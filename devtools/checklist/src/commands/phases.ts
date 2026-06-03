@@ -2,7 +2,7 @@ import { loadChecklist } from '../loader.js';
 import { formatPhases } from '../formatter.js';
 import { resolveDir } from '../resolver.js';
 
-export function phasesCommand(options?: { dir?: string }): void {
+export function phasesCommand(options?: { dir?: string; path?: string }): void {
   const targetDir = resolveDir(options?.dir);
   try {
     const config = loadChecklist(targetDir);

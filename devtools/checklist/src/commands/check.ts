@@ -3,7 +3,7 @@ import { loadState, saveState, setItemResult } from '../state.js';
 import { findPhaseIndex, gatePriorPhases, resolveDir } from '../resolver.js';
 import { formatCheckConfirm, formatGateFailure } from '../formatter.js';
 
-export function checkCommand(phaseArg: string, itemId: string, options: { dir?: string }): void {
+export function checkCommand(phaseArg: string, itemId: string, options: { dir?: string; path?: string }): void {
   const cwd = resolveDir(options.dir);
 
   try {

@@ -7,8 +7,8 @@ import { resolveDir, writeActivePointer } from '../resolver.js';
 
 const STATE_FILE = '.checklist.state.json';
 
-export function initCommand(dir?: string, options?: { force?: boolean }): void {
-  const targetDir = dir || resolveDir();
+export function initCommand(dir?: string, options?: { force?: boolean; dir?: string; path?: string }): void {
+  const targetDir = dir || resolveDir(options?.dir);
   try {
     const config = loadChecklist(targetDir);
     const stateExists = fs.existsSync(path.resolve(targetDir, STATE_FILE));

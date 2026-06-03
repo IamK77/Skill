@@ -361,10 +361,12 @@ describe('resolveDir', () => {
   let tmpDir: string;
   const originalEnv = process.env.CHECKLIST_DIR;
   const originalHome = process.env.CHECKLIST_HOME;
+  const originalSkill = process.env.CLAUDE_SKILL_DIR;
 
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'resolve-dir-test-'));
     delete process.env.CHECKLIST_DIR;
+    delete process.env.CLAUDE_SKILL_DIR;
     // Point the active pointer at a fresh empty dir so it is not seen unless a
     // test explicitly creates it.
     process.env.CHECKLIST_HOME = path.join(tmpDir, 'cfg');
@@ -382,6 +384,11 @@ describe('resolveDir', () => {
     } else {
       delete process.env.CHECKLIST_HOME;
     }
+    if (originalSkill !== undefined) {
+      process.env.CLAUDE_SKILL_DIR = originalSkill;
+    } else {
+      delete process.env.CLAUDE_SKILL_DIR;
+    }
     vi.restoreAllMocks();
   });
 
@@ -398,6 +405,23 @@ describe('resolveDir', () => {
   it('returns CHECKLIST_DIR env var when set and no explicit arg', () => {
     process.env.CHECKLIST_DIR = '/env/dir';
     expect(resolveDir()).toBe('/env/dir');
+  });
+
+  it('returns CLAUDE_SKILL_DIR when set (a running skill knows its own dir)', () => {
+    process.env.CLAUDE_SKILL_DIR = '/skill/dir';
+    expect(resolveDir()).toBe('/skill/dir');
+  });
+
+  it('prioritizes CHECKLIST_DIR over CLAUDE_SKILL_DIR', () => {
+    process.env.CHECKLIST_DIR = '/env/dir';
+    process.env.CLAUDE_SKILL_DIR = '/skill/dir';
+    expect(resolveDir()).toBe('/env/dir');
+  });
+
+  it('prioritizes CLAUDE_SKILL_DIR over the pointer file', () => {
+    process.env.CLAUDE_SKILL_DIR = '/skill/dir';
+    writePointer('/pointed/dir');
+    expect(resolveDir()).toBe('/skill/dir');
   });
 
   it('reads the active pointer file when present (cwd-independent)', () => {

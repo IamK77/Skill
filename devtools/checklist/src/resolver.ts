@@ -24,6 +24,10 @@ function activePointerPath(): string {
 export function resolveDir(explicit?: string): string {
   if (explicit) return explicit;
   if (process.env.CHECKLIST_DIR) return process.env.CHECKLIST_DIR;
+  // A running skill always knows its own dir; the harness exposes it here. This
+  // lets an agent run any checklist command (even before `init`) with no flags
+  // and no guesswork about where .checklist.yml lives.
+  if (process.env.CLAUDE_SKILL_DIR) return process.env.CLAUDE_SKILL_DIR;
   const pointerPath = activePointerPath();
   if (fs.existsSync(pointerPath)) {
     return fs.readFileSync(pointerPath, 'utf-8').trim();

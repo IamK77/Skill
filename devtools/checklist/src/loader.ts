@@ -9,7 +9,13 @@ export function loadChecklist(dir: string): ChecklistConfig {
   const filePath = path.resolve(dir, CONFIG_FILE);
 
   if (!fs.existsSync(filePath)) {
-    throw new Error(`${CONFIG_FILE} not found in ${dir}`);
+    // Agents naturally point checklist at the project they are working on, but
+    // a checklist lives in the *skill* directory (next to SKILL.md). Redirect
+    // instead of dead-ending.
+    const skillHint = process.env.CLAUDE_SKILL_DIR
+      ? `\n  this skill's dir is: ${process.env.CLAUDE_SKILL_DIR}\n  try: checklist init "${process.env.CLAUDE_SKILL_DIR}"`
+      : `\n  a checklist lives in the skill directory (next to SKILL.md), not your project/working dir.\n  try: checklist init <skill-dir>`;
+    throw new Error(`${CONFIG_FILE} not found in ${dir}${skillHint}`);
   }
 
   const raw = fs.readFileSync(filePath, 'utf-8');
