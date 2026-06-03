@@ -8,10 +8,9 @@ dist/
 *.tgz
 coverage/
 
-# Subprojects not tracked as repo files for now (treated as temporary)
+# Subproject not tracked as a repo file for now (treated as temporary)
 devtools/arxiv-cli/
-skills/github-project-discovery/
 
-# Generated skill outputs (temporary)
+# Generated skill outputs (temporary; e.g. if the github skill runs from here)
 output/
 github-discovery-*
