@@ -4,6 +4,7 @@ import { showCommand } from './commands/show.js';
 import { verifyCommand } from './commands/verify.js';
 import { checkCommand } from './commands/check.js';
 import { phasesCommand } from './commands/phases.js';
+import { resetCommand } from './commands/reset.js';
 
 const program = new Command()
   .name('checklist')
@@ -52,5 +53,13 @@ program
   .option(...DIR_OPT)
   .option(...PATH_OPT)
   .action(phasesCommand);
+
+program
+  .command('reset')
+  .alias('done')
+  .description('End-of-run cleanup: clear this skill\'s state and active pointer')
+  .option(...DIR_OPT)
+  .option(...PATH_OPT)
+  .action(resetCommand);
 
 program.parse();

@@ -12,6 +12,8 @@ import { runCheck } from './runner.js';
 // run from — so the skill never has to pass --dir, and there is no cwd-coupled
 // pointer that a stale copy could shadow. Location is overridable via
 // CHECKLIST_HOME (used to sandbox tests).
+const CONFIG_FILE = '.checklist.yml';
+
 function activePointerPath(): string {
   const dir =
     process.env.CHECKLIST_HOME ||
@@ -28,9 +30,37 @@ export function resolveDir(explicit?: string): string {
   // lets an agent run any checklist command (even before `init`) with no flags
   // and no guesswork about where .checklist.yml lives.
   if (process.env.CLAUDE_SKILL_DIR) return process.env.CLAUDE_SKILL_DIR;
+
   const pointerPath = activePointerPath();
-  if (fs.existsSync(pointerPath)) {
-    return fs.readFileSync(pointerPath, 'utf-8').trim();
+  let raw: string;
+  try {
+    raw = fs.readFileSync(pointerPath, 'utf-8');
+  } catch {
+    return process.cwd(); // no pointer (ENOENT) or unreadable
+  }
+
+  const target = raw.trim();
+  if (target) {
+    try {
+      fs.statSync(path.join(target, CONFIG_FILE));
+      return target; // points at a real checklist dir
+    } catch (e) {
+      // Only self-heal when the target is *definitely* gone. statSync returning
+      // ENOENT/ENOTDIR means the dir/file is absent; any other errno (EACCES,
+      // EIO, ELOOP, an NFS stall, ...) means "can't tell" — never delete a valid
+      // pointer over a transient read failure.
+      const code = (e as NodeJS.ErrnoException).code;
+      if (code !== 'ENOENT' && code !== 'ENOTDIR') {
+        return target;
+      }
+    }
+  }
+
+  // Empty content, or target is definitely gone: self-heal and fall through.
+  try {
+    fs.unlinkSync(pointerPath);
+  } catch {
+    /* best-effort cleanup; ignore races */
   }
   return process.cwd();
 }
@@ -40,6 +70,26 @@ export function writeActivePointer(targetDir: string): void {
   const pointerPath = activePointerPath();
   fs.mkdirSync(path.dirname(pointerPath), { recursive: true });
   fs.writeFileSync(pointerPath, absDir, 'utf-8');
+}
+
+// Remove the active pointer. With a targetDir, only removes it when it points
+// there (so `reset` of skill A never clobbers an active pointer for skill B).
+// Returns whether a pointer was removed.
+export function clearActivePointer(targetDir?: string): boolean {
+  const pointerPath = activePointerPath();
+  let current: string;
+  try {
+    current = fs.readFileSync(pointerPath, 'utf-8').trim();
+  } catch {
+    return false; // no pointer (handles the ENOENT race too)
+  }
+  if (targetDir && current !== path.resolve(targetDir)) return false;
+  try {
+    fs.unlinkSync(pointerPath);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function findPhaseIndex(config: ChecklistConfig, nameOrIndex: string): number {

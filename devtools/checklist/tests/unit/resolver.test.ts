@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { findPhaseIndex, runPhase, gatePriorPhases, resolveDir, writeActivePointer } from '../../src/resolver.js';
+import { findPhaseIndex, runPhase, gatePriorPhases, resolveDir, writeActivePointer, clearActivePointer } from '../../src/resolver.js';
 import type { ChecklistState } from '../../src/state.js';
 import type { ChecklistConfig, Phase } from '../../src/types.js';
 
@@ -398,6 +398,18 @@ describe('resolveDir', () => {
     fs.writeFileSync(p, dir, 'utf-8');
   }
 
+  // A real dir that looks like a checklist dir (has .checklist.yml), so the
+  // self-heal in resolveDir treats a pointer to it as valid.
+  function makeCheckdir(): string {
+    const d = fs.mkdtempSync(path.join(tmpDir, 'skill-'));
+    fs.writeFileSync(path.join(d, '.checklist.yml'), 'phases: []', 'utf-8');
+    return d;
+  }
+
+  function pointerExists(): boolean {
+    return fs.existsSync(path.join(process.env.CHECKLIST_HOME!, 'active'));
+  }
+
   it('returns explicit argument when provided', () => {
     expect(resolveDir('/some/path')).toBe('/some/path');
   });
@@ -426,9 +438,55 @@ describe('resolveDir', () => {
 
   it('reads the active pointer file when present (cwd-independent)', () => {
     const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tmpDir);
-    writePointer('/pointed/dir');
+    const skillDir = makeCheckdir();
+    writePointer(skillDir);
 
-    expect(resolveDir()).toBe('/pointed/dir');
+    expect(resolveDir()).toBe(skillDir);
+
+    cwdSpy.mockRestore();
+  });
+
+  it('self-heals a zombie pointer whose target no longer exists', () => {
+    const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tmpDir);
+    writePointer('/no/such/dir');
+
+    expect(resolveDir()).toBe(tmpDir); // falls through to cwd
+    expect(pointerExists()).toBe(false); // and removes the dead pointer
+
+    cwdSpy.mockRestore();
+  });
+
+  it('self-heals a stale pointer whose target lacks .checklist.yml', () => {
+    const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tmpDir);
+    const emptyDir = fs.mkdtempSync(path.join(tmpDir, 'empty-'));
+    writePointer(emptyDir);
+
+    expect(resolveDir()).toBe(tmpDir);
+    expect(pointerExists()).toBe(false);
+
+    cwdSpy.mockRestore();
+  });
+
+  it('self-heals an empty/whitespace-only pointer', () => {
+    const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tmpDir);
+    writePointer('   \n');
+
+    expect(resolveDir()).toBe(tmpDir);
+    expect(pointerExists()).toBe(false);
+
+    cwdSpy.mockRestore();
+  });
+
+  it('KEEPS a pointer when its target cannot be stat-ed (non-ENOENT error)', () => {
+    const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tmpDir);
+    // A self-referential symlink makes statSync throw ELOOP (not ENOENT) when
+    // resolving a path through it — standing in for a permission flap / NFS stall.
+    const loop = path.join(tmpDir, 'loop');
+    fs.symlinkSync(loop, loop);
+    writePointer(loop);
+
+    expect(resolveDir()).toBe(loop); // trusted, not self-healed
+    expect(pointerExists()).toBe(true); // valid pointer preserved
 
     cwdSpy.mockRestore();
   });
@@ -454,9 +512,10 @@ describe('resolveDir', () => {
   });
 
   it('trims whitespace from the pointer file content', () => {
-    writePointer('  /pointed/dir  \n');
+    const skillDir = makeCheckdir();
+    writePointer(`  ${skillDir}  \n`);
 
-    expect(resolveDir()).toBe('/pointed/dir');
+    expect(resolveDir()).toBe(skillDir);
   });
 });
 
@@ -524,5 +583,55 @@ describe('writeActivePointer', () => {
   it('creates the pointer directory if it does not exist', () => {
     writeActivePointer('/some/dir');
     expect(fs.existsSync(path.join(process.env.CHECKLIST_HOME!, 'active'))).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// clearActivePointer
+// ---------------------------------------------------------------------------
+
+describe('clearActivePointer', () => {
+  let tmpDir: string;
+  const originalHome = process.env.CHECKLIST_HOME;
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'clear-pointer-test-'));
+    process.env.CHECKLIST_HOME = path.join(tmpDir, 'cfg');
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    if (originalHome !== undefined) {
+      process.env.CHECKLIST_HOME = originalHome;
+    } else {
+      delete process.env.CHECKLIST_HOME;
+    }
+    vi.restoreAllMocks();
+  });
+
+  function pointerPath(): string {
+    return path.join(process.env.CHECKLIST_HOME!, 'active');
+  }
+
+  it('returns false and no-ops when no pointer exists', () => {
+    expect(clearActivePointer()).toBe(false);
+  });
+
+  it('removes the pointer unconditionally when called without a target', () => {
+    writeActivePointer('/some/dir');
+    expect(clearActivePointer()).toBe(true);
+    expect(fs.existsSync(pointerPath())).toBe(false);
+  });
+
+  it('removes the pointer when it matches the given target', () => {
+    writeActivePointer('/skill/a');
+    expect(clearActivePointer('/skill/a')).toBe(true);
+    expect(fs.existsSync(pointerPath())).toBe(false);
+  });
+
+  it('leaves the pointer when it points at a different skill', () => {
+    writeActivePointer('/skill/b');
+    expect(clearActivePointer('/skill/a')).toBe(false);
+    expect(fs.readFileSync(pointerPath(), 'utf-8')).toBe('/skill/b');
   });
 });

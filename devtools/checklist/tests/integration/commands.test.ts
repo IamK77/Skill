@@ -8,6 +8,8 @@ import { showCommand } from '../../src/commands/show.js';
 import { verifyCommand } from '../../src/commands/verify.js';
 import { checkCommand } from '../../src/commands/check.js';
 import { phasesCommand } from '../../src/commands/phases.js';
+import { resetCommand } from '../../src/commands/reset.js';
+import { writeActivePointer } from '../../src/resolver.js';
 import * as loader from '../../src/loader.js';
 
 // ── Helpers ─────────────────────────────────────────────────────────
@@ -106,6 +108,13 @@ describe('initCommand', () => {
     expect(output).toContain('checklist ready, 1 phases');
     expect(output).toContain('Build');
     expect(exitSpy).not.toHaveBeenCalled();
+  });
+
+  it('errors when positional dir conflicts with --dir', () => {
+    initCommand('/a/dir', { dir: '/b/dir' });
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(errored()).toContain('conflicting target dir');
   });
 
   it('clears existing state with --force flag', () => {
@@ -478,5 +487,70 @@ describe('phasesCommand', () => {
 
     cwdSpy.mockRestore();
     vi.restoreAllMocks();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// resetCommand
+// ═══════════════════════════════════════════════════════════════════════
+
+describe('resetCommand', () => {
+  it('clears the state file in the resolved dir', () => {
+    writeChecklist(MINIMAL_YML);
+    writeState({ checked: { '0': { item: { status: 'pass', message: 'ok' } } } });
+    expect(fs.existsSync(path.join(tmpDir, '.checklist.state.json'))).toBe(true);
+
+    resetCommand({ dir: tmpDir });
+
+    expect(fs.existsSync(path.join(tmpDir, '.checklist.state.json'))).toBe(false);
+    expect(logged()).toContain('cleared state');
+  });
+
+  it('removes the active pointer when it points at the reset dir', () => {
+    writeChecklist(MINIMAL_YML);
+    writeActivePointer(tmpDir);
+    resetCommand({ dir: tmpDir });
+
+    expect(fs.existsSync(path.join(process.env.CHECKLIST_HOME!, 'active'))).toBe(false);
+    expect(logged()).toContain('active pointer');
+  });
+
+  it('leaves a pointer that belongs to a different skill', () => {
+    writeChecklist(MINIMAL_YML);
+    writeActivePointer('/some/other/skill');
+    resetCommand({ dir: tmpDir });
+
+    expect(fs.readFileSync(path.join(process.env.CHECKLIST_HOME!, 'active'), 'utf-8')).toBe('/some/other/skill');
+    expect(logged()).not.toContain('active pointer');
+  });
+
+  it('is a safe no-op when there is nothing to clean', () => {
+    writeChecklist(MINIMAL_YML);
+    resetCommand({ dir: tmpDir });
+    expect(logged()).toContain('cleared state');
+    expect(exitSpy).not.toHaveBeenCalled();
+  });
+
+  it('REFUSES and deletes nothing when the target has no .checklist.yml', () => {
+    // No writeChecklist: tmpDir is an unrelated dir. A stray state file here must
+    // survive — reset must not clobber a directory the user never named.
+    writeState({ checked: { '0': { item: { status: 'pass', message: 'ok' } } } });
+
+    resetCommand({ dir: tmpDir });
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(errored()).toContain('no active checklist to reset');
+    expect(fs.existsSync(path.join(tmpDir, '.checklist.state.json'))).toBe(true); // untouched
+  });
+
+  it('REFUSES rather than falling back to cwd when nothing resolves', () => {
+    const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tmpDir);
+    writeState({ checked: { '0': { item: { status: 'pass', message: 'ok' } } } });
+
+    resetCommand(); // no --dir, no env, no pointer -> would have resolved to cwd
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(fs.existsSync(path.join(tmpDir, '.checklist.state.json'))).toBe(true); // cwd state untouched
+    cwdSpy.mockRestore();
   });
 });
