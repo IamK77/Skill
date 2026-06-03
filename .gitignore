@@ -7,3 +7,11 @@ __pycache__/
 dist/
 *.tgz
 coverage/
+
+# Subprojects not tracked as repo files for now (treated as temporary)
+devtools/arxiv-cli/
+skills/github-project-discovery/
+
+# Generated skill outputs (temporary)
+output/
+github-discovery-*
