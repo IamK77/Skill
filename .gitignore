@@ -1,0 +1,9 @@
+.claude/
+.checklist.state.json
+.checklist.active
+node_modules/
+__pycache__/
+*.pyc
+dist/
+*.tgz
+coverage/
