@@ -25,7 +25,7 @@ export async function showCommand(phaseArg?: string, options?: { dir?: string; p
     }
 
     const result = await runPhase(config.phases[phaseIndex], phaseIndex, cwd, targetPath);
-    console.log(formatPhaseShow(result, state));
+    console.log(formatPhaseShow(result, state, config.phases.length));
   } catch (e) {
     console.error(e instanceof Error ? e.message : String(e));
     process.exit(1);

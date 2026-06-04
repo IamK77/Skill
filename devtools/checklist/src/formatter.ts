@@ -54,7 +54,7 @@ export function formatOverview(config: ChecklistConfig, state: ChecklistState): 
   return lines.join('\n');
 }
 
-export function formatPhaseShow(result: PhaseResult, state: ChecklistState): string {
+export function formatPhaseShow(result: PhaseResult, state: ChecklistState, totalPhases?: number): string {
   const header = `PHASE ${result.phaseIndex}: ${result.phaseName.toUpperCase()}`;
 
   const items = result.checks.map((c, i) => {
@@ -87,7 +87,10 @@ export function formatPhaseShow(result: PhaseResult, state: ChecklistState): str
   const lines = [header, '', items, ''];
 
   if (done === total) {
-    lines.push(`PHASE ${result.phaseIndex} passed, proceed to PHASE ${result.phaseIndex + 1}`);
+    const isLast = totalPhases !== undefined && result.phaseIndex >= totalPhases - 1;
+    lines.push(isLast
+      ? `PHASE ${result.phaseIndex} passed — all phases complete, run \`checklist done\``
+      : `PHASE ${result.phaseIndex} passed, proceed to PHASE ${result.phaseIndex + 1}`);
   } else {
     lines.push(`${done}/${total} completed`);
   }
@@ -95,7 +98,7 @@ export function formatPhaseShow(result: PhaseResult, state: ChecklistState): str
   return lines.join('\n');
 }
 
-export function formatVerifyResult(result: PhaseResult, state: ChecklistState): string {
+export function formatVerifyResult(result: PhaseResult, state: ChecklistState, totalPhases?: number): string {
   const header = `PHASE ${result.phaseIndex}: ${result.phaseName.toUpperCase()}`;
 
   const items = result.checks.map((c, i) => {
@@ -135,7 +138,10 @@ export function formatVerifyResult(result: PhaseResult, state: ChecklistState): 
   const ids = result.checks.map(c => c.item.id);
   const { done, total } = phaseProgress(state, result.phaseIndex, ids);
   if (done === total) {
-    lines.push(`PHASE ${result.phaseIndex} verified, proceed to PHASE ${result.phaseIndex + 1}`);
+    const isLast = totalPhases !== undefined && result.phaseIndex >= totalPhases - 1;
+    lines.push(isLast
+      ? `PHASE ${result.phaseIndex} verified — all phases complete, run \`checklist done\``
+      : `PHASE ${result.phaseIndex} verified, proceed to PHASE ${result.phaseIndex + 1}`);
   }
 
   return lines.join('\n');

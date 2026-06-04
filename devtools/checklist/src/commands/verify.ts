@@ -29,7 +29,7 @@ export async function verifyCommand(phaseArg: string, options: { dir?: string; p
     }
 
     saveState(cwd, state);
-    console.log(formatVerifyResult(result, state));
+    console.log(formatVerifyResult(result, state, config.phases.length));
 
     if (result.mechanicalPassed < result.mechanicalTotal) {
       process.exit(1);

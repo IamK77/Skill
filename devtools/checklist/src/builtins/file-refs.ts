@@ -17,7 +17,13 @@ export async function fileRefsCheck(targetPath: string): Promise<CheckResult> {
   let match: RegExpExecArray | null;
 
   while ((match = LINK_RE.exec(content)) !== null) {
-    refs.push(match[1]);
+    let ref = match[1].trim();
+    ref = ref.replace(/^<(.*)>$/, '$1');             // <path> angle-bracket form
+    ref = ref.replace(/\s+["'][^"']*["']\s*$/, '');  // optional "title" / 'title'
+    const hash = ref.indexOf('#');                   // strip a #fragment on a local path
+    if (hash !== -1) ref = ref.slice(0, hash);
+    ref = ref.trim();
+    if (ref) refs.push(ref);                         // skip pure-fragment / empty targets
   }
 
   if (refs.length === 0) {

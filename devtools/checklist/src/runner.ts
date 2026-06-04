@@ -80,7 +80,21 @@ async function runScript(scriptPath: string, cwd: string, explicit: boolean): Pr
       : `auto-classified as script (first token contains "/" or has script extension), but file not found: "${resolved}". use "shell:" prefix if this is a shell command`;
     return { status: 'error', message: hint };
   }
-  return runShell(resolved, cwd);
+
+  // Containment (canonical): the lexical check above never follows symlinks, but
+  // execution does — a symlink planted inside the dir can point outside it. Re-check
+  // against the real (symlink-resolved) paths before running.
+  const realBase = fs.realpathSync(base);
+  const realResolved = fs.realpathSync(resolved);
+  const realRel = path.relative(realBase, realResolved);
+  if (realRel === '..' || realRel.startsWith('..' + path.sep) || path.isAbsolute(realRel)) {
+    return {
+      status: 'error',
+      message: `script path escapes the checklist dir via symlink: "${scriptPath}" (resolves to "${realResolved}")`,
+    };
+  }
+
+  return runShell(realResolved, cwd);
 }
 
 export async function runCheck(item: CheckItem, cwd: string, targetPath: string): Promise<CheckItemResult> {

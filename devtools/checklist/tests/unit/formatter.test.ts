@@ -298,6 +298,36 @@ describe('formatPhaseShow', () => {
     expect(result).toContain('PHASE 2 passed, proceed to PHASE 3');
   });
 
+  it('last phase done shows completion, not "proceed to PHASE N+1"', () => {
+    const phaseResult: PhaseResult = {
+      phaseName: 'Deploy',
+      phaseIndex: 2,
+      checks: [{ item: { id: 'ship', description: 'Ship it' }, kind: 'mechanical' }],
+      mechanicalPassed: 1,
+      mechanicalTotal: 1,
+      manualCount: 0,
+    };
+    const state = stateWith([{ phase: 2, id: 'ship', status: 'pass', message: '' }]);
+    const result = formatPhaseShow(phaseResult, state, 3); // 3 phases -> index 2 is last
+    expect(result).toContain('all phases complete');
+    expect(result).toContain('checklist done');
+    expect(result).not.toContain('proceed to PHASE 3');
+  });
+
+  it('non-last phase done still says "proceed to PHASE N+1" with totalPhases', () => {
+    const phaseResult: PhaseResult = {
+      phaseName: 'Build',
+      phaseIndex: 0,
+      checks: [{ item: { id: 'lint', description: 'Run linter' }, kind: 'mechanical' }],
+      mechanicalPassed: 1,
+      mechanicalTotal: 1,
+      manualCount: 0,
+    };
+    const state = stateWith([{ phase: 0, id: 'lint', status: 'pass', message: '' }]);
+    const result = formatPhaseShow(phaseResult, state, 3);
+    expect(result).toContain('proceed to PHASE 1');
+  });
+
   it('some items incomplete shows "X/Y completed"', () => {
     const phaseResult: PhaseResult = {
       phaseName: 'Build',
@@ -353,6 +383,40 @@ describe('formatVerifyResult', () => {
     const result = formatVerifyResult(phaseResult, emptyState());
     expect(result).toContain('[x]');
     expect(result).toContain('PASS');
+  });
+
+  it('last phase verified shows completion, not "proceed to PHASE N+1"', () => {
+    const phaseResult: PhaseResult = {
+      phaseName: 'Disposition',
+      phaseIndex: 7,
+      checks: [
+        { item: { id: 'done-item', description: 'wrap up' }, kind: 'mechanical', result: { status: 'pass', message: 'ok' } },
+      ],
+      mechanicalPassed: 1,
+      mechanicalTotal: 1,
+      manualCount: 0,
+    };
+    const state = stateWith([{ phase: 7, id: 'done-item', status: 'pass', message: 'ok' }]);
+    const result = formatVerifyResult(phaseResult, state, 8); // 8 phases -> index 7 is last
+    expect(result).toContain('all phases complete');
+    expect(result).toContain('checklist done');
+    expect(result).not.toContain('PHASE 8');
+  });
+
+  it('non-last phase verified says "proceed to PHASE N+1" with totalPhases', () => {
+    const phaseResult: PhaseResult = {
+      phaseName: 'Build',
+      phaseIndex: 0,
+      checks: [
+        { item: { id: 'lint', description: 'Run linter' }, kind: 'mechanical', result: { status: 'pass', message: 'ok' } },
+      ],
+      mechanicalPassed: 1,
+      mechanicalTotal: 1,
+      manualCount: 0,
+    };
+    const state = stateWith([{ phase: 0, id: 'lint', status: 'pass', message: 'ok' }]);
+    const result = formatVerifyResult(phaseResult, state, 8);
+    expect(result).toContain('proceed to PHASE 1');
   });
 
   it('failing mechanical check shows "[ ]" with "FAIL: message"', () => {
