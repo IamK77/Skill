@@ -6,6 +6,19 @@ This document is loaded at **Choose** and **Compose**. It expands **Tree C** of 
 
 ---
 
+## Contents
+
+- [1. The one axis that explains everything: state vs. behavior](#1-the-one-axis-that-explains-everything-state-vs-behavior)
+- [2. The five doubles — precise definitions + one-line discriminator](#2-the-five-doubles--precise-definitions--one-line-discriminator)
+- [3. The same double across languages](#3-the-same-double-across-languages)
+- [4. Tree C — choosing the double (the decision spine)](#4-tree-c--choosing-the-double-the-decision-spine)
+- [5. What-the-test-needs → which-double (lookup table)](#5-what-the-test-needs--which-double-lookup-table)
+- [6. Classicist (Chicago) vs. mockist (London) — as a selection rule](#6-classicist-chicago-vs-mockist-london--as-a-selection-rule)
+- [7. Anti-pattern catalogue — detection + remedy](#7-anti-pattern-catalogue--detection--remedy)
+- [8. Un-owned dependencies: the adapter / ports-and-adapters seam](#8-un-owned-dependencies-the-adapter--ports-and-adapters-seam)
+- [9. Fake-drift and the contract test](#9-fake-drift-and-the-contract-test)
+- [10. Quick reference card](#10-quick-reference-card)
+
 ## 1. The one axis that explains everything: state vs. behavior
 
 Every double either feeds the test or judges it.

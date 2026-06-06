@@ -8,6 +8,20 @@ The pipeline runs 1 → 10 per funded risk. Steps 1–8 produce the case list an
 
 ---
 
+## Contents
+
+- [1. Name the oracle, or you have no case](#1-name-the-oracle-or-you-have-no-case)
+- [2. Partition the input domain into equivalence classes](#2-partition-the-input-domain-into-equivalence-classes)
+- [3. Edge probes per domain](#3-edge-probes-per-domain)
+- [4. Enumerate the failure paths](#4-enumerate-the-failure-paths)
+- [5. Negative-space assertions — what must NEVER happen](#5-negative-space-assertions--what-must-never-happen)
+- [6. Mine invariants for property routing](#6-mine-invariants-for-property-routing)
+- [7. The call-it-again probe — state progression and idempotency](#7-the-call-it-again-probe--state-progression-and-idempotency)
+- [8. The fail-first regression proof](#8-the-fail-first-regression-proof)
+- [9. Fixtures, isolation, and the determinism plan](#9-fixtures-isolation-and-the-determinism-plan)
+- [10. The per-case quality bar](#10-the-per-case-quality-bar)
+- [COMPOSE exit — what BUILD inherits](#compose-exit--what-build-inherits)
+
 ## 1. Name the oracle, or you have no case
 
 An **oracle** is the external authority a test consults to decide whether an observed result is correct. A case whose expected value comes from running the code and recording whatever came back is not a test — it is a transcript. It pins the implementation to its own present behavior and can only ever detect *change*, never *wrongness*. The most common way a suite rots into a change-detector is the line `assert result == <the value the function happened to return the first time>`.

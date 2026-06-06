@@ -2,6 +2,20 @@
 
 This document is loaded during SURVEY once the target's language is known, and its conventions are ENFORCED at the BUILD gate. It deliberately covers only what an agent does NOT do by default — the framework-idiomatic habits, hidden footguns, and must-run commands that get skipped — not general testing theory.
 
+## Contents
+
+- [How to use](#how-to-use)
+- [Universal blind spots (every language)](#universal-blind-spots-every-language)
+- [Python](#python)
+- [TypeScript / JavaScript](#typescript--javascript)
+- [Go](#go)
+- [Rust](#rust)
+- [Java / JVM](#java--jvm)
+- [C# / .NET](#c--net)
+- [Ruby](#ruby)
+- [C / C++](#c--c)
+- [Must-run cheat-sheet](#must-run-cheat-sheet)
+
 ## How to use
 
 1. **Detect the target language** from build files (`go.mod`, `Cargo.toml`, `pom.xml`/`build.gradle`, `*.csproj`, `Gemfile`, `pyproject.toml`/`setup.cfg`, `package.json`, `CMakeLists.txt`), file extensions, and where existing tests live.
