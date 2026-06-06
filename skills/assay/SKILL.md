@@ -12,6 +12,11 @@ argument-hint: "[target module / scope to test]"
 allowed-tools: Read Bash Edit Write
 ---
 
+<!--
+Copyright 2026 IamK77 — Licensed under the Apache License, Version 2.0.
+See ./LICENSE and ./NOTICE · https://www.apache.org/licenses/LICENSE-2.0
+-->
+
 # assay
 
 !`checklist init ${CLAUDE_SKILL_DIR} --force`
