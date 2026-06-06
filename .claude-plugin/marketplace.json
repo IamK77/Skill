@@ -1,0 +1,22 @@
+{
+  "name": "agent-era-skills",
+  "owner": {
+    "name": "IamK77",
+    "email": "chenyinfeng50@gmail.com"
+  },
+  "metadata": {
+    "description": "Agent-era engineering skills for Claude Code",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "assay",
+      "description": "Risk-driven test planning and hardening: choose what to test, the test type, the test doubles, and the cases that actually catch bugs, across an eight-stage gated flow. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/assay"
+      ]
+    }
+  ]
+}
