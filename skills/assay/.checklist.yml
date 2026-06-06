@@ -1,0 +1,59 @@
+# Flight checklist for the assay skill — 8 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. The STAGE N headings in SKILL.md
+# (Charter, Survey, Triage, Choose, Compose, Build, Bite, Books) map to these
+# phase entries in order.
+phases:
+  - name: charter
+    checks:
+      - id: motivation-identified
+        description: Testing motivation classified (bug-fix / refactor-safety / hunt-unknown / load-hardening / pre-release / audit-existing-suite / general-confidence) and confirmed with the user; decision-tree overrides resolved
+
+  - name: survey
+    checks:
+      - id: surface-mapped
+        description: "Code under test mapped: entry points, collaborators/dependencies, side effects, and existing coverage understood"
+
+  - name: triage
+    checks:
+      - id: risk-ledger-built
+        description: Ranked risk ledger built (likelihood x blast-radius x detection-gap) with an explicit, justified DO-NOT-TEST list
+
+  - name: choose
+    checks:
+      - id: types-selected
+        description: Per funded risk, a test type + scope chosen via the decision tree (Tree B), example-vs-property decided, and an oracle identified
+      - id: stance-and-guards
+        description: Per collaborator, the weakest sufficient double chosen and a classicist/mockist stance recorded (Tree C); determinism guards noted
+
+  - name: compose
+    checks:
+      - id: cases-designed
+        description: Cases designed via boundary/equivalence analysis, invariants, and error/exception paths; every case has a concrete oracle
+      - id: repeat-and-state
+        description: "For each operation that advances state or should be idempotent, a SECOND-invocation case is designed — asserting state moved forward, or that the effect did NOT repeat. Single-call-only suites do not satisfy this. Pure, stateless units (parsers/decoders/pure compute) take no second-invocation case — satisfy them by asserting referential transparency once; that is N/A, not a gap"
+
+  - name: build
+    checks:
+      - id: tests-green
+        description: Tests written and the full suite passes (no regressions)
+      - id: hermetic-and-deterministic
+        description: "Tests are hermetic and deterministic: time / randomness / concurrency / iteration order / I-O controlled; no order dependence"
+      - id: language-norms-applied
+        description: "Tests follow the target language's idiomatic + blind-spot norms (references/language-norms.md) — e.g. patch-where-used, autospec, go test -race, Rust doc-tests, fake timers / no floating promises, parametrize-not-loop — and the language's must-run commands were actually run"
+
+  - name: bite
+    checks:
+      - id: suite-validated
+        description: Suite proven to have teeth — coverage gaps reviewed against the ledger and faults injected (mutation or a deliberate break) to confirm the tests actually fail
+      - id: state-progression-probed
+        description: "Every unit that advances (or should be idempotent about) state has at least one multi-invocation / state-after-action assertion. A suite where every test calls each unit exactly once does NOT pass this gate when the unit mutates state. Pure, stateless units are exempt — a referential-transparency assertion satisfies them"
+      - id: smells-swept
+        description: "Suite swept for the agent's degenerate test patterns — assertion-free coverage padding, over-mocking that hides real integration breakage, implementation-coupled tests that break on a behavior-preserving refactor, unreadable / multi-reason tests — and each found is fixed or deleted; flaky tests are fixed or quarantined with a named owner and a deadline, never tolerated. The cure for 'too many tests' is pushing verification DOWN the pyramid and deleting dead/duplicate/trivial tests, NOT thinning useful coverage (see references/agent-test-smells.md)"
+
+  - name: books
+    checks:
+      - id: disposition-recorded
+        description: Bugs found by testing filed and fixed-or-deferred with a regression test; residual risk and any DO-NOT-TEST deferrals recorded for the user
+      - id: nfrs-validated
+        description: "Each funded non-functional requirement carried from the requirements/architecture stage — especially performance and security, the most-skipped — is either validated by a test (load/stress, SAST/DAST, dependency scan) or explicitly deferred with rationale, and the NFR-to-test traceability is recorded so the requirements -> architecture -> testing line closes"
