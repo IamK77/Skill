@@ -201,7 +201,20 @@ describe('setItemResult', () => {
 });
 
 describe('isPhaseComplete', () => {
-  it('returns true when all items checked', () => {
+  it('returns true when all items are recorded as a pass', () => {
+    const state: ChecklistState = {
+      checked: {
+        '0': {
+          'a': { status: 'pass', message: '' },
+          'b': { status: 'pass', message: '' },
+          'c': { status: 'pass', message: '' },
+        },
+      },
+    };
+    expect(isPhaseComplete(state, 0, ['a', 'b', 'c'])).toBe(true);
+  });
+
+  it('returns false when an item is recorded fail/error (not a pass)', () => {
     const state: ChecklistState = {
       checked: {
         '0': {
@@ -211,7 +224,7 @@ describe('isPhaseComplete', () => {
         },
       },
     };
-    expect(isPhaseComplete(state, 0, ['a', 'b', 'c'])).toBe(true);
+    expect(isPhaseComplete(state, 0, ['a', 'b', 'c'])).toBe(false);
   });
 
   it('returns false when some items missing', () => {
@@ -242,7 +255,8 @@ describe('phaseProgress', () => {
       },
     };
     const result = phaseProgress(state, 1, ['x', 'y', 'z']);
-    expect(result).toEqual({ done: 2, total: 3 });
+    // pass-based: x passes (1), y absent (0), z fail (0) -> 1 done of 3
+    expect(result).toEqual({ done: 1, total: 3 });
   });
 
   it('handles empty list', () => {

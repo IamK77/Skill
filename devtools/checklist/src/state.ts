@@ -41,7 +41,11 @@ export function clearState(dir: string): void {
 }
 
 export function isItemChecked(state: ChecklistState, phaseIndex: number, itemId: string): boolean {
-  return !!state.checked[String(phaseIndex)]?.[itemId];
+  // An item counts as checked only when its recorded result is a PASS — not
+  // merely present. A stored fail/error, or a once-green check that later
+  // regressed and was re-recorded, must NOT satisfy the gate. The gate is the
+  // safety floor: completeness means current pass-status, not existence of a row.
+  return state.checked[String(phaseIndex)]?.[itemId]?.status === 'pass';
 }
 
 export function getItemResult(state: ChecklistState, phaseIndex: number, itemId: string): CheckResult | undefined {

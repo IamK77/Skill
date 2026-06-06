@@ -22,9 +22,11 @@ export async function verifyCommand(phaseArg: string, options: { dir?: string; p
 
     for (const c of result.checks) {
       if (c.kind === 'mechanical' && c.result) {
-        if (c.result.status === 'pass') {
-          setItemResult(state, phaseIndex, c.item.id, c.result);
-        }
+        // Record the CURRENT result, pass or fail — so a check that was green on
+        // an earlier verify and has since regressed overwrites its stale pass and
+        // the gate (isItemChecked === 'pass') sees current reality, instead of a
+        // failing re-verify silently leaving the old pass (and the gate) standing.
+        setItemResult(state, phaseIndex, c.item.id, c.result);
       }
     }
 

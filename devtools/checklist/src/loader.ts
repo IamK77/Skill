@@ -53,6 +53,14 @@ export function loadChecklist(dir: string): ChecklistConfig {
       };
     });
 
+    const seenIds = new Set<string>();
+    for (const ch of checks) {
+      if (seenIds.has(ch.id)) {
+        throw new Error(`Phase "${phase.name}": duplicate check id "${ch.id}"`);
+      }
+      seenIds.add(ch.id);
+    }
+
     return { name: phase.name, checks };
   });
 

@@ -304,7 +304,7 @@ describe('gatePriorPhases', () => {
       checked: {
         '0': {
           'p0-a': { status: 'pass', message: 'ok' },
-          'p0-b': { status: 'fail', message: 'failed but still checked' },
+          'p0-b': { status: 'pass', message: 'ok' },
         },
         // phase 1 has no entries at all
       },
@@ -325,7 +325,7 @@ describe('gatePriorPhases', () => {
     expect(result.failedPhaseIndex).toBe(0);
   });
 
-  it('passes when prior phase items have non-pass statuses (fail/error still count as checked)', () => {
+  it('blocks when a prior phase item is fail/error, not a pass', () => {
     const state: ChecklistState = {
       checked: {
         '0': {
@@ -334,10 +334,11 @@ describe('gatePriorPhases', () => {
         },
       },
     };
-    // isPhaseComplete only checks existence, not status
+    // pass-based gate: a recorded fail/error does NOT satisfy the gate
     const result = gatePriorPhases(config, 1, state);
 
-    expect(result.passed).toBe(true);
+    expect(result.passed).toBe(false);
+    expect(result.failedPhaseIndex).toBe(0);
   });
 
   it('config with single phase and target 0 always passes', () => {

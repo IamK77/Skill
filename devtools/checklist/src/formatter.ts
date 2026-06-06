@@ -137,7 +137,11 @@ export function formatVerifyResult(result: PhaseResult, state: ChecklistState, t
   // instead of requiring a follow-up `show`.
   const ids = result.checks.map(c => c.item.id);
   const { done, total } = phaseProgress(state, result.phaseIndex, ids);
-  if (done === total) {
+  // The verify verdict must reflect THIS run, not just stored progress: never
+  // announce "verified, proceed" when a mechanical check failed on this run,
+  // even if stored state still carries an earlier (now-stale) pass.
+  const mechanicalOk = result.mechanicalPassed === result.mechanicalTotal;
+  if (mechanicalOk && done === total) {
     const isLast = totalPhases !== undefined && result.phaseIndex >= totalPhases - 1;
     lines.push(isLast
       ? `PHASE ${result.phaseIndex} verified — all phases complete, run \`checklist done\``

@@ -284,7 +284,7 @@ describe('verifyCommand', () => {
     expect(state.checked['0']['compile'].status).toBe('pass');
   });
 
-  it('does not save failing mechanical results to state', async () => {
+  it('records failing mechanical results so the gate reflects them', async () => {
     writeChecklist(`
 phases:
   - name: Build
@@ -300,8 +300,10 @@ phases:
     const output = logged();
     expect(output).toContain('FAIL');
 
-    const state = readState() as { checked: Record<string, Record<string, unknown>> };
-    expect(state.checked?.['0']?.['fail-check']).toBeUndefined();
+    const state = readState() as { checked: Record<string, Record<string, { status: string }>> };
+    // The failing result IS recorded (status 'fail') so a later gate read sees
+    // current reality — a stale pass cannot survive a regression.
+    expect(state.checked['0']['fail-check'].status).toBe('fail');
   });
 
   it('exits with gate failure when prior phase is incomplete', async () => {
@@ -359,7 +361,7 @@ phases:
     expect(exitSpy).toHaveBeenCalledWith(1);
     const state = readState() as { checked: Record<string, Record<string, { status: string }>> };
     expect(state.checked['0']['pass-one'].status).toBe('pass');
-    expect(state.checked['0']?.['fail-one']).toBeUndefined();
+    expect(state.checked['0']['fail-one'].status).toBe('fail');
   });
 });
 

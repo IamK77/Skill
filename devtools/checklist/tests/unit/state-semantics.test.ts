@@ -163,31 +163,35 @@ describe('saveState formatting and overwrite', () => {
   });
 });
 
-describe('isPhaseComplete is existence-based, not pass-based', () => {
-  // The real semantic: an item recorded with ANY status (including fail/error)
-  // counts as complete. isItemChecked coerces the result OBJECT with !!, which
-  // is always truthy regardless of status.
-  it('counts a single fail-status item as complete', () => {
+describe('isPhaseComplete is pass-based, not existence-based', () => {
+  // The gate semantic: an item counts as complete only when its recorded result
+  // is a PASS. isItemChecked keys on status === 'pass', so a stored fail/error
+  // (or a once-green check re-recorded after it regressed) does NOT satisfy the
+  // gate — completeness means current pass-status, not existence of a row.
+  it('does NOT count a single fail-status item as complete', () => {
     const state: ChecklistState = { checked: {} };
     setItemResult(state, 0, 'a', { status: 'fail', message: 'broke' });
-    expect(isPhaseComplete(state, 0, ['a'])).toBe(true);
+    expect(isPhaseComplete(state, 0, ['a'])).toBe(false);
   });
 
-  it('counts a single error-status item as complete', () => {
+  it('does NOT count a single error-status item as complete', () => {
     const state: ChecklistState = { checked: {} };
     setItemResult(state, 0, 'a', { status: 'error', message: 'threw' });
-    expect(isPhaseComplete(state, 0, ['a'])).toBe(true);
+    expect(isPhaseComplete(state, 0, ['a'])).toBe(false);
   });
 
-  it('is incomplete only when an id has no recorded result at all', () => {
+  it('is complete only when every id is recorded as a pass', () => {
     const state: ChecklistState = { checked: {} };
     setItemResult(state, 0, 'a', { status: 'error', message: '' });
     setItemResult(state, 0, 'b', { status: 'fail', message: '' });
+    expect(isPhaseComplete(state, 0, ['a', 'b'])).toBe(false);
+    setItemResult(state, 0, 'a', { status: 'pass', message: '' });
+    setItemResult(state, 0, 'b', { status: 'pass', message: '' });
     expect(isPhaseComplete(state, 0, ['a', 'b'])).toBe(true);
     expect(isPhaseComplete(state, 0, ['a', 'b', 'c'])).toBe(false);
   });
 
-  it('still treats an empty-message pass-status item as checked (truthy object)', () => {
+  it('treats an empty-message pass-status item as checked', () => {
     const state: ChecklistState = { checked: {} };
     setItemResult(state, 0, 'a', { status: 'pass', message: '' });
     expect(isItemChecked(state, 0, 'a')).toBe(true);
@@ -274,12 +278,12 @@ describe('phaseProgress counting boundaries', () => {
     expect(phaseProgress(state, 0, ['a', 'b', 'c'])).toEqual({ done: 0, total: 3 });
   });
 
-  it('reports all done when every requested id is recorded (any status)', () => {
+  it('counts only pass-status records as done (fail/error are not done)', () => {
     const state: ChecklistState = { checked: {} };
     setItemResult(state, 0, 'a', { status: 'pass', message: '' });
     setItemResult(state, 0, 'b', { status: 'fail', message: '' });
     setItemResult(state, 0, 'c', { status: 'error', message: '' });
-    expect(phaseProgress(state, 0, ['a', 'b', 'c'])).toEqual({ done: 3, total: 3 });
+    expect(phaseProgress(state, 0, ['a', 'b', 'c'])).toEqual({ done: 1, total: 3 });
   });
 
   it('ignores records that belong to a different phase', () => {
