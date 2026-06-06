@@ -8,7 +8,7 @@
  * located Error every other malformed-structure path emits.
  *
  * ORACLE = consistency-with-sibling-error-paths + the boundary-parsing norm
- * (instrument/legible-failures): a non-conforming list entry is one equivalence
+ * (gauge/legible-failures): a non-conforming list entry is one equivalence
  * class of bad input, so it must be reported the same legible way the loader
  * already reports a bare-scalar entry:
  *    `- just a string`  ->  Error: 'Phase 0: missing "name" field'

@@ -11,7 +11,7 @@ Two things you can use today:
 
 Apache-2.0, Copyright 2026 IamK77.
 
-Four more skills exist in the tree as the broader direction (groundwork, load-bearing, flightline, instrument), but they are **not yet published** — see [Where this is going](#where-this-is-going). `assay` is the first piece shipped.
+Four more skills exist in the tree as the broader direction (groundwork, load-bearing, flightline, gauge), but they are **not yet published** — see [Where this is going](#where-this-is-going). `assay` is the first piece shipped.
 
 ## assay
 
@@ -88,9 +88,9 @@ Not yet published — direction, not shipping. Four sibling skills are intended 
 - **groundwork** — requirements: pin down what to build before building it.
 - **load-bearing** — architecture: choose the style, stack, boundaries, contracts, and data model.
 - **flightline** — engineering process: version control, CI/CD, code review, dependency and build management.
-- **instrument** — the codebase's feedback surface: strict typing, boundary validation, legible failures.
+- **gauge** — the codebase's feedback surface: strict typing, boundary validation, legible failures.
 
-The lifecycle is **groundwork → load-bearing → flightline → assay**, with **instrument** cross-cutting. These directories exist in the repo tree but are not git-tracked and not part of the published surface. `assay` is the first piece published; treat the rest as planned, not available.
+The lifecycle is **groundwork → load-bearing → flightline → assay**, with **gauge** cross-cutting. These directories exist in the repo tree but are not git-tracked and not part of the published surface. `assay` is the first piece published; treat the rest as planned, not available.
 
 ## Repository layout
 
@@ -101,7 +101,7 @@ skills/
     references/          # 10 Markdown files backing the 8 stages
     .checklist.yml       # the 8-stage, 15-check gate definition
     LICENSE  NOTICE
-  groundwork/  load-bearing/  flightline/  instrument/
+  groundwork/  load-bearing/  flightline/  gauge/
                          # present in tree, NOT git-tracked, NOT yet published
 devtools/
   checklist/             # the gate CLI (see its own README)
