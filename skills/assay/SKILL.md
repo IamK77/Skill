@@ -40,6 +40,7 @@ Detail lives in `references/`. Open each when a stage sends you there, not upfro
 - [references/coverage-and-mutation.md](references/coverage-and-mutation.md) — coverage as a guide, mutation testing as the real teeth, the economics of what to skip.
 - [references/language-norms.md](references/language-norms.md) — per-language testing norms an agent must be *told*: idiomatic frameworks, blind-spots (patch-where-used, `-race`, doc-tests, fake timers…), and the must-run commands agents skip. Load at **SURVEY**, apply at **BUILD**.
 - [references/agent-test-smells.md](references/agent-test-smells.md) — how an agent writes *plausible-but-worthless* tests by default (assertion-free coverage padding, over-mocking, implementation-coupled brittleness, tolerated flakes), and how to keep a large suite from rotting into a slow, flaky "test graveyard". Apply while writing at **BUILD**, sweep at **BITE**.
+- [references/parallel-execution.md](references/parallel-execution.md) — running assay on a fleet of agents (ultracode): how the risk ledger, the escalation ladder, and the oracle gate project onto parallel search, and why agreement is not evidence. Open when the harness hands you subagents.
 
 ---
 
@@ -179,6 +180,14 @@ For sustained discovery across rounds, settle all *foreseeable* interaction **up
 Each round, take one target as far as the decision tree's escalation ladder goes — when an approach finds nothing, consult the ladder for the next applicable rung rather than abandoning the target — and only move to the next target once the current one's applicable rungs are spent. Stop autonomously when every funded target is exhausted, or when ≥2 consecutive targets clear with no findings and only low-priority targets remain. Emit a per-round summary (target, tests added, bugs found, coverage delta, what's left) and a shutdown summary when you stop.
 
 If a real decision needs the user mid-loop, **stop and ask** — never guess.
+
+---
+
+## Running with parallel agents (ultracode)
+
+When the harness hands you a fleet of subagents (an ultracode / workflow orchestrator), the **judgment** assay prescribes does not change — one mind still owns the risk ledger, the oracles, the type-and-double choices, and the dispositions, and a human still clears each GATE. A fleet buys **search and skepticism at scale**: fan it out on the genuinely search-bound stages (SURVEY's reconnaissance and the TRIAGE → BITE latent-defect hunt) and keep the gated spine single-threaded. The load-bearing rule survives the fleet intact — **agreement is not evidence**: agents share blind spots, so every survivor of a parallel hunt is pinned to a **named oracle and a test proven red on the unfixed code**, exactly as in single-agent assay. The fleet widens the net; the oracle makes the catch trustworthy. Match the fleet to the risk (*够用就好*) — a helper or a thin wrapper is a single-agent job.
+
+How to slice the work (the risk ledger is the unit, not the file), run the escalation ladder concurrently, place the one dedup barrier, keep BUILD coherent, and handle a headless run — the full projection of the engine onto a fleet — is **[references/parallel-execution.md](references/parallel-execution.md)**.
 
 ## Anti-patterns
 

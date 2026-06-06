@@ -264,4 +264,6 @@ manual example-based
 
 Each rung costs more; stop as soon as a rung finds a bug (then dispose of it via Books) or you reach the top with the budget you funded.
 
+**Parallel form (ultracode).** With a fleet of agents the ladder need not be climbed one rung at a time — its rungs can be run **concurrently**: dispatch a batch of finders, one per rung, pool and dedup, and loop until *two consecutive rounds surface nothing new*. The exhaustion rule is unchanged (one quiet round is not exhaustion), and so is what comes next — every survivor is verified adversarially against a **named oracle and a red-on-unfixed test** before it counts as a defect. More agents agreeing is not evidence; the oracle is. The full projection of this ladder onto a fleet is in [parallel-execution.md](parallel-execution.md).
+
 **Honest-scoring note:** a green run that found no bug is **not** zero value — it bought down the *detection-gap* on that risk. Report it truthfully as exactly that. Never inflate it into a bug catch, and never dismiss it as wasted. Coverage and mutation literacy for this honest accounting is in [coverage-and-mutation.md](coverage-and-mutation.md).
