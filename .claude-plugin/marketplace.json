@@ -71,6 +71,24 @@
       "skills": [
         "./skills/husbandry"
       ]
+    },
+    {
+      "name": "aegis",
+      "description": "Weave security through the whole lifecycle instead of bolting it on: a risk-based stance and the timeless principles (least privilege, defense in depth, fail secure, zero trust), threat modeling (STRIDE), secure design and coding (never trust input, never invent crypto, secrets out of code, least privilege), SAST/DAST/SCA gates, OWASP-class defenses, and runtime defense with incident response — across a six-stage gated flow, tuned for a world where an agent writes insecure code by default and ships a vulnerability green. The defensive half of the security pair (the shield); its adversarial counterpart is the gungnir skill. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/aegis"
+      ]
+    },
+    {
+      "name": "gungnir",
+      "description": "Attack your own system — under explicit authorization — to prove its defenses hold: scope and authorize (the absolute first gate — only systems you own or are permitted in writing to test), recon, scan, exploit and confirm real vulnerabilities (not scanner false positives), chain small flaws into a real attack and show true impact, then report, drive the fix, and re-test — across a six-stage gated flow. Authorized, defensive penetration testing only. The offensive half of the security pair (the spear) that proves what the aegis skill builds. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/gungnir"
+      ]
     }
   ]
 }

@@ -4,7 +4,7 @@ A suite of agent-era engineering skills for Claude Code, plus the `checklist` CL
 
 ## The suite
 
-Seven Claude Code skills covering the engineering lifecycle. The lifecycle runs **groundwork → load-bearing → flightline → assay → stationkeeping → husbandry**, with **gauge** cross-cutting:
+Nine Claude Code skills covering the engineering lifecycle and its security. The lifecycle runs **groundwork → load-bearing → flightline → assay → stationkeeping → husbandry**, with **gauge** (feedback) and the **aegis** / **gungnir** security pair (shield & spear) cross-cutting:
 
 | Skill | Lifecycle role | Stages |
 |-------|----------------|:------:|
@@ -15,6 +15,8 @@ Seven Claude Code skills covering the engineering lifecycle. The lifecycle runs 
 | **`stationkeeping`** | Operations — deploy & release, observability, monitoring, SLOs & incidents, capacity, DR | 7 |
 | **`husbandry`** | Maintenance & evolution — debt, refactoring, defects, versioning, dependencies, legacy, retirement | 6 |
 | **`gauge`** | Feedback surface (cross-cutting) — strict types, boundary validation, legible failures | 5 |
+| **`aegis`** | Security (cross-cutting, the shield) — threat modeling, secure design & coding, SAST/DAST/SCA, OWASP defenses | 6 |
+| **`gungnir`** | Adversarial validation (the spear) — authorized pentest: scope, recon, exploit, chain, fix & re-test | 6 |
 | `checklist` | The TypeScript CLI that enforces every skill's stage gates | — |
 
 Apache-2.0, Copyright 2026 IamK77.
@@ -138,6 +140,36 @@ Eight references back the six stages. Its output is a system that stays cheap to
 
 Six references back the five stages. Invoke with `/gauge <project-or-module>`.
 
+## aegis
+
+`aegis` is the **shield**: it weaves security through the whole lifecycle instead of bolting it on at the end — because the worst weaknesses are architectural and can't be patched in later. It is cross-cutting like `gauge`, owning the security line and directing the siblings (SAST/secret-scan in `flightline`, runtime defense in `stationkeeping`), across six gated stages, tuned for a world where an agent writes insecure code by default, has no threat model, trusts its input, and ships a vulnerability green:
+
+| Stage | Does |
+|-------|------|
+| **Frame** | Size the defense to risk (crown jewels, data classification); set the timeless principles (least privilege, defense in depth, fail secure, zero trust) |
+| **Model** | Threat-model with STRIDE; mark trust boundaries and the attack surface; rank by risk |
+| **Design** | Vetted auth (never invent crypto), server-side authorization, defense in depth, fail secure |
+| **Build** | Never trust input (parameterized queries, output encoding); secrets out of code; least privilege |
+| **Verify** | Gate SAST/DAST/SCA blocking; walk the OWASP Top 10; hand the adversarial attack to `gungnir` |
+| **Operate** | Runtime defense & monitoring; patch CVEs continuously; rehearsed incident response |
+
+Eight references back the six stages. Invoke with `/aegis <system-or-scope-to-secure>`.
+
+## gungnir
+
+`gungnir` is the **spear** that proves the shield: authorized, adversarial penetration testing of a system you own or have written permission to test, to find the holes while they're still cheap to fix. Its first gate is absolute — you attack only authorized targets, never anything else — and it drives a real attack through its whole arc across six gated stages, tuned for a world where an agent can run the tools, shares the defender's blind spots, and mistakes a clean scan for a secure system:
+
+| Stage | Does |
+|-------|------|
+| **Scope** | The absolute gate: confirm ownership / written authorization, the scope, and a safe snapshotted staging environment |
+| **Recon** | Map the attack surface — exposed services, tech stack, the unlinked `/admin` and stale APIs |
+| **Scan** | The automated layer (proxy crawl, vuln scan) → a candidate list of suspects, never a verdict |
+| **Exploit** | Confirm what's real, by class (IDOR, injection, XSS, auth) — a scan is not proof |
+| **Chain** | The creative core: chain small flaws into a real attack, abuse business logic, show true impact |
+| **Report** | The closed loop: rank, fix (via `aegis`/`husbandry`), re-test — then make validation continuous |
+
+Eight references back the six stages. **Authorized use only — your own or explicitly-permitted systems.** Invoke with `/gungnir <your-own-or-authorized-target>`.
+
 ## checklist
 
 `checklist` is a TypeScript CLI (package name `skill-checklist`, version 0.2.0, built on `commander`). It loads a skill's `.checklist.yml`, tracks per-stage pass/fail state in the skill directory, and refuses to open a stage until every check in every prior stage is recorded as `pass` — not merely present. A check that regresses on re-verify overwrites a stale pass, so the gate reflects current state. (`checklist` calls these units `phases`; the skills present them to the user as `stages` — they are the same thing.)
@@ -173,7 +205,7 @@ Full command reference, directory-resolution rules, the `.checklist.yml` schema,
 
 ## Why these skills exist
 
-Agents now write much of the code, and they do not reliably repeat process steps unless something enforces them. These skills move human-era engineering practice into a form an agent-assisted workflow can follow — each covering one part of the lifecycle (requirements, architecture, process, testing, operations, maintenance, and the cross-cutting feedback surface) with machine-enforced gates instead of relying on anyone remembering the step.
+Agents now write much of the code, and they do not reliably repeat process steps unless something enforces them. These skills move human-era engineering practice into a form an agent-assisted workflow can follow — each covering one part of the lifecycle (requirements, architecture, process, testing, operations, maintenance, the cross-cutting feedback surface, and security — built with `aegis` and adversarially proven with `gungnir`) with machine-enforced gates instead of relying on anyone remembering the step.
 
 ## Repository layout
 
@@ -186,6 +218,8 @@ skills/
   stationkeeping/        # operations          — 7 stages, 8 references
   husbandry/             # maintenance         — 6 stages, 8 references
   gauge/                 # feedback surface    — 5 stages, 6 references
+  aegis/                 # security (shield)   — 6 stages, 8 references
+  gungnir/               # adversarial (spear) — 6 stages, 8 references
                          #   each: SKILL.md  references/  .checklist.yml  LICENSE  NOTICE
 devtools/
   checklist/             # the gate CLI (see its own README)
