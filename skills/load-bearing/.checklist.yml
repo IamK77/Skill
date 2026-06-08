@@ -1,0 +1,42 @@
+# Flight checklist for the load-bearing skill — 6 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: frame -> structure -> select -> contracts-data -> nonfunctional -> record.
+phases:
+  - name: frame
+    checks:
+      - id: weight-class-set
+        description: "Architectural weight class set from three dials — cost-of-getting-it-wrong (blast radius), change frequency, and who collaborates (humans AND parallel agents) — so the design matches scale and risk (够用就好), neither over- nor under-architected"
+      - id: reversibility-mapped
+        description: "Looming decisions triaged into one-way doors (irreversible/expensive: production data schema, public/inter-service contracts, auth & trust model, the distribution split) that get human deliberation + an ADR, vs two-way doors (reversible/cheap: internal layout, library choice, naming) that get a default and may be revisited freely by agents"
+      - id: inherited-decisions-reconciled
+        description: "When designing a feature inside an existing system, the one-way doors already decided upstream (by the groundwork/requirements artifact or the existing code) are listed as INHERITED and each marked VALIDATE (agree, with reason) or CHALLENGE (escalate, never silently override), and every upstream open question is resolved / deferred-behind-a-seam / handed to a named owner — none vanishes into the design. Greenfield whole-system runs satisfy this trivially (nothing inherited)"
+
+  - name: structure
+    checks:
+      - id: style-justified
+        description: "Architecture style chosen and justified against the weight class — leanest that fits, Monolith First as the default (its split-later cost is exactly what agents now slash, while distributed runtime cost is not), hype-driven distribution resisted, Conway's Law and agent-sized boundaries considered"
+      - id: boundaries-by-capability
+        description: "Modules split by business capability / bounded context (not technical layer), high-cohesion/low-coupling, distributed-monolith avoided, and a MACHINE-ENFORCED boundary mechanism named (dependency rule / module lint / architecture fitness test) because an agent will not respect a boundary by instinct"
+
+  - name: select
+    checks:
+      - id: stack-justified
+        description: "Tech stack chosen on agent-era criteria — model training-fluency + version stability (avoid niche/post-cutoff churn the agent hallucinates), reviewer verifiability (types/fast-tests/static-analysis as guardrails on agent output), human ability to operate/debug — plus the classics (maturity, ecosystem, license, fit); résumé/novelty-driven choice and speculative abstraction (YAGNI) rejected"
+
+  - name: contracts-data
+    checks:
+      - id: contracts-defined
+        description: "Public and inter-module interfaces designed contract-first with room to evolve (versioning, backward compatibility); the contract is treated as both the spec agents code against and the verification oracle, and as the seam that lets agents work both sides in parallel against stubs"
+      - id: data-model-justified
+        description: "Data model and SQL-vs-NoSQL choice driven by access pattern and consistency need (CAP trade-off made explicit), each service owning its own data (no shared DB), growth/indexes/dominant-queries planned — and acknowledged as the hardest-to-reverse layer that agents do NOT make cheaper, so it earns disproportionate care"
+
+  - name: nonfunctional
+    checks:
+      - id: nfrs-realized
+        description: "Each funded NFR (scalability, availability, performance, security, observability) turned into a concrete design decision AND a guardrail that enforces it (secure-by-default + SAST, perf budget in CI, observability hooks, enforced KISS/YAGNI) — because agents produce plausible-but-unsafe/slow code confidently and feel no cost adding complexity"
+
+  - name: record
+    checks:
+      - id: adrs-and-evolution
+        description: "Each one-way-door decision captured as an ADR (context, options considered, why the others were rejected) to serve as persistent memory across stateless agent sessions; a diagram/code sync mechanism set; architecture framed as continuously evolved behind fitness functions rather than frozen at kickoff"

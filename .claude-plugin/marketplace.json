@@ -6,9 +6,36 @@
   },
   "metadata": {
     "description": "Agent-era engineering skills for Claude Code",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "plugins": [
+    {
+      "name": "groundwork",
+      "description": "Requirements engineering before you build: dig out the real need behind a solution-shaped ask, map the silent stakeholders, write verifiable acceptance criteria, draw the scope line, and manage change — across a five-stage gated flow. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/groundwork"
+      ]
+    },
+    {
+      "name": "load-bearing",
+      "description": "Architecture design for the agent-assisted era: concentrate scarce human judgment on the irreversible decisions (data schema, public contracts, trust model, the split into services) and let agents move fast behind the reversible ones — choosing style, stack, boundaries, contracts, and data model across a six-stage gated flow. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/load-bearing"
+      ]
+    },
+    {
+      "name": "flightline",
+      "description": "Set up or harden a project's engineering process so quality has an automated floor instead of depending on anyone's discipline — version control, code style, code review, CI/CD, and dependency/build management — across a six-stage gated flow, tuned for a world where agents write much of the code. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/flightline"
+      ]
+    },
     {
       "name": "assay",
       "description": "Risk-driven test planning and hardening: choose what to test, the test type, the test doubles, and the cases that actually catch bugs, across an eight-stage gated flow. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
@@ -19,12 +46,12 @@
       ]
     },
     {
-      "name": "groundwork",
-      "description": "Requirements engineering before you build: dig out the real need behind a solution-shaped ask, map the silent stakeholders, write verifiable acceptance criteria, draw the scope line, and manage change — across a five-stage gated flow. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "name": "gauge",
+      "description": "Engineer a codebase's feedback surface so an agent gets clear, fast, local, attributed, hard-to-fake-green signal — strict typing, boundary validation, errors-as-values, structured failures, observability — across a five-stage gated flow. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
       "source": "./",
       "strict": false,
       "skills": [
-        "./skills/groundwork"
+        "./skills/gauge"
       ]
     }
   ]

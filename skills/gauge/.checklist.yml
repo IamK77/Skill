@@ -1,0 +1,31 @@
+# Flight checklist for the gauge skill — 5 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: frame -> static -> boundary -> behavior-runtime -> trustworthy.
+phases:
+  - name: frame
+    checks:
+      - id: failure-modes-and-bar
+        description: "The ways this code can fail are enumerated (wrong shape, bad external data, wrong behavior, runtime fault, production-only) and weighted by blast radius; the target is a clear-feedback source per mode (fast / local / attributed / deterministic / trustworthy / un-fakeable); strictness matched to risk (够用就好) so high-blast-radius paths get rich instrumentation and trivial code is not gold-plated into noise"
+
+  - name: static
+    checks:
+      - id: static-layer
+        description: "The static checker runs in strict mode AND is gated (pyright/mypy/tsc strict); data is modeled as typed records not untyped bags (dict[str,Any]/any); failure modes are put in signatures (errors-as-values where it pays) rather than an untyped throw the checker can't see; closed unions are matched exhaustively (checker errors on a missing case) and non-null is narrowed before use"
+
+  - name: boundary
+    checks:
+      - id: boundaries-validated
+        description: "Every edge where real or untyped data enters (external input, network, files, untyped libraries) VALIDATES rather than asserts — incoming data is parsed into a typed model at the boundary (pydantic/zod) so a bad shape fails there, attributed, not three layers in; Any/any is contained to thin adapter modules at those edges and converted immediately, never flowed inward"
+
+  - name: behavior-runtime
+    checks:
+      - id: behavior-and-runtime-legible
+        description: "Behavioral failure modes have a test that fails clearly (one behavior, one reason to fail, expected-vs-actual message — design depth deferred to assay); runtime faults fail loud/local/attributed via structured errors that name the cause at the site, not a generic exception re-raised far away; production-only failures have observability hooks (structured logs, traces, correlation IDs — pipeline operation deferred to flightline)"
+
+  - name: trustworthy
+    checks:
+      - id: ungameable-green
+        description: "Every feedback source is gated in CI and pre-commit, and the escape hatches an agent uses to flip a signal green are banned or justification-gated: unjustified Any/cast/# type: ignore / as any / @ts-ignore, deleted assertions, widened timeouts, retries masking flakes. A green light the agent can manufacture is not a gate"
+      - id: absence-is-a-signal
+        description: "'Not checked' is made visible so silence is not mistaken for safety: the checker reports unknown/Any types, coverage is read as a map of untested paths, mutation testing exposes assertion-free tests. The honest ceiling is accepted (gradual != sound, green != proof) and the residual gap is made visible rather than left silent"

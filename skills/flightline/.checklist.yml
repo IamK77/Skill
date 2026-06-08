@@ -1,0 +1,42 @@
+# Flight checklist for the flightline skill — 6 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: calibrate -> version-control -> code-style -> code-review -> ci-cd -> dependencies.
+phases:
+  - name: calibrate
+    checks:
+      - id: process-weight-matched
+        description: "Process weight matched to team size, release cadence, and degree of agent involvement (够用就好) — the more agents write and run in parallel, the more the floor must be automated and enforced; the governing fact is internalized that an automated, hard-to-game GATE is the only quality property an agent reliably honors"
+
+  - name: version-control
+    checks:
+      - id: branching-and-commits
+        description: "Branch strategy matched to release cadence (trunk-based/GitHub Flow default for CD; Git Flow only for genuine multi-version maintenance); no long-lived branches (small frequent integration to avoid merge hell, sharper under an agent fleet); commits atomic with clear Conventional-Commit messages that double as the durable why for review and the next stateless session"
+      - id: secrets-machine-enforced
+        description: "Secrets/credentials/large binaries kept out of the repo by a MACHINE-ENFORCED gate (.gitignore + secret-scanning pre-commit hook / CI that blocks the commit), not by trusting a human or agent to remember — because an agent will commit a key to make something work"
+
+  - name: code-style
+    checks:
+      - id: format-and-lint-enforced
+        description: "Formatter + linter run automatically at pre-commit and in CI (not by goodwill); format is delegated to the machine so human review attention is reserved for logic, and the linter is treated as the first automated reviewer of agent output (unused vars, unhandled promises, type errors); the team picks one ruleset and stops debating it"
+
+  - name: code-review
+    checks:
+      - id: small-reviewable-prs
+        description: "PRs kept small enough to actually review — the agent's unit of work is constrained to a human-readable size, because a several-thousand-line diff gets a blind LGTM"
+      - id: review-is-the-gate
+        description: "Review treated as the irreplaceable quality gate: focused on logic/design/edge-cases/security/maintainability (not format); an independent agent used as a pre-review FILTER but never as a substitute for the human gate on consequential changes; critique-the-code-not-the-person with a response SLA; no rubber-stamping or bikeshedding; the agent's characteristic failures (plausible-but-wrong, hallucinated APIs, missing edges, confident security holes, non-asserting tests, scope creep) actively hunted"
+
+  - name: ci-cd
+    checks:
+      - id: ci-fast-and-ungameable
+        description: "CI builds+tests every commit, fast and stable, with gates that are HARD TO GAME (review of test/CI changes, coverage floors that can't be met by deleting assertions, mutation testing where it counts) — because an agent facing a flaky or weak signal will game it; red-means-stop keeps trunk releasable"
+      - id: gates-and-rollback
+        description: "Hard quality gates BLOCK merge (tests, lint, SAST/secret-scan, coverage — blocking not advisory); deploys automated with one-click rollback; CI (automated tests) made solid before reaching for CD; checks shifted left so problems are caught on the developer's machine / in the PR, not in production"
+
+  - name: dependencies
+    checks:
+      - id: deps-locked-and-reviewed
+        description: "Versions locked via the package manager's lockfile for reproducible builds; new dependencies reviewed and SCA-scanned (ideally against an allowlist) before adding — because dependency is attack surface + maintenance burden and an agent reaches for libraries reflexively and can hallucinate/slopsquat a package name; regular security updates backed by the test suite"
+      - id: reproducible-and-bootstrappable
+        description: "Environment parity via containerization so dev/CI/prod match ('works on my machine' eliminated); a fresh newcomer OR a fresh stateless agent session can bootstrap and run the project from the README / AGENTS.md in about half a day, with no load-bearing knowledge trapped in someone's head"
