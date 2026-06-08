@@ -1,0 +1,38 @@
+# Flight checklist for the gungnir skill — 6 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: scope -> recon -> scan -> exploit -> chain -> report.
+phases:
+  - name: scope
+    checks:
+      - id: scope-and-authorization-locked
+        description: "The one absolute, non-negotiable gate: the target is a system the user OWNS or is EXPLICITLY, IN WRITING, authorized to test — confirmed with the user out loud — and the boundaries are pinned: in-scope vs out-of-scope (third-party services and dependencies you don't own are off-limits, never attacked), rules of engagement (allowed techniques — DoS/stress excluded unless agreed — window, contact), a SAFE environment (a snapshotted/backed-up staging mirror, never production with real user data, because an attack can corrupt data or take a service down), and the cloud provider's pen-test policy confirmed. If ownership/authorization cannot be confirmed in writing, STOP — this gate does not clear and no later stage runs"
+
+  - name: recon
+    checks:
+      - id: attack-surface-mapped
+        description: "Within the authorized scope, the attack surface mapped — you cannot attack what you haven't mapped: which endpoints/ports/services are exposed, the technology stack and versions in use, and (critically) the content that is NOT linked from the UI but still exists (a forgotten /admin, a /backup, a stale API) via content/directory discovery; nmap for ports/services, ffuf/gobuster for hidden paths; the aegis threat model (if any) used as the map of where to look hardest"
+
+  - name: scan
+    checks:
+      - id: scanned-and-enumerated
+        description: "The automated layer run over the mapped surface — a vulnerability scanner, a web-proxy crawl (Burp Suite / OWASP ZAP) of every page and API parameter, version-based checks for known-CVE components — producing the CANDIDATE list of suspicious points to investigate; with the line held from the start that a scanner finds KNOWN PATTERNS and does not prove exploitability, and an empty scan is NOT a secure system — scanning is the floor, not the verdict"
+
+  - name: exploit
+    checks:
+      - id: exploited-not-just-scanned
+        description: "The candidates actually EXPLOITED (or proven exploitable with a clear reproducible proof), not merely flagged by a scanner — the value is confirming a vulnerability is genuinely exploitable and discarding false positives; worked from the attacker's core assumption that the app will trust whatever input is given, feeding each input point the unexpected"
+      - id: owasp-classes-attacked
+        description: "The OWASP Top 10 worked hands-on by class against the system: broken access control / IDOR (log in as two users, change a resource ID to another user's, hit an admin endpoint as a normal user — highest-yield self-test); injection (a single-quote probe for DB errors, then sqlmap on reactive parameters; command/NoSQL too); auth & session (weak passwords, brute-force protection, token expiry after logout, HttpOnly/Secure cookies, default creds); XSS (a harmless probe script in a reflected field — does it execute or display); misconfiguration / sensitive-data exposure (debug endpoints, verbose errors, public buckets, plaintext transport, secrets in responses/logs)"
+
+  - name: chain
+    checks:
+      - id: chained-and-impact-shown
+        description: "The creative core a scanner cannot do: several small flaws CHAINED into one real attack (a low-severity info leak + a weak reset chaining into account takeover), BUSINESS-LOGIC abuse no scanner understands, and POST-EXPLOITATION to show TRUE impact (if you got in: lateral movement, privilege escalation, what data is actually reachable); and because an agent attacking a system agents built shares its blind spots, deliberately independent angles taken (and on a high-stakes system, a genuinely independent human tester) — agreement is not evidence"
+
+  - name: report
+    checks:
+      - id: findings-fixed-and-retested
+        description: "The closed loop that is the only part that creates value: every confirmed finding recorded with a clear reproduction, RANKED by severity (impact × exploitability), the FIX driven (handed to the aegis skill for the defense and the husbandry skill for the change), and RE-TESTED to verify the hole is actually closed — a fix never re-attacked is a hope, and a report that sits in a drawer with nothing fixed is the same as never having tested"
+      - id: validation-made-continuous
+        description: "Adversarial validation made CONTINUOUS, not a one-time gate — a single pre-launch attack is stale within weeks because new vulnerabilities are disclosed daily and every change can open a hole; the pre-launch attack is the capstone layered on automated scanning every commit (the aegis/flightline gates), re-attack after major changes, and on the highest-stakes systems ongoing independent testing or a bug-bounty program"
