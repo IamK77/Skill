@@ -4,7 +4,7 @@ A suite of agent-era engineering skills for Claude Code, plus the `checklist` CL
 
 ## The suite
 
-Six Claude Code skills covering the engineering lifecycle. The lifecycle runs **groundwork → load-bearing → flightline → assay → stationkeeping**, with **gauge** cross-cutting:
+Seven Claude Code skills covering the engineering lifecycle. The lifecycle runs **groundwork → load-bearing → flightline → assay → stationkeeping → husbandry**, with **gauge** cross-cutting:
 
 | Skill | Lifecycle role | Stages |
 |-------|----------------|:------:|
@@ -13,6 +13,7 @@ Six Claude Code skills covering the engineering lifecycle. The lifecycle runs **
 | **`flightline`** | Engineering process — version control, review, CI/CD, dependencies | 6 |
 | **`assay`** | Testing — what to test, how, and proving the suite can fail | 8 |
 | **`stationkeeping`** | Operations — deploy & release, observability, monitoring, SLOs & incidents, capacity, DR | 7 |
+| **`husbandry`** | Maintenance & evolution — debt, refactoring, defects, versioning, dependencies, legacy, retirement | 6 |
 | **`gauge`** | Feedback surface (cross-cutting) — strict types, boundary validation, legible failures | 5 |
 | `checklist` | The TypeScript CLI that enforces every skill's stage gates | — |
 
@@ -108,6 +109,21 @@ Ten references back the eight stages. `assay`'s checklist defines 15 checks acro
 
 Eight references back the seven stages. Its output is a production-ready, operable system and the rehearsed controls that keep it serving users. Invoke with `/stationkeeping <service-or-system-to-operate>`.
 
+## husbandry
+
+`husbandry` is the maintenance-and-evolution work the whole lifecycle is really a down-payment on: maintenance is **60–80% of a system's total cost**, and software is **read and changed far more than it is written**. So it treats software not as a building you finish but as a living thing to keep cheaply changeable — across six gated stages, tuned for a world where an agent does the maintaining and reaches for a rewrite, banks debt invisibly, refactors without a net, and rots the docs:
+
+| Stage | Does |
+|-------|------|
+| **Frame** | Size the care to the system's stage of life (growing / steady / legacy / sunsetting); judge every change by the cost of the *next* one |
+| **Debt** | Make technical debt visible and budgeted (Fowler's quadrant); resist the impulsive big rewrite |
+| **Refactor** | Improve structure under a test net; small & continuous; characterization tests for legacy; separate commits |
+| **Defects** | Triage; reproduce with a failing test first; fix the root cause (5 Whys), not the symptom |
+| **Evolve** | Semver & backward-compatible APIs with graceful deprecation; keep dependencies current, before EOL |
+| **Continuity** | Lower the bus factor; living docs (stale docs are worse than none); strangler-fig legacy migration; planned retirement |
+
+Eight references back the six stages. Its output is a system that stays cheap to change for as long as it is worth keeping alive. Invoke with `/husbandry <system-or-module-to-maintain>`.
+
 ## gauge
 
 `gauge` engineers a codebase's feedback surface so an agent gets clear feedback at every step — **fast, local, attributed, deterministic, trustworthy, un-fakeable** — instead of flailing against late, opaque, or false-green signals. It is the *medium*, not a lifecycle phase: it makes the code emit clear signal and leans on its siblings for depth. Five gated stages:
@@ -157,7 +173,7 @@ Full command reference, directory-resolution rules, the `.checklist.yml` schema,
 
 ## Why these skills exist
 
-Agents now write much of the code, and they do not reliably repeat process steps unless something enforces them. These skills move human-era engineering practice into a form an agent-assisted workflow can follow — each covering one part of the lifecycle (requirements, architecture, process, testing, operations, and the cross-cutting feedback surface) with machine-enforced gates instead of relying on anyone remembering the step.
+Agents now write much of the code, and they do not reliably repeat process steps unless something enforces them. These skills move human-era engineering practice into a form an agent-assisted workflow can follow — each covering one part of the lifecycle (requirements, architecture, process, testing, operations, maintenance, and the cross-cutting feedback surface) with machine-enforced gates instead of relying on anyone remembering the step.
 
 ## Repository layout
 
@@ -168,6 +184,7 @@ skills/
   flightline/            # engineering process — 6 stages, 7 references
   assay/                 # testing             — 8 stages, 10 references
   stationkeeping/        # operations          — 7 stages, 8 references
+  husbandry/             # maintenance         — 6 stages, 8 references
   gauge/                 # feedback surface    — 5 stages, 6 references
                          #   each: SKILL.md  references/  .checklist.yml  LICENSE  NOTICE
 devtools/
