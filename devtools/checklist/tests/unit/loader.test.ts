@@ -74,6 +74,18 @@ phases:
     );
   });
 
+  // 6b. Phase with an empty checks array (vacuously gate-complete)
+  it('throws when a phase\'s "checks" array is empty', () => {
+    writeConfig(`
+phases:
+  - name: Build
+    checks: []
+`);
+    expect(() => loadChecklist(tmpDir)).toThrowError(
+      '"checks" array is empty',
+    );
+  });
+
   // 7. Check missing id
   it('throws when a check is missing "id"', () => {
     writeConfig(`

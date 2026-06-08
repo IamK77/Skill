@@ -23,7 +23,16 @@ export function loadState(dir: string): ChecklistState {
   } catch {
     throw new Error(`state file is corrupt: ${p}. run \`checklist init --force\` to reset it`);
   }
-  if (!parsed || typeof parsed !== 'object' || typeof (parsed as ChecklistState).checked !== 'object') {
+  if (!parsed || typeof parsed !== 'object') {
+    throw new Error(`state file is malformed: ${p}. run \`checklist init --force\` to reset it`);
+  }
+  // `typeof null === 'object'` and `typeof [] === 'object'`, so a corrupt or
+  // partially-written file shaped like {"checked":null} or {"checked":[]} would
+  // slip past a bare typeof guard and then crash gate evaluation downstream with
+  // an unhandled TypeError. Reject any non-plain-object `checked` here instead,
+  // so the corruption surfaces as the documented malformed-state error.
+  const checked = (parsed as { checked?: unknown }).checked;
+  if (typeof checked !== 'object' || checked === null || Array.isArray(checked)) {
     throw new Error(`state file is malformed: ${p}. run \`checklist init --force\` to reset it`);
   }
   return parsed as ChecklistState;

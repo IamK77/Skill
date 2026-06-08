@@ -81,8 +81,8 @@ reportUnknownVariableType = "error"
 reportUnknownMemberType = "error"      # these three surface inferred-Any: ABSENCE made visible
 reportUnnecessaryTypeIgnoreComment = "error"   # a stale `# type: ignore` is itself flagged
 reportUntypedFunctionDecorator = "error"
-# basedpyright only, the sharpest "not checked" signal:
-# reportAny = "error"
+# basedpyright only, the sharpest "not checked" signal — flags a written-out `Any`:
+reportAny = "error"
 ```
 
 ### `mypy` (alternative)
@@ -136,7 +136,7 @@ select = [
 ]
 # Ban the agent's reflexes to silence the checker:
 #   - bare/blanket suppressions are caught by pyright's reportUnnecessaryTypeIgnoreComment
-#   - explicit `Any` in annotations is caught by mypy disallow_any_explicit / pyright strict
+#   - explicit `Any` in annotations is caught by mypy disallow_any_explicit / basedpyright reportAny (enabled in §2)
 # ruff adds the annotation-presence half:
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = false

@@ -33,7 +33,7 @@ The single mechanism that makes a build reproducible is the **lockfile**: a mach
 | Rust | `Cargo.toml` | `Cargo.lock` | `cargo build --locked` |
 | Go | `go.mod` | `go.sum` (+ `GOFLAGS=-mod=readonly`) | `go build` with verified `go.sum` |
 | Ruby | `Gemfile` | `Gemfile.lock` | `bundle install --frozen` |
-| Java (Gradle) | `build.gradle` | `gradle.lockfile` (dependency locking) | `gradle --write-locks` then build |
+| Java (Gradle) | `build.gradle` | `gradle.lockfile` (dependency locking) | `gradle build` with strict locking (`lockMode = LockMode.STRICT`); **not** `--write-locks`, which rewrites the lock |
 | PHP (Composer) | `composer.json` | `composer.lock` | `composer install` (uses the lock) |
 
 **The frozen-install rule is the load-bearing half.** A committed lockfile does nothing if CI runs the *mutating* install command (`npm install`, `poetry update`, a bare `pip install`), which is allowed to re-resolve ranges and silently drift. CI must run the **frozen / `--locked` / `ci` variant that fails if the lockfile and manifest disagree** — that failure is the gate that proves dev and CI resolved the identical graph. This matters more under an agent: an agent that hits a resolution error will reflexively run `npm install` or `poetry update` to "fix" it, quietly rewriting the lock. Make the frozen install the only install CI knows how to do.

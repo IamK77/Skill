@@ -31,7 +31,7 @@ If `$ARGUMENTS` names a target (a file, module, or subsystem), test that. If it 
 
 ## Reference library
 
-Detail lives in `references/`. Open each when a stage sends you there, not upfront. Nine references back the eight stages:
+Detail lives in `references/`. Open each when a stage sends you there, not upfront. Ten references back the eight stages:
 
 - **[references/decision-tree.md](references/decision-tree.md)** — the engine. Four nested decision trees (worth-it → type → doubles → cases) plus overlays and an escalation ladder. Open it at **TRIAGE** and keep it beside you through **COMPOSE**.
 - [references/evidence-catalogue.md](references/evidence-catalogue.md) — the trust ceiling of every form of test evidence: what each proves, what it costs, and what it is structurally blind to. Pick evidence by what it *cannot* see.

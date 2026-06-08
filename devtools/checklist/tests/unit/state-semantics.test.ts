@@ -104,20 +104,20 @@ describe('loadState corrupt vs malformed boundary', () => {
   });
 });
 
-describe('loadState lenient blind spots (typeof null/array === object)', () => {
-  // These are the cases the existence/typeof guard lets through. Pinning CURRENT
-  // behavior: the guard checks typeof checked === 'object', and both null and
-  // arrays satisfy that, so loadState does NOT throw and returns them as-is.
-  it('accepts checked:null without throwing (typeof null === object)', () => {
+describe('loadState rejects non-object `checked` (null / array)', () => {
+  // typeof null === 'object' and typeof [] === 'object', so a corrupt or
+  // partially-written state file shaped like {"checked":null} or {"checked":[]}
+  // used to slip past the existence/typeof guard and then crash gate evaluation
+  // downstream with an unhandled TypeError. loadState now rejects both at the
+  // parse boundary with the documented malformed-state error.
+  it('rejects checked:null with the malformed error (not a downstream crash)', () => {
     write('{"checked":null}');
-    const state = loadState(tmpDir);
-    expect(state).toEqual({ checked: null });
+    expect(() => loadState(tmpDir)).toThrow('state file is malformed');
   });
 
-  it('accepts checked as an array without throwing (typeof [] === object)', () => {
+  it('rejects checked as an array with the malformed error', () => {
     write('{"checked":[]}');
-    const state = loadState(tmpDir);
-    expect(state).toEqual({ checked: [] });
+    expect(() => loadState(tmpDir)).toThrow('state file is malformed');
   });
 
   it('ignores extra unknown keys alongside a valid checked object', () => {
