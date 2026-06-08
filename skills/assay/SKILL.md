@@ -27,6 +27,8 @@ A green suite is worthless until it has proven it can go red. This skill drives 
 
 If `$ARGUMENTS` names a target (a file, module, or subsystem), test that. If it names something that is not a test target (say, a language preference), acknowledge it and ask what to test.
 
+**Speak the user's language, or the stakes get set blind.** Testing is a collaboration — you supply the rigor, the user supplies the domain judgment and the stakes: which risks matter, how a found bug is disposed of. They can only supply it on terms they follow, so read their fluency and gloss a term on first use (`mock` vs `fake`, property-based, mutation testing, hermetic, flaky). A user who signs off on a risk ledger or a disposition full of unparsed words has not set the stakes — and the CHARTER, TRIAGE, and BOOKS judgments this skill leans on them for are then hollow.
+
 ## Reference library
 
 Detail lives in `references/`. Open each when a stage sends you there, not upfront. Nine references back the eight stages:
