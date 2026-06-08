@@ -1,0 +1,44 @@
+# Flight checklist for the husbandry skill — 6 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: frame -> debt -> refactor -> defects -> evolve -> continuity.
+phases:
+  - name: frame
+    checks:
+      - id: maintenance-stance-set
+        description: "Maintenance investment matched to the system's stage of life (actively growing / steady-state / legacy / sunsetting) and blast radius (够用就好); SETUP vs AUDIT mode chosen; and the governing fact internalized — software is read and changed far more than written, so every change is judged by the cost of the NEXT change: readability over cleverness, high cohesion / low coupling, and no speculative over-engineering (a structure for an imagined future is itself future maintenance burden)"
+
+  - name: debt
+    checks:
+      - id: debt-tracked-and-budgeted
+        description: "Technical debt made VISIBLE (logged in a register, quantified by its interest — the slowdown/risk it adds to every later change) and paid down on a FIXED per-iteration budget rather than 'when we have time'; the goal is managed/acknowledged debt (Fowler's deliberate-prudent quadrant is legitimate), not a fantasy of zero debt — the fatal case is inadvertent-reckless debt the team doesn't know it's carrying, which is the agent's default corner"
+      - id: no-reckless-rewrite
+        description: "The impulsive big rewrite resisted — incremental refactoring chosen as the default, because a rewrite is almost always far harder than it looks and discards the implicit knowledge and the thousands of edge-case fixes the old system accreted; a rewrite is reserved for a genuinely documented exceptional case, not reached for because the agent finds the code distasteful and can generate a lot of plausible new code fast"
+
+  - name: refactor
+    checks:
+      - id: refactor-under-test
+        description: "Refactoring (improving internal structure WITHOUT changing external behavior) done only under a test safety net that proves behavior is unchanged — without it you are rewriting blind; for legacy code with no tests, characterization tests pin current behavior FIRST, then change. This is the gate the agent most needs, because only a test (not the agent's belief) can catch the silent regression a 'cleanup' introduces"
+      - id: small-and-separated
+        description: "Refactoring kept small and continuous (the boy-scout rule — leave each piece a little cleaner than found) rather than a hoarded big-bang restructuring; and refactoring commits kept SEPARATE from feature/behavior-change commits, so a regression can be attributed and review can tell what actually changed"
+
+  - name: defects
+    checks:
+      - id: triage-and-regression-first
+        description: "Defects TRIAGED by severity/priority (not fixed first-come-first-served), with an explicit won't-fix recorded like any deliberate skip; and every bug REPRODUCED with a failing test BEFORE the fix — confirming the bug is understood, proving the fix works, and standing as a permanent regression guard (the same fail-first discipline as the assay skill)"
+      - id: root-cause-fixed
+        description: "Defects fixed at the ROOT CAUSE (via a method like 5 Whys), not whack-a-mole symptom suppression — because suppressing the symptom is the agent's cheapest path to a green dashboard and leaves the real fault to recur; defects also found PROACTIVELY by wiring stationkeeping's error monitoring/observability back into the maintenance loop, not only when a user reports them"
+
+  - name: evolve
+    checks:
+      - id: versioning-and-compatibility
+        description: "Compatibility communicated via semantic versioning (major.minor.patch — a breaking change is a major bump); public APIs kept backward-compatible and changed GRACEFULLY — to remove an interface, deprecate it with a transition window and a migration path, then remove later, never delete it out from under callers (the agent's default move, since it feels no obligation to callers it can't see)"
+      - id: dependencies-kept-current
+        description: "Dependencies upgraded continuously in small steps (backed by the test suite) rather than deferred into a giant painful upgrade; no load-bearing framework left untouched until it reaches EOL (end-of-life, no security support) and forces an expensive emergency migration — dependency currency treated as a continuous tax, not a someday project"
+
+  - name: continuity
+    checks:
+      - id: knowledge-and-living-docs
+        description: "Bus factor lowered so system knowledge does not live in one head/session (pairing, rotation, ADRs, docs) — for a stateless agent with no memory between sessions, the externalized artifacts ARE the only continuity; and documentation kept LIVING and in sync with the system, because a stale doc actively misleads the next maintainer (very often the next agent session, which trusts it as truth) — a wrong doc is worse than no doc"
+      - id: legacy-and-sunset-planned
+        description: "Legacy code worked SAFELY — characterization tests pin current behavior before any change to an old untested system, and a large migration uses the strangler-fig pattern (grow the replacement around the old system, retire it piece by piece) rather than a big-bang cutover; and end-of-life handled on purpose — a system past its usefulness is decommissioned on a PLAN, not left as a zombie draining resources and attention"

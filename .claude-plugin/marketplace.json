@@ -62,6 +62,15 @@
       "skills": [
         "./skills/stationkeeping"
       ]
+    },
+    {
+      "name": "husbandry",
+      "description": "Keep a software system cheaply changeable over its whole life — the 60–80%-of-cost maintenance phase: make technical debt visible and budgeted, refactor safely under test, manage defects to root cause, evolve versions/APIs/dependencies without breaking callers or hitting EOL, and handle legacy and retirement — across a six-stage gated flow, tuned for a world where an agent does the maintaining and reaches for a rewrite. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/husbandry"
+      ]
     }
   ]
 }
