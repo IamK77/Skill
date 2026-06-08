@@ -1,0 +1,54 @@
+# Flight checklist for the stationkeeping skill — 7 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: calibrate -> release -> environments -> observability ->
+# monitoring -> reliability -> continuity.
+phases:
+  - name: calibrate
+    checks:
+      - id: ops-weight-matched
+        description: "Operational rigor matched to blast radius (revenue/safety/data lost when down), user-criticality, scale, and degree of agent involvement in operations (够用就好) — the more an agent deploys/watches/remediates, the more of the floor must be rehearsed and automated, because there is no human dread or memory in the loop; SETUP vs AUDIT mode chosen, and the governing fact internalized that production is the only truth and an UNREHEARSED control is not a control"
+
+  - name: release
+    checks:
+      - id: rollback-rehearsed
+        description: "Rollback is fast, reliable, and has actually been REHEARSED (proven to work before it is needed, not 'possible in theory') — confirmed on a real or staging run, with someone/something that has done it before; deploys are automated and reproducible rather than manual server edits"
+      - id: progressive-delivery-and-flags
+        description: "Blast radius shrunk via progressive delivery (canary / blue-green / rolling) so a bad release reaches a slice, not everyone; DEPLOY decoupled from RELEASE with feature flags (ship dark, turn on deliberately, one flag-flip to off without a redeploy); releases kept small and frequent; immutable infrastructure (rebuild-and-replace, never hand-patch a running box) to prevent snowflake servers"
+
+  - name: environments
+    checks:
+      - id: infra-as-code-and-parity
+        description: "Environment described as code (IaC, e.g. Terraform) so it is reproducible, reviewable, and version-controlled (no clicked-into-existence snowflake infra); runtime made identical everywhere via containerization/orchestration so 'works on my machine' is dead at the root; dev/staging/prod kept as close to identical as possible because every divergence hides a bug until prod"
+      - id: config-separated-from-code
+        description: "Configuration separated from code — env vars or a config service, never hard-coded — so the same artifact promotes from staging to prod unchanged with only injected config differing, and secrets never sit in the image or the repo"
+
+  - name: observability
+    checks:
+      - id: telemetry-three-pillars
+        description: "The three pillars in place — logs, metrics, traces — with structured logs carrying a correlation/trace id so one request can be followed across every service it touches; the distinction internalized between MONITORING (you know what to watch) and OBSERVABILITY (the system can answer questions you did not anticipate), since distributed failures are usually the unanticipated ones; the load-bearing observability hooks actually cashed in"
+      - id: sensitive-data-out-of-telemetry
+        description: "Secrets and PII kept OUT of logs/metrics/traces (redacted at the boundary), a high-frequency compliance incident an agent causes to make a bug visible; observability data given a retention policy and cost awareness (cardinality/verbosity can get frighteningly expensive)"
+
+  - name: monitoring
+    checks:
+      - id: golden-signals-watched
+        description: "Monitoring watches the USER's experience, not just the machine — the four golden signals (latency, error rate, traffic, saturation) over CPU/memory vanity metrics, because a perfectly healthy host while users get errors is an everyday occurrence; alerting is on SYMPTOMS (users seeing errors) over CAUSES (host 7 CPU high), since the symptom is what matters and catches the unpredicted"
+      - id: alerts-actionable
+        description: "Every alert that PAGES is actionable — if it fires, a human must do something now; alert fatigue (too many/noisy/false alarms training the team to ignore all of them) actively prevented by demoting non-actionable signals to dashboards/digests rather than 3am pages — the operational form of an un-gameable gate, because an agent facing a noisy alert will silence it rather than fix the cause"
+
+  - name: reliability
+    checks:
+      - id: slos-and-error-budget
+        description: "How-reliable-is-enough defined with SLI/SLO/SLA rather than chasing 100% (cost runs to infinity near 100%, and it is rarely the right or achievable target — same restraint as not chasing 100% test coverage); an error budget used to balance shipping vs stability (spend it on features while it lasts, stop and stabilize when nearly spent), turning fast-vs-safe from an argument into a number"
+      - id: incident-process-ready
+        description: "On-call rotation, written runbooks, and incident severity levels stood up so response is known rather than improvised (the runbook is the stateless agent's only incident memory); blameless postmortems practiced (fix the system/process, never punish a person, so failures surface fast instead of hiding); MTTR (fast recovery) optimized over MTBF, since failure is inevitable and fast recovery is the achievable target"
+
+  - name: continuity
+    checks:
+      - id: capacity-proven
+        description: "Capacity PROVEN by load testing (you know where the system falls over) rather than guessed; autoscaling configured on top of that knowledge, not as a substitute for it; the cliff mapped before launch/sale-day traffic, not discovered during it — countering the agent reflex to 'just scale up,' which hides the ceiling instead of mapping it; FinOps cost discipline (over-provisioning wastes money, under-provisioning is an outage — balanced deliberately)"
+      - id: backup-and-dr-rehearsed
+        description: "Backups and disaster recovery actually REHEARSED — a real restore performed periodically to prove the backup works and to measure recovery time (RTO/RPO) — because an untested backup is not a backup, and teams routinely discover corrupt backups only on the day they need them"
+      - id: ops-security-hardened
+        description: "Runtime security hardened: secrets in a real manager/vault (never in code — the RUNNING-system counterpart to flightline's build-time rule), principle of least privilege plus access auditing, and regular OS/dependency patching (supply-chain hygiene continued into production)"

@@ -4,7 +4,7 @@ A suite of agent-era engineering skills for Claude Code, plus the `checklist` CL
 
 ## The suite
 
-Five Claude Code skills covering the engineering lifecycle. The lifecycle runs **groundwork → load-bearing → flightline → assay**, with **gauge** cross-cutting:
+Six Claude Code skills covering the engineering lifecycle. The lifecycle runs **groundwork → load-bearing → flightline → assay → stationkeeping**, with **gauge** cross-cutting:
 
 | Skill | Lifecycle role | Stages |
 |-------|----------------|:------:|
@@ -12,6 +12,7 @@ Five Claude Code skills covering the engineering lifecycle. The lifecycle runs *
 | **`load-bearing`** | Architecture — style, stack, boundaries, contracts, data model | 6 |
 | **`flightline`** | Engineering process — version control, review, CI/CD, dependencies | 6 |
 | **`assay`** | Testing — what to test, how, and proving the suite can fail | 8 |
+| **`stationkeeping`** | Operations — deploy & release, observability, monitoring, SLOs & incidents, capacity, DR | 7 |
 | **`gauge`** | Feedback surface (cross-cutting) — strict types, boundary validation, legible failures | 5 |
 | `checklist` | The TypeScript CLI that enforces every skill's stage gates | — |
 
@@ -91,6 +92,22 @@ Seven references back the six stages. Invoke with `/flightline <project-or-pract
 
 Ten references back the eight stages. `assay`'s checklist defines 15 checks across the 8 stages, all manual human-judgment confirmations, so the gate's enforcement comes from the per-check confirmations plus the sequential prior-stage gate. Invoke with `/assay <path/to/module>`.
 
+## stationkeeping
+
+`stationkeeping` is the operations work that begins where a green pipeline ends: **software's life is in production, not the repository** — and most outages are not logic bugs but deployment, configuration, capacity, or dependency failures that only exist once the system is live. It holds a running system *on station* — against drift, failure, load, and attack — across seven gated stages, tuned for a world where an agent operates production and reads a green dashboard as safety and silence as health:
+
+| Stage | Does |
+|-------|------|
+| **Calibrate** | Size operational rigor to blast radius × criticality × scale × agent-ops share; pick SETUP vs AUDIT |
+| **Release** | Rehearsed rollback; progressive delivery (canary/blue-green/rolling) and feature flags that decouple *deploy* from *release*; immutable infra |
+| **Environments** | Infrastructure as code, container parity across dev/staging/prod, config separated from code |
+| **Observability** | The three pillars (logs/metrics/traces) with a trace id; monitoring vs observability; secrets/PII kept out of telemetry |
+| **Monitoring** | The golden signals over machine metrics; symptom-based, actionable alerts — no alert fatigue |
+| **Reliability** | SLOs and an error budget (not 100%); on-call, runbooks, blameless postmortems; MTTR over MTBF |
+| **Continuity** | Capacity proven by load test; FinOps cost; least-privilege runtime security; rehearsed backups/DR (RTO/RPO) |
+
+Eight references back the seven stages. Its output is a production-ready, operable system and the rehearsed controls that keep it serving users. Invoke with `/stationkeeping <service-or-system-to-operate>`.
+
 ## gauge
 
 `gauge` engineers a codebase's feedback surface so an agent gets clear feedback at every step — **fast, local, attributed, deterministic, trustworthy, un-fakeable** — instead of flailing against late, opaque, or false-green signals. It is the *medium*, not a lifecycle phase: it makes the code emit clear signal and leans on its siblings for depth. Five gated stages:
@@ -140,7 +157,7 @@ Full command reference, directory-resolution rules, the `.checklist.yml` schema,
 
 ## Why these skills exist
 
-Agents now write much of the code, and they do not reliably repeat process steps unless something enforces them. These skills move human-era engineering practice into a form an agent-assisted workflow can follow — each covering one part of the lifecycle (requirements, architecture, process, testing, and the cross-cutting feedback surface) with machine-enforced gates instead of relying on anyone remembering the step.
+Agents now write much of the code, and they do not reliably repeat process steps unless something enforces them. These skills move human-era engineering practice into a form an agent-assisted workflow can follow — each covering one part of the lifecycle (requirements, architecture, process, testing, operations, and the cross-cutting feedback surface) with machine-enforced gates instead of relying on anyone remembering the step.
 
 ## Repository layout
 
@@ -150,6 +167,7 @@ skills/
   load-bearing/          # architecture        — 6 stages, 8 references
   flightline/            # engineering process — 6 stages, 7 references
   assay/                 # testing             — 8 stages, 10 references
+  stationkeeping/        # operations          — 7 stages, 8 references
   gauge/                 # feedback surface    — 5 stages, 6 references
                          #   each: SKILL.md  references/  .checklist.yml  LICENSE  NOTICE
 devtools/

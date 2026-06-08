@@ -53,6 +53,15 @@
       "skills": [
         "./skills/gauge"
       ]
+    },
+    {
+      "name": "stationkeeping",
+      "description": "Take a system from merged to reliably serving users in production and keep it there: deployment & release strategy, infrastructure-as-code & config, observability, monitoring & alerting, SLOs & incident response, capacity, cost, and backup/DR — across a seven-stage gated flow, tuned for a world where agents operate production and read a green dashboard as safety. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/stationkeeping"
+      ]
     }
   ]
 }
