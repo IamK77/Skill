@@ -1,0 +1,42 @@
+# Flight checklist for the plumb skill — 6 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: frame -> names -> functions -> abstraction -> trust -> disposition.
+phases:
+  - name: frame
+    checks:
+      - id: craft-bar-set
+        description: "The craft bar sized to how long the code must stay legible and how many readers it has (够用就好 — a one-off script earns clarity but not a SOLID refactor; a core module read for years earns the full craft); AUDIT (review existing) vs SETUP (write new) mode chosen; and the two governing facts internalized — code is read far more than written and the next reader is an agent with NO context, so boring-and-legible beats clever; AND everything in this skill is GUIDANCE judged by 'does this make the code clearer and cheaper to change', never applied as dogma (a style opinion that doesn't hurt legibility/changeability is not a finding)"
+
+  - name: names
+    checks:
+      - id: names-reveal-intent
+        description: "Names audited/chosen to REVEAL INTENT — a name is code's primary documentation: elapsedTimeInDays over d, isEligibleForRefund() over check(); searchable, pronounceable, free of encodings (no Hungarian/type prefixes), drawn from one consistent vocabulary (not fetch/get/retrieve for the same thing), length scaled to scope; the agent's generic-placeholder tells (data, info, handle, process, tmp, obj) that reveal nothing are flagged — a precise name pays back its cost on the first read and saves a comment plus the next reader's confusion"
+
+  - name: functions
+    checks:
+      - id: functions-small-single-purpose
+        description: "Functions small and doing ONE thing at a SINGLE level of abstraction (not business logic + SQL-building + output-formatting in one body); parameters few (more than ~3–4 usually means they should be grouped into an object); the FLAG ARGUMENT (doStuff(true)) distrusted as a sign the function does two things and should be split"
+      - id: comments-and-errors-honest
+        description: "Comments explain WHY not WHAT — intent, a trade-off, a counter-intuitive trap — never restating the code; a stale comment treated as WORSE than none because it actively lies to the next reader; and error handling treated as design: errors handled explicitly and FAIL FAST, never silently swallowed (an empty catch is a time bomb), with messages that help locate the problem, not 'something went wrong'"
+
+  - name: abstraction
+    checks:
+      - id: abstraction-earned
+        description: "Duplication removed (DRY) only once the pattern is genuinely stable — a WRONG abstraction is more expensive than the duplication it replaced ('duplication is far cheaper than the wrong abstraction', Sandi Metz); the AHA rule (avoid hasty abstraction / rule of three) followed instead of abstracting two similar snippets immediately; and high cohesion / low coupling kept at the code (class/module) level so a change doesn't ripple (the architectural version is the load-bearing skill's)"
+      - id: patterns-solid-as-guidance
+        description: "SOLID and design patterns used as GUIDANCE and shared vocabulary, never as a dogmatic checklist — pattern-itis (wrapping three lines in a factory + two abstraction layers) and SOLID-as-dogma (splitting simple logic into eight classes to satisfy a principle) flagged as OVER-ENGINEERING (the agent's favorite failure, since it feels no cost generating structure); the only test applied is 'does this make the code clearer and easier to change, or just more rule-compliant?' — if simple code solves it, simple code wins (KISS/YAGNI)"
+
+  - name: trust
+    checks:
+      - id: trust-chain-contained
+        description: "The trust-chain escape hatches CONTAINED AT THE EDGES — Any/cast/isinstance/getattr (and the cross-language family: TS any/as/!, Java reflection/unchecked casts, Go interface{}, Rust unwrap/unsafe, …) are each a point where a guarantee the TOOL could prove is downgraded to 'trust me' or 'decide at runtime'; necessary at a boundary (deserializing external data, FFI, a generic library) but a SMELL scattered through core domain logic; the cure is PARSE-DON'T-VALIDATE — parse untrusted/dynamic data once at the edge into a trusted type (dataclass / validated model / NewType) so the type carries the guarantee into the core and nothing re-checks it (the static-layer TOOLING is the gauge skill's; plumb names where the chain leaks and routes the fix there); primitive obsession cured with domain types and illegal states made unrepresentable"
+      - id: smells-swept
+        description: "The classic code smells swept and each pointed at its fix — long function, large class, long parameter list, magic numbers, shotgun surgery (one change scattered across many places), feature envy (a method mostly manipulating another object's data), and the rest of the Fowler catalog; each is a TELL the agent emits without feeling it, and each names a specific refactoring"
+
+  - name: disposition
+    checks:
+      - id: testability-litmus
+        description: "Testability used as the DESIGN LITMUS — hard-to-test code is almost always badly-designed code: a function testable only by mocking a dozen things is too coupled and does too much, so 'how hard is this to test?' is a probe of design quality; pushing toward testability pushes toward good design — pure logic separated from side effects (I/O, network, time), collaborators injected so they're replaceable (designing the tests themselves is the assay skill's craft)"
+      - id: findings-disposed
+        description: "EVERY finding disposed — a found smell never fixed is worthless: fix it now if small and safe; refactor under test via the husbandry skill (small steps, boy-scout rule, behavior pinned) for anything larger; or accept it with a WRITTEN reason (this clever line is justified here / this duplication isn't stable enough to abstract yet); type-discipline fixes routed to gauge, refactors to husbandry, test gaps to assay — a review that produces a list nobody acts on is the same as no review"
