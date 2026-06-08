@@ -4,7 +4,7 @@ A suite of agent-era engineering skills for Claude Code, plus the `checklist` CL
 
 ## The suite
 
-Nine Claude Code skills covering the engineering lifecycle and its security. The lifecycle runs **groundwork → load-bearing → flightline → assay → stationkeeping → husbandry**, with **gauge** (feedback) and the **aegis** / **gungnir** security pair (shield & spear) cross-cutting:
+Ten Claude Code skills covering the engineering lifecycle, its security, and the craft of the code itself. The lifecycle runs **groundwork → load-bearing → flightline → assay → stationkeeping → husbandry**, with **gauge** (feedback), the **aegis** / **gungnir** security pair (shield & spear), and **plumb** (code craft) cross-cutting:
 
 | Skill | Lifecycle role | Stages |
 |-------|----------------|:------:|
@@ -17,6 +17,7 @@ Nine Claude Code skills covering the engineering lifecycle and its security. The
 | **`gauge`** | Feedback surface (cross-cutting) — strict types, boundary validation, legible failures | 5 |
 | **`aegis`** | Security (cross-cutting, the shield) — threat modeling, secure design & coding, SAST/DAST/SCA, OWASP defenses | 6 |
 | **`gungnir`** | Adversarial validation (the spear) — authorized pentest: scope, recon, exploit, chain, fix & re-test | 6 |
+| **`plumb`** | Code craft (cross-cutting, the plumb line) — naming, functions, abstraction, trust-chains, smells, testability | 6 |
 | `checklist` | The TypeScript CLI that enforces every skill's stage gates | — |
 
 Apache-2.0, Copyright 2026 IamK77.
@@ -170,6 +171,21 @@ Eight references back the six stages. Invoke with `/aegis <system-or-scope-to-se
 
 Eight references back the six stages. **Authorized use only — your own or explicitly-permitted systems.** Invoke with `/gungnir <your-own-or-authorized-target>`.
 
+## plumb
+
+`plumb` is the **plumb line** you hold against code to see whether it is *true*: a cross-cutting craft / legibility lens. Its thesis is the oldest in the craft — **code is written for humans to read, and only incidentally for a machine to run** — and its goal is *boring*: simple, clear, predictable code that the next reader (now usually an agent session with no context) gets at a glance. Six gated stages, every rule held as guidance not dogma, tuned for a world where the agent writes clever-not-clear, over-abstracts, names vaguely, and leaves the trust-chain escape hatches:
+
+| Stage | Does |
+|-------|------|
+| **Frame** | Size the craft bar to the code's readers & longevity; boring-over-clever; guidance, not dogma |
+| **Names** | Names reveal intent — the highest-ROI craft; no `data` / `tmp` / `handle` |
+| **Functions** | Small, one thing, one abstraction level; no flag args; comments say *why*; errors fail fast |
+| **Abstraction** | DRY but AHA (no hasty abstraction); cohesion / coupling; SOLID & patterns as guidance, not pattern-itis |
+| **Trust & smells** | Contain the `Any` / `cast` / `isinstance` escape hatches at the edge (parse, don't validate); sweep the Fowler smells |
+| **Disposition** | Testability as the design litmus; dispose every finding (fix / refactor / accept-with-reason) |
+
+Eight references back the six stages. It owns the legibility line and routes fixes to its siblings (types to `gauge`, refactors to `husbandry`, tests to `assay`). Invoke with `/plumb <code-to-audit>`.
+
 ## checklist
 
 `checklist` is a TypeScript CLI (package name `skill-checklist`, version 0.2.0, built on `commander`). It loads a skill's `.checklist.yml`, tracks per-stage pass/fail state in the skill directory, and refuses to open a stage until every check in every prior stage is recorded as `pass` — not merely present. A check that regresses on re-verify overwrites a stale pass, so the gate reflects current state. (`checklist` calls these units `phases`; the skills present them to the user as `stages` — they are the same thing.)
@@ -205,7 +221,7 @@ Full command reference, directory-resolution rules, the `.checklist.yml` schema,
 
 ## Why these skills exist
 
-Agents now write much of the code, and they do not reliably repeat process steps unless something enforces them. These skills move human-era engineering practice into a form an agent-assisted workflow can follow — each covering one part of the lifecycle (requirements, architecture, process, testing, operations, maintenance, the cross-cutting feedback surface, and security — built with `aegis` and adversarially proven with `gungnir`) with machine-enforced gates instead of relying on anyone remembering the step.
+Agents now write much of the code, and they do not reliably repeat process steps unless something enforces them. These skills move human-era engineering practice into a form an agent-assisted workflow can follow — each covering one part of the lifecycle (requirements, architecture, process, testing, operations, maintenance, the cross-cutting feedback surface, security — built with `aegis` and adversarially proven with `gungnir` — and the craft of the code itself, audited with `plumb`) with machine-enforced gates instead of relying on anyone remembering the step.
 
 ## Repository layout
 
@@ -220,6 +236,7 @@ skills/
   gauge/                 # feedback surface    — 5 stages, 6 references
   aegis/                 # security (shield)   — 6 stages, 8 references
   gungnir/               # adversarial (spear) — 6 stages, 8 references
+  plumb/                 # code craft (audit)  — 6 stages, 8 references
                          #   each: SKILL.md  references/  .checklist.yml  LICENSE  NOTICE
 devtools/
   checklist/             # the gate CLI (see its own README)

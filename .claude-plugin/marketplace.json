@@ -89,6 +89,15 @@
       "skills": [
         "./skills/gungnir"
       ]
+    },
+    {
+      "name": "plumb",
+      "description": "Audit code for craft — and write it craft-grade — so it stays cheap to read and change: intent-revealing names, small single-purpose functions, comments that explain why, earned abstraction (DRY but not premature), cohesion and low coupling, SOLID and design patterns as guidance not dogma, the trust-chain escape hatches (Any/cast/isinstance/getattr and their cross-language family) contained at the edges via parse-don't-validate, the classic code smells swept, and testability as the design litmus — across a six-stage gated flow, tuned for a world where an agent writes plausible-but-clever code and is itself the next reader. The cross-cutting craft/legibility lens. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/plumb"
+      ]
     }
   ]
 }
