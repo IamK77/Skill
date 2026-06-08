@@ -4,14 +4,15 @@ A repository of agent-era engineering skills for Claude Code, plus the `checklis
 
 ## What's here today
 
-Two things you can use today:
+Three things you can use today:
 
 1. **`assay`** — a risk-driven testing skill for Claude Code. It plans, writes, and hardens tests through a decision tree, in eight gated stages.
-2. **`checklist`** — a small TypeScript CLI that gates a skill's stages. A stage cannot open until every check in every prior stage is recorded as passing. `assay` runs on it.
+2. **`groundwork`** — a requirements skill for Claude Code. Before any code, it digs out the real need behind a solution-shaped ask, maps the silent stakeholders, and turns it into verifiable, scoped requirements, in five gated stages.
+3. **`checklist`** — a small TypeScript CLI that gates a skill's stages. A stage cannot open until every check in every prior stage is recorded as passing. `assay` and `groundwork` run on it.
 
 Apache-2.0, Copyright 2026 IamK77.
 
-Four more skills exist in the tree as the broader direction (groundwork, load-bearing, flightline, gauge), but they are **not yet published** — see [Where this is going](#where-this-is-going). `assay` is the first piece shipped.
+Three more skills exist in the tree as the broader direction (load-bearing, flightline, gauge), but they are **not yet published** — see [Where this is going](#where-this-is-going).
 
 ## assay
 
@@ -43,6 +44,30 @@ A Claude Code skill is a directory — `SKILL.md` + `references/` + `.checklist.
 ```
 
 `assay`'s `SKILL.md` opens with `` !`checklist init ${CLAUDE_SKILL_DIR} --force` `` and then drives the gates itself.
+
+## groundwork
+
+`groundwork` is a Claude Code skill for the requirements work that comes *before* code. It resists the agent's strongest instinct — implement the literal ask — and instead pins down what is actually worth building, across five gated stages:
+
+| Stage | Does |
+|-------|------|
+| **Elicit** | Map the stakeholders (including the silent-but-affected) and dig out the real need under a solution-shaped ask |
+| **Analyze** | Split functional from non-functional, sweep the NFRs, prioritize with MoSCoW, and draw the out-of-scope line |
+| **Specify** | Turn each funded requirement into a verifiable user story + Given/When/Then acceptance criteria; replace vague words with numbers |
+| **Validate** | Walk the requirements back to the user, confirm what you understood is what they want, and park the unconfirmable as named open questions |
+| **Manage** | Set a baseline, a lightweight change process, and traceability so a later change tells you what it touches |
+
+Detail lives in a `references/` library of six Markdown files, opened per stage: `decision-tree`, `agent-blind-spots`, `elicitation`, `analysis`, `specification`, `validation-and-management`.
+
+Its output is a requirements baseline — the contract the build, and later `assay`'s tests, honor.
+
+### Install groundwork
+
+Same shape as `assay` — a directory of `SKILL.md` + `references/` + `.checklist.yml`, no build step. Place `skills/groundwork/` where Claude Code discovers skills, ensure `checklist` is on `PATH` (next section), then point it at what you want to scope:
+
+```
+/groundwork feature-or-change-to-scope
+```
 
 ## checklist
 
@@ -79,18 +104,17 @@ Full command reference, directory-resolution rules, the `.checklist.yml` schema,
 
 ## Why these skills exist
 
-Agents now write much of the code, and they do not reliably repeat process steps unless something enforces them. These skills move human-era engineering practice into a form an agent-assisted workflow can follow, with machine-enforced gates instead of relying on anyone remembering the step. `assay` does this for testing; the rest of the suite extends it across the lifecycle.
+Agents now write much of the code, and they do not reliably repeat process steps unless something enforces them. These skills move human-era engineering practice into a form an agent-assisted workflow can follow, with machine-enforced gates instead of relying on anyone remembering the step. `assay` does this for testing and `groundwork` for requirements; the rest of the suite extends it across the lifecycle.
 
 ## Where this is going
 
-Not yet published — direction, not shipping. Four sibling skills are intended to form an agent-era engineering methodology:
+Not yet published — direction, not shipping. Three sibling skills are intended to complete an agent-era engineering methodology:
 
-- **groundwork** — requirements: pin down what to build before building it.
 - **load-bearing** — architecture: choose the style, stack, boundaries, contracts, and data model.
 - **flightline** — engineering process: version control, CI/CD, code review, dependency and build management.
 - **gauge** — the codebase's feedback surface: strict typing, boundary validation, legible failures.
 
-The lifecycle is **groundwork → load-bearing → flightline → assay**, with **gauge** cross-cutting. These directories exist in the repo tree but are not git-tracked and not part of the published surface. `assay` is the first piece published; treat the rest as planned, not available.
+The lifecycle is **groundwork → load-bearing → flightline → assay**, with **gauge** cross-cutting. `assay` and `groundwork` are published; `load-bearing`, `flightline`, and `gauge` exist in the repo tree but are not git-tracked and not part of the published surface — planned, not available.
 
 ## Repository layout
 
@@ -101,7 +125,12 @@ skills/
     references/          # 10 Markdown files backing the 8 stages
     .checklist.yml       # the 8-stage, 15-check gate definition
     LICENSE  NOTICE
-  groundwork/  load-bearing/  flightline/  gauge/
+  groundwork/            # published: the requirements skill
+    SKILL.md
+    references/          # 6 Markdown files backing the 5 stages
+    .checklist.yml       # the 5-stage gate definition
+    LICENSE  NOTICE
+  load-bearing/  flightline/  gauge/
                          # present in tree, NOT git-tracked, NOT yet published
 devtools/
   checklist/             # the gate CLI (see its own README)

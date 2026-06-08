@@ -1,0 +1,37 @@
+# Flight checklist for the groundwork skill — 5 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: elicit -> analyze -> specify -> validate -> manage.
+phases:
+  - name: elicit
+    checks:
+      - id: stakeholders-mapped
+        description: "Stakeholders mapped — direct users, sponsor/funder, operators, compliance/legal, and the silent-but-affected — with the user enlisted as proxy for those who cannot be interviewed"
+      - id: real-need-surfaced
+        description: "The real need surfaced beneath any stated solution (the why behind the ask), and implicit/assumed requirements (data-safety, security, legal defaults) made explicit and confirmed with the user"
+
+  - name: analyze
+    checks:
+      - id: functional-nonfunctional-split
+        description: "Functional vs non-functional requirements separated, and a deliberate NFR sweep run (performance, security, reliability, usability, scalability, compliance, observability) rather than waiting for the user to volunteer them"
+      - id: prioritized-and-scoped
+        description: "Requirements prioritized with MoSCoW (Must/Should/Could/Won't), stakeholder conflicts surfaced for resolution, and an explicit in-scope / out-of-scope line written down to fight scope creep"
+
+  - name: specify
+    checks:
+      - id: requirements-verifiable
+        description: "Each requirement meets the quality bar (unambiguous, verifiable, necessary, feasible, consistent, traceable); vague words (fast/friendly/robust/scalable) quantified into measurable targets"
+      - id: acceptance-criteria-defined
+        description: "Each funded requirement captured as a user story / use case / SRS item with concrete acceptance criteria (Given/When/Then) that can serve as the validation contract and the test oracle"
+
+  - name: validate
+    checks:
+      - id: shared-understanding-confirmed
+        description: "Requirements and acceptance criteria reviewed with the user/stakeholders (walkthrough, prototype, or demo); shared understanding confirmed and any misunderstanding corrected before building. DESIGN-ONLY (no human reachable): instead, every Must replayed against its written source-of-truth and the full review checklist walked — a weaker, explicitly-labeled claim (faithful-to-sources, not stakeholder-confirmed)"
+      - id: high-blast-unknowns-parked
+        description: "Every high-blast-radius unknown (money, data integrity, auth, privacy, safety, legal, irreversible) was either confirmed by a reachable authority OR parked as a named open question with an owner-to-ask and blast-radius-if-wrong — none was silently defaulted into the spec"
+
+  - name: manage
+    checks:
+      - id: change-and-traceability
+        description: "A change process noted (who changes a requirement, how impact is assessed and recorded) and traceability established (requirement -> design/code/test); baseline, residual risk, and open questions recorded for whoever inherits the work"

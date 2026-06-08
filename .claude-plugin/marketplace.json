@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Agent-era engineering skills for Claude Code",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "plugins": [
     {
@@ -16,6 +16,15 @@
       "strict": false,
       "skills": [
         "./skills/assay"
+      ]
+    },
+    {
+      "name": "groundwork",
+      "description": "Requirements engineering before you build: dig out the real need behind a solution-shaped ask, map the silent stakeholders, write verifiable acceptance criteria, draw the scope line, and manage change — across a five-stage gated flow. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/groundwork"
       ]
     }
   ]
