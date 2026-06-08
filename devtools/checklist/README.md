@@ -114,7 +114,7 @@ A check's `verify:` value can take one of three forms. The kind is taken from an
 
 A check with no `verify:` is a manual item, cleared by `checklist check`.
 
-In practice, the `assay` skill's checklist uses **only** manual checks — it defines no `verify` rules at all. So in that flow the `verify` command does no mechanical work; its job there is purely to apply the prior-phase gate. The `builtin`/`shell`/`script` machinery exists and is tested, but `assay` does not exercise it.
+In practice, **all five shipped skills' checklists use only manual checks** — none defines any `verify` rules. So in those flows the `verify` command does no mechanical work; its job is purely to apply the prior-phase gate. The `builtin`/`shell`/`script` machinery exists and is tested, but no shipped skill currently exercises it.
 
 ## .checklist.yml format
 
@@ -155,7 +155,7 @@ A phase is addressed by `name` (case-insensitive) or by 0-based index. Skills ty
 npm test
 ```
 
-Runs the vitest suite. The current run is 430 tests passing (with 17 skipped probe tests), across unit and integration files covering the loader, resolver, runner containment, state semantics, the gate, the builtins, and the command surface.
+Runs the vitest suite. The current run is 434 tests passing (with 15 skipped probe tests for deferred, owner-pending defects), across unit and integration files covering the loader, resolver, runner containment, state semantics, the gate, the builtins, and the command surface.
 
 ## License
 
