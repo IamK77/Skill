@@ -188,6 +188,22 @@ Eight references back the six stages. **Authorized use only — your own or expl
 
 Eight references back the six stages. It owns the legibility line and routes fixes to its siblings (types to `gauge`, refactors to `husbandry`, tests to `assay`). Invoke with `/plumb <code-to-audit>`.
 
+## The distributed suite
+
+A second domain, beginning now. Where the engineering suite is general software practice, the **distributed** suite is for systems that span machines — where partial failure, an unreliable asynchronous network, and the absence of a global clock make "correct" genuinely hard. It installs as its own plugin, separate from `engineering`, under the `/distributed:` namespace (`/plugin install distributed@agent-era-skills`).
+
+### holdfast
+
+`holdfast` is the distributed-correctness lens — the realities a single-machine programmer (and an agent) gets wrong by default. The one shift it installs is **the third state**: a remote call can succeed, fail, *or leave you not knowing which* — and single-machine code has no branch for "I don't know," which is where most distributed bugs live. A **foundation cut** for now — three gated stages — with the rest of the map to follow:
+
+| Stage | Does |
+|-------|------|
+| **Frame** | Don't distribute until you must; name the failure model and accept the third state |
+| **Communication** | Idempotency, delivery semantics, timeout/retry with backoff+jitter, circuit breakers, no naive sync chains, schema evolution |
+| **Ordering** | Causality over the wall clock — logical/vector clocks, partial vs total order; never wall-clock last-write-wins |
+
+Three references back the three stages — the three enemies & the third state, communication, and time & causality. Forthcoming stages: replication, consistency & consensus, sharding, fault tolerance, and coordination. Invoke with `/distributed:holdfast <design-or-code>`.
+
 ## checklist
 
 `checklist` is a TypeScript CLI (package name `@iamk77/skill-checklist`, version 0.2.0, built on `commander`). It loads a skill's `.checklist.yml`, tracks per-stage pass/fail state in the skill directory, and refuses to open a stage until every check in every prior stage is recorded as `pass` — not merely present. A check that regresses on re-verify overwrites a stale pass, so the gate reflects current state. (`checklist` calls these units `phases`; the skills present them to the user as `stages` — they are the same thing.)
