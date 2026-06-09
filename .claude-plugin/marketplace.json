@@ -5,8 +5,8 @@
     "email": "chenyinfeng50@gmail.com"
   },
   "metadata": {
-    "description": "Agent-era engineering skills for Claude Code",
-    "version": "1.0.0"
+    "description": "Agent-era skill suites for Claude Code: engineering and distributed, gated by the checklist CLI",
+    "version": "1.0.1"
   },
   "plugins": [
     {
@@ -29,7 +29,7 @@
     },
     {
       "name": "distributed",
-      "description": "Engineer distributed systems for correctness under partial failure — the realities a single-machine programmer (and an agent) get wrong by default. First skill: holdfast (the distributed-correctness lens — the third state where a remote call may leave you NOT KNOWING it ran, idempotency & delivery semantics, retries with backoff+jitter and circuit breakers, ordering by causality not the wall clock, replication without losing data, choosing a consistency model knowing its price — CAP/PACELC, consensus and FLP — partitioning for scale with a key that fits the access pattern, tolerating faults as the default (failure models, redundancy across independent fault domains, bulkheads and circuit breakers, chaos engineering), and coordinating across nodes only when you must (2PC vs sagas, fencing tokens, ZooKeeper/etcd, coordination as a tax), over 'don't distribute until you must'). The complete eight-stage map: frame · communication · ordering · replication · consensus · sharding · fault-tolerance · coordination. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "description": "Engineer distributed systems for correctness under partial failure — the realities a single-machine programmer (and an agent) gets wrong by default. First skill: holdfast, the distributed-correctness lens. Its one shift is the third state — a remote call can succeed, fail, or leave you not knowing which — and its complete eight-stage map is: frame · communication · ordering · replication · consensus · sharding · fault-tolerance · coordination. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
       "source": "./",
       "strict": false,
       "skills": [
