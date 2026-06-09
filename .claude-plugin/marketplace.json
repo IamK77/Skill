@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Agent-era engineering skills for Claude Code",
-    "version": "0.6.0"
+    "version": "0.7.0"
   },
   "plugins": [
     {
@@ -29,7 +29,7 @@
     },
     {
       "name": "distributed",
-      "description": "Engineer distributed systems for correctness under partial failure — the realities a single-machine programmer (and an agent) get wrong by default. First skill: holdfast (the distributed-correctness lens — the third state where a remote call may leave you NOT KNOWING it ran, idempotency & delivery semantics, retries with backoff+jitter and circuit breakers, ordering by causality not the wall clock, replication without losing data, and 'don't distribute until you must'). A foundation cut plus replication (frame · communication · ordering · replication); consistency & consensus, sharding, fault tolerance, and coordination are forthcoming. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "description": "Engineer distributed systems for correctness under partial failure — the realities a single-machine programmer (and an agent) get wrong by default. First skill: holdfast (the distributed-correctness lens — the third state where a remote call may leave you NOT KNOWING it ran, idempotency & delivery semantics, retries with backoff+jitter and circuit breakers, ordering by causality not the wall clock, replication without losing data, and choosing a consistency model knowing its price — CAP/PACELC, consensus and FLP — over 'don't distribute until you must'). A foundation cut plus replication and consensus (frame · communication · ordering · replication · consensus); sharding, fault tolerance, and coordination are forthcoming. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
       "source": "./",
       "strict": false,
       "skills": [

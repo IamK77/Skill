@@ -1,10 +1,9 @@
-# Flight checklist for the holdfast skill — FOUNDATION cut + replication, 4 stages,
-# hard GATEs. SKILL.md addresses stages by NAME (checklist verify <name> /
+# Flight checklist for the holdfast skill — FOUNDATION cut + replication + consensus,
+# 5 stages, hard GATEs. SKILL.md addresses stages by NAME (checklist verify <name> /
 # check <name> <id>), so the 0-based index never surfaces. STAGE N headings in
 # SKILL.md map to these stages in order: frame -> communication -> ordering ->
-# replication. Forthcoming stages (consistency & consensus, sharding,
-# fault-tolerance, coordination) will be appended after replication when those
-# references land.
+# replication -> consensus. Forthcoming stages (sharding, fault-tolerance,
+# coordination) will be appended after consensus when those references land.
 phases:
   - name: frame
     checks:
@@ -35,3 +34,12 @@ phases:
         description: "Failover is treated as the dangerous operation it is, every step landing on an earlier enemy: deciding the leader is REALLY dead (not just slow) is the third-state guess from STAGE 0 — only a timeout, never a fact; choosing the most up-to-date follower as new leader itself needs agreement (forthcoming: consensus); and the OLD leader is FENCED (STONITH / fencing tokens) so a merely-slow old leader that revives cannot keep accepting writes — the SPLIT-BRAIN that corrupts data with two leaders. It is also acknowledged that asynchronous writes not yet propagated at cutover are LOST (and must not be silently resurrected later)"
       - id: conflict-and-lag-faced
         description: "Concurrent writes (multi-leader / leaderless) are DETECTED and resolved, never wall-clock last-write-wins (that silently drops data — STAGE 2's lesson applied): use version vectors to detect conflicts and merge / CRDT / app-logic to resolve; remember QUORUM (W + R > N) guarantees overlap but is NECESSARY-NOT-SUFFICIENT — concurrent writes inside the quorum still need conflict detection. And replication-LAG anomalies under asynchronous/eventual replication are named and the needed guarantee chosen where it matters: read-your-writes (see your own write), monotonic reads (time doesn't go backward), consistent-prefix (writes seen in their committed order — never an effect before its cause) — and EVENTUAL consistency is not mistaken for strong: 'eventually' has no upper bound and says nothing about intermediate reads"
+
+  - name: consensus
+    checks:
+      - id: consistency-model-chosen
+        description: "A consistency model is chosen EXPLICITLY, and it is the WEAKEST one still correct for this use case — stronger is not 'better', it is more expensive. The spectrum, strong to weak: LINEARIZABLE (behaves as a single copy; every op appears to take effect atomically at an instant and respects REAL-TIME order — once a write completes, every read that begins after it sees it or a newer value; this is 'strong consistency') > SEQUENTIAL (a single total order consistent with each process's own program order, but NOT required to match real time) > CAUSAL (causally-related ops are ordered, concurrent ops may be seen in different orders — the STRONGEST model still achievable under a network partition) > EVENTUAL (replicas converge eventually, no order or freshness guarantee in between). Terms are not conflated: linearizability (single-object real-time recency) is NOT serializability (multi-transaction isolation — together they are strict serializability), and neither is ACID's C (an application invariant, unrelated to distribution)"
+      - id: cap-pacelc-faced
+        description: "The CAP trade-off is faced as it really is, not the pop 'three-choose-two'. A partition is NOT optional — the network is unreliable, partitions WILL happen — so CA is not a real option for a distributed system; the only real question is: WHEN a partition occurs, sacrifice Consistency (linearizability) or Availability (every request answered)? — i.e. CP vs AP. CAP's C and A are narrow and say NOTHING about the normal, partition-free case, so PACELC completes it: if Partition then A-vs-C, ELSE (normal operation) Latency-vs-Consistency. The everyday truth: COORDINATION HAS A COST — even with no partition, stronger consistency is bought with higher latency (you must coordinate and wait). Strong consistency costs availability under partition and latency always"
+      - id: consensus-used-well
+        description: "Consensus (nodes agreeing on a value or an ordered log despite crashes on an async network) is used WELL: NOT hand-rolled (notoriously easy to get subtly wrong — use etcd / ZooKeeper / a mature Raft or Paxos library), and used SPARINGLY because it is expensive (coordination latency + needs a reachable MAJORITY). Reserve it for what truly needs a single source of truth — leader election, configuration, metadata, atomic commit — and run the data plane on weaker, cheaper models where possible. Limits understood: it needs a MAJORITY quorum (ODD-sized clusters of 3 or 5; tolerates floor((n-1)/2) failures; the MINORITY side of a partition cannot make progress — that IS choosing CP), and FLP means no deterministic async algorithm can guarantee termination if even one node may crash, so real algorithms keep SAFETY always and obtain LIVENESS only under timing assumptions (partial synchrony) or randomization. Strong consistency is built ON consensus — a fault-tolerant linearizable replicated state machine (Paxos / Raft: majority quorum + leader/term + replicated log)"
