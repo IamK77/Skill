@@ -2,7 +2,7 @@
 
 A CLI that gates a Claude Code skill's phases. A stage cannot open until every check in every prior stage is recorded as passing. It exists so an agent running a multi-stage skill cannot skip ahead or self-certify a stage it did not actually do.
 
-Package name `@iamk77/skill-checklist`, version 0.2.0. TypeScript, commander-based.
+Package name `@iamk77/skill-checklist` (current version: see [CHANGELOG](CHANGELOG.md)). TypeScript, commander-based.
 
 ## What it does
 
@@ -111,7 +111,7 @@ A check's `verify:` value can take one of three forms. The kind is taken from an
 
 A check with no `verify:` is a manual item, cleared by `checklist check`.
 
-In practice, **all five shipped skills' checklists use only manual checks** — none defines any `verify` rules. So in those flows the `verify` command does no mechanical work; its job is purely to apply the prior-phase gate. The `builtin`/`shell`/`script` machinery exists and is tested, but no shipped skill currently exercises it.
+In practice, **every shipped skill's checklist uses only manual checks** — none defines any `verify` rules. So in those flows the `verify` command does no mechanical work; its job is purely to apply the prior-phase gate. The `builtin`/`shell`/`script` machinery exists and is tested, but no shipped skill currently exercises it.
 
 ## .checklist.yml format
 
