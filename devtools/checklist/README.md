@@ -2,7 +2,7 @@
 
 A CLI that gates a Claude Code skill's phases. A stage cannot open until every check in every prior stage is recorded as passing. It exists so an agent running a multi-stage skill cannot skip ahead or self-certify a stage it did not actually do.
 
-Package name `skill-checklist`, version 0.2.0. TypeScript, commander-based. Not published to npm (see Install).
+Package name `@iamk77/skill-checklist`, version 0.2.0. TypeScript, commander-based.
 
 ## What it does
 
@@ -15,38 +15,35 @@ There are two ways a check gets a result:
 - A check with **no** `verify` rule is a manual, human-judgment item. It is cleared by `checklist check <phase> <item-id>`, which records `pass` with the message `confirmed`.
 - A check **with** a `verify` rule is mechanical. It is run (and recorded) by `checklist verify <phase>`. Trying to `check` a mechanical item is rejected with an error pointing you at `verify`.
 
-## Install (no npm)
+## Install
 
-This package is **not** on npm. There is no `npm install -g skill-checklist` and no npx-from-registry path. A `build` script (`tsc` to `dist/`) and a `prepublishOnly` hook exist in `package.json`, but their presence is not a published package.
+```sh
+npm install -g @iamk77/skill-checklist
+```
 
-To install it:
+This puts the `checklist` command on `PATH`. To run it without a global install:
 
-1. Clone the repo:
+```sh
+npx @iamk77/skill-checklist show
+```
 
-   ```sh
-   git clone https://github.com/IamK77/Skill.git
-   ```
-
-2. Install dependencies inside the CLI directory:
-
-   ```sh
-   cd Skill/devtools/checklist
-   npm install
-   ```
-
-   This pulls `commander`, `gray-matter`, `js-yaml`, and `tsx`.
-
-3. Put the `checklist` command on `PATH`, either with:
-
-   ```sh
-   npm link
-   ```
-
-   or by referencing `devtools/checklist/bin/checklist.js` directly (symlink it onto `PATH`, or call it by full path).
-
-The bin runs the TypeScript source live through `tsx` — `bin/checklist.js` does `require('tsx/cjs')` then `require('../src/index.ts')` — so **no compile step is needed to run it**. `npm run build` is available if you want a `dist/` build, but you do not need it to use the CLI.
+The published package ships a compiled `dist/` build, and `bin/checklist.js` runs it through Node directly (`require('../dist/index.js')`) — no `tsx` and no compile step at install time. Its only runtime dependencies are `commander`, `gray-matter`, and `js-yaml`.
 
 Requires Node >= 18.
+
+### From source
+
+To run it from a clone instead:
+
+```sh
+git clone https://github.com/IamK77/Skill.git
+cd Skill/devtools/checklist
+npm install      # dev deps: typescript, vitest, tsx
+npm run build    # compile src/ -> dist/
+npm link         # put `checklist` on PATH
+```
+
+`npm run dev` (`tsc --watch`) keeps `dist/` current while you edit `src/`. The version string is set in two places — `package.json` and `src/index.ts` (`.version('…')`) — keep them in sync on a bump.
 
 In normal use you never pass any flags. The skill calls `checklist init ${CLAUDE_SKILL_DIR} --force`, and later commands resolve the directory from `$CLAUDE_SKILL_DIR` or the active pointer (see How directories are resolved).
 
@@ -159,4 +156,4 @@ Runs the vitest suite. The current run is 434 tests passing (with 15 skipped pro
 
 ## License
 
-Apache-2.0, Copyright 2026 IamK77. See `LICENSE` and `NOTICE` at the repository root.
+Apache-2.0, Copyright 2026 IamK77. See `LICENSE` and `NOTICE` (shipped with the package; also at the repository root).

@@ -188,19 +188,17 @@ Eight references back the six stages. It owns the legibility line and routes fix
 
 ## checklist
 
-`checklist` is a TypeScript CLI (package name `skill-checklist`, version 0.2.0, built on `commander`). It loads a skill's `.checklist.yml`, tracks per-stage pass/fail state in the skill directory, and refuses to open a stage until every check in every prior stage is recorded as `pass` — not merely present. A check that regresses on re-verify overwrites a stale pass, so the gate reflects current state. (`checklist` calls these units `phases`; the skills present them to the user as `stages` — they are the same thing.)
+`checklist` is a TypeScript CLI (package name `@iamk77/skill-checklist`, version 0.2.0, built on `commander`). It loads a skill's `.checklist.yml`, tracks per-stage pass/fail state in the skill directory, and refuses to open a stage until every check in every prior stage is recorded as `pass` — not merely present. A check that regresses on re-verify overwrites a stale pass, so the gate reflects current state. (`checklist` calls these units `phases`; the skills present them to the user as `stages` — they are the same thing.)
 
-It is **not published to npm.** Install it from this repo:
+Install it from npm:
 
 ```sh
-git clone https://github.com/IamK77/Skill.git
-cd Skill/devtools/checklist
-npm install
+npm install -g @iamk77/skill-checklist
 ```
 
-The `checklist` bin runs the TypeScript source directly through `tsx` (`bin/checklist.js` does `require('tsx/cjs')` then `require('../src/index.ts')`), so no build step is needed to run it. Put it on `PATH` with `npm link`, or reference `devtools/checklist/bin/checklist.js` directly. Requires Node >= 18.
+The published package ships a compiled `dist/` build and `bin/checklist.js` runs it through Node directly (no `tsx`, no install-time compile); its only runtime deps are `commander`, `gray-matter`, and `js-yaml`. Requires Node >= 18.
 
-A `build` script (`tsc` → `dist/`) and a `prepublishOnly` hook exist in `package.json`, but the package is not published — do not run `npm install -g skill-checklist`.
+To run it from a clone instead, `cd Skill/devtools/checklist && npm install && npm run build && npm link`. See [`devtools/checklist/README.md`](devtools/checklist/README.md) for the full command reference.
 
 ### How a skill uses checklist
 
