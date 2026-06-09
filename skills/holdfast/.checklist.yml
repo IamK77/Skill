@@ -1,9 +1,10 @@
-# Flight checklist for the holdfast skill — FOUNDATION cut, 3 stages, hard GATEs.
-# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
-# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
-# stages in order: frame -> communication -> ordering.
-# Forthcoming stages (replication, consistency, sharding, fault-tolerance,
-# coordination) will be appended after frame..ordering when those references land.
+# Flight checklist for the holdfast skill — FOUNDATION cut + replication, 4 stages,
+# hard GATEs. SKILL.md addresses stages by NAME (checklist verify <name> /
+# check <name> <id>), so the 0-based index never surfaces. STAGE N headings in
+# SKILL.md map to these stages in order: frame -> communication -> ordering ->
+# replication. Forthcoming stages (consistency & consensus, sharding,
+# fault-tolerance, coordination) will be appended after replication when those
+# references land.
 phases:
   - name: frame
     checks:
@@ -25,3 +26,12 @@ phases:
     checks:
       - id: no-wallclock-ordering
         description: "Cross-machine events are NOT ordered by wall-clock time — clocks drift and skew (NTP residual is tens of ms and can jump backward, so wall-clock time is non-monotonic), so wall-clock last-write-wins SILENTLY drops data; a monotonic clock is used for durations only, never for cross-machine order. Where order matters it is established by CAUSALITY (happened-before / logical or vector clocks / version vectors), and CONCURRENT writes are DETECTED and resolved (merge / CRDT / app-level), not silently clobbered — remembering you only get the partial (causal) order for free; a true total order costs coordination"
+
+  - name: replication
+    checks:
+      - id: topology-and-sync-chosen
+        description: "The replication topology is chosen DELIBERATELY against the workload, not by default — single-leader (all writes through one node = one authoritative write order, the simplest and most common) vs multi-leader (each site writes locally — fast, partition-tolerant per site, but CONFLICTING concurrent writes are now possible) vs leaderless/Dynamo (quorum reads & writes, highest availability, conflicts handled by the client). And synchronous vs asynchronous replication is named with its bill: synchronous protects the data but a slow/dead follower stalls writes (hurts availability); ASYNCHRONOUS is fast and available but a leader that crashes before propagating SILENTLY LOSES already-acknowledged writes — 'the async follower is safe' is false. Replication (copies of the SAME data) is also kept distinct from partitioning/sharding (splitting DIFFERENT data); they are orthogonal and usually combined"
+      - id: failover-split-brain-guarded
+        description: "Failover is treated as the dangerous operation it is, every step landing on an earlier enemy: deciding the leader is REALLY dead (not just slow) is the third-state guess from STAGE 0 — only a timeout, never a fact; choosing the most up-to-date follower as new leader itself needs agreement (forthcoming: consensus); and the OLD leader is FENCED (STONITH / fencing tokens) so a merely-slow old leader that revives cannot keep accepting writes — the SPLIT-BRAIN that corrupts data with two leaders. It is also acknowledged that asynchronous writes not yet propagated at cutover are LOST (and must not be silently resurrected later)"
+      - id: conflict-and-lag-faced
+        description: "Concurrent writes (multi-leader / leaderless) are DETECTED and resolved, never wall-clock last-write-wins (that silently drops data — STAGE 2's lesson applied): use version vectors to detect conflicts and merge / CRDT / app-logic to resolve; remember QUORUM (W + R > N) guarantees overlap but is NECESSARY-NOT-SUFFICIENT — concurrent writes inside the quorum still need conflict detection. And replication-LAG anomalies under asynchronous/eventual replication are named and the needed guarantee chosen where it matters: read-your-writes (see your own write), monotonic reads (time doesn't go backward), consistent-prefix (writes seen in their committed order — never an effect before its cause) — and EVENTUAL consistency is not mistaken for strong: 'eventually' has no upper bound and says nothing about intermediate reads"
