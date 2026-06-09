@@ -61,7 +61,7 @@ The user's most recent write vanished, no exception was raised, and the timestam
 
 > **Clock skew can give a causally-LATER event a SMALLER wall-clock timestamp. Therefore "keep the latest by timestamp" (last-write-wins) silently drops writes whenever two machines' clocks disagree — which is always. It is a real, silent, data-losing bug, not a theoretical one. Never order cross-machine events by wall-clock time.**
 
-(LWW is not always wrong — it is a deliberate, lossy conflict-resolution *policy* you may choose when the application can tolerate losing one of two concurrent writes. The bug is using it while *believing* the timestamps give you a true order. The forthcoming **replication** block treats LWW honestly, as one option among merge / CRDT / hand-to-application.)
+(LWW is not always wrong — it is a deliberate, lossy conflict-resolution *policy* you may choose when the application can tolerate losing one of two concurrent writes. The bug is using it while *believing* the timestamps give you a true order. The **replication** stage (STAGE 3) treats LWW honestly, as one option among merge / CRDT / hand-to-application.)
 
 ## The paid-for exception — Spanner / TrueTime
 
@@ -111,9 +111,9 @@ Happened-before does **not** order all pairs of events. Some pairs are ordered (
 
 Everything downstream is a stance toward this fact:
 
-- **Strong consistency / linearizability** (forthcoming: the *consistency & consensus* block) is essentially **"pretend a total order exists"** — make the whole system behave as if every operation happened at a single instant on a single timeline. It is achievable, but it is the *expensive* model precisely because manufacturing a total order is expensive.
+- **Strong consistency / linearizability** (STAGE 4: the *consistency & consensus* block) is essentially **"pretend a total order exists"** — make the whole system behave as if every operation happened at a single instant on a single timeline. It is achievable, but it is the *expensive* model precisely because manufacturing a total order is expensive.
 - **Weaker models** (eventual, causal) **calmly embrace the partial order** — they let concurrent events be unordered and only constrain what is causally related.
-- A true total order **is not free**: it costs **coordination** — nodes must communicate and agree, which is the job of **consensus** (forthcoming). Every time you demand a single global order, you are signing up for that coordination bill. The architectural decision of *whether* to pay it (and the CAP/PACELC trade behind it) belongs to the `load-bearing` skill; holdfast's job here is to make sure you know a total order is a *purchase*, not a given.
+- A true total order **is not free**: it costs **coordination** — nodes must communicate and agree, which is the job of **consensus** (STAGE 4). Every time you demand a single global order, you are signing up for that coordination bill. The architectural decision of *whether* to pay it (and the CAP/PACELC trade behind it) belongs to the `load-bearing` skill; holdfast's job here is to make sure you know a total order is a *purchase*, not a given.
 
 So the engineering instinct to install: **default to respecting the partial order; demand a total order only where the application truly needs one, knowing it costs coordination.**
 
@@ -153,7 +153,7 @@ A = [2,1,0]   B = [2,3,1]   →  A < B   ⇒  A → B          (B is causally af
 A = [2,1,0]   C = [0,1,4]   →  neither ⇒  A ∥ C          (A and C are CONCURRENT — a real conflict)
 ```
 
-That third case is the whole point: a vector clock can **distinguish a true concurrent conflict from a write that is merely the causal descendant of another.** The **cost** is size — the vector grows **O(N)** with the number of participating processes, so in a system with many or churning nodes the metadata becomes a real scalability concern (mitigated by dotted version vectors, pruning, etc., in the forthcoming replication block).
+That third case is the whole point: a vector clock can **distinguish a true concurrent conflict from a write that is merely the causal descendant of another.** The **cost** is size — the vector grows **O(N)** with the number of participating processes, so in a system with many or churning nodes the metadata becomes a real scalability concern (mitigated by dotted version vectors, pruning, etc., in the replication stage).
 
 **The one-line trade-off to remember:** *Lamport clocks are cheap and give a consistent total order but are blind to concurrency; vector clocks see concurrency (full causality) but are heavier (O(N)).* Pick by whether you need to *detect concurrent writes* (vector) or just *agree on some consistent processing order* (Lamport).
 
@@ -170,9 +170,9 @@ Logical clocks are not academic bookkeeping; they are the machinery behind two t
 - If `V(write1) < V(write2)`, write2 is the **causal descendant** — it already "saw" write1, so write2 simply **wins, with no conflict.** (LWW-by-timestamp can't tell this apart from a real conflict, which is half of why it loses data.)
 - If `write1 ∥ write2` — **concurrent** — that is a **true conflict**: two writers acted without seeing each other, and *neither is authoritative*. Now you must **resolve**: last-write-wins (lossy, your choice), application-level **merge**, a **CRDT** that merges deterministically, or **hand the siblings to the application** to decide. **Dynamo** and **Riak** do exactly this — they keep version vectors, return *both* concurrent values as siblings, and refuse to silently pick one.
 
-The forthcoming **replication** block is built entirely on this distinction; this stage is where you learn to make it.
+The **replication** stage (STAGE 3) is built entirely on this distinction; this stage is where you learn to make it.
 
-**Causal consistency.** A consistency model that guarantees you observe **causally-related events in their causal order** — you will **never see a reply before the message it answers**, never see a comment before the post it replies to — while leaving **concurrent events free to appear in any order**. It is exactly "honor the partial order, don't manufacture a total one." Its importance: **causal consistency is the strongest consistency model still achievable under a network partition** (the forthcoming *consistency & consensus* block makes this precise against CAP). It is the natural sweet spot — much stronger than eventual, far cheaper than linearizable — and it is *defined* in terms of the happened-before relation this file built.
+**Causal consistency.** A consistency model that guarantees you observe **causally-related events in their causal order** — you will **never see a reply before the message it answers**, never see a comment before the post it replies to — while leaving **concurrent events free to appear in any order**. It is exactly "honor the partial order, don't manufacture a total one." Its importance: **causal consistency is the strongest consistency model still achievable under a network partition** (the *consistency & consensus* stage (STAGE 4) makes this precise against CAP). It is the natural sweet spot — much stronger than eventual, far cheaper than linearizable — and it is *defined* in terms of the happened-before relation this file built.
 
 ## Anti-patterns (use as a pre-flight checklist)
 
@@ -183,7 +183,7 @@ The forthcoming **replication** block is built entirely on this distinction; thi
 - **Assuming NTP means clocks agree** — it bounds skew to tens of ms at best and can step time backward; "synced" is not "equal."
 - **Treating "concurrent" as an error to suppress or clobber** — concurrency (A ∥ B) is a **real, expected state**. Detect it (vector clock), then resolve it (merge / CRDT / app); do not force-order it.
 - **Using a Lamport clock to detect conflicts** — it can't; `L(A) < L(B)` doesn't mean `A → B`. Use a vector clock when you need to *detect concurrency*; Lamport only gives you a consistent total order.
-- **Demanding a global total order by reflex** — a total order costs **coordination** (consensus, forthcoming). Default to the partial (causal) order; pay for a total order only where the application truly needs one.
+- **Demanding a global total order by reflex** — a total order costs **coordination** (consensus, STAGE 4). Default to the partial (causal) order; pay for a total order only where the application truly needs one.
 - **Believing you can buy Spanner's guarantee for free** — TrueTime's global order is purchased with atomic clocks + GPS + commit-wait latency. Without that budget, order by causality.
 - **Putting a human wall-clock timestamp in the data and later ordering by it** — fine for *display*, forbidden for *ordering*. Keep the two uses separate, or use an HLC so the same value is both readable and causal.
 
@@ -191,4 +191,4 @@ The engineering posture, in one line: **this block is the formal answer to enemy
 
 ---
 
-**Cross-links:** [the-three-enemies.md](the-three-enemies.md) (enemy 3 — no global clock/state — and the third state this stage extends to *time*) · [communication.md](communication.md) (the async, reordering network that makes "who first?" a real question; the monotonic clock powers its timeouts/backoff) · [../SKILL.md](../SKILL.md) (STAGE 2 — Ordering, the flight plan this reference serves; replication, consistency & consensus, and coordination are the forthcoming blocks built on this partial-order foundation) · `load-bearing` (the architecture call of *whether* to pay for a total order — CAP/PACELC as a design choice) · `stationkeeping` (clock-skew monitoring, NTP health, and the production realities of running this) · `gauge` (encoding "this is a monotonic instant, not a wall-clock time" in the type system so the two clocks can't be confused) · `plumb` (keeping the version-vector / clock plumbing legible).
+**Cross-links:** [the-three-enemies.md](the-three-enemies.md) (enemy 3 — no global clock/state — and the third state this stage extends to *time*) · [communication.md](communication.md) (the async, reordering network that makes "who first?" a real question; the monotonic clock powers its timeouts/backoff) · [../SKILL.md](../SKILL.md) (STAGE 2 — Ordering, the flight plan this reference serves; replication, consistency & consensus, and coordination are later stages built on this partial-order foundation) · `load-bearing` (the architecture call of *whether* to pay for a total order — CAP/PACELC as a design choice) · `stationkeeping` (clock-skew monitoring, NTP health, and the production realities of running this) · `gauge` (encoding "this is a monotonic instant, not a wall-clock time" in the type system so the two clocks can't be confused) · `plumb` (keeping the version-vector / clock plumbing legible).

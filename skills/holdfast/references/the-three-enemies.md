@@ -109,7 +109,7 @@ This enemy is two faces of the same loss — shared clock and shared memory gone
 
 > **By the time information about node B reaches node A, it is already stale.** It describes B as B *was* when the message left, one network delay ago — and B may have changed since. You are always looking at light from a star that may already be gone.
 
-So you can **never decide on "the current state of the system"** — there is no such observable thing. You can only ever decide on a **possibly-stale local view.** Every "is the cluster healthy?", "is this lock free?", "who is the leader?" is answered against a snapshot that was already out of date when you read it. This is the ground beneath replication and consistency (both **forthcoming** stages): all of consistency is, in the end, a set of rules about *how stale* a view a reader is allowed to see.
+So you can **never decide on "the current state of the system"** — there is no such observable thing. You can only ever decide on a **possibly-stale local view.** Every "is the cluster healthy?", "is this lock free?", "who is the leader?" is answered against a snapshot that was already out of date when you read it. This is the ground beneath replication and consistency (both later stages): all of consistency is, in the end, a set of rules about *how stale* a view a reader is allowed to see.
 
 ---
 
@@ -126,7 +126,7 @@ Which means **a timeout is a guess, not a fact.** When you set a deadline and th
 
 There is no setting that is right in both directions, and the deeper reason is a theorem, not a missing optimization:
 
-> **There is NO perfect failure detector in an asynchronous system.** You cannot build a mechanism that always correctly and promptly distinguishes a crashed node from a slow one when message delay is unbounded. This is a fundamental limit of the model. (It connects to the **FLP impossibility result** — that no deterministic protocol can guarantee consensus in an asynchronous system if even one node may crash — which gets its proper treatment in the **forthcoming** fault-tolerance / consensus block. For now: stop looking for the perfect timeout. It does not exist.)
+> **There is NO perfect failure detector in an asynchronous system.** You cannot build a mechanism that always correctly and promptly distinguishes a crashed node from a slow one when message delay is unbounded. This is a fundamental limit of the model. (It connects to the **FLP impossibility result** — that no deterministic protocol can guarantee consensus in an asynchronous system if even one node may crash — which gets its proper treatment in the fault-tolerance / consensus stages. For now: stop looking for the perfect timeout. It does not exist.)
 
 The engineering consequence is that timeouts, heartbeats, and failure detectors are all *best-effort heuristics tuned for a particular blast radius*, and every design must assume its failure detector will sometimes be wrong — which is, again, why idempotency and retries (coping with "I acted on a guess that was wrong") are the load-bearing tools.
 
@@ -219,12 +219,12 @@ End on this, because it is the stance the whole skill is built to install. The t
 
 > **You cannot eliminate these realities. You can only design AROUND them.** Embrace asynchrony instead of pretending calls are instant. Assume partial failure is *always happening* and build to serve through it. Replace the nonexistent "global truth" with **explicit protocols** that make a defined, weaker guarantee you actually understand.
 
-That sentence is the seed of every forthcoming stage. Each major distributed technique is one disciplined answer to the same question — *in this world, how do we keep ourselves safe?*
+That sentence is the seed of every later stage. Each major distributed technique is one disciplined answer to the same question — *in this world, how do we keep ourselves safe?*
 
-- **Replication** (forthcoming) — answers partial failure: keep copies so the death of one node does not lose the data or the service.
-- **Consistency & consensus** (forthcoming) — answers no-global-state: agree on a shared decision *despite* stale views and no global clock (CAP/PACELC, linearizable→eventual, Paxos/Raft, FLP).
-- **Sharding** (forthcoming) — answers scale: split the data so no one node must hold it all.
-- **Fault tolerance & coordination** (forthcoming) — answer the third state and concurrency: detect failure as best you can, elect leaders, hold locks, and make progress when nodes disagree.
+- **Replication** (STAGE 3) — answers partial failure: keep copies so the death of one node does not lose the data or the service.
+- **Consistency & consensus** (STAGE 4) — answers no-global-state: agree on a shared decision *despite* stale views and no global clock (CAP/PACELC, linearizable→eventual, Paxos/Raft, FLP).
+- **Sharding** (STAGE 5) — answers scale: split the data so no one node must hold it all.
+- **Fault tolerance & coordination** (STAGE 6–7) — answer the third state and concurrency: detect failure as best you can, elect leaders, hold locks, and make progress when nodes disagree.
 
 And the foundation cut you have *now* is the first layer of that posture: **frame** (this file — justify distributing, name the failure model, accept the third state), **[communication.md](communication.md)** (talk reliably on top of the third state — idempotency, delivery semantics, retry discipline), and **[time-and-causality.md](time-and-causality.md)** (order by causality, never the wall clock).
 
