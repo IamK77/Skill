@@ -8,16 +8,22 @@ description: >
   timeouts, retries with backoff+jitter, retry budgets and circuit breakers; why
   deep synchronous call chains cascade (availability multiplies, latency adds);
   ordering by causality not the wall clock (logical/vector clocks, partial vs
-  total order); and the first law — don't distribute until you must. Use when the
-  user designs or reviews anything that spans machines: RPC / microservices,
-  retries and idempotency, message queues and delivery guarantees, event ordering,
-  clocks and timestamps across servers, or asks whether a distributed design is
+  total order); replicating data without losing it (single-leader / multi-leader /
+  leaderless topologies, async failover and the acknowledged writes it drops,
+  split-brain and fencing, conflict detection over wall-clock last-write-wins,
+  replication-lag anomalies, eventual vs strong consistency); and the first law —
+  don't distribute until you must. Use when the user designs or reviews anything
+  that spans machines: RPC / microservices, retries and idempotency, message
+  queues and delivery guarantees, event ordering, clocks and timestamps across
+  servers, replication and failover, or asks whether a distributed design is
   correct. Triggers on "is this retry safe", "exactly-once", "idempotency",
   "is this distributed design correct", "microservice call chain", "ordering /
-  timestamps across servers", "should this even be distributed". The agent-era
-  distributed-correctness lens — the FIRST skill of the distributed suite, and a
-  FOUNDATION cut (frame · communication · ordering); replication, consistency &
-  consensus, sharding, fault tolerance, and coordination are forthcoming stages.
+  timestamps across servers", "is this replication safe", "split-brain",
+  "eventual vs strong consistency", "read-your-writes", "should this even be
+  distributed". The agent-era distributed-correctness lens — the FIRST skill of
+  the distributed suite, a FOUNDATION cut plus replication (frame · communication ·
+  ordering · replication); consistency & consensus, sharding, fault tolerance, and
+  coordination are forthcoming stages.
 argument-hint: "[distributed design or code to audit, or the thing you're about to distribute]"
 allowed-tools: Read Bash Edit Write
 ---
@@ -47,13 +53,14 @@ A distributed system is a set of independent computers that fail independently, 
 
 ## The reference library
 
-The depth lives in `references/`. Open each when a stage sends you there — not all upfront. Three references back this foundation cut:
+The depth lives in `references/`. Open each when a stage sends you there — not all upfront. Four references back this foundation-plus-replication cut:
 
 - **[references/the-three-enemies.md](references/the-three-enemies.md)** — the foundation: partial failure, the unreliable async network, no global clock/state, the **third state**, concurrency/non-determinism, the eight fallacies, the Cook framing, and the first law (don't distribute until you must). Load at STAGE 0; it is the key to all of it.
 - [references/communication.md](references/communication.md) — how nodes talk *despite* the third state: RPC as a leaky abstraction, sync vs async (and why deep sync chains cascade — availability multiplies, latency adds), delivery semantics (at-most/at-least/effectively-once), idempotency as the headline weapon, timeout/retry/backoff+jitter/circuit-breaker, and schema evolution across independently-deployed versions.
 - [references/time-and-causality.md](references/time-and-causality.md) — why wall clocks can't order cross-machine events (and silently lose data via last-write-wins), happened-before and causality, partial vs total order, Lamport vs vector clocks, HLC, and the lesson that you only get the **causal partial order** for free — a global total order costs coordination.
+- [references/replication.md](references/replication.md) — keeping copies of the same data without losing or corrupting it: the three topologies (single-leader / multi-leader / leaderless), synchronous vs asynchronous and the writes async failover drops, failover hazards (split-brain, fencing), write conflicts and how leaderless quorums (W+R>N), read-repair, anti-entropy and version vectors handle them, the replication-lag anomalies (read-your-writes / monotonic-reads / consistent-prefix), eventual consistency and its limits, and change propagation (statement / WAL / logical-row CDC). Applies STAGE 2's ordering lesson and bridges to the forthcoming consistency & consensus.
 
-> **Scope note.** This is the foundation cut. The remaining stages — **replication**, **consistency & consensus** (the heart: CAP/PACELC, linearizability→eventual, Paxos/Raft, FLP), **partitioning/sharding**, **fault tolerance**, and **distributed transactions & coordination** (2PC/Saga, leader election, locks, ZooKeeper/etcd) — are forthcoming. Until then, holdfast gates the three foundational stages below.
+> **Scope note.** This is the foundation cut plus replication. The remaining stages — **consistency & consensus** (the heart: CAP/PACELC, linearizability→eventual, Paxos/Raft, FLP), **partitioning/sharding**, **fault tolerance**, and **distributed transactions & coordination** (2PC/Saga, leader election, locks, ZooKeeper/etcd) — are forthcoming. Until then, holdfast gates the four stages below.
 
 ---
 
@@ -94,11 +101,27 @@ Open **[references/time-and-causality.md](references/time-and-causality.md)**. O
 - **Never order cross-machine events by wall-clock time.** Clocks drift and skew (NTP residual is tens of ms and can jump *backward*), so wall-clock **last-write-wins silently drops data**. Use a **monotonic** clock for durations, never for cross-machine order.
 - **Order by causality.** Use happened-before / logical or vector clocks (or version vectors) where order matters; **detect concurrent writes** (genuinely unordered) instead of letting one clobber the other. Remember you only get the **partial (causal) order** for free — a true total order costs coordination (forthcoming: consensus).
 
-### FINAL GATE (foundation cut)
+### GATE — clear before REPLICATION
 1. `checklist check ordering no-wallclock-ordering`
 2. `checklist verify ordering`
-3. `checklist show` — confirm the three foundation stages passed.
-4. `checklist done` — clear this run's state.
+
+---
+
+## STAGE 3 — Replication (copies of the same data, kept correct)
+
+Open **[references/replication.md](references/replication.md)**. The moment one datum lives on more than one node, the asynchronous network guarantees the copies *will* diverge for a while. Replication is the whole discipline of handling that divergence — and it is where STAGE 2's ordering lesson stops being abstract: "concurrent writes, detected not clobbered" is now the daily conflict-resolution problem. (Keep replication — copies of the *same* data — distinct from **sharding** (forthcoming) — splitting *different* data across nodes; they are orthogonal and usually combined.)
+
+- **Choose the topology and the sync mode on purpose.** Single-leader (all writes through one node → one authoritative order, simplest, most common) vs multi-leader (each site writes locally → fast and partition-tolerant, but concurrent writes can now *conflict*) vs leaderless/Dynamo (quorum reads & writes, highest availability). And pick **synchronous vs asynchronous** with eyes open: sync protects the data but a slow follower stalls writes; **async is fast but a leader that crashes before propagating silently loses already-acknowledged writes** — "the async follower is safe" is false.
+- **Treat failover as the dangerous operation it is.** Deciding the leader is *really* dead is the **third state** again (a timeout, never a fact). Picking the new leader needs agreement (forthcoming: consensus). And the old leader must be **fenced** (STONITH / fencing tokens) — a merely-slow old leader that revives and keeps writing is **split-brain**, two leaders corrupting the data. Acknowledge that un-propagated async writes are **lost** at cutover (don't silently resurrect them later).
+- **Face conflicts and lag head-on.** Detect concurrent writes with **version vectors** and resolve by merge / CRDT / app-logic — never wall-clock **last-write-wins** (STAGE 2: it silently drops data). Remember a **quorum** (W + R > N) guarantees the read and write sets overlap but is **necessary, not sufficient** — concurrent writes inside the quorum still need conflict detection. Name the **replication-lag anomalies** and buy the guarantee where it matters: read-your-writes, monotonic reads, consistent-prefix. And do not mistake **eventual** consistency for strong — "eventually" has no upper bound and promises nothing about the read you're about to do.
+
+### FINAL GATE (foundation + replication cut)
+1. `checklist check replication topology-and-sync-chosen`
+2. `checklist check replication failover-split-brain-guarded`
+3. `checklist check replication conflict-and-lag-faced`
+4. `checklist verify replication`
+5. `checklist show` — confirm all four stages passed.
+6. `checklist done` — clear this run's state.
 
 ---
 
@@ -118,4 +141,9 @@ holdfast is the **distributed-failure-mode correctness lens**, held over any des
 - **Assuming sender and receiver share a version** — independent deploys; evolve the schema forward/backward compatibly.
 - **Ordering cross-machine events by wall clock** (and wall-clock last-write-wins) — clocks drift/skew/jump; order by causality.
 - **Treating "concurrent" as an error to suppress** — concurrency is a real state to detect and resolve, not to clobber.
+- **Believing asynchronous replication can't lose data** — a leader that crashes before propagating drops already-acknowledged writes; "the async follower is safe" is false.
+- **Failing over without fencing the old leader** — a slow-not-dead leader revives and you have split-brain: two leaders corrupting the same data.
+- **Resolving write conflicts with wall-clock last-write-wins** — it silently discards one writer; detect with version vectors and merge.
+- **Trusting a quorum (W + R > N) to prevent conflicts** — overlap guarantees you *read* a fresh copy, not that two concurrent writes didn't both land; they still need conflict detection.
+- **Mistaking eventual consistency for strong** — "eventually" has no upper bound and says nothing about the read you're about to do (read-your-writes / monotonic reads must be bought).
 - **Skipping a GATE** — and remember the first law: the cheapest distributed bug is the one you avoided by not distributing.
