@@ -194,7 +194,7 @@ A second domain, beginning now. Where the engineering suite is general software 
 
 ### holdfast
 
-`holdfast` is the distributed-correctness lens — the realities a single-machine programmer (and an agent) gets wrong by default. The one shift it installs is **the third state**: a remote call can succeed, fail, *or leave you not knowing which* — and single-machine code has no branch for "I don't know," which is where most distributed bugs live. A **foundation cut plus replication and consensus** for now — five gated stages — with the rest of the map to follow:
+`holdfast` is the distributed-correctness lens — the realities a single-machine programmer (and an agent) gets wrong by default. The one shift it installs is **the third state**: a remote call can succeed, fail, *or leave you not knowing which* — and single-machine code has no branch for "I don't know," which is where most distributed bugs live. A **foundation cut plus replication, consensus, and sharding** for now — six gated stages — with the rest of the map to follow:
 
 | Stage | Does |
 |-------|------|
@@ -203,8 +203,9 @@ A second domain, beginning now. Where the engineering suite is general software 
 | **Ordering** | Causality over the wall clock — logical/vector clocks, partial vs total order; never wall-clock last-write-wins |
 | **Replication** | Topology (single-/multi-leader, leaderless) and sync vs async; failover, split-brain and fencing; conflict detection over LWW; replication-lag anomalies; eventual vs strong consistency |
 | **Consistency & consensus** | The consistency spectrum (linearizable→eventual) and choosing the weakest model still correct; CAP as CP-vs-AP (not three-choose-two) and PACELC's latency cost; consensus, FLP, Paxos/Raft, majority quorums — don't hand-roll it, use it sparingly |
+| **Partitioning (sharding)** | Range vs hash vs consistent hashing and a partition key that fits the access pattern; skew and the single hot key; secondary-index trade-offs; rebalancing without mass migration; routing metadata is itself consensus-backed; minimize cross-shard joins and transactions |
 
-Five references back the five stages — the three enemies & the third state, communication, time & causality, replication, and consistency & consensus. Forthcoming stages: sharding, fault tolerance, and coordination. Invoke with `/distributed:holdfast <design-or-code>`.
+Six references back the six stages — the three enemies & the third state, communication, time & causality, replication, consistency & consensus, and sharding. Forthcoming stages: fault tolerance, and coordination. Invoke with `/distributed:holdfast <design-or-code>`.
 
 ## checklist
 
