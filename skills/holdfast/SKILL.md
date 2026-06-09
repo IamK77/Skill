@@ -14,20 +14,25 @@ description: >
   replication-lag anomalies, eventual vs strong consistency); choosing a
   consistency model with eyes open (the linearizable → sequential → causal →
   eventual spectrum, CAP/PACELC, and why coordination — consensus, Paxos/Raft — is
-  expensive and best used sparingly); and the first law — don't distribute until
-  you must. Use when the user designs or reviews anything that spans machines:
-  RPC / microservices, retries and idempotency, message queues and delivery
-  guarantees, event ordering, clocks and timestamps across servers, replication
-  and failover, consistency models and consensus, or asks whether a distributed
-  design is correct. Triggers on "is this retry safe", "exactly-once",
-  "idempotency", "is this distributed design correct", "microservice call chain",
-  "ordering / timestamps across servers", "is this replication safe", "split-brain",
-  "eventual vs strong consistency", "read-your-writes", "CAP / CP vs AP",
-  "linearizability", "how strong a consistency do we need", "do we need consensus",
-  "Raft / Paxos / etcd / ZooKeeper", "should this even be distributed". The
-  agent-era distributed-correctness lens — the FIRST skill of the distributed
-  suite, a FOUNDATION cut plus replication and consensus (frame · communication ·
-  ordering · replication · consensus); sharding, fault tolerance, and coordination
+  expensive and best used sparingly); partitioning data for scale (range vs hash vs
+  consistent hashing, the partition key that keeps hot operations on one shard, skew
+  and hot keys, secondary-index trade-offs, rebalancing without mass migration, and
+  routing metadata that is itself a consensus problem); and the first law — don't
+  distribute until you must. Use when the user designs or reviews anything that
+  spans machines: RPC / microservices, retries and idempotency, message queues and
+  delivery guarantees, event ordering, clocks and timestamps across servers,
+  replication and failover, consistency models and consensus, partitioning /
+  sharding, or asks whether a distributed design is correct. Triggers on "is this
+  retry safe", "exactly-once", "idempotency", "is this distributed design correct",
+  "microservice call chain", "ordering / timestamps across servers", "is this
+  replication safe", "split-brain", "eventual vs strong consistency",
+  "read-your-writes", "CAP / CP vs AP", "linearizability", "how strong a consistency
+  do we need", "do we need consensus", "Raft / Paxos / etcd / ZooKeeper", "how
+  should I shard this", "partition / shard key", "consistent hashing", "hot key /
+  hotspot", "rebalancing", "should this even be distributed". The agent-era
+  distributed-correctness lens — the FIRST skill of the distributed suite, a
+  FOUNDATION cut plus replication, consensus, and sharding (frame · communication ·
+  ordering · replication · consensus · sharding); fault tolerance and coordination
   are forthcoming stages.
 argument-hint: "[distributed design or code to audit, or the thing you're about to distribute]"
 allowed-tools: Read Bash Edit Write
@@ -58,15 +63,16 @@ A distributed system is a set of independent computers that fail independently, 
 
 ## The reference library
 
-The depth lives in `references/`. Open each when a stage sends you there — not all upfront. Five references back this foundation-plus-replication-and-consensus cut:
+The depth lives in `references/`. Open each when a stage sends you there — not all upfront. Six references back this foundation-plus-replication-consensus-and-sharding cut:
 
 - **[references/the-three-enemies.md](references/the-three-enemies.md)** — the foundation: partial failure, the unreliable async network, no global clock/state, the **third state**, concurrency/non-determinism, the eight fallacies, the Cook framing, and the first law (don't distribute until you must). Load at STAGE 0; it is the key to all of it.
 - [references/communication.md](references/communication.md) — how nodes talk *despite* the third state: RPC as a leaky abstraction, sync vs async (and why deep sync chains cascade — availability multiplies, latency adds), delivery semantics (at-most/at-least/effectively-once), idempotency as the headline weapon, timeout/retry/backoff+jitter/circuit-breaker, and schema evolution across independently-deployed versions.
 - [references/time-and-causality.md](references/time-and-causality.md) — why wall clocks can't order cross-machine events (and silently lose data via last-write-wins), happened-before and causality, partial vs total order, Lamport vs vector clocks, HLC, and the lesson that you only get the **causal partial order** for free — a global total order costs coordination.
 - [references/replication.md](references/replication.md) — keeping copies of the same data without losing or corrupting it: the three topologies (single-leader / multi-leader / leaderless), synchronous vs asynchronous and the writes async failover drops, failover hazards (split-brain, fencing), write conflicts and how leaderless quorums (W+R>N), read-repair, anti-entropy and version vectors handle them, the replication-lag anomalies (read-your-writes / monotonic-reads / consistent-prefix), eventual consistency and its limits, and change propagation (statement / WAL / logical-row CDC). Applies STAGE 2's ordering lesson and bridges to consistency & consensus.
 - [references/consistency-and-consensus.md](references/consistency-and-consensus.md) — the heart: the consistency spectrum (linearizable → sequential → causal → eventual) and choosing the weakest model still correct; the three meanings of "consistency" untangled (ACID-C vs CAP-C vs the model spectrum) and linearizability vs serializability; CAP as it really is (partition is not optional → CP vs AP, not three-choose-two) and PACELC (coordination costs latency even without a partition); consensus as the algorithmic core (what reduces to it, FLP and how real systems sidestep it via safety-always/liveness-under-timing, Paxos vs Raft, majority quorums and odd-sized clusters); and the posture — don't hand-roll consensus, use it sparingly.
+- [references/sharding.md](references/sharding.md) — splitting *different* data across nodes for scale (orthogonal to replication, and layered with it — each shard is itself a replicated cluster): the partitioning schemes (range vs hash vs consistent hashing vs fixed partition count) and choosing a partition key that fits the access pattern; skew and the single hot key hashing can't fix; secondary-index trade-offs (local scatter-gather reads vs global cross-partition writes); rebalancing without mass migration (and why auto-rebalance + auto-failure-detection can cascade); request routing whose partition→node map is itself consensus-backed metadata; and minimizing the painful cross-shard joins and transactions.
 
-> **Scope note.** This is the foundation cut plus replication and consensus. The remaining stages — **partitioning/sharding**, **fault tolerance**, and **distributed transactions & coordination** (2PC/Saga, leader election, locks, ZooKeeper/etcd) — are forthcoming. Until then, holdfast gates the five stages below.
+> **Scope note.** This is the foundation cut plus replication, consensus, and sharding. The remaining stages — **fault tolerance** and **distributed transactions & coordination** (2PC/Saga, leader election, locks, ZooKeeper/etcd) — are forthcoming. Until then, holdfast gates the six stages below.
 
 ---
 
@@ -115,7 +121,7 @@ Open **[references/time-and-causality.md](references/time-and-causality.md)**. O
 
 ## STAGE 3 — Replication (copies of the same data, kept correct)
 
-Open **[references/replication.md](references/replication.md)**. The moment one datum lives on more than one node, the asynchronous network guarantees the copies *will* diverge for a while. Replication is the whole discipline of handling that divergence — and it is where STAGE 2's ordering lesson stops being abstract: "concurrent writes, detected not clobbered" is now the daily conflict-resolution problem. (Keep replication — copies of the *same* data — distinct from **sharding** (forthcoming) — splitting *different* data across nodes; they are orthogonal and usually combined.)
+Open **[references/replication.md](references/replication.md)**. The moment one datum lives on more than one node, the asynchronous network guarantees the copies *will* diverge for a while. Replication is the whole discipline of handling that divergence — and it is where STAGE 2's ordering lesson stops being abstract: "concurrent writes, detected not clobbered" is now the daily conflict-resolution problem. (Keep replication — copies of the *same* data — distinct from **sharding** (STAGE 5) — splitting *different* data across nodes; they are orthogonal and usually combined.)
 
 - **Choose the topology and the sync mode on purpose.** Single-leader (all writes through one node → one authoritative order, simplest, most common) vs multi-leader (each site writes locally → fast and partition-tolerant, but concurrent writes can now *conflict*) vs leaderless/Dynamo (quorum reads & writes, highest availability). And pick **synchronous vs asynchronous** with eyes open: sync protects the data but a slow follower stalls writes; **async is fast but a leader that crashes before propagating silently loses already-acknowledged writes** — "the async follower is safe" is false.
 - **Treat failover as the dangerous operation it is.** Deciding the leader is *really* dead is the **third state** again (a timeout, never a fact). Picking the new leader needs agreement (forthcoming: consensus). And the old leader must be **fenced** (STONITH / fencing tokens) — a merely-slow old leader that revives and keeps writing is **split-brain**, two leaders corrupting the data. Acknowledge that un-propagated async writes are **lost** at cutover (don't silently resurrect them later).
@@ -137,12 +143,28 @@ Open **[references/consistency-and-consensus.md](references/consistency-and-cons
 - **Face CAP as it really is — then PACELC.** A partition is *not optional* (the network is unreliable — STAGE 0), so it is never "three-choose-two" and **CA is not a real option**: the only question is **when a partition happens, sacrifice C or A?** — CP vs AP. And CAP says nothing about the normal case, so **PACELC** completes it: *if Partition → A vs C, **else** → Latency vs C.* **Coordination has a cost**: even with no partition, stronger consistency is bought with latency.
 - **Use consensus well — sparingly, and never hand-rolled.** Consensus (agreeing on a value/log despite crashes on an async network) is the core primitive — leader election, atomic commit, config, a linearizable store all reduce to it. But it is expensive (a reachable **majority quorum**; use **odd-sized** clusters; the minority side of a partition stalls = CP) and **FLP** says no deterministic async algorithm can *guarantee* termination if a node may crash — so real systems keep **safety always** and get **liveness only under timing assumptions**. Therefore: **don't hand-roll it** (use etcd / ZooKeeper / a mature Raft library), and **reserve it for the control plane** (the things that need one source of truth), running the data plane on weaker, cheaper models.
 
-### FINAL GATE (foundation + replication + consensus cut)
+### GATE — clear before SHARDING
 1. `checklist check consensus consistency-model-chosen`
 2. `checklist check consensus cap-pacelc-faced`
 3. `checklist check consensus consensus-used-well`
 4. `checklist verify consensus`
-5. `checklist show` — confirm all five stages passed.
+
+---
+
+## STAGE 5 — Partitioning / sharding (split different data across nodes)
+
+Open **[references/sharding.md](references/sharding.md)**. When data is too big for one machine or traffic too heavy for one node, you **split** it across nodes — that is partitioning (sharding). Keep it straight from replication: **replication (STAGE 3) is the *same* data copied for fault tolerance; partitioning is *different* data split for scale.** They are orthogonal and **layered** — a real system is a 2-D grid: sharded across, replicated down, so **each shard is itself a small replicated cluster and STAGE 3/4 run again inside it.**
+
+- **Choose the scheme and the partition key to fit the access pattern — the decision everything else pays for.** **Range** partitioning gives efficient scans but **hotspots** on a monotonic key (a timestamp sends all new writes to the last shard); **hash** spreads evenly but kills range scans, and naive `hash mod N` is a rebalancing **disaster** (change N → almost every key moves) — use **consistent hashing** (~K/N keys move) or a **fixed, large partition count** (move whole partitions). Above all, pick the key so the operations you care about **stay on one shard** — a mis-aligned key taxes every later query and transaction.
+- **Expect skew and the hot key.** Real load is power-law; "uniform" rarely holds. Hashing fixes order-clustering but **not a single hot key** (a celebrity, a viral post — same hash, same shard) — split it with a random prefix/suffix and re-gather on read. And face the **secondary-index** trade-off: a **local** (document-partitioned) index is cheap to write but a query **scatter-gathers** every shard; a **global** (term-partitioned) index reads efficiently but writes are expensive, cross-partition, and usually async (the index lags). No free option.
+- **Make rebalancing and routing safe.** Rebalance by moving the **minimum** data, online and fairly (never `hash mod N`). Beware the cascade: **auto-rebalance + auto-failure-detection** can read a merely-slow node (STAGE 0) as dead, kick off a massive data move, and tip a strained system over (a Cook cascade) — keep a **human in the loop**. Routing needs the partition→node map, which is consistent cluster **metadata** living in a coordination service (ZooKeeper / etcd) that runs on **consensus** (STAGE 4) — *consensus reappears.* And **minimize cross-shard work** — joins need a shuffle (denormalize, co-locate), cross-shard transactions need distributed coordination (2PC — forthcoming) that is slow and fragile; design to keep them single-shard.
+
+### FINAL GATE (foundation + replication + consensus + sharding cut)
+1. `checklist check sharding partition-key-fits-access`
+2. `checklist check sharding skew-and-secondary-indexes-handled`
+3. `checklist check sharding rebalance-and-routing-safe`
+4. `checklist verify sharding`
+5. `checklist show` — confirm all six stages passed.
 6. `checklist done` — clear this run's state.
 
 ---
@@ -174,4 +196,10 @@ holdfast is the **distributed-failure-mode correctness lens**, held over any des
 - **Hand-rolling a consensus or leader-election protocol** — it is notoriously easy to get subtly wrong; use etcd / ZooKeeper / a mature Raft library.
 - **Reaching for strong consistency everywhere** — consensus is expensive (a reachable majority, coordination latency); reserve it for the control plane (leader, config, metadata) and run the data plane on weaker, cheaper models.
 - **Running a consensus cluster with an even number of nodes** — no better fault tolerance than the odd size below it and a needless split risk; use 3 or 5.
+- **Partitioning with `hash mod N`** — adding or removing a node remaps almost every key (mass migration); use consistent hashing or a fixed partition count.
+- **A monotonic partition key (timestamp, auto-increment) on range partitioning** — every new write lands on the last shard; that shard is your hotspot.
+- **Believing hashing cures hotspots** — it spreads *order-clustering*, but a single hot key still maps to one shard; split the hot key with a prefix/suffix.
+- **Ignoring the secondary-index tax** — a local index scatter-gathers reads across all shards; a global index makes writes cross-partition and lagging. Pick deliberately.
+- **A partition key that doesn't fit the access pattern** — you pay a cross-shard join or transaction on every important query; co-locate what's read together.
+- **Fully automatic rebalancing wired to automatic failure detection** — a slow node read as dead triggers a mass data move and cascades; keep a human in the loop.
 - **Skipping a GATE** — and remember the first law: the cheapest distributed bug is the one you avoided by not distributing.
