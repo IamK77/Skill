@@ -1,0 +1,66 @@
+name: release-please
+
+# Automated releases for @iamk77/skill-checklist (devtools/checklist).
+#
+# How it works:
+#   1. On every push to main, release-please reads the Conventional Commits
+#      that touched devtools/checklist/ since the last release and maintains a
+#      "release PR" that bumps the version and updates the CHANGELOG.
+#   2. When you merge that release PR, release-please creates the git tag and
+#      GitHub Release — and the publish job below ships the package to npm.
+#
+# Auth: npm OIDC trusted publishing — no token is stored. The publish job
+# requests an OIDC token from GitHub (id-token: write) and npm exchanges it for
+# a short-lived publish credential. Requires a Trusted Publisher configured on
+# npmjs.com for this repo + this workflow file (see devtools/checklist/RELEASING.md).
+
+on:
+  push:
+    branches: [main]
+
+# Deny by default; each job opts into exactly what it needs.
+permissions: {}
+
+concurrency:
+  group: release-please-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      released: ${{ steps.release.outputs.releases_created }}
+      tag: ${{ steps.release.outputs['devtools/checklist--tag_name'] }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  publish:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.released == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # required for npm OIDC trusted publishing
+    defaults:
+      run:
+        working-directory: devtools/checklist
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+      - name: Upgrade npm to a version with trusted-publishing (OIDC) support
+        run: npm install -g npm@latest
+      - run: npm ci
+      - run: npm test
+      - name: Publish to npm (OIDC trusted publishing, with provenance)
+        run: npm publish

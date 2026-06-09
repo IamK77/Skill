@@ -1,4 +1,6 @@
 import { Command } from 'commander';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { initCommand } from './commands/init.js';
 import { showCommand } from './commands/show.js';
 import { verifyCommand } from './commands/verify.js';
@@ -6,10 +8,18 @@ import { checkCommand } from './commands/check.js';
 import { phasesCommand } from './commands/phases.js';
 import { resetCommand } from './commands/reset.js';
 
+// Single source of truth for the version: read it from package.json at
+// runtime rather than hard-coding it here. Works from both src/ (tests) and
+// dist/ (the shipped build) because package.json is one level up in each.
+// This is what lets release-please bump the version in package.json alone.
+const { version } = JSON.parse(
+  readFileSync(join(__dirname, '..', 'package.json'), 'utf8'),
+) as { version: string };
+
 const program = new Command()
   .name('checklist')
   .description('Flight checklist CLI for Claude Code skills')
-  .version('0.2.0');
+  .version(version);
 
 // Flags are uniform across every command so an agent never has to remember
 // which command accepts what. In the normal skill flow none are needed:

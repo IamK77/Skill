@@ -1,0 +1,36 @@
+name: ci
+
+# Build + test the checklist CLI on every push/PR that touches it, so the
+# release PR (and any feature PR) is gated by a green suite before it can be
+# merged and auto-published.
+
+on:
+  push:
+    branches: [main]
+    paths: ['devtools/checklist/**']
+  pull_request:
+    paths: ['devtools/checklist/**']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: devtools/checklist
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: devtools/checklist/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm test

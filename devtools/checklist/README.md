@@ -43,7 +43,7 @@ npm run build    # compile src/ -> dist/
 npm link         # put `checklist` on PATH
 ```
 
-`npm run dev` (`tsc --watch`) keeps `dist/` current while you edit `src/`. The version string is set in two places — `package.json` and `src/index.ts` (`.version('…')`) — keep them in sync on a bump.
+`npm run dev` (`tsc --watch`) keeps `dist/` current while you edit `src/`. The version is read from `package.json` at runtime (single source of truth), and releases are automated from Conventional Commits — see [RELEASING.md](RELEASING.md).
 
 In normal use you never pass any flags. The skill calls `checklist init ${CLAUDE_SKILL_DIR} --force`, and later commands resolve the directory from `$CLAUDE_SKILL_DIR` or the active pointer (see How directories are resolved).
 
