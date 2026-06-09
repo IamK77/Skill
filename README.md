@@ -194,7 +194,7 @@ A second domain, beginning now. Where the engineering suite is general software 
 
 ### holdfast
 
-`holdfast` is the distributed-correctness lens — the realities a single-machine programmer (and an agent) gets wrong by default. The one shift it installs is **the third state**: a remote call can succeed, fail, *or leave you not knowing which* — and single-machine code has no branch for "I don't know," which is where most distributed bugs live. A **foundation cut plus replication, consensus, sharding, and fault tolerance** for now — seven gated stages — with coordination still to follow:
+`holdfast` is the distributed-correctness lens — the realities a single-machine programmer (and an agent) gets wrong by default. The one shift it installs is **the third state**: a remote call can succeed, fail, *or leave you not knowing which* — and single-machine code has no branch for "I don't know," which is where most distributed bugs live. The **complete map — eight gated stages**, eight facets of one problem (surviving partial failure, an asynchronous unreliable network, and the absence of a global clock or state):
 
 | Stage | Does |
 |-------|------|
@@ -205,8 +205,9 @@ A second domain, beginning now. Where the engineering suite is general software 
 | **Consistency & consensus** | The consistency spectrum (linearizable→eventual) and choosing the weakest model still correct; CAP as CP-vs-AP (not three-choose-two) and PACELC's latency cost; consensus, FLP, Paxos/Raft, majority quorums — don't hand-roll it, use it sparingly |
 | **Partitioning (sharding)** | Range vs hash vs consistent hashing and a partition key that fits the access pattern; skew and the single hot key; secondary-index trade-offs; rebalancing without mass migration; routing metadata is itself consensus-backed; minimize cross-shard joins and transactions |
 | **Fault tolerance** | Failure as the default: failure models (crash→Byzantine, 2f+1 vs 3f+1), detection as a guess; redundancy only across independent fault domains; fence and recover (MTTR over MTBF); contain the blast radius with bulkheads/circuit breakers/backpressure; design for failure and exercise it (chaos engineering) |
+| **Transactions & coordination** | When you must act atomically across nodes or agree who's in charge: 2PC and why it blocks; sagas and idempotent compensations; distributed locks and fencing tokens; outsourcing consensus to ZooKeeper/etcd — and that coordination is a tax to minimize |
 
-Seven references back the seven stages — the three enemies & the third state, communication, time & causality, replication, consistency & consensus, sharding, and fault tolerance. The one forthcoming stage: distributed transactions & coordination. Invoke with `/distributed:holdfast <design-or-code>`.
+Eight references back the eight stages — the three enemies & the third state, communication, time & causality, replication, consistency & consensus, sharding, fault tolerance, and transactions & coordination. Invoke with `/distributed:holdfast <design-or-code>`.
 
 ## checklist
 
