@@ -11,19 +11,24 @@ description: >
   total order); replicating data without losing it (single-leader / multi-leader /
   leaderless topologies, async failover and the acknowledged writes it drops,
   split-brain and fencing, conflict detection over wall-clock last-write-wins,
-  replication-lag anomalies, eventual vs strong consistency); and the first law —
-  don't distribute until you must. Use when the user designs or reviews anything
-  that spans machines: RPC / microservices, retries and idempotency, message
-  queues and delivery guarantees, event ordering, clocks and timestamps across
-  servers, replication and failover, or asks whether a distributed design is
-  correct. Triggers on "is this retry safe", "exactly-once", "idempotency",
-  "is this distributed design correct", "microservice call chain", "ordering /
-  timestamps across servers", "is this replication safe", "split-brain",
-  "eventual vs strong consistency", "read-your-writes", "should this even be
-  distributed". The agent-era distributed-correctness lens — the FIRST skill of
-  the distributed suite, a FOUNDATION cut plus replication (frame · communication ·
-  ordering · replication); consistency & consensus, sharding, fault tolerance, and
-  coordination are forthcoming stages.
+  replication-lag anomalies, eventual vs strong consistency); choosing a
+  consistency model with eyes open (the linearizable → sequential → causal →
+  eventual spectrum, CAP/PACELC, and why coordination — consensus, Paxos/Raft — is
+  expensive and best used sparingly); and the first law — don't distribute until
+  you must. Use when the user designs or reviews anything that spans machines:
+  RPC / microservices, retries and idempotency, message queues and delivery
+  guarantees, event ordering, clocks and timestamps across servers, replication
+  and failover, consistency models and consensus, or asks whether a distributed
+  design is correct. Triggers on "is this retry safe", "exactly-once",
+  "idempotency", "is this distributed design correct", "microservice call chain",
+  "ordering / timestamps across servers", "is this replication safe", "split-brain",
+  "eventual vs strong consistency", "read-your-writes", "CAP / CP vs AP",
+  "linearizability", "how strong a consistency do we need", "do we need consensus",
+  "Raft / Paxos / etcd / ZooKeeper", "should this even be distributed". The
+  agent-era distributed-correctness lens — the FIRST skill of the distributed
+  suite, a FOUNDATION cut plus replication and consensus (frame · communication ·
+  ordering · replication · consensus); sharding, fault tolerance, and coordination
+  are forthcoming stages.
 argument-hint: "[distributed design or code to audit, or the thing you're about to distribute]"
 allowed-tools: Read Bash Edit Write
 ---
@@ -53,14 +58,15 @@ A distributed system is a set of independent computers that fail independently, 
 
 ## The reference library
 
-The depth lives in `references/`. Open each when a stage sends you there — not all upfront. Four references back this foundation-plus-replication cut:
+The depth lives in `references/`. Open each when a stage sends you there — not all upfront. Five references back this foundation-plus-replication-and-consensus cut:
 
 - **[references/the-three-enemies.md](references/the-three-enemies.md)** — the foundation: partial failure, the unreliable async network, no global clock/state, the **third state**, concurrency/non-determinism, the eight fallacies, the Cook framing, and the first law (don't distribute until you must). Load at STAGE 0; it is the key to all of it.
 - [references/communication.md](references/communication.md) — how nodes talk *despite* the third state: RPC as a leaky abstraction, sync vs async (and why deep sync chains cascade — availability multiplies, latency adds), delivery semantics (at-most/at-least/effectively-once), idempotency as the headline weapon, timeout/retry/backoff+jitter/circuit-breaker, and schema evolution across independently-deployed versions.
 - [references/time-and-causality.md](references/time-and-causality.md) — why wall clocks can't order cross-machine events (and silently lose data via last-write-wins), happened-before and causality, partial vs total order, Lamport vs vector clocks, HLC, and the lesson that you only get the **causal partial order** for free — a global total order costs coordination.
-- [references/replication.md](references/replication.md) — keeping copies of the same data without losing or corrupting it: the three topologies (single-leader / multi-leader / leaderless), synchronous vs asynchronous and the writes async failover drops, failover hazards (split-brain, fencing), write conflicts and how leaderless quorums (W+R>N), read-repair, anti-entropy and version vectors handle them, the replication-lag anomalies (read-your-writes / monotonic-reads / consistent-prefix), eventual consistency and its limits, and change propagation (statement / WAL / logical-row CDC). Applies STAGE 2's ordering lesson and bridges to the forthcoming consistency & consensus.
+- [references/replication.md](references/replication.md) — keeping copies of the same data without losing or corrupting it: the three topologies (single-leader / multi-leader / leaderless), synchronous vs asynchronous and the writes async failover drops, failover hazards (split-brain, fencing), write conflicts and how leaderless quorums (W+R>N), read-repair, anti-entropy and version vectors handle them, the replication-lag anomalies (read-your-writes / monotonic-reads / consistent-prefix), eventual consistency and its limits, and change propagation (statement / WAL / logical-row CDC). Applies STAGE 2's ordering lesson and bridges to consistency & consensus.
+- [references/consistency-and-consensus.md](references/consistency-and-consensus.md) — the heart: the consistency spectrum (linearizable → sequential → causal → eventual) and choosing the weakest model still correct; the three meanings of "consistency" untangled (ACID-C vs CAP-C vs the model spectrum) and linearizability vs serializability; CAP as it really is (partition is not optional → CP vs AP, not three-choose-two) and PACELC (coordination costs latency even without a partition); consensus as the algorithmic core (what reduces to it, FLP and how real systems sidestep it via safety-always/liveness-under-timing, Paxos vs Raft, majority quorums and odd-sized clusters); and the posture — don't hand-roll consensus, use it sparingly.
 
-> **Scope note.** This is the foundation cut plus replication. The remaining stages — **consistency & consensus** (the heart: CAP/PACELC, linearizability→eventual, Paxos/Raft, FLP), **partitioning/sharding**, **fault tolerance**, and **distributed transactions & coordination** (2PC/Saga, leader election, locks, ZooKeeper/etcd) — are forthcoming. Until then, holdfast gates the four stages below.
+> **Scope note.** This is the foundation cut plus replication and consensus. The remaining stages — **partitioning/sharding**, **fault tolerance**, and **distributed transactions & coordination** (2PC/Saga, leader election, locks, ZooKeeper/etcd) — are forthcoming. Until then, holdfast gates the five stages below.
 
 ---
 
@@ -115,12 +121,28 @@ Open **[references/replication.md](references/replication.md)**. The moment one 
 - **Treat failover as the dangerous operation it is.** Deciding the leader is *really* dead is the **third state** again (a timeout, never a fact). Picking the new leader needs agreement (forthcoming: consensus). And the old leader must be **fenced** (STONITH / fencing tokens) — a merely-slow old leader that revives and keeps writing is **split-brain**, two leaders corrupting the data. Acknowledge that un-propagated async writes are **lost** at cutover (don't silently resurrect them later).
 - **Face conflicts and lag head-on.** Detect concurrent writes with **version vectors** and resolve by merge / CRDT / app-logic — never wall-clock **last-write-wins** (STAGE 2: it silently drops data). Remember a **quorum** (W + R > N) guarantees the read and write sets overlap but is **necessary, not sufficient** — concurrent writes inside the quorum still need conflict detection. Name the **replication-lag anomalies** and buy the guarantee where it matters: read-your-writes, monotonic reads, consistent-prefix. And do not mistake **eventual** consistency for strong — "eventually" has no upper bound and promises nothing about the read you're about to do.
 
-### FINAL GATE (foundation + replication cut)
+### GATE — clear before CONSENSUS
 1. `checklist check replication topology-and-sync-chosen`
 2. `checklist check replication failover-split-brain-guarded`
 3. `checklist check replication conflict-and-lag-faced`
 4. `checklist verify replication`
-5. `checklist show` — confirm all four stages passed.
+
+---
+
+## STAGE 4 — Consistency & Consensus (the heart: how much agreement, at what price)
+
+Open **[references/consistency-and-consensus.md](references/consistency-and-consensus.md)**. This is the heart of the whole subject, and the one place a word will trip you: **"consistency" is overloaded.** It means at least three different things — ACID's **C** (a transaction preserves an application invariant; not a distributed concept), CAP's **C** (specifically *linearizability*), and the **consistency-model spectrum** (what a read is allowed to observe). This stage is about the last two; keep them apart from ACID-C. The through-line: *strong consistency needs **consensus**; consensus needs a **majority quorum** whose liveness needs **timing assumptions**; under a partition the minority can't reach a majority, so a strong-consistency system goes unavailable there — which is exactly CAP.* "How strong a consistency, at what cost?" = "how much coordination, paid for in availability-under-partition and latency-always."
+
+- **Choose a consistency model explicitly — the *weakest* one still correct.** Know the spectrum, strong to weak: **linearizable** (behaves as one copy, every op atomic at an instant, respects *real time* — "strong consistency") → **sequential** (a total order matching each process's program order, but not real time) → **causal** (orders causally-related ops; the *strongest model still available under a partition*) → **eventual** (converges, nothing in between). Stronger is not "better" — it is more expensive. (Don't conflate: **linearizability** ≠ **serializability** — single-object real-time recency vs multi-transaction isolation; both together = strict serializability; and neither is ACID-C.)
+- **Face CAP as it really is — then PACELC.** A partition is *not optional* (the network is unreliable — STAGE 0), so it is never "three-choose-two" and **CA is not a real option**: the only question is **when a partition happens, sacrifice C or A?** — CP vs AP. And CAP says nothing about the normal case, so **PACELC** completes it: *if Partition → A vs C, **else** → Latency vs C.* **Coordination has a cost**: even with no partition, stronger consistency is bought with latency.
+- **Use consensus well — sparingly, and never hand-rolled.** Consensus (agreeing on a value/log despite crashes on an async network) is the core primitive — leader election, atomic commit, config, a linearizable store all reduce to it. But it is expensive (a reachable **majority quorum**; use **odd-sized** clusters; the minority side of a partition stalls = CP) and **FLP** says no deterministic async algorithm can *guarantee* termination if a node may crash — so real systems keep **safety always** and get **liveness only under timing assumptions**. Therefore: **don't hand-roll it** (use etcd / ZooKeeper / a mature Raft library), and **reserve it for the control plane** (the things that need one source of truth), running the data plane on weaker, cheaper models.
+
+### FINAL GATE (foundation + replication + consensus cut)
+1. `checklist check consensus consistency-model-chosen`
+2. `checklist check consensus cap-pacelc-faced`
+3. `checklist check consensus consensus-used-well`
+4. `checklist verify consensus`
+5. `checklist show` — confirm all five stages passed.
 6. `checklist done` — clear this run's state.
 
 ---
@@ -146,4 +168,10 @@ holdfast is the **distributed-failure-mode correctness lens**, held over any des
 - **Resolving write conflicts with wall-clock last-write-wins** — it silently discards one writer; detect with version vectors and merge.
 - **Trusting a quorum (W + R > N) to prevent conflicts** — overlap guarantees you *read* a fresh copy, not that two concurrent writes didn't both land; they still need conflict detection.
 - **Mistaking eventual consistency for strong** — "eventually" has no upper bound and says nothing about the read you're about to do (read-your-writes / monotonic reads must be bought).
+- **Reading CAP as "three-choose-two" (and thinking CA is achievable)** — partitions are not optional; the only real choice is CP vs AP when one happens.
+- **Assuming consistency is free as long as there's no partition** — PACELC: stronger consistency costs latency even in normal operation; coordination is never free.
+- **Confusing linearizability with serializability** — single-object real-time recency vs multi-transaction isolation; they are different guarantees (both together = strict serializability), and neither is ACID's C.
+- **Hand-rolling a consensus or leader-election protocol** — it is notoriously easy to get subtly wrong; use etcd / ZooKeeper / a mature Raft library.
+- **Reaching for strong consistency everywhere** — consensus is expensive (a reachable majority, coordination latency); reserve it for the control plane (leader, config, metadata) and run the data plane on weaker, cheaper models.
+- **Running a consensus cluster with an even number of nodes** — no better fault tolerance than the odd size below it and a needless split risk; use 3 or 5.
 - **Skipping a GATE** — and remember the first law: the cheapest distributed bug is the one you avoided by not distributing.
