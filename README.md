@@ -28,12 +28,14 @@ Each skill is a directory — `SKILL.md` + a `references/` library + a `.checkli
 
 **Per skill:** copy `skills/<name>/` into a path Claude Code discovers skills from, ensure the `checklist` CLI is installed and on `PATH` (see [checklist](#checklist) — it is what enforces every skill's gates), then invoke it, e.g. `/groundwork <target>` or `/assay path/to/module`. Each skill's `SKILL.md` opens with `` !`checklist init ${CLAUDE_SKILL_DIR} --force` `` and drives its own gates from there.
 
-**As a plugin marketplace:** register the whole repo and install any skill by name:
+**As a plugin marketplace:** register the repo and install the whole suite as one plugin:
 
 ```
 /plugin marketplace add IamK77/Skill
-/plugin install assay@agent-era-skills
+/plugin install engineering@agent-era-skills
 ```
+
+This installs all ten skills under the `engineering` namespace — invoke them as `/engineering:groundwork`, `/engineering:assay`, `/engineering:plumb`, and so on. (Plugin-provided skills are always prefixed by their plugin name; bundling the suite into one `engineering` plugin makes that prefix a meaningful namespace rather than a per-skill repeat.)
 
 ## groundwork
 

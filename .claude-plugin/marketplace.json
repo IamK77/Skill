@@ -6,97 +6,25 @@
   },
   "metadata": {
     "description": "Agent-era engineering skills for Claude Code",
-    "version": "0.3.0"
+    "version": "0.4.0"
   },
   "plugins": [
     {
-      "name": "groundwork",
-      "description": "Requirements engineering before you build: dig out the real need behind a solution-shaped ask, map the silent stakeholders, write verifiable acceptance criteria, draw the scope line, and manage change — across a five-stage gated flow. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "name": "engineering",
+      "description": "Ten gated, agent-era engineering skills as one suite — spanning the software lifecycle: requirements (groundwork), architecture (load-bearing), engineering process (flightline), testing (assay), deployment & operations (stationkeeping), maintenance & evolution (husbandry); plus four cross-cutting lenses: the feedback surface (gauge), code craft (plumb), and the security pair — shield (aegis) and spear (gungnir). Each is a multi-stage gated flow, tuned for a world where agents write much of the code. Installs every skill under the /engineering: prefix. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
       "source": "./",
       "strict": false,
       "skills": [
-        "./skills/groundwork"
-      ]
-    },
-    {
-      "name": "load-bearing",
-      "description": "Architecture design for the agent-assisted era: concentrate scarce human judgment on the irreversible decisions (data schema, public contracts, trust model, the split into services) and let agents move fast behind the reversible ones — choosing style, stack, boundaries, contracts, and data model across a six-stage gated flow. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/load-bearing"
-      ]
-    },
-    {
-      "name": "flightline",
-      "description": "Set up or harden a project's engineering process so quality has an automated floor instead of depending on anyone's discipline — version control, code style, code review, CI/CD, and dependency/build management — across a six-stage gated flow, tuned for a world where agents write much of the code. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/flightline"
-      ]
-    },
-    {
-      "name": "assay",
-      "description": "Risk-driven test planning and hardening: choose what to test, the test type, the test doubles, and the cases that actually catch bugs, across an eight-stage gated flow. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/assay"
-      ]
-    },
-    {
-      "name": "gauge",
-      "description": "Engineer a codebase's feedback surface so an agent gets clear, fast, local, attributed, hard-to-fake-green signal — strict typing, boundary validation, errors-as-values, structured failures, observability — across a five-stage gated flow. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/gauge"
-      ]
-    },
-    {
-      "name": "stationkeeping",
-      "description": "Take a system from merged to reliably serving users in production and keep it there: deployment & release strategy, infrastructure-as-code & config, observability, monitoring & alerting, SLOs & incident response, capacity, cost, and backup/DR — across a seven-stage gated flow, tuned for a world where agents operate production and read a green dashboard as safety. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/stationkeeping"
-      ]
-    },
-    {
-      "name": "husbandry",
-      "description": "Keep a software system cheaply changeable over its whole life — the 60–80%-of-cost maintenance phase: make technical debt visible and budgeted, refactor safely under test, manage defects to root cause, evolve versions/APIs/dependencies without breaking callers or hitting EOL, and handle legacy and retirement — across a six-stage gated flow, tuned for a world where an agent does the maintaining and reaches for a rewrite. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/husbandry"
-      ]
-    },
-    {
-      "name": "aegis",
-      "description": "Weave security through the whole lifecycle instead of bolting it on: a risk-based stance and the timeless principles (least privilege, defense in depth, fail secure, zero trust), threat modeling (STRIDE), secure design and coding (never trust input, never invent crypto, secrets out of code, least privilege), SAST/DAST/SCA gates, OWASP-class defenses, and runtime defense with incident response — across a six-stage gated flow, tuned for a world where an agent writes insecure code by default and ships a vulnerability green. The defensive half of the security pair (the shield); its adversarial counterpart is the gungnir skill. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/aegis"
-      ]
-    },
-    {
-      "name": "gungnir",
-      "description": "Attack your own system — under explicit authorization — to prove its defenses hold: scope and authorize (the absolute first gate — only systems you own or are permitted in writing to test), recon, scan, exploit and confirm real vulnerabilities (not scanner false positives), chain small flaws into a real attack and show true impact, then report, drive the fix, and re-test — across a six-stage gated flow. Authorized, defensive penetration testing only. The offensive half of the security pair (the spear) that proves what the aegis skill builds. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
-      "source": "./",
-      "strict": false,
-      "skills": [
+        "./skills/groundwork",
+        "./skills/load-bearing",
+        "./skills/flightline",
+        "./skills/assay",
+        "./skills/stationkeeping",
+        "./skills/husbandry",
+        "./skills/gauge",
+        "./skills/plumb",
+        "./skills/aegis",
         "./skills/gungnir"
-      ]
-    },
-    {
-      "name": "plumb",
-      "description": "Audit code for craft — and write it craft-grade — so it stays cheap to read and change: intent-revealing names, small single-purpose functions, comments that explain why, earned abstraction (DRY but not premature), cohesion and low coupling, SOLID and design patterns as guidance not dogma, the trust-chain escape hatches (Any/cast/isinstance/getattr and their cross-language family) contained at the edges via parse-don't-validate, the classic code smells swept, and testability as the design litmus — across a six-stage gated flow, tuned for a world where an agent writes plausible-but-clever code and is itself the next reader. The cross-cutting craft/legibility lens. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/plumb"
       ]
     }
   ]
