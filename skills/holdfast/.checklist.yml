@@ -1,0 +1,27 @@
+# Flight checklist for the holdfast skill — FOUNDATION cut, 3 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: frame -> communication -> ordering.
+# Forthcoming stages (replication, consistency, sharding, fault-tolerance,
+# coordination) will be appended after frame..ordering when those references land.
+phases:
+  - name: frame
+    checks:
+      - id: distribution-justified
+        description: "The first law applied — distribution justified by a REAL driver (scale: data/traffic too big for one machine; availability: no single point of failure; latency: users too far for one location; or the problem is inherently multi-site), OR the dramatically simpler single-machine option deliberately chosen. Distributing for fashion is the most expensive mistake on the list; a single strong box has shared memory, one clock, and all-or-nothing failure"
+      - id: failure-model-named
+        description: "The failure model for THIS system named — what can fail (nodes crash; the network delays without bound, drops, duplicates, reorders, and partitions; there is no global clock and no global state) — and the THIRD STATE accepted: every remote operation has three outcomes (success / failure / 'I don't know'), not two, so the design must carry a branch for 'unknown' ('slow' and 'dead' are indistinguishable, so a timeout is a guess)"
+
+  - name: communication
+    checks:
+      - id: third-state-handled
+        description: "Every remote interaction survives 'I don't know': delivery semantics chosen deliberately (at-most-once may lose; at-least-once may duplicate — the common choice; effectively-once = at-least-once + idempotency, since exactly-once DELIVERY is essentially impossible given the third state), and operations made IDEMPOTENT (idempotency keys / dedup table, or naturally-idempotent 'set to X' rather than 'add X') so a duplicate delivery is harmless"
+      - id: retry-discipline
+        description: "Retries disciplined — bounded, with exponential BACKOFF + JITTER, a retry budget, and a CIRCUIT BREAKER, and ONLY idempotent operations retried. Naive retries are a retry storm that turns a struggling service into a dead one (a Cook cascade). The recipe in one line: timeout + bounded-retry(backoff+jitter) + idempotency key + circuit breaker"
+      - id: no-naive-sync-chains
+        description: "Deep synchronous call chains avoided or bounded — a sync chain's availability is the PRODUCT of each link's and its latency is the SUM (five 99.9% hops ~ 99.5%); bound with bulkheads, tight inner timeouts, deadline propagation, async where possible. And because services deploy independently at DIFFERENT versions, the message schema is forward/backward compatible (route the API-evolution mechanics to flightline / load-bearing)"
+
+  - name: ordering
+    checks:
+      - id: no-wallclock-ordering
+        description: "Cross-machine events are NOT ordered by wall-clock time — clocks drift and skew (NTP residual is tens of ms and can jump backward, so wall-clock time is non-monotonic), so wall-clock last-write-wins SILENTLY drops data; a monotonic clock is used for durations only, never for cross-machine order. Where order matters it is established by CAUSALITY (happened-before / logical or vector clocks / version vectors), and CONCURRENT writes are DETECTED and resolved (merge / CRDT / app-level), not silently clobbered — remembering you only get the partial (causal) order for free; a true total order costs coordination"
