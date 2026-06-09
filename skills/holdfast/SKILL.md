@@ -17,23 +17,29 @@ description: >
   expensive and best used sparingly); partitioning data for scale (range vs hash vs
   consistent hashing, the partition key that keeps hot operations on one shard, skew
   and hot keys, secondary-index trade-offs, rebalancing without mass migration, and
-  routing metadata that is itself a consensus problem); and the first law — don't
-  distribute until you must. Use when the user designs or reviews anything that
-  spans machines: RPC / microservices, retries and idempotency, message queues and
-  delivery guarantees, event ordering, clocks and timestamps across servers,
-  replication and failover, consistency models and consensus, partitioning /
-  sharding, or asks whether a distributed design is correct. Triggers on "is this
-  retry safe", "exactly-once", "idempotency", "is this distributed design correct",
-  "microservice call chain", "ordering / timestamps across servers", "is this
-  replication safe", "split-brain", "eventual vs strong consistency",
-  "read-your-writes", "CAP / CP vs AP", "linearizability", "how strong a consistency
-  do we need", "do we need consensus", "Raft / Paxos / etcd / ZooKeeper", "how
-  should I shard this", "partition / shard key", "consistent hashing", "hot key /
-  hotspot", "rebalancing", "should this even be distributed". The agent-era
-  distributed-correctness lens — the FIRST skill of the distributed suite, a
-  FOUNDATION cut plus replication, consensus, and sharding (frame · communication ·
-  ordering · replication · consensus · sharding); fault tolerance and coordination
-  are forthcoming stages.
+  routing metadata that is itself a consensus problem); tolerating faults as the
+  default, not the exception (failure models from crash-stop to Byzantine and what
+  each costs, why failure detection is a guess, redundancy only across independent
+  fault domains, graceful degradation, bulkheads / circuit breakers / backpressure
+  to contain the blast radius, MTTR over MTBF, and chaos engineering); and the first
+  law — don't distribute until you must. Use when the user designs or reviews
+  anything that spans machines: RPC / microservices, retries and idempotency,
+  message queues and delivery guarantees, event ordering, clocks and timestamps
+  across servers, replication and failover, consistency models and consensus,
+  partitioning / sharding, fault tolerance and graceful degradation, or asks whether
+  a distributed design is correct. Triggers on "is this retry safe", "exactly-once",
+  "idempotency", "is this distributed design correct", "microservice call chain",
+  "ordering / timestamps across servers", "is this replication safe", "split-brain",
+  "eventual vs strong consistency", "read-your-writes", "CAP / CP vs AP",
+  "linearizability", "how strong a consistency do we need", "do we need consensus",
+  "Raft / Paxos / etcd / ZooKeeper", "how should I shard this", "partition / shard
+  key", "consistent hashing", "hot key / hotspot", "rebalancing", "is this
+  fault-tolerant", "failure model", "circuit breaker / bulkhead", "graceful
+  degradation", "chaos engineering", "MTTR", "should this even be distributed". The
+  agent-era distributed-correctness lens — the FIRST skill of the distributed suite,
+  a FOUNDATION cut plus replication, consensus, sharding, and fault tolerance (frame
+  · communication · ordering · replication · consensus · sharding · fault-tolerance);
+  distributed transactions & coordination is the one forthcoming stage.
 argument-hint: "[distributed design or code to audit, or the thing you're about to distribute]"
 allowed-tools: Read Bash Edit Write
 ---
@@ -63,7 +69,7 @@ A distributed system is a set of independent computers that fail independently, 
 
 ## The reference library
 
-The depth lives in `references/`. Open each when a stage sends you there — not all upfront. Six references back this foundation-plus-replication-consensus-and-sharding cut:
+The depth lives in `references/`. Open each when a stage sends you there — not all upfront. Seven references back this foundation-plus-replication-consensus-sharding-and-fault-tolerance cut:
 
 - **[references/the-three-enemies.md](references/the-three-enemies.md)** — the foundation: partial failure, the unreliable async network, no global clock/state, the **third state**, concurrency/non-determinism, the eight fallacies, the Cook framing, and the first law (don't distribute until you must). Load at STAGE 0; it is the key to all of it.
 - [references/communication.md](references/communication.md) — how nodes talk *despite* the third state: RPC as a leaky abstraction, sync vs async (and why deep sync chains cascade — availability multiplies, latency adds), delivery semantics (at-most/at-least/effectively-once), idempotency as the headline weapon, timeout/retry/backoff+jitter/circuit-breaker, and schema evolution across independently-deployed versions.
@@ -71,8 +77,9 @@ The depth lives in `references/`. Open each when a stage sends you there — not
 - [references/replication.md](references/replication.md) — keeping copies of the same data without losing or corrupting it: the three topologies (single-leader / multi-leader / leaderless), synchronous vs asynchronous and the writes async failover drops, failover hazards (split-brain, fencing), write conflicts and how leaderless quorums (W+R>N), read-repair, anti-entropy and version vectors handle them, the replication-lag anomalies (read-your-writes / monotonic-reads / consistent-prefix), eventual consistency and its limits, and change propagation (statement / WAL / logical-row CDC). Applies STAGE 2's ordering lesson and bridges to consistency & consensus.
 - [references/consistency-and-consensus.md](references/consistency-and-consensus.md) — the heart: the consistency spectrum (linearizable → sequential → causal → eventual) and choosing the weakest model still correct; the three meanings of "consistency" untangled (ACID-C vs CAP-C vs the model spectrum) and linearizability vs serializability; CAP as it really is (partition is not optional → CP vs AP, not three-choose-two) and PACELC (coordination costs latency even without a partition); consensus as the algorithmic core (what reduces to it, FLP and how real systems sidestep it via safety-always/liveness-under-timing, Paxos vs Raft, majority quorums and odd-sized clusters); and the posture — don't hand-roll consensus, use it sparingly.
 - [references/sharding.md](references/sharding.md) — splitting *different* data across nodes for scale (orthogonal to replication, and layered with it — each shard is itself a replicated cluster): the partitioning schemes (range vs hash vs consistent hashing vs fixed partition count) and choosing a partition key that fits the access pattern; skew and the single hot key hashing can't fix; secondary-index trade-offs (local scatter-gather reads vs global cross-partition writes); rebalancing without mass migration (and why auto-rebalance + auto-failure-detection can cascade); request routing whose partition→node map is itself consensus-backed metadata; and minimizing the painful cross-shard joins and transactions.
+- [references/fault-tolerance.md](references/fault-tolerance.md) — Cook's *How Complex Systems Fail* made into code: failure is the default, so build a reliable whole from unreliable parts. The failure models (crash-stop / crash-recovery / omission / Byzantine, and the 2f+1 vs 3f+1 price of malice); why failure detection is an unavoidable guess (heartbeat/timeout, the timeout dilemma, phi-accrual); redundancy and its one precondition — *independent* failure (correlated failures across rack/AZ/version defeat it); failover and recovery (fence, catch up, MTTR over MTBF); containing the blast radius (graceful degradation, bulkheads, circuit breakers, backpressure, timeouts); and designing for failure then *exercising* it with chaos engineering.
 
-> **Scope note.** This is the foundation cut plus replication, consensus, and sharding. The remaining stages — **fault tolerance** and **distributed transactions & coordination** (2PC/Saga, leader election, locks, ZooKeeper/etcd) — are forthcoming. Until then, holdfast gates the six stages below.
+> **Scope note.** This is the foundation cut plus replication, consensus, sharding, and fault tolerance. The one remaining stage — **distributed transactions & coordination** (2PC/Saga, leader election, locks, ZooKeeper/etcd) — is forthcoming. Until then, holdfast gates the seven stages below.
 
 ---
 
@@ -159,12 +166,28 @@ Open **[references/sharding.md](references/sharding.md)**. When data is too big 
 - **Expect skew and the hot key.** Real load is power-law; "uniform" rarely holds. Hashing fixes order-clustering but **not a single hot key** (a celebrity, a viral post — same hash, same shard) — split it with a random prefix/suffix and re-gather on read. And face the **secondary-index** trade-off: a **local** (document-partitioned) index is cheap to write but a query **scatter-gathers** every shard; a **global** (term-partitioned) index reads efficiently but writes are expensive, cross-partition, and usually async (the index lags). No free option.
 - **Make rebalancing and routing safe.** Rebalance by moving the **minimum** data, online and fairly (never `hash mod N`). Beware the cascade: **auto-rebalance + auto-failure-detection** can read a merely-slow node (STAGE 0) as dead, kick off a massive data move, and tip a strained system over (a Cook cascade) — keep a **human in the loop**. Routing needs the partition→node map, which is consistent cluster **metadata** living in a coordination service (ZooKeeper / etcd) that runs on **consensus** (STAGE 4) — *consensus reappears.* And **minimize cross-shard work** — joins need a shuffle (denormalize, co-locate), cross-shard transactions need distributed coordination (2PC — forthcoming) that is slow and fragile; design to keep them single-shard.
 
-### FINAL GATE (foundation + replication + consensus + sharding cut)
+### GATE — clear before FAULT-TOLERANCE
 1. `checklist check sharding partition-key-fits-access`
 2. `checklist check sharding skew-and-secondary-indexes-handled`
 3. `checklist check sharding rebalance-and-routing-safe`
 4. `checklist verify sharding`
-5. `checklist show` — confirm all six stages passed.
+
+---
+
+## STAGE 6 — Fault tolerance (a reliable whole from unreliable parts)
+
+Open **[references/fault-tolerance.md](references/fault-tolerance.md)**. This stage gathers every failure the earlier stages met into one discipline, and it is essentially Cook's *How Complex Systems Fail* turned into engineering. The premise is the one from STAGE 0: **in a distributed system failure is the constant background, not an exception** — with enough nodes, *something* is broken at any instant, so the job is to build a reliable whole from unreliable parts. Fault tolerance is therefore not a feature; it is the **floor**.
+
+- **Name the failure model, and treat detection as a guess.** Decide how bad a node may get and design for exactly that: **crash-stop** (halts for good — simplest) → **crash-recovery** (returns, maybe stale, maybe a zombie — needs recovery + fencing) → **omission** (drops messages) → **Byzantine** (lies / arbitrary). Malice is expensive: f crash failures need **2f+1** nodes, f Byzantine need **3f+1** — so **don't pay for BFT inside a trusted datacenter** (default to crash faults; reserve BFT for untrusted settings — blockchain, aerospace). And failure **detection** (heartbeat + timeout) cannot tell *dead* from *slow* (STAGE 0) — too short a timeout false-positives a slow node (needless failover, the STAGE 5 cascade); prefer an accrual detector (phi-accrual) and respect that a false positive often hurts more than the slowness.
+- **Make redundancy real, and recover fast.** Eliminate single points of failure with spares — but redundancy masks **only independent** failures: replicas in the same rack / AZ / power feed / buggy version die from **one** event, so spread across **fault domains** and avoid shared dependencies. On failover, **fence** the old component (no zombie / split-brain — STAGE 3) and don't lose in-flight state; a recovering node must **catch up** before it serves and never serve stale data. Because failure is inevitable, **optimize MTTR over MTBF** — fast automatic recovery beats chasing "never fails."
+- **Contain the blast radius, then exercise it.** When part fails, **degrade gracefully** (cache / stale / shed load / partial results) rather than collapse. Stop the cascade (Cook) with **bulkheads** (isolate resources so one failure can't drain them all), **circuit breakers** (stop calling a dead dependency — kills the STAGE 1 retry storm), **backpressure / load-shedding** (reject early, don't die wholesale), and **timeouts everywhere** (never wait forever). Then **design for failure** as the default path and **exercise it — chaos engineering** (kill nodes, add latency, partition the network): a failure mode you have never exercised is one whose real reliability you do not know.
+
+### FINAL GATE (foundation + replication + consensus + sharding + fault-tolerance cut)
+1. `checklist check fault-tolerance failure-model-and-detection-honest`
+2. `checklist check fault-tolerance redundancy-without-correlation`
+3. `checklist check fault-tolerance blast-radius-contained`
+4. `checklist verify fault-tolerance`
+5. `checklist show` — confirm all seven stages passed.
 6. `checklist done` — clear this run's state.
 
 ---
@@ -202,4 +225,12 @@ holdfast is the **distributed-failure-mode correctness lens**, held over any des
 - **Ignoring the secondary-index tax** — a local index scatter-gathers reads across all shards; a global index makes writes cross-partition and lagging. Pick deliberately.
 - **A partition key that doesn't fit the access pattern** — you pay a cross-shard join or transaction on every important query; co-locate what's read together.
 - **Fully automatic rebalancing wired to automatic failure detection** — a slow node read as dead triggers a mass data move and cascades; keep a human in the loop.
+- **Treating failure as an exception, not the default** — with enough nodes something is always broken; build for it, don't bolt it on.
+- **A failure-detection timeout set too short** — it false-positives slow-but-alive nodes into "dead," triggering needless failover and flapping (a cascade); tune it, prefer an accrual detector.
+- **Trusting redundancy against correlated failure** — replicas in the same rack / AZ / power feed / software version die together; spread across fault domains.
+- **Leaving a single point of failure** — the one load balancer, the one coordinator; find it and give it a spare.
+- **Chasing MTBF while ignoring MTTR** — since failure is inevitable, fast automatic recovery usually buys more than "never fails."
+- **No bulkheads or circuit breakers** — one slow dependency drains every thread/connection and sinks the whole service; isolate and fail fast.
+- **Never running a chaos / game-day exercise** — a failure mode you've never triggered is one whose blast radius you'll first learn about in production.
+- **Paying for BFT (3f+1) inside a trusted network** — Byzantine tolerance is for untrusted participants; default to crash faults (2f+1) in your own datacenter.
 - **Skipping a GATE** — and remember the first law: the cheapest distributed bug is the one you avoided by not distributing.
