@@ -1,26 +1,64 @@
-# Trust-Chains & Smells
+# Trust-Chains & Smells — the six lenses
 
-This reference is the depth behind **STAGE 4 — Trust & smells** of the [../SKILL.md](../SKILL.md) flight plan, the signature stage of `plumb`: it governs the two checks `trust-chain-contained` and `smells-swept` — where a static guarantee leaks from compile time to runtime, and what the rest of the code smells of. The human-era author who reached for `cast`, `isinstance`, `Any`, `getattr` (or `as`, reflection, `interface{}`, `unwrap`) felt a small unease — they knew they were stepping outside the guarantee the tool would otherwise prove, vouching for something the checker no longer could, and they confined it to a boundary and felt wrong scattering it through the core. The agent scatters these *without* that unease, because each one makes the immediate thing work and the agent feels none of the lost guarantee — so the trust chain leaks all through the core, one convenient `cast`/`isinstance`/`Any` at a time, and it stops at the *finding-list* rather than the fix because producing the audit already turned the task green. For *why* this is the shift, read [agent-era-shifts.md](agent-era-shifts.md) — **SHIFT 5** (the agent leaves the trust-chain escape hatches) and **SHIFT 7** (smells found, never fixed). This file is the *how*: the trust-chain reframe, the per-language family, the parse-don't-validate cure, primitive obsession and unrepresentable illegal states, and the Fowler smell catalog with the fix each one points at.
+This reference is the depth behind **STAGE 4 — Trust & smells** of the [../SKILL.md](../SKILL.md) flight plan, the signature stage of `plumb`. It governs the two checks: **`trust-chain-contained`** (where a static guarantee leaks from compile time to runtime) and **`smells-swept`** (what the rest of the code smells of, organized below into six lenses).
 
-The governing fact, inherited from [decision-tree.md](decision-tree.md) and restated here because every call below is judged against it:
+A code-smell catalog is famously hard to remember, and the reason is that most catalogs list *names* without a *lens* — twenty unrelated labels you memorize and forget. This file is built the other way. **Every smell answers one question — "does it make the code harder to understand, or harder to change?"** — and the smells that share an *underlying failure* are grouped into a **family with one lens**, the way the trust-chain reframe gives `Any`/`cast`/`isinstance`/`getattr` a single lens ("where did trust leak from compile time to runtime?"). Learn the six lenses and the master question, and you do not need to memorize the list — you can *derive* it.
 
-> **Code is read far more than it is written, the next reader is an agent with no context, so boring-and-legible beats clever — and every rule here is guidance, judged by whether it makes the code clearer, never applied as dogma.**
+The governing fact, inherited from [decision-tree.md](decision-tree.md) and restated because every call below is judged against it:
 
-The meta-rule bites especially hard at this stage, because the trust-chain discipline is the one most easily turned into zealotry: **the test for every move here is "does this make the code clearer and cheaper to change, or just more rule-compliant?"** A `cast` at a genuine boundary is *correct*; ripping it out to satisfy a "no casts" rule, or hand-rolling a validation layer the data never needed, is over-application — its own defect. You are hunting *leaks*, not *occurrences*.
+> **Code is read far more than it is written, the next reader is an agent with no context, so boring-and-legible beats clever — and every rule here is guidance, judged by whether it makes the code clearer and cheaper to change, never applied as dogma.**
 
 ## Contents
 
-- [The trust-chain reframe — the signature of the skill](#the-trust-chain-reframe--the-signature-of-the-skill)
-- [The Python family in depth](#the-python-family-in-depth)
-- [The cross-language family — same smell, different clothes](#the-cross-language-family--same-smell-different-clothes)
-- [The cure — parse, don't validate](#the-cure--parse-dont-validate)
-- [Primitive obsession and illegal states](#primitive-obsession-and-illegal-states)
-- [The Fowler smell catalog — each a tell, each pointing at a fix](#the-fowler-smell-catalog--each-a-tell-each-pointing-at-a-fix)
+- [The map — one question, seven families, two checks](#the-map--one-question-seven-families-two-checks)
+- [The signature lens — the trust chain](#the-signature-lens--the-trust-chain)
+  - [The reframe — a chain of guarantees, and where it breaks](#the-reframe--a-chain-of-guarantees-and-where-it-breaks)
+  - [The Python family in depth](#the-python-family-in-depth)
+  - [The cross-language family — same smell, different clothes](#the-cross-language-family--same-smell-different-clothes)
+  - [The cure — parse, don't validate](#the-cure--parse-dont-validate)
+  - [Primitive obsession and illegal states](#primitive-obsession-and-illegal-states)
+- [The six lenses of the sweep](#the-six-lenses-of-the-sweep)
+  - [Lens 1 — Coupling: change one place, ripple everywhere](#lens-1--coupling-change-one-place-ripple-everywhere)
+  - [Lens 2 — Mutable shared state: you can't reason from a local read](#lens-2--mutable-shared-state-you-cant-reason-from-a-local-read)
+  - [Lens 3 — Size & bloat: more than fits in one head](#lens-3--size--bloat-more-than-fits-in-one-head)
+  - [Lens 4 — Abstraction misalignment: not aimed at the real axis of change](#lens-4--abstraction-misalignment-not-aimed-at-the-real-axis-of-change)
+  - [Lens 5 — Implicit intent: the meaning lives in your head, not the code](#lens-5--implicit-intent-the-meaning-lives-in-your-head-not-the-code)
+  - [Lens 6 — Dead matter & noise: existence is a cost](#lens-6--dead-matter--noise-existence-is-a-cost)
 - [Sweep, dispose, boy-scout](#sweep-dispose-boy-scout)
 
 ---
 
-## The trust-chain reframe — the signature of the skill
+## The map — one question, seven families, two checks
+
+The whole stage hangs off **one master question, applied to any line you are unsure about:**
+
+> **"Will the person who has to change this in six months — very likely a fresh agent session, possibly you — have an easier time, or a harder one?"** If the honest answer is *harder*, it is a smell, whatever its textbook name; if *neither*, it is a style opinion, not a finding (drop it). The name is a label for a thing you already detected with this question — never the other way around.
+
+The families below each isolate *one underlying failure* and hand you the lens that detects every member of it:
+
+| # | Family | The underlying failure | Check |
+|---|---|---|---|
+| **signature** | **Trust chain** | a guarantee the tool could prove is downgraded to "trust me" / "decide at runtime" | `trust-chain-contained` |
+| **1** | Coupling | things that should move independently are tangled, so a change can't be made locally | `smells-swept` |
+| **2** | Mutable shared state | one datum is writable by many, at uncertain times, so you can't reason from a local read | `smells-swept` |
+| **3** | Size & bloat | a unit holds more than fits in working memory | `smells-swept` |
+| **4** | Abstraction misalignment | the abstraction is cut along the wrong axis — too little *or* too much | `smells-swept` |
+| **5** | Implicit intent | the meaning lives in convention and comments, not in the code itself | `smells-swept` |
+| **6** | Dead matter & noise | code that exists costs attention and maintenance without paying it back | `smells-swept` |
+
+A **seventh family — error handling** (swallowed exceptions, exceptions as control flow, over-defensive checks, leaky abstractions) — has its lens *"errors and boundaries are first-class design, not an afterthought"* and already lives in [functions-and-flow.md](functions-and-flow.md) (and the *tooling* in the `gauge` skill); it is named here only so the map is complete.
+
+The families are not disjoint, and the overlaps are where the deepest smells sit: **primitive obsession** is both a trust-chain leak (the checker can't tell `UserId` from `Email`) and an implicit-intent smell (Lens 5) — the two families meet there. **Mutable shared state** (Lens 2) is itself a kind of implicit coupling (Lens 1). When a smell shows up under two lenses, that is signal it is worth fixing, not a contradiction.
+
+The signature lens gets the deepest treatment because it is `plumb`'s identity and the model for the rest; then the six lenses are the spine of the `smells-swept` sweep.
+
+---
+
+## The signature lens — the trust chain
+
+The human-era author who reached for `cast`, `isinstance`, `Any`, `getattr` (or `as`, reflection, `interface{}`, `unwrap`) felt a small unease — they knew they were stepping outside the guarantee the tool would otherwise prove, vouching for something the checker no longer could, and they confined it to a boundary and felt wrong scattering it through the core. The agent scatters these *without* that unease, because each one makes the immediate thing work and the agent feels none of the lost guarantee — so the trust chain leaks all through the core, one convenient `cast`/`isinstance`/`Any` at a time, and it stops at the *finding-list* rather than the fix because producing the audit already turned the task green. For *why* this is the shift, read [agent-era-shifts.md](agent-era-shifts.md) — **SHIFT 5** (the agent leaves the trust-chain escape hatches) and **SHIFT 7** (smells found, never fixed).
+
+### The reframe — a chain of guarantees, and where it breaks
 
 The reframe is this: **a static checker holds a chain of guarantees** — at every point, a value's type is *proven*, not *asserted*, and the proof flows from where the value was created to where it is used. `Any`, `cast`, `isinstance`, `getattr` and their family are each a **point where that chain breaks** — where a guarantee the tool *could have proven* is downgraded to something weaker. They are not all the same break:
 
@@ -39,9 +77,7 @@ So the question is **never "can I use it?"** — every one of these is necessary
 
 > **The meta-rule, applied here:** the goal is not zero escape hatches — it is the chain *unbroken in the core*. An isolated `cast` at a clear edge is fine; do not flag it. A cluster in the domain is the finding. Counting occurrences instead of locating leaks is the over-application failure.
 
----
-
-## The Python family in depth
+### The Python family in depth
 
 The family is larger than the canonical four — anything that lets a value be used at a type the checker cannot prove belongs to it. Each below is a tiny bad-vs-good; the *fix tooling* (the strict checker, `pydantic`, `NewType`) is the `gauge` skill's — plumb names the leak and routes the parse-once fix there.
 
@@ -98,9 +134,7 @@ Fix: if the set of names is known, it is a record (dataclass / TypedDict / model
 | primitive obsession (`user_id: str`, `email: str`) | the checker treats them as interchangeable | domain types (`NewType`) — see below |
 | `eval` / `exec` | the ultimate break — arbitrary code, zero static knowledge, an injection surface | almost never necessary; a dispatch dict or real parsing |
 
----
-
-## The cross-language family — same smell, different clothes
+### The cross-language family — same smell, different clothes
 
 Every statically-checked language has this family; the *clothes* differ, the *break* is identical. The meta-point governs which ones to worry about most.
 
@@ -111,21 +145,19 @@ Every statically-checked language has this family; the *clothes* differ, the *br
 | **C#** | `dynamic`, `object` | `as`, explicit cast | `is` + cast | reflection | `object` / `Dictionary<string,object>` | nullable-ref + exhaustive `switch` |
 | **C / C++** | `void*` (the ultimate) | C-cast, `reinterpret_cast`, `const_cast` | `dynamic_cast` | macros, union type-punning | — | `std::variant` + `std::visit` |
 | **Go** | `interface{}` / `any` | `x.(T)` type assertion | type `switch x.(type)` | `reflect`, `unsafe.Pointer` | `map[string]any` | a concrete struct; `errors.As` |
-| **Rust** | `Box<dyn Any>` | `as` numeric truncation | `match` on an enum | `transmute` | — | `enum` + exhaustive `match` |
+| **Rust** | `Box<dyn Any>` | `unwrap`/`expect` (panic-cast), `as` truncation | `match` on an enum | `transmute` | — | `enum` + exhaustive `match` |
 | **Kotlin / Swift** | `Any` | `!!`, `as!` | `is` / `as?` | reflection | — | sealed/`enum` + `when`/`switch`, `as?` returning optional |
 
 Two language details worth pulling out:
 
 - **Rust `unwrap`/`expect` are a panic-cast** — "I assert this `Option`/`Result` is the happy variant, panic if I'm wrong." Scattered through core logic they are the same smell as `cast`; at a boundary in a script they are fine. `unsafe` and `transmute` are the deeper breaks.
-- **Go's discarded error `_` is a swallowed-failure cousin** — `v, _ := f()` throws away the very signal the type system handed you. (Error-swallowing proper is the [functions-and-flow.md](functions-and-flow.md) concern; here it is the trust-chain framing — you discarded a proven failure value.)
+- **Go's discarded error `_` is a swallowed-failure cousin** — `v, _ := f()` throws away the very signal the type system handed you. (Error-swallowing proper is the [functions-and-flow.md](functions-and-flow.md) concern — the seventh family; here it is the trust-chain framing: you discarded a proven failure value.)
 
 **The meta-point that decides what to hunt:** *good* languages and styles make "I am breaking the guarantee" **explicit and local** — Rust's `unsafe` block you must write and a reviewer can grep, TypeScript's lintable `any`, Kotlin's glaring `!!` that no one types by accident. *Bad* ones make the break **invisible and default** — C's `void*` reachable everywhere, a dynamic language's untyped-by-default surface, reflection buried deep where no reader will find it. So the craft move, in any language, is to make the break **shout**: confine it to a named, greppable, local place, never let it be the silent default. A `# type: ignore` with a rule-code and a reason shouts; an unannotated function that infers `Any` is silent — and the silent one is the dangerous one, because the next session reads its silence as safety.
 
----
+### The cure — parse, don't validate
 
-## The cure — parse, don't validate
-
-This is the direct antidote to the broken chain, and the single idea this stage exists to install.
+This is the direct antidote to the broken chain, and the single idea this lens exists to install.
 
 **The wrong way reconstructs trust everywhere.** The untrusted data flows inward still-untrusted, and every function that touches it re-checks the shape — a scatter of `isinstance` / `cast` / `if x is not None` re-validations, the break leaking through the whole core:
 
@@ -165,11 +197,9 @@ The dynamism is contained to `parse_charge`; past it, the type *is* the proof, a
 
 > **CRITICAL DELEGATION:** the static-layer *tooling* — the strict checker, `pydantic`/`zod`, `NewType` — is the `gauge` skill's craft, and so is the *boundary-validation* mechanism. plumb's job at `trust-chain-contained` is to **spot the leak** (the cluster of re-checks in the core, the `dict[str, Any]` flowing inward) and **name the parse-once fix**, then route the implementation to `gauge`. Do not re-teach `pydantic`/`zod` here.
 
----
+### Primitive obsession and illegal states
 
-## Primitive obsession and illegal states
-
-Two related cures that finish closing the chain.
+Two related cures that finish closing the chain — and the place the trust-chain family meets **Lens 5 (implicit intent)**, because a domain type both proves a guarantee *and* records intent.
 
 **Cure primitive obsession with domain types.** When `user_id: str` and `email: str` are both just `str`, the checker treats them as interchangeable and will happily let you pass an email where a user-id is wanted — a leak the type system was *capable* of catching but wasn't asked to.
 
@@ -207,27 +237,69 @@ A bad combination is now a compile-time impossibility, not a runtime check you m
 
 ---
 
-## The Fowler smell catalog — each a tell, each pointing at a fix
+## The six lenses of the sweep
 
-`smells-swept` is the rest of the classic catalog beyond the trust-chain. **Each smell is a *tell* — a surface symptom — that points at a specific refactoring.** This is the [decision-tree.md smell→fix map](decision-tree.md#the-smell--fix-map-stage-4-and-the-disposition-router-stage-5); the table here is the depth behind it. Spotting a smell is the *finding*; the fix-direction is what makes it actionable rather than a complaint.
+`smells-swept` is everything beyond the trust-chain. Run the six lenses over the unit; each isolates one underlying failure, names its members, and hands you the cure. This is the depth behind the [decision-tree.md smell→fix map](decision-tree.md#the-smell--fix-map-stage-4-and-the-disposition-router-stage-5) — spotting a smell is the *finding*; the lens's cure is what makes it actionable.
 
-| Smell | The tell | Points at |
-|---|---|---|
-| **Long function** | many lines, several jobs, mixed abstraction levels in one body | extract functions — one thing, one level ([functions-and-flow.md](functions-and-flow.md)) |
-| **Large class** | too many fields/methods, more than one responsibility | extract class; split by responsibility (cohesion — [abstraction-and-design.md](abstraction-and-design.md)) |
-| **Long parameter list** | 4+ params, or several always passed together | introduce a parameter object |
-| **Data clumps** | the same group of fields/args travels together everywhere | make the clump a type — it's a value object that wants to exist |
-| **Magic numbers / strings** | unexplained literals (`* 0.0875`, `"PENDING"`) | named constants / an enum |
-| **Shotgun surgery** | one conceptual change forces edits scattered across many files | move the related behavior together — raise cohesion |
-| **Divergent change** | *one* module changes for many unrelated reasons | split it — each reason-to-change is its own responsibility |
-| **Feature envy** | a method mostly manipulates *another* object's data | move the method to the data it envies |
-| **Message chains** | `a.getB().getC().getD()` — the caller knows the whole graph | hide the navigation behind a method (Law of Demeter) |
-| **Primitive obsession** | `str`/`int` for domain concepts; interchangeable `user_id`/`email` | domain types (see above) |
-| **Comments as deodorant** | a comment explaining a confusing block, masking the real problem | fix the code so the comment isn't needed; a comment is not a fix for bad code |
+### Lens 1 — Coupling: change one place, ripple everywhere
 
-Two notes on judgment: **shotgun surgery and divergent change are duals** — one change hitting many places (too little cohesion) versus one place hit by many changes (too little separation) — and the fix for each is the opposite cohesion move. And **comments-as-deodorant** is the trust-chain idea applied to prose: a comment that exists to make a confusing line bearable is hiding a smell the way a `cast` hides a leak; the cure is to make the code clear, not to annotate the unclear.
+**The underlying failure: things that should move independently are tangled, so a change can't be localized.** The members:
 
-> **The meta-rule, once more:** a "smell" that doesn't actually tax the next reader is a *style opinion*, not a finding — drop it (the [decision-tree.md finding taxonomy](decision-tree.md#audit-vs-setup--pick-the-mode-then-the-finding-taxonomy)). A three-line function with a magic `2` that everyone reads as "double it" is not primitive obsession waiting to be cured. Flag what leaks or what genuinely confuses; let the formatter own formatting (`flightline`).
+- **Shotgun surgery** — one conceptual change forces scattered edits across many files.
+- **Divergent change** — the dual: *one* module changes for many unrelated reasons (its responsibilities aren't single).
+- **Feature envy** — a method mostly manipulates *another* object's data; it's living in the wrong house.
+- **Message chains / train wrecks** (`a.b().c().d()`) — the caller depends on a long internal structure; any link changing breaks it (Law of Demeter).
+- **Temporal coupling** — you must call A before B, but nothing *enforces* the order; it lives only in someone's head.
+- **Circular dependencies**, and implicit coupling through **global mutable state / singletons** (which is also Lens 2).
+
+**The lens / cure: pursue *locality of change*** — put what changes together in one place (high cohesion), keep what changes separately apart (low coupling). Shotgun surgery and divergent change are the two failure directions of the same dial, and their fixes are opposite cohesion moves. Hide a message chain behind a method that owns the navigation. Make temporal coupling structural — a builder, a type that can't be used before it's ready, a state machine — so the order can't be got wrong. This is the *architectural* cohesion of the `load-bearing` skill, applied inside a module; the module-boundary calls themselves route there.
+
+### Lens 2 — Mutable shared state: you can't reason from a local read
+
+**The underlying failure: one datum is writable by many places, at uncertain times, so reading a function locally no longer tells you how it behaves.** The members: hidden side effects, global mutable state, aliasing bugs (two names for one mutable object, so a write *here* changes a value *there*), and the sharpest form — **concurrency: races and deadlocks** (shared mutable state + multiple threads).
+
+```python
+# bad — behaviour depends on invisible, mutable, shared state
+TAX_RATE = 0.0                      # mutated somewhere far away
+def price(net): return net * (1 + TAX_RATE)   # reading this tells you nothing; depends on global history
+
+# good — state is an explicit input; the function is a pure, local, reasoning-closed unit
+def price(net: Cents, tax_rate: Rate) -> Cents:
+    return Cents(round(net * (1 + tax_rate)))
+```
+
+**The lens / cure: make state reasoning-closed.** Prefer immutability, pure functions, and value objects; make every state change **explicit and local**; push side effects (I/O, network, the clock, randomness) out to the edges and keep the core pure — *functional core, imperative shell*. Then any function can be understood by reading it alone, which is the whole game. Note this lens is a special case of Lens 1: shared mutable state is implicit coupling through data. (The immutability/effect-typing *tooling* and errors-as-values overlap the `gauge` skill; *testing* the concurrency is `assay`'s. plumb's job is to name the smell — "this can't be reasoned about locally" — and route the mechanics.)
+
+### Lens 3 — Size & bloat: more than fits in one head
+
+**The underlying failure: a unit does or holds more than fits in working memory, so the cognitive load to understand it exceeds what a reader can hold.** The members: long functions, god classes / god functions, long parameter lists, **data clumps** (the same group of fields always travelling together — a value object that wants to exist), deep nesting (arrow code / the pyramid of doom), and high cyclomatic complexity.
+
+**The lens / cure: decompose, extract, raise the abstraction level.** A sharp test is Ousterhout's **deep module**: a *good* module is a **simple interface over a complex implementation** — it hides a lot and asks little of the caller; a *bad* one is a **shallow module** whose interface is as complex as its implementation, so it hides nothing and only adds surface. A module's value is **the complexity it hides minus the complexity its interface adds** — so the cure for bloat is not just "smaller pieces" but "pieces whose interfaces are *much* simpler than their innards." (The function-shape depth — small, one thing, one level, few parameters, no flag arguments — is [functions-and-flow.md](functions-and-flow.md).)
+
+### Lens 4 — Abstraction misalignment: not aimed at the real axis of change
+
+**The underlying failure: the abstraction is cut along an axis that doesn't match how requirements actually vary — and *both* directions are a disease.**
+
+- **Under-abstracted: duplication** — the same knowledge encoded in several places, so a change must be made in all of them.
+- **Over-abstracted: speculative generality** — extension points, parameters, and layers built for an imagined future no one needs (the YAGNI violation); **middle man** (a class that only forwards to another); premature abstraction.
+
+**The lens / cure: aim the abstraction at what *actually* changes.** This is the [decision-tree.md duplicate-or-abstract fork](decision-tree.md#the-duplicate-or-abstract-fork-dry-vs-aha--stage-3): **a wrong abstraction is more expensive than the duplication it replaced** (Sandi Metz), because once the two needs diverge it becomes the thing no one can change. So tolerate a little duplication until the axis of change is clear — *rule of three, then extract* (AHA: avoid hasty abstraction). DRY removes duplicated **knowledge**, not coincidentally-similar **text**. (Cohesion/coupling and SOLID/patterns depth is [abstraction-and-design.md](abstraction-and-design.md).)
+
+### Lens 5 — Implicit intent: the meaning lives in your head, not the code
+
+**The underlying failure: the code's meaning is carried by convention, comments, and tribal knowledge rather than written into the code itself** — so the next reader has to reconstruct what you meant. The members: **magic numbers / strings** (`* 0.0875`, `"PENDING"`), **flag parameters** (`f(true)` — *what* is true?), **boolean blindness** (a run of `True`/`False` no one can keep straight), **primitive obsession** (which is *also* a trust-chain leak — this is where the two families meet), and **comments-as-deodorant** (prose explaining a confusing block instead of fixing the block).
+
+**The lens / cure: encode the intent *into the code*** — named constants, enums, value types / `NewType`, named/keyword arguments, and types that make illegal states unrepresentable. A comment that exists to make a confusing line bearable is hiding a smell the way a `cast` hides a leak; the cure is to make the code say what it means, not to annotate the unclear. (Naming — the highest-ROI form of making intent explicit — is [naming.md](naming.md); the domain-types depth is in the signature lens above; the **flag-argument** and parameter-shape depth is [functions-and-flow.md](functions-and-flow.md)'s, as for Lens 3.)
+
+### Lens 6 — Dead matter & noise: existence is a cost
+
+**The underlying failure: every line that exists demands attention and maintenance, but not every line pays it back.** The members: dead code (unreachable or never called), **commented-out code** ("might need it later" — version control already remembers; delete it), redundant comments that merely restate the code, unused variables and imports, and lazy classes that don't earn their keep.
+
+**The lens / cure: delete, ruthlessly.** The least code is the most legible: there is less to read, less to understand, less to keep correct. The agent has no instinct to delete (removing code earns no green and it feels no ownership of the clutter), so this is a deliberate move — the cheapest, safest legibility win there is, and the one most often skipped.
+
+> **Where the seventh family lives:** error handling — swallowed exceptions, exceptions-as-control-flow, over-defensive guards, leaky abstractions — is covered in [functions-and-flow.md](functions-and-flow.md) under the lens *"errors and boundaries are first-class design, not an afterthought,"* with the strict-failure *tooling* in `gauge`. It is one of the families; it just has a home of its own.
+
+> **The meta-rule, once more:** a "smell" that doesn't actually tax the next reader is a *style opinion*, not a finding — drop it (the [decision-tree.md finding taxonomy](decision-tree.md#audit-vs-setup--pick-the-mode-then-the-finding-taxonomy)). A three-line function with a magic `2` everyone reads as "double it" is not primitive obsession waiting to be cured. Flag what *leaks* or what *genuinely confuses*; let the formatter own formatting (`flightline`).
 
 ---
 
@@ -235,8 +307,13 @@ Two notes on judgment: **shotgun surgery and divergent change are duals** — on
 
 A smell found and never fixed is worthless — this is **SHIFT 7**, the agent stopping at the list because producing the audit already turned the task green. `smells-swept` is not "I listed the smells"; it is "each found smell has a disposition." That disposition is the next stage's router ([testability-and-disposition.md](testability-and-disposition.md)): **fix now** if small and safe (a rename, an extract under existing tests), **refactor under test** for anything larger — handed to the `husbandry` skill, which owns the refactoring *mechanics* (small steps, behavior pinned with characterization tests first, the boy-scout rule), or **accept with a written reason** (this `cast` is a real boundary; this duplication isn't stable enough to abstract yet). The trust-chain *tooling* fixes route to `gauge`; designing the tests that pin behavior before a refactor is `assay`'s; the module-boundary calls are `load-bearing`'s. plumb names the smell and routes the fix — it does not re-implement the refactoring engine.
 
-And the standing habit that keeps the catalog from re-filling: the **boy-scout rule** — when you are in a file for any reason and see a cheap, safe craft improvement under the existing tests, make it; leave the code a little cleaner than you found it. The agent has no boy-scout instinct (the cleanup earns no green, it feels no ownership), so this too must be a deliberate move, not a trusted reflex. Smells accumulate exactly as fast as no one disposes of them.
+Two habits keep the catalog from re-filling, and both must be deliberate because the agent has neither instinct:
+
+- **Smells are hypotheses, not verdicts.** "Smell" is the right word — it says *"something here is probably worth a look,"* not *"this is definitely wrong."* Every family has legitimate exceptions: a `cast` at a true boundary, a hand-rolled loop on a real hot path, framework-mandated boilerplate, duplication that isn't yet stable enough to abstract. **Do not turn the six lenses into a new checklist to enforce** — that is the dogma the whole skill warns against, aimed back at itself. Confirm each candidate against the master question before you call it a finding.
+- **The boy-scout rule** — when you're in a file for any reason and see a cheap, safe craft improvement under the existing tests, make it; leave the code a little cleaner than you found it. Smells accumulate exactly as fast as no one disposes of them.
+
+And when in doubt about any candidate, fall all the way back to the one question every lens is a special case of: **"will the next person to change this have an easier time, or a harder one?"** If *harder*, it is a smell, whatever its name. If you can't say *harder*, let it go.
 
 ---
 
-**Cross-links:** [agent-era-shifts.md](agent-era-shifts.md) (SHIFT 5 and SHIFT 7 — *why* this stage reads as it does) · [decision-tree.md](decision-tree.md) (the edge-or-core router, the smell→fix map, the disposition router this file is the depth behind) · [functions-and-flow.md](functions-and-flow.md) (error-swallowing, the function-shape smells) · [abstraction-and-design.md](abstraction-and-design.md) (cohesion, the cure for shotgun-surgery/divergent-change) · [testability-and-disposition.md](testability-and-disposition.md) (where every swept smell gets disposed) · [craft-stance.md](craft-stance.md) (boring-over-clever, guidance-not-dogma) · [naming.md](naming.md) (the names a domain type earns) · [../SKILL.md](../SKILL.md) (the six-stage flight plan this reference serves).
+**Cross-links:** [agent-era-shifts.md](agent-era-shifts.md) (SHIFT 5 and SHIFT 7 — *why* this stage reads as it does) · [decision-tree.md](decision-tree.md) (the edge-or-core router, the smell→fix map, the disposition router this file is the depth behind) · [functions-and-flow.md](functions-and-flow.md) (the seventh family — error handling — and the function-shape smells of Lens 3) · [abstraction-and-design.md](abstraction-and-design.md) (cohesion for Lens 1, DRY-vs-AHA for Lens 4, SOLID/patterns) · [testability-and-disposition.md](testability-and-disposition.md) (where every swept smell gets disposed) · [craft-stance.md](craft-stance.md) (boring-over-clever, guidance-not-dogma) · [naming.md](naming.md) (intent-revealing names — the front line of Lens 5) · [../SKILL.md](../SKILL.md) (the six-stage flight plan this reference serves).
