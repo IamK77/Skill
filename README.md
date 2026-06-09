@@ -1,8 +1,8 @@
 # Skill
 
-A suite of agent-era engineering skills for Claude Code, plus the `checklist` CLI that gates them.
+Agent-era skill suites for Claude Code, organized by domain — each installable as one plugin, gated by the `checklist` CLI. The first suite is **engineering**; more domains will follow.
 
-## The suite
+## The engineering suite
 
 Ten Claude Code skills covering the engineering lifecycle, its security, and the craft of the code itself. The lifecycle runs **groundwork → load-bearing → flightline → assay → stationkeeping → husbandry**, with **gauge** (feedback), the **aegis** / **gungnir** security pair (shield & spear), and **plumb** (code craft) cross-cutting:
 
