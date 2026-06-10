@@ -17,11 +17,12 @@ import { checkCommand } from '../../src/commands/check.js';
 // trailing NAME suffix of the argument is not silently ignored while the numeric
 // prefix steers the write into a DIFFERENT phase than the one named.
 //
-// These probes are written to redden on CURRENT code (fail-first proof,
-// probe-construction §8). See the structured verdict for the disposition: the
-// parser leniency itself has no spec requiring rejection, so the honest landing
-// is pin-as-contract-decision for #1, while #2 (cross-phase divergence) is an
-// oracle-backed silent-wrong-action.
+// These probes were written to redden on the pre-fix code (fail-first proof,
+// probe-construction §8). Disposition (resolved — audit batch 2, finding M5):
+// the owner ruled FIX. findPhaseIndex now only accepts pure digit strings as
+// indexes, so a numeric-prefix typo is rejected at the command layer (exit 1,
+// no state write). This suite is the sanctioned regression test for that
+// downstream consequence.
 // ────────────────────────────────────────────────────────────────────────────
 
 let tmpDir: string;
@@ -83,13 +84,10 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// DEFERRED (assay audit — owner to rule): findPhaseIndex's parseInt leniency lets
-// a numeric-prefix typo clear the wrong gate. Skipped until the strict-parse-vs-
-// lenient decision is made; un-skip to drive the fix.
-describe.skip('check — bogus numeric-prefix phase arg must not silently clear a gate', () => {
-  // PROBE 1 — the candidate's proposed negative-space oracle, verbatim:
+describe('check — bogus numeric-prefix phase arg must not silently clear a gate', () => {
+  // PROBE 1 — negative-space oracle:
   //   `check <numeric-prefix-garbage> <id>` must exit 1 AND leave state with no
-  //   new passed entry. Reddens on current code (the gate IS cleared, exit 0).
+  //   new passed entry. (Pre-fix the gate WAS cleared, exit 0.)
   it('a typo phase ref "0typo" exits non-zero and writes no passed entry', () => {
     writeChecklist(ONE_PHASE_YML);
 
@@ -107,7 +105,7 @@ describe.skip('check — bogus numeric-prefix phase arg must not silently clear 
   //   `check survey shared-id` is gate-blocked (exit 1, no write) because
   //   charter is incomplete. The fat-fingered `0survey` must not produce a
   //   *different, passing* outcome that clears a check in a phase the agent did
-  //   not name. Reddens on current code: '0survey' clears charter[shared-id].
+  //   not name. (Pre-fix, '0survey' cleared charter[shared-id].)
   it('"0survey" must not silently clear a check in charter when the name says survey', () => {
     writeChecklist(TWO_PHASE_SHARED_YML);
 

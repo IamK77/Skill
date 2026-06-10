@@ -57,27 +57,27 @@ describe('findPhaseIndex — numeric-parse blind spots', () => {
     expect(() => findPhaseIndex(config, '3')).toThrow('Phase not found');
   });
 
-  it('leading-whitespace numeric " 1" is parsed as index 1 (parseInt tolerates leading ws)', () => {
-    // parseInt(" 1", 10) === 1. So a phase ref with a leading space still
-    // resolves by index. If src ever switched to Number()/strict parse this
-    // would change — this pins the current parseInt behavior.
-    expect(findPhaseIndex(config, ' 1')).toBe(1);
+  // The strict-parse contract (audit batch 2, finding M5): ONLY a pure digit
+  // string (/^\d+$/) is an index. parseInt's prefix leniency used to resolve
+  // these typo shapes to a real index and let them clear the wrong gate; they
+  // must now fall through to the name lookup and throw. The exhaustive typo
+  // table lives in _assay_probe_findphaseindex_typo.test.ts.
+
+  it('leading-whitespace numeric " 1" is NOT an index (strict parse) → name lookup → throws', () => {
+    expect(() => findPhaseIndex(config, ' 1')).toThrow('Phase not found');
   });
 
-  it('numeric with trailing garbage "1abc" resolves to index 1 (parseInt stops at "a")', () => {
-    // parseInt("1abc", 10) === 1, !isNaN, in range → numeric branch wins even
-    // though "1abc" is not a clean integer and is not a phase name. Sharp
-    // blind spot: coverage on the numeric branch never reveals this.
-    expect(findPhaseIndex(config, '1abc')).toBe(1);
+  it('numeric with trailing garbage "1abc" is NOT an index → name lookup → throws', () => {
+    // Pre-fix, parseInt("1abc", 10) === 1 silently resolved this to index 1.
+    expect(() => findPhaseIndex(config, '1abc')).toThrow('Phase not found');
   });
 
-  it('float-looking "1.9" resolves to index 1 (parseInt truncates at the dot)', () => {
-    // parseInt("1.9", 10) === 1.
-    expect(findPhaseIndex(config, '1.9')).toBe(1);
+  it('float-looking "1.9" is NOT an index → name lookup → throws', () => {
+    expect(() => findPhaseIndex(config, '1.9')).toThrow('Phase not found');
   });
 
-  it('"2.0" (== last valid index as a float string) resolves to last index 2', () => {
-    expect(findPhaseIndex(config, '2.0')).toBe(2);
+  it('"2.0" (== last valid index as a float string) is NOT an index → throws', () => {
+    expect(() => findPhaseIndex(config, '2.0')).toThrow('Phase not found');
   });
 
   it('empty string "" falls through to name search and throws', () => {

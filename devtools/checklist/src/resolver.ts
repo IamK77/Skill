@@ -93,9 +93,18 @@ export function clearActivePointer(targetDir?: string): boolean {
 }
 
 export function findPhaseIndex(config: ChecklistConfig, nameOrIndex: string): number {
-  const num = parseInt(nameOrIndex, 10);
-  if (!isNaN(num) && num >= 0 && num < config.phases.length) {
-    return num;
+  // STRICT index parse: only a pure digit string is an index. parseInt's
+  // lenient prefix parse ("1abc" → 1, "0survey" → 0, "1.9" → 1) let a typo'd
+  // phase reference silently resolve to a real index — and record a pass
+  // against a stage the caller never named. Anything that is not all digits
+  // falls through to the name lookup, where a miss is an error.
+  if (/^\d+$/.test(nameOrIndex)) {
+    const num = parseInt(nameOrIndex, 10);
+    if (num < config.phases.length) {
+      return num;
+    }
+    // Out-of-range pure number: fall through — a phase may literally be NAMED
+    // e.g. "99"; otherwise the name lookup below throws.
   }
 
   const idx = config.phases.findIndex(p => p.name.toLowerCase() === nameOrIndex.toLowerCase());
