@@ -6,25 +6,26 @@
   },
   "metadata": {
     "description": "Agent-era skill suites for Claude Code: engineering and distributed, gated by the checklist CLI",
-    "version": "1.0.2"
+    "version": "1.1.0"
   },
   "plugins": [
     {
       "name": "engineering",
-      "description": "Ten gated, agent-era engineering skills as one suite — spanning the software lifecycle: requirements (groundwork), architecture (load-bearing), engineering process (flightline), testing (assay), deployment & operations (stationkeeping), maintenance & evolution (husbandry); plus four cross-cutting lenses: the feedback surface (gauge), code craft (plumb), and the security pair — shield (aegis) and spear (gungnir). Each is a multi-stage gated flow, tuned for a world where agents write much of the code. Installs every skill under the /engineering: prefix. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "description": "Ten gated, agent-era engineering skills as one suite — spanning the software lifecycle: requirements (groundwork), architecture (load-bearing), engineering process (flightline), testing (assay), deployment & operations (stationkeeping), maintenance & evolution (husbandry); plus four cross-cutting lenses: the feedback surface (gauge), code craft (plumb), and the security pair — shield (aegis) and spear (gungnir). A separate un-gated navigator, pilot, routes you to the right skill(s) for a task — or tells you when none is needed. Each gated skill is a multi-stage flow, tuned for a world where agents write much of the code. Installs every skill under the /engineering: prefix. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
       "source": "./",
       "strict": false,
       "skills": [
-        "./skills/groundwork",
-        "./skills/load-bearing",
-        "./skills/flightline",
-        "./skills/assay",
-        "./skills/stationkeeping",
-        "./skills/husbandry",
-        "./skills/gauge",
-        "./skills/plumb",
-        "./skills/aegis",
-        "./skills/gungnir"
+        "./skills/engineering/pilot",
+        "./skills/engineering/groundwork",
+        "./skills/engineering/load-bearing",
+        "./skills/engineering/flightline",
+        "./skills/engineering/assay",
+        "./skills/engineering/stationkeeping",
+        "./skills/engineering/husbandry",
+        "./skills/engineering/gauge",
+        "./skills/engineering/plumb",
+        "./skills/engineering/aegis",
+        "./skills/engineering/gungnir"
       ]
     },
     {
@@ -33,7 +34,7 @@
       "source": "./",
       "strict": false,
       "skills": [
-        "./skills/holdfast"
+        "./skills/distributed/holdfast"
       ]
     }
   ]
