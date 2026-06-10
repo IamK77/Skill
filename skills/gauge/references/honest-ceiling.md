@@ -60,6 +60,7 @@ The weak dimensions among the six are **trustworthy** and its corollary **absenc
 | Unknown / `Any` types the checker skipped | **checker's own report-on-unchecked mode** | a count + locations of expressions the checker could not verify | fail the build if the count rises |
 | Code paths no test ever ran | **coverage read as a map of untested paths** | a list of lines/branches with no behavioral signal | a floor that blocks merge below threshold |
 | Tests that run a path but assert nothing | **mutation testing** | surviving mutants = assertions with no teeth | run on high-stakes modules; fail on survivors |
+| One rule encoded twice, in opposite directions | **twin-predicate diff** | a divergence silent today that flips wrong under the next state added | a review/CI check on duplicated predicates; one named set both consume |
 
 The literal knobs:
 
@@ -108,6 +109,37 @@ A mutation tool is itself a signal source, so the skill's own rule applies to it
 - **`src`-layout + editable install (import-path mismatch).** If the mutator mutates files in one place but the runner imports the package from another (`pip install -e .` resolving to the original `src/`), every test runs against the *unmutated* module and **every mutant "survives"** — a confident, wrong "all survived" that reads as "your tests have no teeth" when the tool actually tested nothing. A false *all-survived* is worse than no signal.
 
 When the tool can't run faithfully on a module, don't ship it as a gate. Prefer a **rebuild-based mutator** with no import-path ambiguity — `cargo-mutants` (Rust) compiles each mutant, Stryker (TS/JS) instruments the build — or skip mutation there and lean on the other absence-signals (the coverage map, test diversity, any cross-implementation conformance/contract suite). An honestly-incomplete coverage map beats a confidently-false mutation score.
+
+### The fourth silence — twin predicates that drift
+
+The three silences above are each about *one* site (an unchecked type, an untested path, an assertion-free test). There is a fourth that lives in the *relationship between two* sites, and it is the one a strict checker and a green suite both sail straight over: the **same piece of knowledge encoded twice, in opposite directions,** so the two copies agree today and silently disagree the moment the state space grows. The canonical shape:
+
+```python
+# reports.py — "what counts as revenue-bearing", written as a WHITELIST
+def revenue(orders):
+    return sum(o.amount for o in orders if o.status in ("paid", "shipped"))
+
+# elsewhere — "what counts as active", the SAME set, written as a BLACKLIST
+def active_count(orders):
+    return sum(1 for o in orders if o.status not in ("cancelled", "pending"))
+```
+
+Today both pick out `{paid, shipped}`. They are one piece of knowledge — *which states are live* — wearing two encodings. Now add a `delivered` state, and the two diverge **with no signal at all**: the whitelist *excludes* `delivered` (revenue silently under-counts — but at least it waits for a human to add the state), while the blacklist *includes* it (`delivered` is silently counted active, and no one was asked whether that is right). Nothing fails. No type is unknown, no path uncovered, no assertion missing. Both the checker and the suite are green over a logic error now in production.
+
+Two moves convert this silence into a signal:
+
+- **The whitelist/blacklist asymmetry — prefer the encoding that fails loud under extension.** A whitelist (`status in {…}`) **fails safe**: a newly added state is excluded by default, so the worst case is a too-small result waiting for someone to notice. A blacklist (`status not in {…}`) **fails silent**: a new state is *admitted* by default, quietly changing behaviour with no one in the loop. When a predicate enumerates membership, prefer the whitelist form, and pair it with the exhaustiveness machinery (the `assert_never` move / STAGE 1) so adding a state forces a checker error at the *definition* rather than a silent shift at every use site.
+- **Name the set once; make both sites consume it.** The real cure is to refuse the duplication — give the knowledge a single home and a name, and the divergence becomes impossible to construct:
+
+```python
+REVENUE_BEARING = {Status.PAID, Status.SHIPPED}        # the ONE definition
+ACTIVE          = REVENUE_BEARING - {Status.DELIVERED}  # forced to answer: is delivered active?
+
+def revenue(orders):      return sum(o.amount for o in orders if o.status in REVENUE_BEARING)
+def active_count(orders): return sum(1 for o in orders if o.status in ACTIVE)
+```
+
+Naming does more than de-duplicate: an *anonymous* predicate (`status not in ("cancelled","pending")`) has no one forced to define its semantics, so when a state is added no one is asked the question. A *named* set (`ACTIVE = REVENUE_BEARING - {Status.DELIVERED}`) cannot be written without answering "is `delivered` active?" — the name drags the silent decision into the open. **The review reflex:** the instant you see a duplicated predicate, *diff its copies* — identical means the knowledge is still latent (de-duplicate before it forks), already-diverged means you are not looking at a smell but at a live bug (a `> 365` here and a `>= 365` there is a customer-facing inconsistency, not a style nit). This reflex earns its keep especially against agent-written code, which is a prolific source of near-identical copies. (The duplication-as-knowledge framing is `plumb`'s Lens 4; the single-named-set and the `assert_never` exhaustiveness are this skill's STAGE 1 — this section is *why* the drift is a silence STAGE 4 must make audible.)
 
 ---
 

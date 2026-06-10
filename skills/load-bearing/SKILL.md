@@ -80,6 +80,8 @@ Open **[references/architecture-styles.md](references/architecture-styles.md)** 
 
 **Boundaries.** Split by **business capability / bounded context**, not by technical layer (controller/service/dao). High cohesion, low coupling. Getting a boundary wrong is expensive to redraw, and the **distributed-monolith** (services that are physically split but logically entangled) is the worst of both worlds. Because an agent has no instinct to respect a boundary — it will reach across one for a shorter path to a green test — name the **machine-enforced** mechanism that will hold the line (dependency rules, module-boundary lint, architecture fitness tests).
 
+**Design for deletion, not just for extension.** A sharp, machine-checkable reading of "low coupling" is the **deletion test**: *could this whole capability be removed in a single PR without the core bleeding?* Make it pass by pointing the dependency arrows one way — from the short-lived edge toward the long-lived core (a feature may import the core; **the core never imports a feature**) — so a feature is a clean-excisable organ, not a tumor grown through nine files. This is a better bet than designing for extension: easy-to-extend pays off only if you guessed the axis of future change right (and the speculative extension point you guessed wrong becomes dead weight you can't delete *either*), whereas easy-to-delete wins on every branch — the change that does arrive is cheaper to excise-and-replace than to unpick from an over-fitted abstraction. The `utils.py` everything imports is the anti-shape: nothing can be deleted because everything depends on it.
+
 ### GATE — clear before STAGE 2
 1. `checklist check structure style-justified`
 2. `checklist check structure boundaries-by-capability`
@@ -107,7 +109,7 @@ Reject **résumé-driven / novelty-driven** selection and **speculative abstract
 
 This stage groups the two things that are **hardest to reverse**, which in the agent era is precisely why they earn the most human judgment. Open **[references/boundaries-and-contracts.md](references/boundaries-and-contracts.md)** and **[references/data-design.md](references/data-design.md)**.
 
-**Contracts.** An interface, once depended on, is a contract that is painful to change. Design it deliberately and leave room to evolve (versioning, backward compatibility). **Interface-first** pays a triple dividend now: the contract is the spec an agent codes against, the oracle that verifies it, and the seam that lets agents work both sides in parallel against stubs. Internal module interfaces deserve the same care as the public API.
+**Contracts.** An interface, once depended on, is a contract that is painful to change. Design it deliberately and leave room to evolve (versioning, backward compatibility). **Interface-first** pays a triple dividend now: the contract is the spec an agent codes against, the oracle that verifies it, and the seam that lets agents work both sides in parallel against stubs. Internal module interfaces deserve the same care as the public API. The reliable way to *arrive* at a good interface is **caller-first**: write the call site you wish you had — plus at least two *diverse* callers, one of them a test — *before* the implementation, and derive the interface from how it wants to be used. This is what makes a module **deep** (a simple interface over a complex implementation, Ousterhout) instead of a shallow mirror of its own internals, and it surfaces the awkwardness while the design is still free; it is also the real value of TDD (*caller*-first, which the test happens to enforce, not merely *test*-first).
 
 **Data.** The data model is the single hardest part of the system to change — and agents *do not* lower migration cost, so as code gets cheap to rewrite, the data model's relative permanence only grows. Choose **SQL vs NoSQL by access pattern and consistency need**, not by fashion; make the **CAP** trade-off explicit; let **each service own its data** (a shared database is a hidden hard coupling); plan growth, indexes, and the dominant queries up front.
 
@@ -164,6 +166,8 @@ The architecture is a set of decisions, not a finished system — carry the chos
 - **Distributed monolith** — split into services that are still tightly coupled; both costs, neither benefit.
 - **Shared database across services** — a hidden hard coupling masquerading as separation.
 - **Speculative abstraction** — the swap-the-database layer you'll never use; an agent will build it on request.
+- **Designed-to-extend, impossible-to-delete** — extension points bet on a guessed future; favor the deletion test (excise a capability in one PR) and point dependency arrows edge→core.
+- **Implementation-first interface** — an API that mirrors the internal pipeline (`set_x(); prepare(); run()`); design caller-first, deriving the interface from the call site you wish you had.
 - **Boundaries by technical layer** — slicing controller/service/dao instead of by business capability.
 - **Diagram–code drift** — a beautiful diagram and a codebase that does something else; keep docs alive with the system.
 - **Architecture as a one-shot artifact** — frozen at kickoff; good architecture is continuously refactored, and that is now cheap.
