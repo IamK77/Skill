@@ -14,9 +14,9 @@ npm install -g @iamk77/skill-checklist   # the CLI that enforces every gate — 
 /plugin install distributed@skill
 ```
 
-First run: have existing code? `/engineering:assay path/to/module` — it works on any module and audits the tests you already have. Starting something new? `/engineering:groundwork <the-feature>`.
+First run: have existing code? `/engineering:assay path/to/module` — it works on any module and audits the tests you already have. Starting something new? `/engineering:groundwork <the-feature>`. Not sure which skill fits? `/engineering:pilot <your task>` routes you — or tells you when no skill is needed.
 
-Plugin-provided skills are prefixed by their plugin name — `/engineering:plumb`, `/distributed:holdfast`; bundling each suite into one plugin makes the prefix a meaningful namespace. To use a skill without plugins instead, copy `skills/<name>/` into `~/.claude/skills/` (personal) or `.claude/skills/` (per-project), keep the `checklist` CLI on `PATH`, and drop the prefix: `/assay path/to/module`.
+Plugin-provided skills are prefixed by their plugin name — `/engineering:plumb`, `/distributed:holdfast`; bundling each suite into one plugin makes the prefix a meaningful namespace. To use a skill without plugins instead, copy `skills/<suite>/<name>/` (e.g. `skills/engineering/assay/`) into `~/.claude/skills/` (personal) or `.claude/skills/` (per-project), keep the `checklist` CLI on `PATH`, and drop the prefix: `/assay path/to/module`.
 
 ## What a gated run looks like
 
@@ -45,10 +45,11 @@ PHASE 0 verified, proceed to PHASE 1            # now survey opens
 
 ## The engineering suite
 
-Ten skills covering the engineering lifecycle, its security, and the craft of the code itself. The lifecycle runs **groundwork → load-bearing → flightline → assay → stationkeeping → husbandry**, with **gauge** (feedback), the **aegis** / **gungnir** security pair (shield & spear), and **plumb** (code craft) cross-cutting:
+Ten skills covering the engineering lifecycle, its security, and the craft of the code itself. The lifecycle runs **groundwork → load-bearing → flightline → assay → stationkeeping → husbandry**, with **gauge** (feedback), the **aegis** / **gungnir** security pair (shield & spear), and **plumb** (code craft) cross-cutting. A separate un-gated navigator, **pilot**, sits in front of them all: tell it your task and it routes you to the right skill(s) in the right order — or says plainly when no skill is needed.
 
 | Skill | Lifecycle role | Stages |
 |-------|----------------|:------:|
+| [**`pilot`**](#pilot) | Navigator (un-gated front door) — routes a task to the right skill(s), or says none is needed | — |
 | [**`groundwork`**](#groundwork) | Requirements — pin down what to build before building it | 5 |
 | [**`load-bearing`**](#load-bearing) | Architecture — style, stack, boundaries, contracts, data model | 6 |
 | [**`flightline`**](#flightline) | Engineering process — version control, review, CI/CD, dependencies | 6 |
@@ -60,25 +61,31 @@ Ten skills covering the engineering lifecycle, its security, and the craft of th
 | [**`gungnir`**](#gungnir) | Adversarial validation (the spear) — authorized pentest: scope, recon, exploit, chain, fix & re-test | 6 |
 | [**`plumb`**](#plumb) | Code craft (cross-cutting, the plumb line) — naming, functions, abstraction, trust-chains, smells, testability | 6 |
 
-Every skill is a directory — `SKILL.md` + a `references/` library + a `.checklist.yml` gate definition. No build, no package step. Each section below links to the skill's directory; the stage tables live there.
+Every gated skill is a directory — `SKILL.md` + a `references/` library + a `.checklist.yml` gate definition (the navigator `pilot` is un-gated, so it carries no `.checklist.yml`). No build, no package step. Each section below links to the skill's directory; the stage tables live there.
+
+### pilot
+
+`pilot` is the **navigator** — the front door to the suite. It is a dispatcher, not a methodology, so it has **no gates**: tell it a task, a goal, or just a confusion, and it returns a routing verdict — run this skill, run these in this order, or *don't reach for a skill, here's why*. Its value is the four things a trigger-match can't do: **sequence** a multi-skill job, **redirect** ("you asked for a review, but there are no tests yet — start with `assay`"), **refuse** when no skill is warranted, and **disambiguate** the confusable pairs (`plumb` vs `gauge`, `assay` vs `gauge`, `flightline` vs `husbandry`, `aegis` vs `gungnir`). Before sending you into a gated skill it checks that the `checklist` CLI is installed.
+
+Invoke with `/engineering:pilot <the-task-to-route>` · map and references: [skills/engineering/pilot/](skills/engineering/pilot/)
 
 ### groundwork
 
 `groundwork` is the requirements work that comes *before* code. It resists the agent's strongest instinct — implement the literal ask — and instead pins down what is actually worth building. Its output is a requirements baseline — the contract the build, and later `assay`'s tests, honor.
 
-Invoke with `/engineering:groundwork <feature-or-change-to-scope>` · stages and references: [skills/groundwork/](skills/groundwork/)
+Invoke with `/engineering:groundwork <feature-or-change-to-scope>` · stages and references: [skills/engineering/groundwork/](skills/engineering/groundwork/)
 
 ### load-bearing
 
 `load-bearing` designs architecture for the agent-assisted era. Architecture is the set of decisions that are *expensive to reverse* — so the skill triages every decision into a **one-way door** (data schema, public contract, trust model, the split into services) that earns real human judgment and an ADR, or a **two-way door** that gets a default and is left for agents to refactor freely. Its output is the architecture (boundaries, contracts, data model) and the ADRs the build honors.
 
-Invoke with `/engineering:load-bearing <system-or-change-to-architect>` · stages and references: [skills/load-bearing/](skills/load-bearing/)
+Invoke with `/engineering:load-bearing <system-or-change-to-architect>` · stages and references: [skills/engineering/load-bearing/](skills/engineering/load-bearing/)
 
 ### flightline
 
 `flightline` sets up or hardens a project's engineering process so quality is an **automated floor** that holds for everyone, instead of something each contributor has to remember. The agent era makes this the whole game: the most prolific contributor is an agent with no self-discipline, so every quality property not encoded as a hard, un-gameable gate is one it will eventually violate while looking successful.
 
-Invoke with `/engineering:flightline <project-or-practice-area>` · stages and references: [skills/flightline/](skills/flightline/)
+Invoke with `/engineering:flightline <project-or-practice-area>` · stages and references: [skills/engineering/flightline/](skills/engineering/flightline/)
 
 ### assay
 
@@ -95,43 +102,43 @@ Invoke with `/engineering:flightline <project-or-practice-area>` · stages and r
 | **Bite** | Prove the suite can go red — mutation or a deliberate break — audit single-call tests, sweep for test smells |
 | **Books** | Dispose of every bug found (fix / file-and-defer / pin); close the non-functional-requirement loop |
 
-Invoke with `/engineering:assay <path/to/module>` · stages and references: [skills/assay/](skills/assay/)
+Invoke with `/engineering:assay <path/to/module>` · stages and references: [skills/engineering/assay/](skills/engineering/assay/)
 
 ### stationkeeping
 
 `stationkeeping` is the operations work that begins where a green pipeline ends: **software's life is in production, not the repository** — and most outages are not logic bugs but deployment, configuration, capacity, or dependency failures that only exist once the system is live. It holds a running system *on station* — against drift, failure, load, and attack — tuned for a world where an agent operates production and reads a green dashboard as safety and silence as health.
 
-Invoke with `/engineering:stationkeeping <service-or-system-to-operate>` · stages and references: [skills/stationkeeping/](skills/stationkeeping/)
+Invoke with `/engineering:stationkeeping <service-or-system-to-operate>` · stages and references: [skills/engineering/stationkeeping/](skills/engineering/stationkeeping/)
 
 ### husbandry
 
 `husbandry` is the maintenance-and-evolution work the whole lifecycle is really a down-payment on: maintenance is **60–80% of a system's total cost**, and software is **read and changed far more than it is written**. So it treats software not as a building you finish but as a living thing to keep cheaply changeable — tuned for a world where an agent does the maintaining and reaches for a rewrite, banks debt invisibly, refactors without a net, and rots the docs.
 
-Invoke with `/engineering:husbandry <system-or-module-to-maintain>` · stages and references: [skills/husbandry/](skills/husbandry/)
+Invoke with `/engineering:husbandry <system-or-module-to-maintain>` · stages and references: [skills/engineering/husbandry/](skills/engineering/husbandry/)
 
 ### gauge
 
 `gauge` engineers a codebase's feedback surface so an agent gets clear feedback at every step — **fast, local, attributed, deterministic, trustworthy, un-fakeable** — instead of flailing against late, opaque, or false-green signals. It is the *medium*, not a lifecycle phase: it makes the code emit clear signal and leans on its siblings for depth.
 
-Invoke with `/engineering:gauge <project-or-module>` · stages and references: [skills/gauge/](skills/gauge/)
+Invoke with `/engineering:gauge <project-or-module>` · stages and references: [skills/engineering/gauge/](skills/engineering/gauge/)
 
 ### aegis
 
 `aegis` is the **shield**: it weaves security through the whole lifecycle instead of bolting it on at the end — because the worst weaknesses are architectural and can't be patched in later. It is cross-cutting like `gauge`, owning the security line and directing the siblings (SAST/secret-scan in `flightline`, runtime defense in `stationkeeping`).
 
-Invoke with `/engineering:aegis <system-or-scope-to-secure>` · stages and references: [skills/aegis/](skills/aegis/)
+Invoke with `/engineering:aegis <system-or-scope-to-secure>` · stages and references: [skills/engineering/aegis/](skills/engineering/aegis/)
 
 ### gungnir
 
 `gungnir` is the **spear** that proves the shield: authorized, adversarial penetration testing of a system you own or have written permission to test, to find the holes while they're still cheap to fix. Its first gate is absolute — you attack only authorized targets, never anything else. **Authorized use only — your own or explicitly-permitted systems.**
 
-Invoke with `/engineering:gungnir <your-own-or-authorized-target>` · stages and references: [skills/gungnir/](skills/gungnir/)
+Invoke with `/engineering:gungnir <your-own-or-authorized-target>` · stages and references: [skills/engineering/gungnir/](skills/engineering/gungnir/)
 
 ### plumb
 
 `plumb` is the **plumb line** you hold against code to see whether it is *true*: a cross-cutting craft / legibility lens. Its thesis is the oldest in the craft — **code is written for humans to read, and only incidentally for a machine to run** — and its goal is *boring*: simple, clear, predictable code that the next reader (now usually an agent session with no context) gets at a glance. It owns the legibility line and routes fixes to its siblings (types to `gauge`, refactors to `husbandry`, tests to `assay`).
 
-Invoke with `/engineering:plumb <code-to-audit>` · stages and references: [skills/plumb/](skills/plumb/)
+Invoke with `/engineering:plumb <code-to-audit>` · stages and references: [skills/engineering/plumb/](skills/engineering/plumb/)
 
 ## The distributed suite
 
@@ -145,7 +152,7 @@ Where the engineering suite is general software practice, the **distributed** su
 
 `holdfast` is the distributed-correctness lens — the realities a single-machine programmer (and an agent) gets wrong by default. The one shift it installs is **the third state**: a remote call can succeed, fail, *or leave you not knowing which* — and single-machine code has no branch for "I don't know," which is where most distributed bugs live. Its eight stages are eight facets of one problem — surviving partial failure, an asynchronous unreliable network, and the absence of a global clock or state: frame · communication · ordering · replication · consensus · sharding · fault tolerance · coordination.
 
-Invoke with `/distributed:holdfast <design-or-code>` · stages and references: [skills/holdfast/](skills/holdfast/)
+Invoke with `/distributed:holdfast <design-or-code>` · stages and references: [skills/distributed/holdfast/](skills/distributed/holdfast/)
 
 ## checklist
 
@@ -165,10 +172,14 @@ To run it from a clone instead, `cd Skill/devtools/checklist && npm install && n
 
 ```
 skills/
-  groundwork/  load-bearing/  flightline/  assay/  stationkeeping/
-  husbandry/   gauge/         aegis/       gungnir/ plumb/          # the engineering suite
-  holdfast/                                                          # the distributed suite
-                 # each: SKILL.md  references/  .checklist.yml  LICENSE  NOTICE
+  engineering/                                                       # the engineering suite
+    pilot/                                                           # navigator (un-gated front door)
+    groundwork/  load-bearing/  flightline/  assay/  stationkeeping/
+    husbandry/   gauge/         aegis/       gungnir/  plumb/
+  distributed/                                                       # the distributed suite
+    holdfast/
+                 # each gated skill: SKILL.md  references/  .checklist.yml  LICENSE  NOTICE
+                 # pilot (un-gated): SKILL.md  references/  LICENSE  NOTICE
 devtools/
   checklist/             # the gate CLI (see its own README)
 .claude-plugin/
