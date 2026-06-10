@@ -35,7 +35,7 @@ jobs:
       released: ${{ steps.release.outputs.releases_created }}
       tag: ${{ steps.release.outputs['devtools/checklist--tag_name'] }}
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -51,10 +51,10 @@ jobs:
       run:
         working-directory: devtools/checklist
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ needs.release-please.outputs.tag }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
