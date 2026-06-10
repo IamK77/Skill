@@ -29,7 +29,7 @@ npx @iamk77/skill-checklist show
 
 The published package ships a compiled `dist/` build, and `bin/checklist.js` runs it through Node directly (`require('../dist/index.js')`) — no `tsx` and no compile step at install time. Its only runtime dependencies are `commander`, `gray-matter`, and `js-yaml`.
 
-Requires Node >= 18.
+Requires Node >= 20 (the `commander` dependency declares `>=20`).
 
 ### From source
 
