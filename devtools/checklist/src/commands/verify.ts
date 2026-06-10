@@ -1,5 +1,5 @@
 import { loadChecklist } from '../loader.js';
-import { loadState, saveState, setItemResult } from '../state.js';
+import { loadState, mergeAndSaveState, setItemResult, type ChecklistState } from '../state.js';
 import { findPhaseIndex, gatePriorPhases, runPhase, resolveDir } from '../resolver.js';
 import { formatVerifyResult, formatGateFailure } from '../formatter.js';
 
@@ -20,18 +20,24 @@ export async function verifyCommand(phaseArg: string, options: { dir?: string; p
 
     const result = await runPhase(config.phases[phaseIndex], phaseIndex, cwd, targetPath);
 
+    const updates: ChecklistState = { checked: {} };
     for (const c of result.checks) {
       if (c.kind === 'mechanical' && c.result) {
         // Record the CURRENT result, pass or fail — so a check that was green on
         // an earlier verify and has since regressed overwrites its stale pass and
         // the gate (isItemChecked === 'pass') sees current reality, instead of a
         // failing re-verify silently leaving the old pass (and the gate) standing.
-        setItemResult(state, phaseIndex, c.item.id, c.result);
+        setItemResult(updates, phaseIndex, c.item.id, c.result);
       }
     }
 
-    saveState(cwd, state);
-    console.log(formatVerifyResult(result, state, config.phases.length));
+    // merge-save the DELTA (only the checks this run actually executed), not the
+    // loaded snapshot: records written by a concurrent check/verify since our
+    // load survive, and our stale in-memory copies of untouched items cannot
+    // clobber newer results. Print from the merged state so the summary matches
+    // what is actually on disk.
+    const merged = mergeAndSaveState(cwd, updates);
+    console.log(formatVerifyResult(result, merged, config.phases.length));
 
     if (result.mechanicalPassed < result.mechanicalTotal) {
       process.exit(1);

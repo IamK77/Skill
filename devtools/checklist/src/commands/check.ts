@@ -1,5 +1,5 @@
 import { loadChecklist } from '../loader.js';
-import { loadState, saveState, setItemResult } from '../state.js';
+import { loadState, mergeAndSaveState, setItemResult, type ChecklistState } from '../state.js';
 import { findPhaseIndex, gatePriorPhases, resolveDir } from '../resolver.js';
 import { formatCheckConfirm, formatGateFailure } from '../formatter.js';
 
@@ -31,8 +31,12 @@ export function checkCommand(phaseArg: string, itemId: string, options: { dir?: 
       process.exit(1);
     }
 
-    setItemResult(state, phaseIndex, itemId, { status: 'pass', message: 'confirmed' });
-    saveState(cwd, state);
+    // merge-save the DELTA (just this confirmation), not the loaded snapshot:
+    // records written by a concurrent invocation since our load survive, and our
+    // stale in-memory copies of untouched items cannot clobber newer results.
+    const updates: ChecklistState = { checked: {} };
+    setItemResult(updates, phaseIndex, itemId, { status: 'pass', message: 'confirmed' });
+    mergeAndSaveState(cwd, updates);
     console.log(formatCheckConfirm(phaseIndex, itemId));
   } catch (e) {
     console.error(e instanceof Error ? e.message : String(e));

@@ -18,6 +18,7 @@ import * as path from 'node:path';
 import {
   loadState,
   saveState,
+  mergeAndSaveState,
   clearState,
   getItemResult,
   setItemResult,
@@ -291,5 +292,102 @@ describe('phaseProgress counting boundaries', () => {
     setItemResult(state, 0, 'a', { status: 'pass', message: '' });
     // Querying phase 1 must not see phase 0's record.
     expect(phaseProgress(state, 1, ['a'])).toEqual({ done: 0, total: 1 });
+  });
+});
+
+describe('saveState atomicity — observable surface (white-box pins live in state-atomic-write.test.ts)', () => {
+  it('leaves no temp litter after a successful save', () => {
+    saveState(tmpDir, { checked: {} });
+    saveState(tmpDir, { checked: { '1': { b: { status: 'fail', message: 'x' } } } });
+    expect(fs.readdirSync(tmpDir)).toEqual([STATE_FILE]);
+  });
+});
+
+describe('mergeAndSaveState — concurrent load-modify-save interleave (lost-update regression)', () => {
+  // Simulates two checklist invocations racing the same state file. The
+  // interleave is sequential (single process) but exercises the same
+  // load → record → save windows real concurrent runs hit.
+
+  it('a save does not drop a record another invocation wrote since our load', () => {
+    // A and B both start from the empty state…
+    const aUpdates: ChecklistState = { checked: {} };
+    const bUpdates: ChecklistState = { checked: {} };
+    setItemResult(aUpdates, 0, 'from-a', { status: 'pass', message: 'a' });
+    setItemResult(bUpdates, 1, 'from-b', { status: 'pass', message: 'b' });
+
+    mergeAndSaveState(tmpDir, aUpdates); // …A lands first…
+    mergeAndSaveState(tmpDir, bUpdates); // …then B, which never saw A's record
+
+    const final = loadState(tmpDir);
+    expect(isItemChecked(final, 0, 'from-a')).toBe(true); // pre-fix: lost
+    expect(isItemChecked(final, 1, 'from-b')).toBe(true);
+  });
+
+  it('merges records within the SAME phase key, not just across phases', () => {
+    const aUpdates: ChecklistState = { checked: {} };
+    const bUpdates: ChecklistState = { checked: {} };
+    setItemResult(aUpdates, 0, 'x', { status: 'pass', message: 'a' });
+    setItemResult(bUpdates, 0, 'y', { status: 'fail', message: 'b' });
+
+    mergeAndSaveState(tmpDir, aUpdates);
+    mergeAndSaveState(tmpDir, bUpdates);
+
+    const final = loadState(tmpDir);
+    expect(getItemResult(final, 0, 'x')).toEqual({ status: 'pass', message: 'a' });
+    expect(getItemResult(final, 0, 'y')).toEqual({ status: 'fail', message: 'b' });
+  });
+
+  it('our fresh result for an item we re-ran wins over the on-disk record', () => {
+    // Disk holds an older pass; this run re-verified the item and it FAILED.
+    saveState(tmpDir, { checked: { '0': { x: { status: 'pass', message: 'stale' } } } });
+    const updates: ChecklistState = { checked: {} };
+    setItemResult(updates, 0, 'x', { status: 'fail', message: 'regressed' });
+
+    mergeAndSaveState(tmpDir, updates);
+
+    expect(getItemResult(loadState(tmpDir), 0, 'x')).toEqual({
+      status: 'fail',
+      message: 'regressed',
+    });
+  });
+
+  it('does NOT resurrect a stale pass for an item this run never touched', () => {
+    // The audit scenario: another invocation records a FAIL for x after we
+    // loaded (when x was still a pass). Our save of an unrelated item must keep
+    // their fail — re-writing our stale snapshot would re-green a failing gate.
+    saveState(tmpDir, { checked: { '0': { x: { status: 'pass', message: 'old' } } } });
+    loadState(tmpDir); // our invocation loads while x is still green
+    saveState(tmpDir, { checked: { '0': { x: { status: 'fail', message: 'regressed' } } } });
+
+    const updates: ChecklistState = { checked: {} }; // delta: only OUR new item
+    setItemResult(updates, 0, 'y', { status: 'pass', message: 'confirmed' });
+    mergeAndSaveState(tmpDir, updates);
+
+    const final = loadState(tmpDir);
+    expect(getItemResult(final, 0, 'x')!.status).toBe('fail'); // not resurrected
+    expect(isItemChecked(final, 0, 'y')).toBe(true);
+  });
+
+  it('degrades to a plain replace when the on-disk file went corrupt since our load', () => {
+    fs.writeFileSync(path.join(tmpDir, STATE_FILE), '{ torn write', 'utf-8');
+    const updates: ChecklistState = { checked: {} };
+    setItemResult(updates, 0, 'a', { status: 'pass', message: 'ok' });
+
+    const merged = mergeAndSaveState(tmpDir, updates);
+
+    expect(merged).toEqual(updates);
+    expect(loadState(tmpDir)).toEqual(updates); // file is valid again
+  });
+
+  it('returns the merged state it wrote (disk records + our delta)', () => {
+    saveState(tmpDir, { checked: { '0': { a: { status: 'pass', message: 'kept' } } } });
+    const updates: ChecklistState = { checked: {} };
+    setItemResult(updates, 1, 'b', { status: 'pass', message: 'new' });
+
+    const merged = mergeAndSaveState(tmpDir, updates);
+
+    expect(merged).toEqual(loadState(tmpDir));
+    expect(getItemResult(merged, 0, 'a')).toEqual({ status: 'pass', message: 'kept' });
+    expect(getItemResult(merged, 1, 'b')).toEqual({ status: 'pass', message: 'new' });
   });
 });
