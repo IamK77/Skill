@@ -10,8 +10,8 @@ npm install -g @iamk77/skill-checklist   # the CLI that enforces every gate — 
 
 ```
 /plugin marketplace add IamK77/Skill
-/plugin install engineering@agent-era-skills
-/plugin install distributed@agent-era-skills
+/plugin install engineering@skill
+/plugin install distributed@skill
 ```
 
 First run: have existing code? `/engineering:assay path/to/module` — it works on any module and audits the tests you already have. Starting something new? `/engineering:groundwork <the-feature>`.
