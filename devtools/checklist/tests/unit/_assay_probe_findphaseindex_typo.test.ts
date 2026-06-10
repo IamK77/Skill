@@ -18,16 +18,14 @@ import type { ChecklistConfig } from '../../src/types.js';
 // ORACLE (probe-construction.md §1, spec/hand-derived rung): a string that is
 // NEITHER a clean integer index NOR an exact (case-insensitive) phase name is
 // a typo and must fall through to the name search and throw "Phase not found".
-// The CONTROL below ("chartr", no leading digit) already does exactly that on
-// the current code — it is the trusted reference behavior these inputs deviate
-// from. This is the *correct*-behavior assertion required by the fail-first
-// rule (§8); it is expected to go RED on the current (unfixed) code.
+// The CONTROL below ("chartr", no leading digit) already did exactly that on
+// the pre-fix code — it is the trusted reference behavior these inputs deviate
+// from.
 //
-// Disposition note: per BOOKS §8 / coverage-and-mutation §4, a lenient parser
-// is normally a PIN, not a fix. This survives that bar only because the lenient
-// path produces a MISLEADING SILENT OUTCOME (the wrong gate marked passed) —
-// the "documented ≠ scenes-à-faire" override. We do NOT fix src/ here; this is
-// the proving red test for a file-and-defer / contract-decision.
+// Disposition (resolved — audit batch 2, finding M5): the owner ruled FIX.
+// findPhaseIndex now treats an argument as an index only when it is a pure
+// digit string (/^\d+$/); everything else goes to the name lookup, where a
+// miss throws. This suite is the sanctioned regression test for that contract.
 // ---------------------------------------------------------------------------
 
 const config: ChecklistConfig = {
@@ -38,20 +36,17 @@ const config: ChecklistConfig = {
   ],
 };
 
-// DEFERRED (assay audit — owner to rule): findPhaseIndex's parseInt accepts
-// leading-numeric-prefix typos ('0typo','1abc'). Skipped pending a strict-parse
-// decision; un-skip to drive the fix.
-describe.skip('findPhaseIndex rejects leading-numeric-prefix typos', () => {
+describe('findPhaseIndex rejects leading-numeric-prefix typos', () => {
   // CONTROL — the trusted reference. A typo with NO leading digit already
-  // throws on the current code. This anchors the oracle: it is the behavior
-  // every typo below should share but does not.
+  // threw on the pre-fix code. This anchors the oracle: it is the behavior
+  // every typo below now shares.
   it('CONTROL: a non-numeric typo ("chartr") throws Phase not found (passes today)', () => {
     expect(() => findPhaseIndex(config, 'chartr')).toThrow('Phase not found');
   });
 
-  // Each row is a typo that names NO real stage. parseInt(.,10) extracts an
-  // in-range index, so the current code accepts it (RED). The expected,
-  // correct behavior is the same as the CONTROL: throw "Phase not found".
+  // Each row is a typo that names NO real stage. parseInt(.,10) used to
+  // extract an in-range index and accept it. The correct behavior is the same
+  // as the CONTROL: throw "Phase not found".
   const typos: Array<[string, string]> = [
     ['0typo', 'parseInt("0typo",10) === 0'],
     ['1abc', 'parseInt("1abc",10) === 1'],

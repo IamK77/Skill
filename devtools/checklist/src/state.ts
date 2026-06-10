@@ -1,5 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { randomUUID } from 'node:crypto';
 import type { CheckResult } from './types.js';
 
 const STATE_FILE = '.checklist.state.json';
@@ -38,8 +39,54 @@ export function loadState(dir: string): ChecklistState {
   return parsed as ChecklistState;
 }
 
+// Replace the state file with exactly `state`. The write is atomic: the JSON
+// is written to a temp file in the SAME directory and renamed over the target,
+// so a reader never observes a truncated/half-written file and a crash mid-write
+// leaves the previous state intact (renameSync is atomic only within one
+// filesystem, hence same-dir temp).
 export function saveState(dir: string, state: ChecklistState): void {
-  fs.writeFileSync(statePath(dir), JSON.stringify(state, null, 2), 'utf-8');
+  const p = statePath(dir);
+  const tmp = `${p}.${process.pid}.${randomUUID()}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(state, null, 2), 'utf-8');
+  try {
+    fs.renameSync(tmp, p);
+  } catch (e) {
+    try {
+      fs.unlinkSync(tmp); // best-effort: don't litter the skill dir on failure
+    } catch {
+      /* ignore */
+    }
+    throw e;
+  }
+}
+
+// Read-merge-write for the load-modify-save flows (check/verify). Between OUR
+// load and OUR save another invocation may have recorded results; blindly
+// writing back the whole in-memory copy would clobber them with our stale
+// snapshot (lost update) — and a clobbered fail/error would resurrect a stale
+// pass for the gate. So re-read the file at save time and overlay ONLY the
+// records this run actually produced (`updates` must be the delta, NOT the
+// loaded state): everything on disk survives unless WE re-recorded that same
+// item, in which case our current result wins. Returns the merged state that
+// was written.
+export function mergeAndSaveState(dir: string, updates: ChecklistState): ChecklistState {
+  let onDisk: ChecklistState;
+  try {
+    onDisk = loadState(dir);
+  } catch {
+    // The file went corrupt/malformed since our load: there is nothing valid to
+    // merge with, so degrade to a plain (atomic) replace with our records.
+    onDisk = { checked: {} };
+  }
+  const merged: ChecklistState = { ...onDisk, ...updates, checked: {} };
+  for (const [phase, items] of Object.entries(onDisk.checked)) {
+    merged.checked[phase] = { ...items };
+  }
+  for (const [phase, items] of Object.entries(updates.checked)) {
+    merged.checked[phase] = { ...merged.checked[phase], ...items };
+  }
+  saveState(dir, merged);
+  return merged;
 }
 
 export function clearState(dir: string): void {

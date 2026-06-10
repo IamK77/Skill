@@ -1,9 +1,10 @@
 /**
- * ASSAY PROBE — latent-defect hunt (do NOT treat as a sanctioned regression test
- * until the owner rules on the disposition).
+ * ASSAY PROBE — resolved: the owner ruled FIX (audit batch 2, finding L7), the
+ * loader now validates list entries, and this file is the sanctioned regression
+ * test for that contract.
  *
- * Candidate defect: a `null` (or otherwise non-object) entry in `phases:` / `checks:`
- * is rejected by the loader with a RAW, UNLOCATED `TypeError`
+ * The defect (now fixed): a `null` (or otherwise non-object) entry in `phases:` /
+ * `checks:` was rejected by the loader with a RAW, UNLOCATED `TypeError`
  * ("Cannot read properties of null (reading 'name')") instead of the structured,
  * located Error every other malformed-structure path emits.
  *
@@ -17,9 +18,8 @@
  * 'object' but null is not indexable), which is why null slips past the structured
  * check while the string sibling does not.
  *
- * EXPECTED on a correct loader: a null entry throws a plain structured `Error`
+ * EXPECTED (and now actual): a null entry throws a plain structured `Error`
  * whose message names the offending phase/check location.
- * ACTUAL on current code: a raw `TypeError` with no location -> these tests go RED.
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
@@ -27,10 +27,7 @@ import * as path from 'node:path';
 import * as os from 'node:os';
 import { loadChecklist } from '../../src/loader.js';
 
-// DEFERRED (assay audit): a null phase/check list entry throws an opaque,
-// unlocated TypeError instead of the loader's structured error. Skipped until
-// fixed; un-skip to drive it.
-describe.skip('null list entry in phases/checks yields a structured, located error', () => {
+describe('null list entry in phases/checks yields a structured, located error', () => {
   let tmpDir: string;
 
   beforeEach(() => {

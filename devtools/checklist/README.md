@@ -2,7 +2,7 @@
 
 A CLI that gates a Claude Code skill's phases. A stage cannot open until every check in every prior stage is recorded as passing. It exists so an agent running a multi-stage skill cannot skip ahead or self-certify a stage it did not actually do.
 
-Package name `@iamk77/skill-checklist` (current version: see [CHANGELOG](CHANGELOG.md)). TypeScript, commander-based.
+Package name `@iamk77/skill-checklist` (current version: see [CHANGELOG](https://github.com/IamK77/Skill/blob/main/devtools/checklist/CHANGELOG.md)). TypeScript, commander-based.
 
 ## What it does
 
@@ -29,7 +29,7 @@ npx @iamk77/skill-checklist show
 
 The published package ships a compiled `dist/` build, and `bin/checklist.js` runs it through Node directly (`require('../dist/index.js')`) — no `tsx` and no compile step at install time. Its only runtime dependencies are `commander`, `gray-matter`, and `js-yaml`.
 
-Requires Node >= 18.
+Requires Node >= 20 (the `commander` dependency declares `>=20`).
 
 ### From source
 
@@ -43,7 +43,7 @@ npm run build    # compile src/ -> dist/
 npm link         # put `checklist` on PATH
 ```
 
-`npm run dev` (`tsc --watch`) keeps `dist/` current while you edit `src/`. The version is read from `package.json` at runtime (single source of truth), and releases are automated from Conventional Commits — see [RELEASING.md](RELEASING.md).
+`npm run dev` (`tsc --watch`) keeps `dist/` current while you edit `src/`. The version is read from `package.json` at runtime (single source of truth), and releases are automated from Conventional Commits — see [RELEASING.md](https://github.com/IamK77/Skill/blob/main/devtools/checklist/RELEASING.md).
 
 In normal use you never pass any flags. The skill calls `checklist init ${CLAUDE_SKILL_DIR} --force`, and later commands resolve the directory from `$CLAUDE_SKILL_DIR` or the active pointer (see How directories are resolved).
 
@@ -105,17 +105,19 @@ The pointer self-heals, but conservatively: it is removed and the resolver falls
 
 A check's `verify:` value can take one of three forms. The kind is taken from an explicit prefix; without a prefix it is auto-classified (a first token containing `/` or ending in `.sh`/`.bash`/`.ts`/`.js`/`.py` is treated as a script, otherwise as a shell command).
 
-- **`builtin:<name>`** — an in-process check. The available builtins are: `frontmatter`, `name-format`, `description-present`, `description-length`, `no-secrets`, `file-refs`, `has-checklist`, `line-count`. An unknown name returns an error listing the valid ones.
+- **`builtin:<name>`** — an in-process check. The available builtins are: `frontmatter`, `name-format`, `description-present`, `description-length`, `no-secrets`, `file-refs`, `has-checklist`, `line-count`. An unknown name returns an error listing the valid ones. A builtin that crashes (e.g. on a `SKILL.md` whose frontmatter is not even parseable YAML) is recorded as that one check's `error` result, prefixed with the check id — it does not abort the rest of the batch.
 - **`shell:<cmd>`** — run a shell command (via `/bin/bash`) with a 10s timeout. Non-zero exit is a fail; its stderr/message is the recorded detail.
-- **`script:<path>`** — run a script that must live **inside** the checklist directory. The path is checked twice for containment: lexically, and again against the real (symlink-resolved) paths before execution. Paths that escape the directory via `..`, another root, or a symlink are rejected with an error rather than run.
+- **`script:<path>`** — run a script that must live **inside** the checklist directory. The path is checked twice for containment: lexically, and again against the real (symlink-resolved) paths before execution. Paths that escape the directory via `..`, another root, or a symlink are rejected with an error rather than run. The vetted path is executed with `/bin/bash <path>` (passed as an argument, not interpolated into a shell string), so directories with spaces or shell metacharacters in their names are fine.
 
-A check with no `verify:` is a manual item, cleared by `checklist check`.
+A check with no `verify:` is a manual item, cleared by `checklist check`. A `verify:` that is present but not a string (e.g. an indentation mistake that turns the rule into a nested mapping) is a config error — the file refuses to load rather than silently demoting a mechanical check to a manual one.
+
+**Platform note:** `shell:` and `script:` rules require a POSIX shell at `/bin/bash` (macOS, Linux). On Windows, run the CLI under WSL if your checklist uses them — checklists with only manual checks and `builtin:` rules work anywhere Node runs.
 
 In practice, **every shipped skill's checklist uses only manual checks** — none defines any `verify` rules. So in those flows the `verify` command does no mechanical work; its job is purely to apply the prior-phase gate. The `builtin`/`shell`/`script` machinery exists and is tested, but no shipped skill currently exercises it.
 
 ## .checklist.yml format
 
-Top-level `phases:` is an ordered, non-empty list. Each phase has a `name` and a non-empty `checks:` list. Each check has an `id` (unique within its phase) and a `description`, plus an optional `verify`. The loader rejects a missing `phases` array, an empty `phases` array, a phase without a `name` or `checks`, a check without an `id` or `description`, and duplicate `id`s within a phase.
+Top-level `phases:` is an ordered, non-empty list. Each phase has a `name` and a non-empty `checks:` list. Each check has an `id` (unique within its phase) and a `description`, plus an optional `verify`. The loader rejects, with a located error: a missing `phases` array, an empty `phases` array, a phase without a `name` or `checks`, an empty `checks:` array (it would be vacuously gate-complete), a check without an `id` or `description`, duplicate `id`s within a phase, duplicate phase names (compared case-insensitively, since phases are addressed by name), a `verify` that is not a string, and a list entry that is not a mapping (e.g. a dangling `- `).
 
 ```yaml
 phases:
@@ -135,13 +137,13 @@ phases:
         verify: builtin:frontmatter
 ```
 
-A phase is addressed by `name` (case-insensitive) or by 0-based index. Skills typically address stages by name only, so the index never surfaces.
+A phase is addressed by `name` (case-insensitive) or by 0-based index. An index argument must be all digits — anything else (`1abc`, `1.9`, a stray space) is looked up as a name and errors if no phase has that name, so a typo can never silently land on the wrong phase. Skills typically address stages by name only, so the index never surfaces.
 
 ## State and files
 
 `checklist` writes two things:
 
-- `.checklist.state.json` in the skill directory — the per-phase, per-item results (`{ checked: { "<phaseIndex>": { "<itemId>": { status, message } } } }`). This is gitignored. A corrupt or malformed state file is reported with a hint to run `checklist init --force`.
+- `.checklist.state.json` in the skill directory — the per-phase, per-item results (`{ checked: { "<phaseIndex>": { "<itemId>": { status, message } } } }`). This is gitignored. A corrupt or malformed state file is reported with a hint to run `checklist init --force`. Writes are atomic (temp file in the same directory + rename), and `check`/`verify` merge their new records into whatever is on disk at save time, so concurrent invocations don't overwrite each other's results.
 - the global `active` pointer file (location described above).
 
 `init --force` clears the state file; `reset`/`done` clears the state file and drops the active pointer when it points at this directory.
@@ -152,7 +154,7 @@ A phase is addressed by `name` (case-insensitive) or by 0-based index. Skills ty
 npm test
 ```
 
-Runs the vitest suite. The current run is 434 tests passing (with 15 skipped probe tests for deferred, owner-pending defects), across unit and integration files covering the loader, resolver, runner containment, state semantics, the gate, the builtins, and the command surface.
+Runs the vitest suite. The current run is 471 tests passing (none skipped — the probe suites for the once-deferred defects are fixed and un-skipped), across unit and integration files covering the loader, resolver, runner containment, state semantics, the gate, the builtins, and the command surface.
 
 ## License
 

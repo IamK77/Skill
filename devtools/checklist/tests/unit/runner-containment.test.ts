@@ -151,6 +151,53 @@ describe('runner containment + classification boundaries', () => {
     });
   });
 
+  // ──────────────── SCRIPT PATH QUOTING (argv exec, not shell string) ────────
+  describe('script paths with spaces/metacharacters are exec\'d as argv, not interpolated', () => {
+    // Pre-fix, runScript handed the RESOLVED PATH to bash as a command STRING:
+    // a dir with a space word-split into a wrong command, and $(...) in a path
+    // was command-substituted. The path is now an execFileSync argv element.
+
+    it('runs a script whose checklist dir contains a SPACE', async () => {
+      const spaced = path.join(tmpDir, 'dir with space');
+      fs.mkdirSync(spaced, { recursive: true });
+      const p = path.join(spaced, 'run.sh');
+      fs.writeFileSync(p, '#!/bin/bash\necho SPACED-OK\n', 'utf-8');
+      fs.chmodSync(p, 0o755);
+
+      const result = await runCheck(makeItem('script:./run.sh'), spaced, spaced);
+
+      expect(result.result!.status).toBe('pass');
+      expect(result.result!.message).toContain('SPACED-OK');
+    });
+
+    it('runs a script whose FILENAME contains a space', async () => {
+      const p = path.join(tmpDir, 'my check.sh');
+      fs.writeFileSync(p, '#!/bin/bash\necho FILENAME-SPACE-OK\n', 'utf-8');
+      fs.chmodSync(p, 0o755);
+
+      const result = await runCheck(makeItem('script:./my check.sh'), tmpDir, tmpDir);
+
+      expect(result.result!.status).toBe('pass');
+      expect(result.result!.message).toContain('FILENAME-SPACE-OK');
+    });
+
+    it('does NOT shell-interpret metacharacters in the resolved path ($(…) stays literal)', async () => {
+      const evil = path.join(tmpDir, 'meta-$(touch ESCAPED)');
+      fs.mkdirSync(evil, { recursive: true });
+      const p = path.join(evil, 'run.sh');
+      fs.writeFileSync(p, '#!/bin/bash\necho META-OK\n', 'utf-8');
+      fs.chmodSync(p, 0o755);
+
+      const result = await runCheck(makeItem('script:./run.sh'), evil, evil);
+
+      expect(result.result!.status).toBe('pass');
+      expect(result.result!.message).toContain('META-OK');
+      // The command-substitution payload must never have run.
+      expect(fs.existsSync(path.join(evil, 'ESCAPED'))).toBe(false);
+      expect(fs.existsSync(path.join(tmpDir, 'ESCAPED'))).toBe(false);
+    });
+  });
+
   // ───────────────────────────── CLASSIFICATION ─────────────────────────────
   describe('classifyVerify dispatch', () => {
     it('prefix beats heuristic: "shell:has/a/slash" runs as SHELL, not script', async () => {

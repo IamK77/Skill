@@ -223,6 +223,34 @@ describe('runPhase', () => {
     expect(result.checks[0].item.id).toBe('item-a');
     expect(result.checks[0].item.description).toBe('desc for item-a');
   });
+
+  it('a crashing builtin does not abort the batch: sibling checks still run and the crash is an attributed error', async () => {
+    // Malformed frontmatter makes the unguarded builtins throw inside
+    // gray-matter/js-yaml. The batch (Promise.all over runCheck) must survive,
+    // count the crash as ONE errored mechanical check, and run the sibling.
+    // (Content is unique to this test: gray-matter caches parses by content
+    // string and a throw poisons the cache for identical content.)
+    fs.writeFileSync(
+      path.join(tmpDir, 'SKILL.md'),
+      ['---', 'name: "unterminated-batch-survival', '---', '', '# Body'].join('\n'),
+      'utf-8',
+    );
+    const phase = makePhase('Mixed Crash Phase', [
+      { id: 'crasher', verify: 'builtin:name-format' },
+      { id: 'survivor', verify: 'shell:echo still-ran' },
+    ]);
+
+    const result = await runPhase(phase, 0, tmpDir, tmpDir);
+
+    expect(result.mechanicalTotal).toBe(2);
+    expect(result.mechanicalPassed).toBe(1);
+    const crasher = result.checks.find(c => c.item.id === 'crasher')!;
+    expect(crasher.result!.status).toBe('error');
+    expect(crasher.result!.message).toMatch(/^crasher: /);
+    const survivor = result.checks.find(c => c.item.id === 'survivor')!;
+    expect(survivor.result!.status).toBe('pass');
+    expect(survivor.result!.message).toContain('still-ran');
+  });
 });
 
 // ---------------------------------------------------------------------------
