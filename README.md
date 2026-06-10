@@ -1,6 +1,6 @@
 # Skill — gated skill suites for Claude Code
 
-Agents now write much of the code, and they do not reliably repeat process steps unless something enforces them. Each skill here moves one piece of human-era engineering practice into a form an agent-assisted workflow can follow: a multi-stage procedure whose stage gates are machine-enforced by the [`checklist`](#checklist) CLI — the agent cannot skip ahead, and cannot close a stage without recording every check. Two suites, each installable as one Claude Code plugin: **[engineering](#the-engineering-suite)** (the software lifecycle, its security, and the craft of the code itself) and **[distributed](#the-distributed-suite)** (correctness for systems that span machines).
+Agents now write much of the code, and they do not reliably repeat process steps unless something enforces them. Each skill here moves one piece of human-era practice into a form an agent-assisted workflow can follow: a multi-stage procedure whose stage gates are machine-enforced by the [`checklist`](#checklist) CLI — the agent cannot skip ahead, and cannot close a stage without recording every check. Three suites, each installable as one Claude Code plugin: **[engineering](#the-engineering-suite)** (the software lifecycle, its security, and the craft of the code itself), **[distributed](#the-distributed-suite)** (correctness for systems that span machines), and **[inquiry](#the-inquiry-suite)** (computational research that survives review — from a vague area to published results).
 
 ## Quickstart
 
@@ -12,6 +12,7 @@ npm install -g @iamk77/skill-checklist   # the CLI that enforces every gate — 
 /plugin marketplace add IamK77/Skill
 /plugin install engineering@skill
 /plugin install distributed@skill
+/plugin install inquiry@skill
 ```
 
 First run: have existing code? `/engineering:assay path/to/module` — it works on any module and audits the tests you already have. Starting something new? `/engineering:groundwork <the-feature>`. Not sure which skill fits? `/engineering:pilot <your task>` routes you — or tells you when no skill is needed.
@@ -154,6 +155,20 @@ Where the engineering suite is general software practice, the **distributed** su
 
 Invoke with `/distributed:holdfast <design-or-code>` · stages and references: [skills/distributed/holdfast/](skills/distributed/holdfast/)
 
+## The inquiry suite
+
+Where the engineering and distributed suites are about *building* software, the **inquiry** suite is about *doing computational research* — the work of going from a vague area to published results in any field where you run experiments to publish (machine learning, combinatorial optimization, operations research, systems, scheduling). It updates human-era research practice for a world where the agent does the searching, reading, reproducing, and drafting — and therefore fools you by default, optimizing for output that *looks* like a result.
+
+| Skill | Role | Stages |
+|-------|------|:------:|
+| [**`prospect`**](#prospect) | Research-gap prospecting — bound the ground, mine candidate gaps in parallel, attack & rank, kill cheaply, land the gap | 6 |
+
+### prospect
+
+`prospect` owns step one of research — *choosing what to work on, and proving it is worth working on.* The one shift it installs is **mine, don't read**: a gap is not read out of the literature by close-reading until an idea "emerges", it is **mined** out by a fixed set of extraction strategies (the **seven seams** — limitation-clustering, the cross-blank matrix, assumption-audit, leaderboard-weakness, reproduction-arbitrage, cross-domain transplant, trend arbitrage) run in parallel, then made to **survive an adversarial "prove this was already done" attack** before you bet on it. The agent is the **means** — the parallel miner and the adversary — never the oracle; you keep three judgments it cannot have (how to slice the dimensions, why a blank is blank, which gap to bet on). Its six stages — frame · mine · filter · rank · kill · land — end in the three deliverables that mean the literature review is *done*: a one-page gap statement, a core-paper comparison table, and 1–2 baselines reproduced on your machine.
+
+Invoke with `/inquiry:prospect <area-to-prospect-or-gap-to-stress-test>` · stages and references: [skills/inquiry/prospect/](skills/inquiry/prospect/)
+
 ## checklist
 
 `checklist` is a TypeScript CLI (npm: [`@iamk77/skill-checklist`](https://www.npmjs.com/package/@iamk77/skill-checklist), built on `commander`). It loads a skill's `.checklist.yml`, tracks per-stage pass/fail state in the skill directory, and refuses to open a stage until every check in every prior stage is recorded as `pass` — not merely present. A check that regresses on re-verify overwrites a stale pass, so the gate reflects current state. (`checklist` calls these units `phases`; the skills present them to the user as `stages` — they are the same thing.)
@@ -178,6 +193,8 @@ skills/
     husbandry/   gauge/         aegis/       gungnir/  plumb/
   distributed/                                                       # the distributed suite
     holdfast/
+  inquiry/                                                           # the inquiry suite
+    prospect/
                  # each gated skill: SKILL.md  references/  .checklist.yml  LICENSE  NOTICE
                  # pilot (un-gated): SKILL.md  references/  LICENSE  NOTICE
 devtools/

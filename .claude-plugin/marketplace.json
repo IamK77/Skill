@@ -5,8 +5,8 @@
     "email": "chenyinfeng50@gmail.com"
   },
   "metadata": {
-    "description": "Agent-era skill suites for Claude Code: engineering and distributed, gated by the checklist CLI",
-    "version": "1.1.0"
+    "description": "Agent-era skill suites for Claude Code: engineering, distributed, and inquiry, gated by the checklist CLI",
+    "version": "1.2.0"
   },
   "plugins": [
     {
@@ -35,6 +35,15 @@
       "strict": false,
       "skills": [
         "./skills/distributed/holdfast"
+      ]
+    },
+    {
+      "name": "inquiry",
+      "description": "Do computational research that survives review — the agent-era methodology for going from a vague area to published results, for fields where you run experiments to publish (machine learning, combinatorial optimization, operations research, systems, scheduling). First skill: prospect, the research-gap prospecting lens. Its one shift is mine-don't-read — a gap is not read out of the literature but MINED out by fixed extraction strategies (the seven seams) run in parallel, then made to survive an adversarial 'prove it's already been done' attack before you bet on it; the agent is the means (parallel miner + adversary), never the oracle. Six-stage map: frame · mine · filter · rank · kill · land — ending in the three deliverables that mean the literature review is DONE: a one-page gap statement, a core-paper comparison table, and reproduced baselines. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/inquiry/prospect"
       ]
     }
   ]
