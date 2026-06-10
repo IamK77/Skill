@@ -30,6 +30,13 @@ export function loadChecklist(dir: string): ChecklistConfig {
   }
 
   const phases: Phase[] = data.phases.map((p: unknown, i: number) => {
+    // A null entry ("- " / "- null") or any other non-mapping slips past the
+    // bare cast (typeof null === 'object') and used to crash downstream with a
+    // raw, unlocated TypeError. Reject it here with the same located error
+    // style every other malformed-structure path uses.
+    if (!p || typeof p !== 'object' || Array.isArray(p)) {
+      throw new Error(`Phase ${i}: entry must be a mapping with "name" and "checks"`);
+    }
     const phase = p as Record<string, unknown>;
     if (!phase.name || typeof phase.name !== 'string') {
       throw new Error(`Phase ${i}: missing "name" field`);
@@ -45,6 +52,9 @@ export function loadChecklist(dir: string): ChecklistConfig {
     }
 
     const checks: CheckItem[] = phase.checks.map((c: unknown, j: number) => {
+      if (!c || typeof c !== 'object' || Array.isArray(c)) {
+        throw new Error(`Phase "${phase.name}", check ${j}: entry must be a mapping with "id" and "description"`);
+      }
       const check = c as Record<string, unknown>;
       if (!check.id || typeof check.id !== 'string') {
         throw new Error(`Phase "${phase.name}", check ${j}: missing "id"`);
@@ -52,10 +62,18 @@ export function loadChecklist(dir: string): ChecklistConfig {
       if (!check.description || typeof check.description !== 'string') {
         throw new Error(`Phase "${phase.name}", check "${check.id}": missing "description"`);
       }
+      // A present-but-non-string verify (a YAML indentation mistake turns it
+      // into a nested mapping; "verify:" with no value turns it into null) used
+      // to be silently coerced to undefined — demoting a MECHANICAL check to a
+      // self-certifiable manual one. Refuse to load instead.
+      const verify = check.verify;
+      if (verify !== undefined && typeof verify !== 'string') {
+        throw new Error(`Phase "${phase.name}", check "${check.id}": "verify" must be a string`);
+      }
       return {
         id: check.id,
         description: check.description,
-        verify: typeof check.verify === 'string' ? check.verify : undefined,
+        verify,
       };
     });
 

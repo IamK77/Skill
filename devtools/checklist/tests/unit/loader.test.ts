@@ -142,8 +142,10 @@ phases:
     expect(config.phases[0].checks[0].verify).toBe('npm test');
   });
 
-  // 11. verify field is non-string
-  it('sets verify to undefined when the verify field is a non-string value', () => {
+  // 11. verify field is non-string — must be a located config error, NOT a
+  // silent coercion to undefined (which would demote a mechanical check to a
+  // self-certifiable manual one).
+  it('throws a located error when the verify field is a non-string scalar', () => {
     writeConfig(`
 phases:
   - name: Test
@@ -151,6 +153,53 @@ phases:
       - id: unit-tests
         description: All unit tests pass
         verify: 42
+`);
+    expect(() => loadChecklist(tmpDir)).toThrowError(
+      'Phase "Test", check "unit-tests": "verify" must be a string',
+    );
+  });
+
+  // 11b. The classic indentation mistake: the rule line indented one level too
+  // deep turns verify into a NESTED MAPPING. Pre-fix this was coerced to
+  // undefined and the check silently became manual.
+  it('throws a located error when an indentation mistake makes verify a nested mapping', () => {
+    writeConfig(`
+phases:
+  - name: Test
+    checks:
+      - id: unit-tests
+        description: All unit tests pass
+        verify:
+          shell: npm test
+`);
+    expect(() => loadChecklist(tmpDir)).toThrowError(
+      'Phase "Test", check "unit-tests": "verify" must be a string',
+    );
+  });
+
+  // 11c. A bare "verify:" key parses as null — present but not a string.
+  it('throws a located error when verify is present but empty (YAML null)', () => {
+    writeConfig(`
+phases:
+  - name: Test
+    checks:
+      - id: unit-tests
+        description: All unit tests pass
+        verify:
+`);
+    expect(() => loadChecklist(tmpDir)).toThrowError(
+      'Phase "Test", check "unit-tests": "verify" must be a string',
+    );
+  });
+
+  // 11d. A check with NO verify key at all stays a manual item (undefined).
+  it('keeps verify undefined when the key is absent (manual item)', () => {
+    writeConfig(`
+phases:
+  - name: Test
+    checks:
+      - id: confirmed-by-human
+        description: A human judgment call
 `);
     const config = loadChecklist(tmpDir);
     expect(config.phases[0].checks[0].verify).toBeUndefined();
