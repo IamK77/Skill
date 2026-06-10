@@ -99,13 +99,15 @@ Open **[references/review-practice.md](references/review-practice.md)**. Review 
 - **Review logic, design, edge cases, security, maintainability** — not format; format is the machine's job (STAGE 2).
 - **Use a second, independent agent as a pre-review *filter*** to catch the obvious before human time is spent — but never as a *substitute* for the human gate on a consequential change; two agents can share a blind spot and co-sign a plausible-but-wrong change.
 - **Critique the code, not the person; set a response SLA** so review doesn't block others for days.
+- **Spend judgment on a budget, then sign.** Gathering evidence, locating risk, pre-filtering, even running a whole adversarial panel can be outsourced to agents — but three acts cannot, and they are the job: *choosing the instrument* (which probes to run — running the same strategy through more clean-context agents converges on the same blind spot, so only a *different* instrument widens coverage), *declaring the evidence sufficient* (a probe budget fixed up front, then adjudicate), and *signing* (the approval is a claim you own and get paged for). The mirror image of rubber-stamping is **endless re-auditing that never decides** — equally a hole, just more respectable. When you must sign on incomplete evidence, state the bet out loud, and make every request-changes carry the specific condition that would clear it, so the loop converges on a decision instead of spinning.
 
-Hunt the agent's characteristic failures: plausible-but-wrong logic, hallucinated APIs, missing edge cases, confidently-introduced security holes, tests that don't actually assert, and scope creep past the task. Avoid the two anti-patterns: **rubber-stamping** (approving unread — now existential) and **bikeshedding** (arguing trivia while the real risk sails through).
+Hunt the agent's characteristic failures: plausible-but-wrong logic, hallucinated APIs, missing edge cases, confidently-introduced security holes, tests that don't actually assert, scope creep past the task, and **behavior-changing "refactors"** — a diff narrated as cleanup that silently reorders side-effects or flips an error path (the order of a side-effect relative to a state change *is* behavior, not style). Avoid the two anti-patterns: **rubber-stamping** (approving unread — now existential) and **bikeshedding** (arguing trivia while the real risk sails through).
 
 ### GATE — clear before STAGE 4
 1. `checklist check code-review small-reviewable-prs`
 2. `checklist check code-review review-is-the-gate`
-3. `checklist verify code-review`
+3. `checklist check code-review judgment-on-a-budget`
+4. `checklist verify code-review`
 
 ---
 
@@ -159,6 +161,7 @@ Open **[references/dependencies-and-reproducibility.md](references/dependencies-
 - **Format by human willpower** — a formatter and linter exist; the machine holds the line, the human reviews logic.
 - **Giant PRs** — unreviewable, so rubber-stamped; constrain the agent's unit of work.
 - **Rubber-stamp review** — approving unread; with an agent author, nothing checked it at all.
+- **Endless re-auditing / never adjudicating** — the respectable twin of rubber-stamping; both ship zero judgment. Review on a fixed budget and *sign*, owning the call (and naming the bet when evidence is incomplete).
 - **Bikeshedding** — arguing trivia while the real risk passes; the machine should have settled the trivia already.
 - **Slow / flaky CI** — gets bypassed and gamed; a green light the agent can manufacture is no gate.
 - **Trunk left red** — stop and fix before stacking more on a broken build.

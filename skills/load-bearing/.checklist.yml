@@ -17,7 +17,7 @@ phases:
       - id: style-justified
         description: "Architecture style chosen and justified against the weight class — leanest that fits, Monolith First as the default (its split-later cost is exactly what agents now slash, while distributed runtime cost is not), hype-driven distribution resisted, Conway's Law and agent-sized boundaries considered"
       - id: boundaries-by-capability
-        description: "Modules split by business capability / bounded context (not technical layer), high-cohesion/low-coupling, distributed-monolith avoided, and a MACHINE-ENFORCED boundary mechanism named (dependency rule / module lint / architecture fitness test) because an agent will not respect a boundary by instinct"
+        description: "Modules split by business capability / bounded context (not technical layer), high-cohesion/low-coupling, distributed-monolith avoided, and a MACHINE-ENFORCED boundary mechanism named (dependency rule / module lint / architecture fitness test) because an agent will not respect a boundary by instinct. Coupling is also measured by the DELETION TEST — could this whole capability be removed in one PR without the core bleeding? — and the dependency arrows point from the short-lived/edge toward the long-lived/core (a feature may import the core; the core never imports a feature), so easy-to-DELETE is favored over easy-to-extend (an asymmetric bet: easy-to-extend wins only if you guessed the future right, easy-to-delete wins on every branch, since a change that does come is cheaper to excise-and-replace than to unpick from an over-fitted extension point)"
 
   - name: select
     checks:
@@ -27,7 +27,7 @@ phases:
   - name: contracts-data
     checks:
       - id: contracts-defined
-        description: "Public and inter-module interfaces designed contract-first with room to evolve (versioning, backward compatibility); the contract is treated as both the spec agents code against and the verification oracle, and as the seam that lets agents work both sides in parallel against stubs"
+        description: "Public and inter-module interfaces designed contract-first with room to evolve (versioning, backward compatibility); the contract is treated as both the spec agents code against and the verification oracle, and as the seam that lets agents work both sides in parallel against stubs. The interface is designed CALLER-FIRST — write the call site you wish you had (and at least two DIVERSE callers, one of them a test) BEFORE the implementation, then derive the interface from how it wants to be used — which naturally yields a shallow interface over a deep implementation (Ousterhout) and surfaces awkwardness while the design is still free to change; an implementation-first interface that mirrors the internal pipeline (set_x(); set_y(); prepare(); run()) is the anti-pattern"
       - id: data-model-justified
         description: "Data model and SQL-vs-NoSQL choice driven by access pattern and consistency need (CAP trade-off made explicit), each service owning its own data (no shared DB), growth/indexes/dominant-queries planned — and acknowledged as the hardest-to-reverse layer that agents do NOT make cheaper, so it earns disproportionate care"
 

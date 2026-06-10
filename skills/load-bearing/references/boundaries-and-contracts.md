@@ -35,6 +35,22 @@ Every decomposition is a search for **high cohesion** (things that change togeth
 | Temporal coupling | "you must call init() before use()" | encode order in types (builder, typestate) so it can't be skipped |
 | Chatty fine-grained calls | N calls to do one logical thing | coarsen the interface to one capability-level call |
 
+### Design for deletion — the deletion test and the easy-to-delete bet
+
+The coupling test above ("could an agent rewrite B's insides without A's tests going red?") has a blunter, even more revealing sibling: **the deletion test — could this whole capability be deleted in a single PR without the core bleeding?** Count the files you'd touch, the imports left dangling, the config keys / migrations / dashboards orphaned. That number is the truest reading of how coupled the capability really is, because deletion exercises *every* dependency at once: a feature that has seeped into nine files across the codebase fails the test loudly, while one that lives behind a single seam passes it.
+
+What makes the test passable is the **direction of the dependency arrows** — they must run from the *short-lived* toward the *long-lived*, from a feature/edge toward the core, and **never** the reverse. A feature module may import the core's types and call its ports; the core must never `import feature`. Get this one rule right and deletion is safe by construction (remove the feature's directory and the single line that wired it in); get it wrong once — a `from coupons import …` inside `checkout` — and the feature has grown back into the core and can no longer be excised. This is the same Dependency-Rule arrow as the hexagonal "depend inward," read through the lens of *mortality*: point the arrows at whatever will outlive the other.
+
+And the deeper reason to optimise for deletion over extension is that they are different bets on the future:
+
+| | Designed to **extend** | Designed to **delete** |
+|---|---|---|
+| Wins when | you guessed the axis of future change *right* | always — any future is cheaper to absorb |
+| Loses when | you guessed wrong: the extension point is dead weight that *also* can't be removed ("we might still need it") | rarely; the cost is a little duplication tolerated until the axis is clear |
+| The change that arrives | must be bent to fit the pre-built seam | excise the old organ, drop in a new one — a two-way door agents now make cheap |
+
+Extension pays off only on a correct prediction; deletion is robust across *all* branches — which is exactly why it fits an era where mechanical excise-and-replace is cheap and prediction is not. The canonical anti-shape is the `utils.py` / over-broad "shared kernel" that swells until everything imports it: nothing in it can be deleted because everything depends on it, and it is the gravitational centre a distributed monolith forms around. Keep the genuinely-shared kernel *tiny and stable* (the `Money`, `CustomerId` vocabulary of the worked example below) and let everything else stay deletable. (The code-level "delete ruthlessly" — removing dead code that already exists — is `plumb`'s Lens 6; this is the architectural version: *arranging* modules so a live capability *can* be deleted.)
+
 ---
 
 ## Split by business capability, not by technical layer
@@ -171,6 +187,18 @@ A **contract** is the agreed shape of an interaction across a boundary: the oper
 3. Let implementation proceed on both sides against the stubs, in parallel, possibly by different agents.
 4. Generate conformance/contract tests from the same artifact and run them in CI as a fitness function.
 5. Any change to the contract goes through versioning (below), never a silent edit.
+
+### Design the contract caller-first — write the call site you wish you had
+
+Contract-first says *write the contract before the implementation*; it does not say how to arrive at a *good* contract. The failure mode is the **implementation-first** interface that mirrors the producer's internal pipeline: if the implementation connects, filters, prepares, and runs, the interface grows a `set_connection()`, `add_filter()`, `prepare()`, `run()` to match — a **shallow** interface (Ousterhout) as complex as the innards it exposes, carrying hidden temporal coupling (`prepare()` must precede `run()`) the caller has to memorise. The cure is to design it **caller-first**: before writing any implementation, write the call site you *wish* you had —
+
+```python
+report = export_orders(since=date(2026, 1, 1), status="paid", fmt="csv")   # the whole job, one call
+```
+
+— and derive the interface from that. Then write a **second, deliberately different caller** (a streaming HTTP handler that wants rows, not a file path) and a **third that is a test** (which wants to inject fake orders, not reach a database). Two diverse callers plus a test stop you over-fitting the interface to one use and force the shape a deep module wants — a simple façade over a complex implementation, with I/O pushed to the edges so the test can reach the core. The awkwardness you uncover this way ("the web caller can't wait for a 10 GB file to finish") costs *nothing* to fix now, while no implementation exists; discovered after, the same fix is a contract change that breaks every consumer.
+
+This is the real content of "test-first design": its value is not that a test exists first, it is that **the test is the first caller**, and a caller-first interface is one designed from the outside in. (Designing the tests themselves is `assay`'s craft; here the test is used as a *design probe* on the contract.) One guardrail: once the call site reads well, sanity-check feasibility — a one-call façade over a genuinely paginated, cursor-bound, 10 GB source may *have* to expose streaming or batching, so spend two minutes tracing the implementation path and let physical reality pull the unavoidable complexity back onto the interface. Start from the caller's wish; reconcile it with what can actually be built — in that order.
 
 ---
 

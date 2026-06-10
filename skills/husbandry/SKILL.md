@@ -93,8 +93,9 @@ Open **[references/technical-debt.md](references/technical-debt.md)**. Technical
 Open **[references/refactoring.md](references/refactoring.md)**. Refactoring is, by definition, **improving internal structure without changing external behavior.** Two iron rules and a commit discipline:
 
 - **Refactoring requires a test safety net.** Without tests proving behavior is unchanged, you are not refactoring — you are rewriting blind and hoping. **Tests are the safety net that makes refactoring possible** (the `assay` skill designs them); for legacy code that *has* none, write **characterization tests** that pin current behavior first, then change. This is the gate the agent most needs, because it cannot feel the regression a missing test would have caught.
+- **"Behavior-preserving" includes the error path and side-effect ordering — not just equal outputs.** The dangerous refactor is the one that's identical on the happy path and different when something fails: reorder a side-effect relative to a state mutation — `refund()` then `set_cancelled()` vs the reverse — and the outputs match every green test, but when the refund throws, one version leaves the order recoverable and the other strands it cancelled-but-unrefunded. **The order of a side-effect relative to a state change is behavior, not style.** So the net must pin the *failure* path, and "I just cleaned it up" is not evidence it was preserved.
 - **Small and continuous, not a big-bang refactor.** Follow the boy-scout rule — leave each piece of code a little cleaner than you found it — instead of hoarding a giant risky restructuring. Small steps stay reviewable and reversible.
-- **Separate refactoring commits from feature commits.** Never mix "I changed the structure" with "I changed the behavior" in one diff, or a regression can't be attributed and review can't tell what actually changed.
+- **Separate refactoring commits from feature commits — and treat "顺手 / while I was here" as a trigger.** Never mix "I changed the structure" with "I changed the behavior" in one diff, or a regression can't be attributed and review can't tell what actually changed. The narration that a change was *incidental cleanup* is precisely the cue to **diff behavior, not trust the label** — and if a "refactor" can't be cleanly split from its behavior change, it was never a pure refactor.
 
 ### GATE — clear before DEFECTS
 1. `checklist check refactor refactor-under-test`
@@ -162,6 +163,7 @@ This skill closes the loop the whole suite draws. A formal software engineering 
 - **Debt only borrowed, never logged or repaid** — make it visible and budget the paydown, or the system ossifies.
 - **The impulsive big rewrite** — discards implicit knowledge and fixed edge-cases; prefer incremental refactoring.
 - **Refactoring without tests** — that's blind rewriting; pin behavior with tests (characterization tests for legacy) first.
+- **Behavior smuggled into a "refactor"** — a cleanup that reorders side-effects or flips an error path; ordering is behavior, the net must pin the failure path, and "顺手 / while I was here" is a trigger to diff, not a reassurance.
 - **Whack-a-mole bug-fixing** — suppressing symptoms without a root cause; the defect recurs.
 - **Dependencies frozen until EOL** — forces an expensive emergency migration; upgrade continuously in small steps.
 - **Cleverness over readability** — code is read far more than written; write for the next maintainer.

@@ -18,9 +18,9 @@ phases:
   - name: refactor
     checks:
       - id: refactor-under-test
-        description: "Refactoring (improving internal structure WITHOUT changing external behavior) done only under a test safety net that proves behavior is unchanged — without it you are rewriting blind; for legacy code with no tests, characterization tests pin current behavior FIRST, then change. This is the gate the agent most needs, because only a test (not the agent's belief) can catch the silent regression a 'cleanup' introduces"
+        description: "Refactoring (improving internal structure WITHOUT changing external behavior) done only under a test safety net that proves behavior is unchanged — without it you are rewriting blind; for legacy code with no tests, characterization tests pin current behavior FIRST, then change. This is the gate the agent most needs, because only a test (not the agent's belief) can catch the silent regression a 'cleanup' introduces. 'Behavior unchanged' is checked on the ERROR PATH and on SIDE-EFFECT ORDERING, not just equal happy-path outputs — reordering a side-effect relative to a state mutation (e.g. refund-then-set-cancelled vs set-cancelled-then-refund) is a behavior change a happy-path test never sees, so the net must pin the failure path too"
       - id: small-and-separated
-        description: "Refactoring kept small and continuous (the boy-scout rule — leave each piece a little cleaner than found) rather than a hoarded big-bang restructuring; and refactoring commits kept SEPARATE from feature/behavior-change commits, so a regression can be attributed and review can tell what actually changed"
+        description: "Refactoring kept small and continuous (the boy-scout rule — leave each piece a little cleaner than found) rather than a hoarded big-bang restructuring; and refactoring commits kept SEPARATE from feature/behavior-change commits, so a regression can be attributed and review can tell what actually changed. A change narrated as 'cleanup / while I was here / 顺手' is itself the TRIGGER to diff behavior (not a reassurance it is safe); and if a 'refactor' cannot be cleanly separated from a behavior change, it was never a pure refactor — split it"
 
   - name: defects
     checks:
