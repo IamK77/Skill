@@ -10,7 +10,7 @@ The governing fact, inherited from [decision-tree.md](decision-tree.md) and rest
 
 ## Contents
 
-- [The map — one question, seven families, two checks](#the-map--one-question-seven-families-two-checks)
+- [The map — one question, eight families, two checks](#the-map--one-question-eight-families-two-checks)
 - [The signature lens — the trust chain](#the-signature-lens--the-trust-chain)
   - [The reframe — a chain of guarantees, and where it breaks](#the-reframe--a-chain-of-guarantees-and-where-it-breaks)
   - [The Python family in depth](#the-python-family-in-depth)
@@ -28,7 +28,7 @@ The governing fact, inherited from [decision-tree.md](decision-tree.md) and rest
 
 ---
 
-## The map — one question, seven families, two checks
+## The map — one question, eight families, two checks
 
 The whole stage hangs off **one master question, applied to any line you are unsure about:**
 
@@ -46,7 +46,7 @@ The families below each isolate *one underlying failure* and hand you the lens t
 | **5** | Implicit intent | the meaning lives in convention and comments, not in the code itself | `smells-swept` |
 | **6** | Dead matter & noise | code that exists costs attention and maintenance without paying it back | `smells-swept` |
 
-A **seventh family — error handling** (swallowed exceptions, exceptions as control flow, over-defensive checks, leaky abstractions) — has its lens *"errors and boundaries are first-class design, not an afterthought"* and already lives in [functions-and-flow.md](functions-and-flow.md) (and the *tooling* in the `gauge` skill); it is named here only so the map is complete.
+An **eighth family — error handling** (swallowed exceptions, exceptions as control flow, over-defensive checks, leaky abstractions) — has its lens *"errors and boundaries are first-class design, not an afterthought"* and already lives in [functions-and-flow.md](functions-and-flow.md) (and the *tooling* in the `gauge` skill); it is named here only so the map is complete.
 
 The families are not disjoint, and the overlaps are where the deepest smells sit: **primitive obsession** is both a trust-chain leak (the checker can't tell `UserId` from `Email`) and an implicit-intent smell (Lens 5) — the two families meet there. **Mutable shared state** (Lens 2) is itself a kind of implicit coupling (Lens 1). When a smell shows up under two lenses, that is signal it is worth fixing, not a contradiction.
 

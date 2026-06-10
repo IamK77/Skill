@@ -1,6 +1,6 @@
 # The Feedback Decision Engine
 
-This is the deterministic core of `gauge`, opened at **STAGE 0 (Frame)** and kept open at every later GATE. Its one job: for each way the code can fail, route that failure mode to the source that gives the clearest signal cheapest, and push that signal as far **left** as it goes. An agent runs a loop — act, observe a signal, correct — and the loop is only as good as the signal at each step. The agent has no intuition, no memory across sessions, and no feel that something is subtly wrong; it knows only what the code, the checker, the test, and the logs tell it. The engine below scores a signal on six axes, selects a source per failure mode, routes that source left, dials strictness by risk, and escalates when no clear source exists. It does not reimplement its siblings: contracts and boundaries come from `load-bearing`, the behavior tests from `assay`, the pipeline and production observability from `flightline`. Read [../SKILL.md](../SKILL.md) for the five-stage order these forks run inside.
+This is the deterministic core of `gauge`, opened at **STAGE 0 (Frame)** and kept open at every later GATE. Its one job: for each way the code can fail, route that failure mode to the source that gives the clearest signal cheapest, and push that signal as far **left** as it goes. An agent runs a loop — act, observe a signal, correct — and the loop is only as good as the signal at each step. The agent has no intuition, no memory across sessions, and no feel that something is subtly wrong; it knows only what the code, the checker, the test, and the logs tell it. The engine below scores a signal on six axes, selects a source per failure mode, routes that source left, dials strictness by risk, and escalates when no clear source exists. It does not reimplement its siblings: contracts and boundaries come from `load-bearing`, the behavior tests from `assay`, the pipeline from `flightline`, the production observability from `stationkeeping`. Read [../SKILL.md](../SKILL.md) for the five-stage order these forks run inside.
 
 Every fork below carries three fields so two agents working the same code reach the same plan:
 
@@ -49,7 +49,7 @@ No single tool delivers all six axes. You **assemble** clear feedback by mapping
 | Bad external / untyped data (HTTP body, env, file, untyped lib, deserialized blob) | **Boundary validation** — parse into a typed model | **boundary** (first line that touches the data) | LOCAL, ATTRIBUTED, DETERMINISTIC | recovers what runtime erasure loses; the static type alone is a *claim* here, not a check |
 | Wrong behavior (right shape, wrong answer — an invariant types can't express) | **Behavior test** — legible oracle | **pre-commit / CI** | DETERMINISTIC, ATTRIBUTED, TRUSTWORTHY (with coverage/mutation) | designed in `assay`; absence made visible by coverage + mutation (PART 5) |
 | Runtime fault (a real fault fires at run time — a parse fails, a precondition breaks) | **Structured error** — fail loud at the site | **runtime**, but surfaced in tests/CI | LOCAL, ATTRIBUTED | put the failure in the *signature* (errors-as-values) so the checker pulls it left to editor |
-| Production-only (only appears under real traffic, real data, real concurrency) | **Observability** — structured logs, traces, correlation IDs | **prod** (last resort — can't be pulled fully left) | ATTRIBUTED, LOCAL (with a correlation ID) | the agent can't *feel* prod; this is the only source that makes that failure legible. Pipeline run by `flightline` |
+| Production-only (only appears under real traffic, real data, real concurrency) | **Observability** — structured logs, traces, correlation IDs | **prod** (last resort — can't be pulled fully left) | ATTRIBUTED, LOCAL (with a correlation ID) | the agent can't *feel* prod; this is the only source that makes that failure legible. Operated by `stationkeeping` |
 
 ```
 SELECTOR — run per failure mode from the STAGE 0 ledger.
@@ -89,7 +89,7 @@ S5. Production-only?
     PREDICATE: can NO left-of-prod source see it (it needs real scale/data/timing)?
     └─ OBSERVABILITY. Emit a structured, queryable signal (log/trace + correlation ID)
        so the failure the agent cannot feel becomes a readable signal.
-       Operating the pipeline is flightline's job; here, ensure the HOOKS exist.
+       Operating that observability is stationkeeping's job; here, ensure the HOOKS exist.
 ```
 
 **DEFAULT** when two sources could own a mode: take the **leftmost** one that covers it (a type beats a test beats a log), and add the next source only for the residual the leftmost can't reach. **FALLBACK** when you can't classify the mode yet: park it in a "needs-recon" bucket with its blast-radius guess; do not force it onto the nearest source.
@@ -132,7 +132,7 @@ The cost-of-catching-late gradient is why left wins — and the gradient is stee
 - **DEFAULT** on a coin-flip: move it left; the asymmetry favors it — an over-eager local check costs the agent a few seconds, a late check costs a context-switch or an incident.
 - **FALLBACK** when you can't tell if the left lane can host it: spike it in that lane on a branch and watch it catch a seeded failure before committing.
 
-The pipeline that runs the right-hand lanes (pre-commit, CI gates, prod observability) is operated by `flightline`; this engine only decides *which signal goes how far left*.
+The pipeline that runs the gate lanes (pre-commit, CI) is operated by `flightline`, the prod-observability lane by `stationkeeping`; this engine only decides *which signal goes how far left*.
 
 ---
 
@@ -263,7 +263,7 @@ match load_account(req.from_account):
 
 The error is LOCAL and ATTRIBUTED at its site, and exhaustiveness (`match` + `assert_never`) makes a forgotten case a checker error in the editor.
 
-**Mode (e), production-only — S5.** The double-debit race needs real concurrency; no left-of-prod source feels it reliably. → **observability**: emit a structured log with a correlation ID and the transfer id on every debit/credit, so the race becomes a queryable signal. Hooks here, pipeline by `flightline`.
+**Mode (e), production-only — S5.** The double-debit race needs real concurrency; no left-of-prod source feels it reliably. → **observability**: emit a structured log with a correlation ID and the transfer id on every debit/credit, so the race becomes a queryable signal. Hooks here, operation by `stationkeeping`.
 
 **Route left (PART 3).** Checker in editor + pre-commit + CI strict; the boundary model's type checked in editor, its reject path tested in CI; the conservation property in the fast suite; the Result handling enforced by the editor checker; the observability the one lane that stays at prod.
 

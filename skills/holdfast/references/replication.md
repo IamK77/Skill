@@ -1,6 +1,6 @@
 # Replication — copies of the same data, kept correct while they disagree
 
-This reference is the depth behind **STAGE 3 — Replication** of the [../SKILL.md](../SKILL.md) flight plan. It is the last stage of the foundation-plus-replication cut, and it is where the three earlier stages stop being separate lessons and start operating together. The single fact this whole stage hangs on:
+This reference is the depth behind **STAGE 3 — Replication** of the [../SKILL.md](../SKILL.md) flight plan. It is the stage where the three foundation stages stop being separate lessons and start operating together. The single fact this whole stage hangs on:
 
 > **The instant the same datum has more than one copy, the asynchronous network guarantees those copies WILL temporarily disagree.** A write lands on one copy before it reaches another, and between those two moments a reader can see either. That disagreement is not a defect you can engineer away — it is a *consequence* of [enemy 2](the-three-enemies.md#enemy-2--the-unreliable-asynchronous-network), the unbounded-delay network. **How you handle the disagreement IS the entire topic.** And handling it well is the bridge to the *consistency & consensus* stage (STAGE 4), because every choice here is a down-payment on a consistency model you'll name precisely there.
 

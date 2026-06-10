@@ -361,7 +361,7 @@ A signal helps only if the agent cannot flip it green by hand and if silence can
 | deleted assertion / weakened test | mutation testing (`mutmut`) — a deleted assertion lets a mutant survive, score drops |
 | missing-coverage path read as "fine" | read coverage as a **map of untested paths**, not a percentage to clear |
 
-**Absence is a signal — the one move that neutralises gradualness.** Make "not checked" *loud*: turn on the checker's unknown/`Any` reports (above), read coverage as which branches were *never executed*, and run mutation testing to expose assertion-free tests. Otherwise the agent reads the silence of an unchecked path as safety, which is precisely where the residual risk hides. The pipeline that *runs* these gates and the production observability are `flightline`'s to operate; `gauge`'s job is to ensure the hooks exist and every failure mode is wired to one.
+**Absence is a signal — the one move that neutralises gradualness.** Make "not checked" *loud*: turn on the checker's unknown/`Any` reports (above), read coverage as which branches were *never executed*, and run mutation testing to expose assertion-free tests. Otherwise the agent reads the silence of an unchecked path as safety, which is precisely where the residual risk hides. The pipeline that *runs* these gates is `flightline`'s to operate, the production observability `stationkeeping`'s; `gauge`'s job is to ensure the hooks exist and every failure mode is wired to one.
 
 ---
 

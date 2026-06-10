@@ -221,12 +221,12 @@ End on this, because it is the stance the whole skill is built to install. The t
 
 That sentence is the seed of every later stage. Each major distributed technique is one disciplined answer to the same question — *in this world, how do we keep ourselves safe?*
 
-- **Replication** (STAGE 3) — answers partial failure: keep copies so the death of one node does not lose the data or the service.
-- **Consistency & consensus** (STAGE 4) — answers no-global-state: agree on a shared decision *despite* stale views and no global clock (CAP/PACELC, linearizable→eventual, Paxos/Raft, FLP).
-- **Sharding** (STAGE 5) — answers scale: split the data so no one node must hold it all.
-- **Fault tolerance & coordination** (STAGE 6–7) — answer the third state and concurrency: detect failure as best you can, elect leaders, hold locks, and make progress when nodes disagree.
+- **[Replication](replication.md)** (STAGE 3) — answers partial failure: keep copies so the death of one node does not lose the data or the service.
+- **[Consistency & consensus](consistency-and-consensus.md)** (STAGE 4) — answers no-global-state: agree on a shared decision *despite* stale views and no global clock (CAP/PACELC, linearizable→eventual, Paxos/Raft, FLP).
+- **[Sharding](sharding.md)** (STAGE 5) — answers scale: split the data so no one node must hold it all.
+- **[Fault tolerance](fault-tolerance.md) & [coordination](transactions-and-coordination.md)** (STAGE 6–7) — answer the third state and concurrency: detect failure as best you can, elect leaders, hold locks, and make progress when nodes disagree.
 
-And the foundation cut you have *now* is the first layer of that posture: **frame** (this file — justify distributing, name the failure model, accept the third state), **[communication.md](communication.md)** (talk reliably on top of the third state — idempotency, delivery semantics, retry discipline), and **[time-and-causality.md](time-and-causality.md)** (order by causality, never the wall clock).
+And the foundation layer of that posture is the three stages every later one builds on: **frame** (this file — justify distributing, name the failure model, accept the third state), **[communication.md](communication.md)** (talk reliably on top of the third state — idempotency, delivery semantics, retry discipline), and **[time-and-causality.md](time-and-causality.md)** (order by causality, never the wall clock).
 
 For an agent the lever is exactly the one the rest of the suite names: it writes code that assumes the network is reliable, a retry is free, and a timestamp orders the world — and it feels none of the future 3 a.m. page that proves otherwise. So this model must be **judged and gated**, not trusted to instinct. The version that has a branch for "I do not know" is the one that ships.
 

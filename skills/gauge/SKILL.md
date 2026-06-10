@@ -45,7 +45,7 @@ No single tool delivers all of this. You **assemble** clear feedback from severa
 
 ## Where this sits next to the other skills
 
-`gauge` is the *medium*, not a lifecycle phase: it makes the code emit clear signal, and it leans on its siblings for depth. The **contracts and boundaries** it instruments are `load-bearing`'s decisions; the **behavior tests** that are one feedback source are designed in `assay`; the **pipeline** that runs the gates and the **production observability** are operated by `flightline`. This skill's job is to ensure *every failure mode has a clear, un-fakeable signal* and that they are wired together — not to reimplement those skills.
+`gauge` is the *medium*, not a lifecycle phase: it makes the code emit clear signal, and it leans on its siblings for depth. The **contracts and boundaries** it instruments are `load-bearing`'s decisions; the **behavior tests** that are one feedback source are designed in `assay`; the **pipeline** that runs the gates is operated by `flightline`; the **production observability** is operated by `stationkeeping`. This skill's job is to ensure *every failure mode has a clear, un-fakeable signal* and that they are wired together — not to reimplement those skills.
 
 ## The reference library
 
@@ -99,7 +99,7 @@ Some failures are behavioral or only appear at runtime; types won't catch them. 
 
 - **Behavior** → tests as legible oracles: one behavior per test, one reason to fail, a message that states expected-vs-actual. Designing them well is the `assay` skill's job; here, ensure the behavioral failure modes from STAGE 0 *have* a test that fails clearly. **Fallback when the suite exists but cannot run in your environment** (encrypted/missing fixtures, env-gated golden files, uninstalled toolchain): score the source by *inspection* — confirm it is gated upstream (read the CI config) and read its structure — and record **explicitly that you could not execute it**, so the unexercised state is a visible residual, not silently scored present or absent. Carve out the runnable subset (a pure unit on a parse helper, a directly-constructed model) and assert *that* with real teeth rather than assuming the whole suite verifies.
 - **Runtime faults** → **fail loud, local, and attributed**: a structured error that names the cause at its site, not a generic exception swallowed and re-raised three layers up.
-- **Production-only** → observability: structured logs, traces, correlation IDs, so a failure the agent cannot feel becomes a readable signal. Operating that pipeline is `flightline`'s job; here, ensure the hooks exist.
+- **Production-only** → observability: structured logs, traces, correlation IDs, so a failure the agent cannot feel becomes a readable signal. Operating that observability is `stationkeeping`'s job; here, ensure the hooks exist.
 
 ### GATE — clear before STAGE 4
 1. `checklist check behavior-runtime behavior-and-runtime-legible`
