@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { getBuiltin, listBuiltins } from './builtins/index.js';
@@ -7,6 +7,7 @@ import type { CheckItem, CheckItemResult, CheckResult } from './types.js';
 type VerifyKind = 'shell' | 'builtin' | 'script';
 
 const EXEC_TIMEOUT = 10_000;
+const BASH = '/bin/bash';
 
 const PREFIX_MAP: Record<string, VerifyKind> = {
   'builtin:': 'builtin',
@@ -33,20 +34,42 @@ function classifyVerify(verify: string): Classification {
   return { kind: 'shell', value: verify, explicit: false };
 }
 
+function failureFromExec(e: unknown): CheckResult {
+  const err = e as { stderr?: string; message?: string };
+  const detail = (err.stderr || err.message || 'command failed').trim();
+  return { status: 'fail', message: detail };
+}
+
 async function runShell(command: string, cwd: string): Promise<CheckResult> {
   try {
     const stdout = execSync(command, {
       cwd,
       timeout: EXEC_TIMEOUT,
       encoding: 'utf-8',
-      shell: '/bin/bash',
+      shell: BASH,
       stdio: ['pipe', 'pipe', 'pipe'],
     }).trim();
     return { status: 'pass', message: stdout || 'OK' };
   } catch (e) {
-    const err = e as { stderr?: string; message?: string };
-    const detail = (err.stderr || err.message || 'command failed').trim();
-    return { status: 'fail', message: detail };
+    return failureFromExec(e);
+  }
+}
+
+// Execute a (containment-vetted) script file. The path is passed as an argv
+// element to bash — NOT interpolated into a shell command string — so paths
+// containing spaces or shell metacharacters are executed verbatim instead of
+// being word-split or interpreted.
+async function runScriptFile(scriptPath: string, cwd: string): Promise<CheckResult> {
+  try {
+    const stdout = execFileSync(BASH, [scriptPath], {
+      cwd,
+      timeout: EXEC_TIMEOUT,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+    return { status: 'pass', message: stdout || 'OK' };
+  } catch (e) {
+    return failureFromExec(e);
   }
 }
 
@@ -94,7 +117,7 @@ async function runScript(scriptPath: string, cwd: string, explicit: boolean): Pr
     };
   }
 
-  return runShell(realResolved, cwd);
+  return runScriptFile(realResolved, cwd);
 }
 
 export async function runCheck(item: CheckItem, cwd: string, targetPath: string): Promise<CheckItemResult> {
