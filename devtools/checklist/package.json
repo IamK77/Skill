@@ -1,6 +1,6 @@
 {
   "name": "@iamk77/skill-checklist",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Flight checklist CLI that gates a Claude Code skill's phases — a stage cannot open until every check in every prior stage is recorded as passing",
   "keywords": [
     "claude",
