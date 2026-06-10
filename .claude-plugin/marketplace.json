@@ -1,12 +1,12 @@
 {
-  "name": "agent-era-skills",
+  "name": "skill",
   "owner": {
     "name": "IamK77",
     "email": "chenyinfeng50@gmail.com"
   },
   "metadata": {
     "description": "Agent-era skill suites for Claude Code: engineering and distributed, gated by the checklist CLI",
-    "version": "1.0.1"
+    "version": "1.0.2"
   },
   "plugins": [
     {
