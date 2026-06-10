@@ -128,16 +128,25 @@ export async function runCheck(item: CheckItem, cwd: string, targetPath: string)
   const { kind, value, explicit } = classifyVerify(item.verify);
   let result: CheckResult;
 
-  switch (kind) {
-    case 'builtin':
-      result = await runBuiltin(value, targetPath);
-      break;
-    case 'script':
-      result = await runScript(value, cwd, explicit);
-      break;
-    case 'shell':
-      result = await runShell(value, cwd);
-      break;
+  try {
+    switch (kind) {
+      case 'builtin':
+        result = await runBuiltin(value, targetPath);
+        break;
+      case 'script':
+        result = await runScript(value, cwd, explicit);
+        break;
+      case 'shell':
+        result = await runShell(value, cwd);
+        break;
+    }
+  } catch (e) {
+    // A handler that THROWS (e.g. a builtin hitting js-yaml's parser on a
+    // SKILL.md with malformed frontmatter) must degrade to this one check's
+    // error result, attributed to its id — not abort the whole verify batch
+    // with a raw, unattributed stack trace.
+    const reason = e instanceof Error ? e.message : String(e);
+    result = { status: 'error', message: `${item.id}: ${reason}` };
   }
 
   return { item, kind: 'mechanical', result };

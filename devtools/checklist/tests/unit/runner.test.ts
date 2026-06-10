@@ -293,4 +293,48 @@ describe('runCheck', () => {
       expect(result.result!.message).toContain('escapes the checklist dir');
     });
   });
+
+  // ── Crash containment: a throwing handler becomes an attributed error ──
+  //
+  // Several builtins call gray-matter/js-yaml without their own guard. A
+  // SKILL.md with malformed frontmatter made them THROW a raw YAMLException,
+  // aborting the whole verify batch with no hint of which check died. runCheck
+  // now catches handler crashes and returns {status:'error'} attributed to the
+  // check id.
+  describe('crash containment (malformed SKILL.md frontmatter)', () => {
+    // Unterminated double-quoted scalar -> js-yaml throws YAMLException.
+    // The content must be UNIQUE per test: gray-matter caches parses by content
+    // string, and a throw poisons the cache so identical content silently
+    // returns empty data on the next call instead of throwing again.
+    function writeMalformedSkill(marker: string): void {
+      const malformed = ['---', `name: "unterminated-${marker}`, '---', '', '# Body'].join('\n');
+      fs.writeFileSync(path.join(tmpDir, 'SKILL.md'), malformed, 'utf-8');
+    }
+
+    it.each(['name-format', 'description-present', 'description-length', 'file-refs'])(
+      'builtin:%s returns an attributed error result instead of throwing',
+      async (builtin) => {
+        writeMalformedSkill(builtin);
+        const item = makeItem({ id: `${builtin}-check`, verify: `builtin:${builtin}` });
+
+        const result = await runCheck(item, tmpDir, tmpDir);
+
+        expect(result.kind).toBe('mechanical');
+        expect(result.result!.status).toBe('error');
+        // Attribution: the failing check's id leads the message.
+        expect(result.result!.message).toMatch(new RegExp(`^${builtin}-check: `));
+        // And the underlying parse reason is preserved for diagnosis.
+        expect(result.result!.message.length).toBeGreaterThan(`${builtin}-check: `.length);
+      },
+    );
+
+    it('the frontmatter builtin (which has its own guard) still reports a parse FAIL, not a crash', async () => {
+      writeMalformedSkill('frontmatter-guard');
+      const item = makeItem({ verify: 'builtin:frontmatter' });
+      const result = await runCheck(item, tmpDir, tmpDir);
+
+      expect(result.result!.status).toBe('fail');
+      expect(result.result!.message).toContain('parse error');
+    });
+  });
 });
