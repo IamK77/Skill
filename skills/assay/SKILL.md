@@ -46,7 +46,7 @@ Detail lives in `references/`. Open each when a stage sends you there, not upfro
 
 ---
 
-## STAGE 1 — Charter
+## STAGE 0 — Charter
 
 Fix the job this testing is hired to do; it re-weights every choice downstream and the decision tree treats it as the **root override**. Classify the goal with the user, then carry that classification into TRIAGE. The funded goals (the ones that earn test effort):
 
@@ -68,7 +68,7 @@ If the goal is unclear, ask: **"What's prompting this — a bug, a refactor, a r
 
 ---
 
-## STAGE 2 — Survey
+## STAGE 1 — Survey
 
 Do not write tests yet. Chart the testable surface first: entry points and the **untrusted edges** where unvalidated input crosses in; collaborators and dependencies; observable side effects. Read the **standing suite as a map** — run coverage to see what already exists and how it is built (fixtures, doubles, naming, structure), not as a number to grow. Separate real logic from thin wrappers and generated boilerplate.
 
@@ -82,7 +82,7 @@ Share the charted surface with the user before ranking.
 
 ---
 
-## STAGE 3 — Triage
+## STAGE 2 — Triage
 
 Open **[references/decision-tree.md](references/decision-tree.md)** and run **Tree A** per unit / failure mode. Rank where a defect could plausibly *and expensively* hide — score each survivor by `likelihood × blast-radius × detection-gap` — into a **risk ledger**. Then publish the deliberate **DO-NOT-TEST list as a first-class artifact**: choosing not to test is a recorded judgment with a reason, not a silent omission. See [references/coverage-and-mutation.md](references/coverage-and-mutation.md) for the economics of the cut.
 
@@ -94,7 +94,7 @@ Present the ranked ledger and the skips. Ask the user to confirm the order and t
 
 ---
 
-## STAGE 4 — Choose
+## STAGE 3 — Choose
 
 Per funded risk in the ledger, decide how to attack it. Walk **Tree B** (scope + example-vs-property; [references/evidence-catalogue.md](references/evidence-catalogue.md)) and **Tree C** (one double per collaborator; [references/test-doubles.md](references/test-doubles.md)), keeping the decision tree beside you.
 
@@ -109,7 +109,7 @@ Per funded risk in the ledger, decide how to attack it. Walk **Tree B** (scope +
 
 ---
 
-## STAGE 5 — Compose
+## STAGE 4 — Compose
 
 Turn each funded risk into written cases following the oracle-first pipeline in [references/probe-construction.md](references/probe-construction.md). Every case carries a **named oracle** — state *how you know* the expected answer is right (spec, a reference or inverse computation, a metamorphic relation, a golden value with provenance, or a human-confirmed judgment). A test that asserts the code returned whatever the code returned is not a test. Drive cases from boundary and equivalence-class analysis, error and exception paths, and the negative-space assertions of what must never happen. If the input space is large and a checkable invariant holds, route that case to a property ([references/property-based.md](references/property-based.md)).
 
@@ -122,7 +122,7 @@ Turn each funded risk into written cases following the oracle-first pipeline in 
 
 ---
 
-## STAGE 6 — Build
+## STAGE 5 — Build
 
 Write the cases and run them. Build determinism in **by construction** — inject clocks and seeds, control concurrency and iteration order, isolate shared state, fake the network ([references/determinism-and-flakiness.md](references/determinism-and-flakiness.md), [references/test-doubles.md](references/test-doubles.md)). A test that flakes is a defect in the test or the system; fix the source, never paper over it with a retry.
 
@@ -138,7 +138,7 @@ Write the cases and run them. Build determinism in **by construction** — injec
 
 ---
 
-## STAGE 7 — Bite
+## STAGE 6 — Bite
 
 Green proves nothing if it cannot fail. Make the suite prove it can go **RED**: inject a fault — mutation testing, deliberately breaking the code under test, or — when the risk is a nondeterminism / ordering / seed defect — injecting the controlling variable (iteration order, RNG seed, clock) so the test reddens deterministically on the current code — and confirm a test reddens ([references/coverage-and-mutation.md](references/coverage-and-mutation.md)). For that nondeterminism class, `-race` and single-process reruns are *not* the teeth: the defect is cross-invocation, so the redden has to come from injecting the controlling variable or repeating across processes. Review the coverage gaps against the ledger. If an approach found nothing, climb the **escalation ladder** in the decision tree before declaring the code solid.
 
@@ -154,7 +154,7 @@ Green proves nothing if it cannot fail. Make the suite prove it can go **RED**: 
 
 ---
 
-## STAGE 8 — Books
+## STAGE 7 — Books
 
 Dispose of everything testing surfaced. **Every bug — whether you were hired to fix it or surfaced it mid-flight under another charter — first gets a test proven to redden on the *unfixed* code** (the fail-first proof, [references/probe-construction.md](references/probe-construction.md) §8); the discipline attaches to the bug, not to the charter. Then, for each, ask the user how to settle it:
 

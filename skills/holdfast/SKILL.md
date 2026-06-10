@@ -1,49 +1,24 @@
 ---
 name: holdfast
 description: >
-  Design and audit distributed systems for correctness under partial failure —
-  the realities a single-machine programmer (and an agent) gets wrong by default.
-  The third state (a remote call can succeed, fail, OR leave you NOT KNOWING which);
-  idempotency and delivery semantics (at-most / at-least / effectively-once);
-  timeouts, retries with backoff+jitter, retry budgets and circuit breakers; why
-  deep synchronous call chains cascade (availability multiplies, latency adds);
-  ordering by causality not the wall clock (logical/vector clocks, partial vs
-  total order); replicating data without losing it (single-leader / multi-leader /
-  leaderless topologies, async failover and the acknowledged writes it drops,
-  split-brain and fencing, conflict detection over wall-clock last-write-wins,
-  replication-lag anomalies, eventual vs strong consistency); choosing a
-  consistency model with eyes open (the linearizable → sequential → causal →
-  eventual spectrum, CAP/PACELC, and why coordination — consensus, Paxos/Raft — is
-  expensive and best used sparingly); partitioning data for scale (range vs hash vs
-  consistent hashing, the partition key that keeps hot operations on one shard, skew
-  and hot keys, secondary-index trade-offs, rebalancing without mass migration, and
-  routing metadata that is itself a consensus problem); tolerating faults as the
-  default, not the exception (failure models from crash-stop to Byzantine and what
-  each costs, why failure detection is a guess, redundancy only across independent
-  fault domains, graceful degradation, bulkheads / circuit breakers / backpressure
-  to contain the blast radius, MTTR over MTBF, and chaos engineering); coordinating
-  across nodes only when you must (two-phase commit and why it blocks, sagas and
-  compensating transactions, distributed locks and fencing tokens, leader election,
-  ZooKeeper/etcd — and that coordination is a tax to minimize); and the first law —
-  don't distribute until you must. Use when the user designs or reviews anything that
-  spans machines: RPC / microservices, retries and idempotency, message queues and
-  delivery guarantees, event ordering, clocks and timestamps across servers,
+  The distributed-correctness lens: design or audit anything that spans machines.
+  Use when the user designs or reviews RPC / microservices, retries and idempotency,
+  message queues and delivery guarantees, event ordering and cross-server timestamps,
   replication and failover, consistency models and consensus, partitioning /
-  sharding, fault tolerance and graceful degradation, distributed transactions and
-  coordination, or asks whether a distributed design is correct. Triggers on "is this
-  retry safe", "exactly-once", "idempotency", "is this distributed design correct",
-  "microservice call chain", "ordering / timestamps across servers", "is this
-  replication safe", "split-brain", "eventual vs strong consistency",
-  "read-your-writes", "CAP / CP vs AP", "linearizability", "how strong a consistency
-  do we need", "do we need consensus", "Raft / Paxos / etcd / ZooKeeper", "how should
-  I shard this", "partition / shard key", "consistent hashing", "hot key / hotspot",
-  "rebalancing", "is this fault-tolerant", "failure model", "circuit breaker /
-  bulkhead", "graceful degradation", "chaos engineering", "MTTR", "two-phase commit /
-  2PC", "saga / compensating transaction", "distributed lock", "leader election",
-  "fencing token", "should this even be distributed". The agent-era
-  distributed-correctness lens — the FIRST skill of the distributed suite, and the
-  COMPLETE eight-stage map: frame · communication · ordering · replication ·
-  consensus · sharding · fault-tolerance · coordination.
+  sharding, fault tolerance, distributed transactions and coordination — or asks
+  whether a distributed design is correct. Triggers on "is this retry safe",
+  "exactly-once", "idempotency", "microservice call chain", "ordering / timestamps
+  across servers", "is this replication safe", "split-brain", "eventual vs strong
+  consistency", "CAP / CP vs AP", "linearizability", "do we need consensus",
+  "Raft / Paxos / etcd / ZooKeeper", "how should I shard this", "partition / shard
+  key", "consistent hashing", "hot key", "rebalancing", "is this fault-tolerant",
+  "failure model", "circuit breaker / bulkhead", "graceful degradation",
+  "two-phase commit / 2PC", "saga / compensating transaction", "distributed lock",
+  "fencing token", "leader election", "should this even be distributed". The lens
+  installs the third state (a remote call can succeed, fail, OR leave you NOT
+  KNOWING which), the first law (don't distribute until you must), and the complete
+  eight-stage map: frame · communication · ordering · replication · consensus ·
+  sharding · fault-tolerance · coordination.
 argument-hint: "[distributed design or code to audit, or the thing you're about to distribute]"
 allowed-tools: Read Bash Edit Write
 ---
@@ -108,7 +83,7 @@ Open **[references/communication.md](references/communication.md)**. Every remot
 
 - **Handle the third state in every remote call.** Pick the delivery semantics deliberately (at-most-once = may lose; at-least-once = may duplicate — the common choice; effectively-once = at-least-once **+ idempotency**, because exactly-once *delivery* is essentially impossible). Make operations **idempotent** (idempotency keys / dedup, or naturally-idempotent "set to X" over "add X") so a retry is harmless.
 - **Retry with discipline.** Bounded retries, **exponential backoff + jitter**, a retry budget, and a **circuit breaker** — and retry **only idempotent** operations. Naive retries are a **retry storm** that turns a struggling service into a dead one (a Cook cascade). The one-line recipe: **timeout + bounded-retry(backoff+jitter) + idempotency key + circuit breaker.**
-- **Don't build naive synchronous call chains.** A deep sync chain's availability is the **product** of each link's and its latency is the **sum** — five 99.9% hops ≈ 99.5%. Bound it: bulkheads, tight inner timeouts, go async where you can. And because services deploy independently at **different versions**, make the message schema forward/backward compatible (this routes to `flightline` / `load-bearing`'s API-evolution).
+- **Don't build naive synchronous call chains.** A deep sync chain's availability is the **product** of each link's and its latency is the **sum** — five 99.9% hops ≈ 99.5%. Bound it: bulkheads, tight inner timeouts, go async where you can. And because services deploy independently at **different versions**, make the message schema forward/backward compatible (this routes to `load-bearing`'s contract versioning / `husbandry`'s API evolution).
 
 ### GATE — clear before ORDERING
 1. `checklist check communication third-state-handled`

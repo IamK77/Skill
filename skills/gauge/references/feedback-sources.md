@@ -177,7 +177,7 @@ The signal for the one failure class the agent structurally **cannot feel**: the
 
 1. **Structured, not free-text.** Structured logs (key-value/JSON), traces with spans, and correlation IDs so a failure is queryable and a request is followable across services — not `print` debugging an agent can't aggregate.
 2. **Instrument the consequential paths.** The high-blast-radius operations from STAGE 0 (money, auth, data integrity) must emit telemetry; an un-instrumented critical path is a silent failure surface.
-3. **Ensure the hooks exist.** `gauge`'s job stops at *the hooks are present and the consequential paths emit*. *Operating* the pipeline — dashboards, alert thresholds, on-call, retention — is the `flightline` skill's job; do not reimplement it here.
+3. **Ensure the hooks exist.** `gauge`'s job stops at *the hooks are present and the consequential paths emit*. *Operating* it — dashboards, alert thresholds, on-call, retention — is the `stationkeeping` skill's job; do not reimplement it here.
 
 **Cannot catch:**
 - **Nothing further right** — this is the last net. Everything it catches *should ideally have been caught left of it*; a failure that reaches observability and *could* have been a type error, a boundary parse, or a test is a signal that the left-of-it sources have a gap to close. Read production incidents back as instructions for which earlier source to strengthen.
@@ -192,7 +192,7 @@ Three of the five sources share one weakness on the **trustworthy** axis: they a
 |---|---|---|
 | Static types | `Any` / unannotated paths | Checker reports unknown/`Any` types (`mypy --disallow-any-explicit`, pyright unknown diagnostics, eslint `no-explicit-any`). |
 | Behavior tests | Unexercised branches & teeth-less tests | Coverage read as a *map of untested paths*; mutation testing surfaces assertion-free tests. |
-| Observability | Un-instrumented paths | Audit critical paths for telemetry; an alert for "no signal where one is expected" (operated by `flightline`). |
+| Observability | Un-instrumented paths | Audit critical paths for telemetry; an alert for "no signal where one is expected" (operated by `stationkeeping`). |
 
 This is the heart of STAGE 4's `absence-is-a-signal` check. The point is not 100% — it is that the *gap is visible* instead of silent, so the agent (and the reviewer) can see exactly what was never checked. See [honest-ceiling.md](honest-ceiling.md) for why the gap never closes to zero.
 
@@ -228,6 +228,6 @@ Every card above describes the *full* instrumentation a source can carry. You do
 
 - The **contracts and boundaries** being instrumented are `load-bearing`'s architecture decisions — `gauge` makes them emit signal, it does not design them.
 - The **behavior tests** (SOURCE 3) are designed in `assay` — its decision tree picks the type, scope, doubles, and cases; `gauge` only ensures the behavioral modes from STAGE 0 each have a clearly-failing test.
-- The **gate pipeline** (CI/pre-commit that makes every source un-fakeable) and the **production observability** (SOURCE 5) are operated by `flightline` — `gauge` ensures the hooks exist and the gates are wired; `flightline` runs them.
+- The **gate pipeline** (CI/pre-commit that makes every source un-fakeable) is operated by `flightline`, the **production observability** (SOURCE 5) by `stationkeeping` — `gauge` ensures the hooks exist and the gates are wired; those siblings run them.
 
 For the language-specific tool names and copy-usable configs that realize each source, go to [python-recipe.md](python-recipe.md) or [typescript-recipe.md](typescript-recipe.md). For the irreducible limits no amount of instrumentation removes, go to [honest-ceiling.md](honest-ceiling.md).

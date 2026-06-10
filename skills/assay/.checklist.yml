@@ -1,8 +1,7 @@
 # Flight checklist for the assay skill — 8 stages, hard GATEs.
-# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
-# so the 0-based index never surfaces. The STAGE N headings in SKILL.md
-# (Charter, Survey, Triage, Choose, Compose, Build, Bite, Books) map to these
-# phase entries in order.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>).
+# The STAGE 0-7 headings in SKILL.md (Charter, Survey, Triage, Choose, Compose,
+# Build, Bite, Books) map one-to-one, in order, to the phase entries below.
 phases:
   - name: charter
     checks:

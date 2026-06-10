@@ -195,7 +195,7 @@ Now collapse the entire stage into the chain promised at the top, each link mech
 - **Under a partition the minority can't reach a majority → can't make progress → a strong-consistency system is unavailable on the minority side.** That is **CP**, and it is **the concrete mechanism of CAP.**
 - Therefore **"how strong a consistency, at what cost?" = "how much coordination, paid for in availability-under-partition + latency-always?"** The two questions are *the same question*.
 
-And the call-backs that make this stage the culmination of the cut, not a fresh topic:
+And the call-backs that make this stage the culmination of the stages before it, not a fresh topic:
 
 - [Enemy 1's](the-three-enemies.md#the-third-state--the-spine-of-everything) slow-vs-dead is the **root of FLP** — the impossibility is the third state proved as a theorem about agreement.
 - From [time-and-causality.md](time-and-causality.md#partial-order-vs-total-order--the-load-bearing-takeaway): **linearizability is "pretend a single real-time total order exists"; consensus is the machinery that "manufactures an agreed-upon total order"; causal consistency is "calmly embrace the partial order."** This stage is STAGE 2's partial-vs-total-order question, finally priced.

@@ -21,7 +21,7 @@ phases:
   - name: behavior-runtime
     checks:
       - id: behavior-and-runtime-legible
-        description: "Behavioral failure modes have a test that fails clearly (one behavior, one reason to fail, expected-vs-actual message — design depth deferred to assay); runtime faults fail loud/local/attributed via structured errors that name the cause at the site, not a generic exception re-raised far away; production-only failures have observability hooks (structured logs, traces, correlation IDs — pipeline operation deferred to flightline)"
+        description: "Behavioral failure modes have a test that fails clearly (one behavior, one reason to fail, expected-vs-actual message — design depth deferred to assay); runtime faults fail loud/local/attributed via structured errors that name the cause at the site, not a generic exception re-raised far away; production-only failures have observability hooks (structured logs, traces, correlation IDs — operating them deferred to stationkeeping)"
 
   - name: trustworthy
     checks:
