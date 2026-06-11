@@ -157,17 +157,31 @@ Invoke with `/distributed:holdfast <design-or-code>` · stages and references: [
 
 ## The inquiry suite
 
-Where the engineering and distributed suites are about *building* software, the **inquiry** suite is about *doing computational research* — the work of going from a vague area to published results in any field where you run experiments to publish (machine learning, combinatorial optimization, operations research, systems, scheduling). It updates human-era research practice for a world where the agent does the searching, reading, reproducing, and drafting — and therefore fools you by default, optimizing for output that *looks* like a result.
+Where the engineering and distributed suites are about *building* software, the **inquiry** suite is about *doing computational research* — the work of going from a vague area to published results in any field where you run experiments to publish (machine learning, combinatorial optimization, operations research, systems, scheduling). It updates human-era research practice for a world where the agent does the searching, reading, reproducing, and drafting — and therefore fools you by default, optimizing for output that *looks* like a result. Three skills so far form a pipeline over the first three research steps, each handing the next a concrete artifact: **prospect** (find and prove the gap) → **crucible** (forge the method) → **ledger** (design the experiments).
 
 | Skill | Role | Stages |
 |-------|------|:------:|
 | [**`prospect`**](#prospect) | Research-gap prospecting — bound the ground, mine candidate gaps in parallel, attack & rank, kill cheaply, land the gap | 6 |
+| [**`crucible`**](#crucible) | Method design — decidable spec, oracle ceiling, race death-orthogonal variants in a feasibility-checked tournament, deepen with theory / ablation / novelty | 7 |
+| [**`ledger`**](#ledger) | Experiment design — claim-evidence matrix, exploration/confirmation firewall, instances & fair baselines, statistics, ablation & sensitivity, frozen protocol | 7 |
 
 ### prospect
 
 `prospect` owns step one of research — *choosing what to work on, and proving it is worth working on.* The one shift it installs is **mine, don't read**: a gap is not read out of the literature by close-reading until an idea "emerges", it is **mined** out by a fixed set of extraction strategies (the **seven seams** — limitation-clustering, the cross-blank matrix, assumption-audit, leaderboard-weakness, reproduction-arbitrage, cross-domain transplant, trend arbitrage) run in parallel, then made to **survive an adversarial "prove this was already done" attack** before you bet on it. The agent is the **means** — the parallel miner and the adversary — never the oracle; you keep three judgments it cannot have (how to slice the dimensions, why a blank is blank, which gap to bet on). Its six stages — frame · mine · filter · rank · kill · land — end in the three deliverables that mean the literature review is *done*: a one-page gap statement, a core-paper comparison table, and 1–2 baselines reproduced on your machine.
 
 Invoke with `/inquiry:prospect <area-to-prospect-or-gap-to-stress-test>` · stages and references: [skills/inquiry/prospect/](skills/inquiry/prospect/)
+
+### crucible
+
+`crucible` owns step two — turning a landed gap into a method worth writing up. The one shift it installs is **a method is raced to death, not nursed**: where implementing a variant once cost weeks (so you bet on one idea and grew attached to it), a cheap agent prototype of *each* variant lets you generate several and run an **elimination tournament** against kill criteria written *before* the race — on a scaffold whose **independent feasibility checker** traps the agent's silent bugs (a variant that "soars" is usually emitting infeasible solutions). You measure the prize first with an **oracle ladder** (total gap = is the direction worth it; per-level gaps = which component to attack), then deepen the survivor with theory (counterexample-search-first, the proof-laundering guard), pre-wired ablation switches, and a mechanism-keyword novelty defense. Its seven stages: spec · ceiling · variants · tournament · theory · ablation · novelty.
+
+Invoke with `/inquiry:crucible <gap-to-turn-into-a-method-or-method-to-stress-test>` · stages and references: [skills/inquiry/crucible/](skills/inquiry/crucible/)
+
+### ledger
+
+`ledger` owns step three — turning a forged method into evidence a reviewer believes. The one shift it installs is **write down what counts as evidence before you look at the data**: the protocol (claims, instances, baselines, metrics, and the conditions that count as support *or* refutation) is frozen *before* the main run, because running first and choosing the story after is the experiment-version of p-hacking. Its keystone is a **firewall between exploration and confirmation** — chaos-testing an MVP generates hypotheses into an append-only notebook whose numbers never enter the paper, and confirmation re-runs the survivors on fresh seeds and instances under the frozen protocol. The agent is the experiment operator (batch-submit, monitor, auto-retry, summarize), never the judge of what the numbers mean. Its seven stages: matrix · firewall · instances · baselines · stats · ablation · freeze.
+
+Invoke with `/inquiry:ledger <method-to-design-experiments-for-or-protocol-to-stress-test>` · stages and references: [skills/inquiry/ledger/](skills/inquiry/ledger/)
 
 ## checklist
 
@@ -194,7 +208,7 @@ skills/
   distributed/                                                       # the distributed suite
     holdfast/
   inquiry/                                                           # the inquiry suite
-    prospect/
+    prospect/  crucible/  ledger/
                  # each gated skill: SKILL.md  references/  .checklist.yml  LICENSE  NOTICE
                  # pilot (un-gated): SKILL.md  references/  LICENSE  NOTICE
 devtools/
