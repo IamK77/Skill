@@ -1,6 +1,30 @@
-# Skill — gated skill suites for Claude Code
+# Skill
 
-Agents now write much of the code, and they do not reliably repeat process steps unless something enforces them. Each skill here moves one piece of human-era practice into a form an agent-assisted workflow can follow: a multi-stage procedure whose stage gates are machine-enforced by the [`checklist`](#checklist) CLI — the agent cannot skip ahead, and cannot close a stage without recording every check. Three suites, each installable as one Claude Code plugin: **[engineering](#the-engineering-suite)** (the software lifecycle, its security, and the craft of the code itself), **[distributed](#the-distributed-suite)** (correctness for systems that span machines), and **[inquiry](#the-inquiry-suite)** (computational research that survives review — from a vague area to published results).
+Step-by-step engineering and research skills for Claude Code, with a CLI that won't let your coding agent skip a stage or mark one done when it isn't.
+
+[![npm](https://img.shields.io/npm/v/@iamk77/skill-checklist?label=checklist&color=blue)](https://www.npmjs.com/package/@iamk77/skill-checklist) ![suites](https://img.shields.io/badge/suites-3-blue) ![skills](https://img.shields.io/badge/skills-18-blue) ![CLI tests](https://img.shields.io/badge/CLI%20tests-400%2B-brightgreen) ![node](https://img.shields.io/badge/node-%3E%3D18-blue) [![license](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+
+Your agent writes most of the code now. It also skips the test it said it wrote, marks a check green without running it, and quotes a number it never measured. In the diff, all three look fine.
+
+Each skill here takes one part of established engineering or research practice and writes it down as ordered stages. A small CLI, [`checklist`](#checklist), holds the gate: a stage stays shut until every check before it is recorded as passed, and an attempt to jump ahead exits non-zero. The agent does the work and follows the method; it can't skip a stage or quietly close one it didn't do.
+
+Here is the gate stopping an agent that jumped ahead in a testing run, then opening once the first stage is actually done:
+
+```console
+$ checklist verify survey                    # agent jumps to a later stage, before stage 0 is done
+gate blocked: PHASE 0 (charter) incomplete   # exits non-zero — the run stops here
+
+$ checklist check charter motivation-identified
+[x] motivation-identified .. confirmed
+
+$ checklist verify charter
+PHASE 0 verified, proceed to PHASE 1         # the next stage opens only now
+```
+
+- **The order is enforced, not suggested.** A stage stays shut until every earlier check is recorded as passed. Re-run a check that now fails and it overwrites the old pass, so the gate reflects the current state, not a stale one.
+- **18 skills across 3 suites** — the software lifecycle, distributed-systems correctness, and computational research. Each suite installs as one Claude Code plugin.
+- **It's just files.** A skill is a directory — one `SKILL.md`, a `references/` folder, one `.checklist.yml`. No runtime, no build step. Copy it into `~/.claude/skills/` and it runs without the plugin.
+- **What's enforced, stated plainly.** The CLI enforces the *order* of stages and records that each check was confirmed. It does not yet check the *substance* of a check; that judgment stays with you and the agent. The mechanical-verify rules exist and are tested, but no shipped skill uses them yet.
 
 ## Quickstart
 
@@ -19,30 +43,46 @@ First run: have existing code? `/engineering:assay path/to/module` — it works 
 
 Plugin-provided skills are prefixed by their plugin name — `/engineering:plumb`, `/distributed:holdfast`; bundling each suite into one plugin makes the prefix a meaningful namespace. To use a skill without plugins instead, copy `skills/<suite>/<name>/` (e.g. `skills/engineering/assay/`) into `~/.claude/skills/` (personal) or `.claude/skills/` (per-project), keep the `checklist` CLI on `PATH`, and drop the prefix: `/assay path/to/module`.
 
+## The three suites
+
+- **[engineering](#the-engineering-suite)** — the software lifecycle, its security, and the craft of the code itself. 11 skills.
+- **[distributed](#the-distributed-suite)** — correctness for systems that span machines. 1 skill.
+- **[inquiry](#the-inquiry-suite)** — computational research, from a vague area to a published paper. 6 skills.
+
 ## What a gated run looks like
 
-Every skill walks its stages in order, and the CLI refuses to open a stage until every check in every prior stage is recorded as `pass`. From a real `assay` session (stages are addressed by name, never by number; a refused gate exits non-zero):
+The gate above is one moment from a run. A whole `assay` (testing) run is eight stages, set up once:
 
-```
-$ checklist init $CLAUDE_SKILL_DIR --force
+```console
+$ checklist init -d skills/engineering/assay
 checklist ready, 8 phases
   0: charter (1 checks)
   1: survey (1 checks)
-  ...
-
-$ checklist verify survey                       # try to skip ahead
-gate blocked: PHASE 0 (charter) incomplete
-
-$ checklist check charter motivation-identified
-[x] motivation-identified .. confirmed
-
-$ checklist verify charter
-PHASE 0: CHARTER
-
-1. [x] motivation-identified .................... confirmed
-
-PHASE 0 verified, proceed to PHASE 1            # now survey opens
+  2: triage (1 checks)
+  3: choose (2 checks)
+  4: compose (2 checks)
+  5: build (3 checks)
+  6: bite (3 checks)
+  7: books (2 checks)
 ```
+
+You confirm each check as you go, and `checklist show` reports where the run stands — what has passed, the stage you're on, and everything still shut:
+
+```console
+$ checklist show
+PHASE 0: CHARTER              [x] passed
+PHASE 1: SURVEY               [ ] pending
+PHASE 2: TRIAGE               [ ] pending
+PHASE 3: CHOOSE               [ ] pending
+PHASE 4: COMPOSE              [ ] pending
+PHASE 5: BUILD                [ ] pending
+PHASE 6: BITE                 [ ] pending
+PHASE 7: BOOKS                [ ] pending
+
+current phase: PHASE 1
+```
+
+Stages are addressed by name, never by number, and a refused gate exits non-zero — so an agent driving the run can't read past a closed gate as success.
 
 ## The engineering suite
 
