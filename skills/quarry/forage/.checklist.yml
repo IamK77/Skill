@@ -1,0 +1,44 @@
+# Flight checklist for the forage skill — the open-source discovery pipeline,
+# 5 stages, hard GATEs. SKILL.md addresses stages by NAME (checklist verify <name>
+# / check <name> <id>), so the 0-based index never surfaces. STAGE N headings in
+# SKILL.md map to these stages in order: frame -> seams -> cast -> sift -> capture.
+# forage is the first skill of the quarry suite; it owns DISCOVERY and its terminus
+# is a small, captured, categorized shortlist of candidate repositories — each with
+# its provenance and a one-line reason — framed for the touchstone skill to evaluate.
+phases:
+  - name: frame
+    checks:
+      - id: mode-and-need-fixed
+        description: "The MODE is declared and AIMED before any search. TARGETED: a NEED-SPEC is written — one or two sentences sharp enough that 'does this repo fit?' has a yes/no answer (language/runtime, the must-haves, the deal-breakers, and the thing it would replace). The sharpness of this sentence sets the ceiling on everything downstream; a vague need ('a task queue') searches the wrong commons thoroughly and cannot be rescued by a wider search. SERENDIPITOUS: the SURFACES to wander are named and the ADJACENCY DIAL is set — how far from your usual ground to roam (more dial = more orthogonal, more noise) — because 'show me anything good' with no dial just returns the popular things you have already seen. The mode and its aim are a non-delegable judgment: hand the agent a vague need and you have automated a thorough search of the wrong place"
+      - id: capture-cheap-set
+        description: "The CAPTURE DESTINATION is set up BEFORE searching, so recording a find costs one line rather than a decision — a categorized star-list, a notes file, or a scratch list. This is the discipline the human-era practice states as 'lower the cost of RECORDING, not finding': the entire value of a wander leaks away if capturing a surprise is expensive, because you simply will not do it. A find you cannot cheaply record is a find you will lose"
+      - id: provenance-discipline-set
+        description: "The SOURCE DISCIPLINE is fixed before the first query, because the agent is the MEANS (parallel miner + wanderer), never the judge of what is worth it. Its gradient points at handing you something that LOOKS like an answer, and in this domain that fails three specific ways: it TRUSTS THE MOST GAMEABLE SIGNALS (a big star count, a polished README — exactly what an abandoned project or an AI-generated star-farm wears best); it INVENTS REPOSITORIES or asserts a real one 'supports X' without opening it; and it FLATTENS everything to 'relevant'. So the rule is set up front: every candidate carries its PROVENANCE (which seam, which query/surface), the agent surfaces NO repository it did not actually pull from a source, and STARS and the README are recorded as CLAIMS to be corroborated later by touchstone, never treated as proof of quality here"
+
+  - name: seams
+    checks:
+      - id: seams-or-surfaces-planned
+        description: "A plan names at least THREE OR FOUR INDEPENDENT seams (targeted) or surfaces (serendipitous) — single-sourcing is how the best find hides in the one place you skipped. The TARGETED seams: qualifier-combo search (combine language · stars · pushed · topic · created · in:readme · good-first-issues, plus the Code search tab for how an API is really used) and SNOWBALLING — a trusted developer's stars page, the relevant awesome-* list, a known-good project's dependency graph and its 'Used by' count, off-peak (weekly/monthly) trending, and the 'what's the alternative to X?' threads inside issues and discussions. The SERENDIPITOUS surfaces: Show HN, off-peak / all-language trending, an unfamiliar github.com/topics corner, the 'vibe' keywords (tiny, toy, from-scratch, in-1000-lines, weekend-project), the star feeds of people whose taste you trust, and the curator newsletters. Which seams to open is YOUR judgment — aim the agent at one narrow seam and you have only parallelized a tunnel"
+      - id: activity-and-orthogonality-bias-set
+        description: "The search BIAS is set toward what survives, not what once scored. TARGETED: weight MAINTAINED AND ACTUALLY-USED (recent pushed date, real 'Used by', a recent release) over raw star count — many four-figure-star repos stopped breathing years ago, and stars record PAST attention, not present life. SERENDIPITOUS: point the ADJACENCY DIAL at the ORTHOGONAL — the goal of a wander is the thing you would not have searched for, not ten more of what you already follow. This bias is what keeps the cast from returning a tidy pile of popular, dead, or on-topic-but-useless repos"
+
+  - name: cast
+    checks:
+      - id: fanout-run-with-provenance
+        description: "The planned seams are ACTUALLY RUN, in parallel, with the live tools (web search, gh, the GitHub search and Code tabs) — not reasoned about. Many threads at once, each blind to the others; a repo the agent describes but never retrieved does not exist for this purpose. EVERY candidate that enters the pool carries its PROVENANCE — the seam that surfaced it and the query/surface behind it — both so coverage can be judged (all from one seam = under-cast) and so no hallucinated name slips in unsourced. The cheap facts the seam already returned are recorded (name, one-line description, last-push date, star/Used-by if shown), but EVALUATION DOES NOT HAPPEN HERE — that is touchstone's job, kept separate on purpose so cheap discovery stays cheap"
+      - id: pool-wide-enough
+        description: "The cast is WIDE ENOUGH that the narrowing to come has real material. TARGETED: a pool of more than a handful — finding only two candidates is the tell that one narrow seam was cast, so more seams are opened before narrowing. SERENDIPITOUS: a real sweep ACROSS the surfaces, not the first page of a single trending list. Under-casting here cannot be repaired downstream; sift and capture can only narrow what cast brought back"
+
+  - name: sift
+    checks:
+      - id: deduped-and-cheap-culled
+        description: "A CHEAP first-pass cull removes the obvious non-starters on signals readable in seconds, WITHOUT doing the deep evaluation: DEAD (no commit in years, archived), MIRROR / re-upload of another project, EMPTY or STUB (a README and nothing behind it), STAR-FARMED (a high star count with no issues, no forks-in-use, no real history), and DUPLICATE of a stronger candidate already in the pool. The cull REASON is recorded for each (a one-word tag suffices). Crucially this is TRIAGE, NOT TRIAL: bus factor, issue-response quality, the slop check and the per-axis scoring all belong to touchstone, and pulling them forward here defeats the point of cheap discovery — when in doubt, KEEP it and let touchstone decide"
+      - id: shortlist-is-fit-not-hype
+        description: "Each survivor is kept because it GENUINELY FITS the need (targeted) or genuinely PULLS (serendipitous) — NOT because it has the most stars or the slickest README. The suspicion of the gameable signals is carried FORWARD intact, because testing exactly those signals is what touchstone exists to do. A shortlist sorted by star count is a shortlist that has already made touchstone's mistake for it"
+
+  - name: capture
+    checks:
+      - id: captured-cheaply-with-why
+        description: "EVERY survivor is recorded in the destination set at STAGE 0, with its PROVENANCE and a ONE-LINE reason it is there ('Celery alternative, no broker, last push last week' / 'weird and lovely, no idea what for yet'), CATEGORIZED as you go ('candidates for need X', 'interesting, not sure why yet') so the list stays usable. Cheap and immediate beats thorough and later: a find not recorded in the moment is a find lost. This closes the recording-cost discipline opened at frame — the terminus of a forage is a captured, categorized shortlist you will still have next month, NOT twenty browser tabs you will close unread"
+      - id: taste-verdict-and-handoff
+        description: "The KEEPER VERDICT is the human's and the handoff is framed. Which candidates are worth pursuing (targeted) and which genuinely made you sit up (serendipitous — the 眼前一亮) is YOUR mark, not the agent's relevance rank: the agent can order the list, only you can say which to actually open. For the ones to be evaluated, they are framed for touchstone — the targets plus the USE-CONTEXT that will set the bar there (a weekend tryout, a production dependency, a contribution, a thing to learn from). The rest are PARKED in the 'not sure yet' list — un-judged, not discarded. This framed shortlist (or the parked pile) is what discovery hands on"

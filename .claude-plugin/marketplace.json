@@ -5,8 +5,8 @@
     "email": "chenyinfeng50@gmail.com"
   },
   "metadata": {
-    "description": "Agent-era skill suites for Claude Code: engineering, distributed, and inquiry, gated by the checklist CLI",
-    "version": "1.5.0"
+    "description": "Agent-era skill suites for Claude Code: engineering, distributed, inquiry, and quarry, gated by the checklist CLI",
+    "version": "1.6.0"
   },
   "plugins": [
     {
@@ -49,6 +49,16 @@
         "./skills/inquiry/forge",
         "./skills/inquiry/reckoning",
         "./skills/inquiry/envoy"
+      ]
+    },
+    {
+      "name": "quarry",
+      "description": "Find and judge high-value open-source repositories — the agent-era methodology for getting from 'I need something' (or 'show me something interesting') to a repo you can actually trust, instead of searching by keyword and trusting the star count. Two gated lenses. forage (discovery) finds the few candidates worth your time in either mode finding actually happens in: TARGETED, where the agent fans out every search seam in parallel against a sharp need-spec; or SERENDIPITOUS, where it ranges the high-signal surfaces (Show HN, off-peak trending, topic corners, taste-feeds) and brings back the orthogonal finds, captured cheaply so none is lost — the one shift being that search-syntax mastery is commoditized, so your edge is the need-spec and the taste. touchstone (evaluation) judges a repo in minutes by scanning its dashboards, not its code: an agent over-trusts exactly the two signals easiest to fake — the star count and a polished README, which is what an abandoned project or an AI-generated star-farm wears best — so touchstone inverts the weighting toward the signals that can't be cheaply faked (commit substance, issue-response quality, bus factor, real downstream Used-by, tests and CI), runs an AI-slop / star-farm detector, scores three axes (alive · healthy · well-built), and calibrates the verdict to your use-context (a weekend tryout and a production dependency pass different bars). The agent is the means (the parallel miner, the wanderer, the dashboard reader, the adversary), never the judge — you keep the need-spec, the 'worth a look' verdict, and the calibration of what a score means for your risk. forage hands its shortlist to touchstone; touchstone hands deep-dive survivors to the engineering suite. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/quarry/forage",
+        "./skills/quarry/touchstone"
       ]
     }
   ]

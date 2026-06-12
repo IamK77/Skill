@@ -1,0 +1,48 @@
+# Flight checklist for the touchstone skill — the repository-evaluation pipeline,
+# 6 stages, hard GATEs. SKILL.md addresses stages by NAME (checklist verify <name>
+# / check <name> <id>), so the 0-based index never surfaces. STAGE N headings in
+# SKILL.md map to these stages in order: frame -> scan -> signal-weight ->
+# slop-check -> score -> verdict. touchstone is the second skill of the quarry
+# suite; it owns EVALUATION and its terminus is a verdict (deep-dive / try / don't-
+# bet-in-production / skip) calibrated to the user's use-context, with a three-axis
+# score and a slop-risk call, every claim traceable to the actual repository.
+phases:
+  - name: frame
+    checks:
+      - id: targets-and-use-context-fixed
+        description: "The TARGETS and the USE-CONTEXT are fixed before the first glance. What is being evaluated is named — one repo, or a batch (e.g. a forage shortlist) — and, decisively, WHAT IT WOULD BE USED FOR: a weekend tryout, a production dependency, a contribution target, or a thing to learn from. The use-context SETS THE BAR, and the same repo clears it for one use and fails it for another; an evaluation with no declared use is a verdict with no scale. The bar itself is written down: a tryout needs little more than 'it runs and roughly works'; a production dependency demands a survivable bus factor, real maintenance, and a clean security/dependency posture; a contribution target needs responsive maintainers and tractable issues; a learning source needs legible code over institutional health"
+      - id: bar-and-source-discipline-set
+        description: "The QUALITY BAR is derived from the use-context AND the SOURCE DISCIPLINE is set, because the agent is the MEANS (dashboard reader + adversary), never the oracle. Its failure here is reaching a confident verdict by trusting the surface and FILLING GAPS WITH PLAUSIBLE FACTS — asserting 'actively maintained' from a high star count, or inventing a contributor statistic it never pulled. So the rule is fixed up front: EVERY claim traces to the actual repo — every signal is pulled via gh/API/web, every number is read not guessed, and any signal that can't be determined is reported as UNKNOWN rather than invented. No 'maintained' or 'popular' without the dated evidence behind it"
+
+  - name: scan
+    checks:
+      - id: dashboard-pulled-from-repo
+        description: "The FIVE-GLANCE dashboard sweep is run and its real data PULLED from the actual repo (not presumed). (1) HOMEPAGE 30s — the About line and doc-site link, the last-commit date, the star/fork/'Used by' ratio, the releases (cadence, and whether still 0.0.x), and the LICENSE (none = unusable in any serious setting). (2) README SKELETON — does it answer what / why / how-to-start, are there screenshots or a demo, what do the badges say (CI green/red, coverage), is there an honest 'comparison with X'. (3) ISSUES & PRs — open a few recent ones (response, not count). (4) INSIGHTS -> CONTRIBUTORS — the contributor distribution, the commit-activity pulse, and the Community Standards page. (5) FILE TREE — tests/, a CI config under .github/workflows/, a CHANGELOG, and a sane dependency manifest with a lockfile. For a batch, the data is pulled UNIFORMLY so targets are comparable. A datum not retrieved is not a datum"
+      - id: facts-traced-not-asserted
+        description: "Every datum is TRACED, not asserted: the raw reads (dates, counts, presence/absence) are captured per target so the later stages have concrete evidence to point at, and so every eventual claim has a source. Judgment is DEFERRED here — this stage gathers the dashboard; weighting, slop-check and scoring come next. The discipline that no claim outruns its evidence starts at the moment the data is collected: if a number wasn't pulled, it is not available to be stated later"
+
+  - name: signal-weight
+    checks:
+      - id: gameable-discounted
+        description: "The GAMEABLE signals are explicitly DISCOUNTED to suspect-until-corroborated. A high STAR COUNT and a polished README move the verdict the LEAST: stars are farmable and lag reality, and a fluent, feature-rich README is the CHEAPEST thing in the repo to produce — an agent can generate a beautiful one in a minute, which is exactly why a polished README over a thin history is the signature of AI-generated slop. Neither is treated as evidence of quality on its own; both are demoted before the un-gameable signals are read, so the agent's instinct to rank by stars-and-README is corrected by construction"
+      - id: ungameable-assessed
+        description: "The EXPENSIVE-TO-FAKE signals are assessed and made the basis of the read: COMMIT SUBSTANCE (real, coherent changes over time vs padding or a single dump), ISSUE-RESPONSE QUALITY (whether the maintainer substantively engages on recent issues — not how MANY issues exist), BUS FACTOR (is ~95% of the work one person, and are they still active?), real downstream 'USED BY' and dependents, and the PRESENCE OF TESTS AND CI. These are the signals a fake can't cheaply wear. Activity is read IN CONTEXT, not as a verdict: low recent activity is ambiguous — a small, complete, Unix-style library can be correctly dormant (FINISHED: stable surface, issues answered, used downstream) and must be distinguished from ABANDONED (issues piling unanswered, PRs rotting, dependents fleeing)"
+
+  - name: slop-check
+    checks:
+      - id: ai-slop-and-farming-checked
+        description: "The AI-SLOP / STAR-FARM detector is run ADVERSARIALLY and returns a slop-risk verdict (low / medium / high) naming the specific tells found OR explicitly cleared. The tells of a repo built to LOOK valuable: a too-polished, feature-listing README over a THIN OR INCOHERENT commit history (a few giant dumps, not real evolution); BREADTH WITHOUT DEPTH (a dozen advertised features, none battle-tested); FABRICATED or unreproducible benchmarks; a high STAR COUNT WITH NO MATCHING REALITY (no real issues, no dependents, no discussion); and UNIFORM, GENERATED-LOOKING code with none of a real maintainer's idiosyncrasy. Any one is a yellow flag; several together is the pattern. The agent is COMMANDED to find the evidence this is slop or farmed (not to confirm the repo is fine) — the same please-you gradient that makes it trust the README, redirected, makes it a good detector; a repo that survives a genuine attempt to expose it as fake is far more trustworthy than one merely never doubted. This is the signal stars and the README were hiding, and the reason the suite exists in the agent era"
+
+  - name: score
+    checks:
+      - id: three-axes-scored
+        description: "The THREE AXES are scored per target, explicitly, on a consistent scale (so a batch is comparable). ALIVE (still being worked on?) — last commit, release cadence, issue-response recency. HEALTHY (if the lead leaves, does it die?) — bus factor, external contributors, whether a company or foundation stands behind it. WELL-BUILT (is the code likely good?) — tests, CI, CHANGELOG, documentation structure, and the QUALITY of the maintainer's replies in issues. The axes are INDEPENDENT and are allowed to disagree: a finished tool scores low Alive / high Well-built; a hot new project scores high Alive / low Healthy (single maintainer, no backing). The split is information and is NOT averaged into a single misleading number"
+      - id: scored-from-evidence-not-stars
+        description: "Each axis score NAMES THE SIGNALS BEHIND IT (from scan / signal-weight / slop-check), never the star count. 'Well-built: strong — full test suite, green CI, every recent issue answered with a concrete fix' is a score; 'well-built: it has 12k stars' is the exact mistake the skill exists to prevent. The score is built from the un-gameable evidence assessed earlier, so the verdict inherits the gameable-signal discipline rather than quietly smuggling stars back in"
+
+  - name: verdict
+    checks:
+      - id: verdict-calibrated-to-context
+        description: "The verdict is CALIBRATED to the use-context bar set at frame, landing ONE call: DEEP-DIVE (clears the bar, worth a real look at the code), TRY IT (good enough for a tryout/learning, not a production bet), DON'T-BET-IN-PRODUCTION (fine to play with, fails the dependency bar — low health, high slop-risk, or a bus factor of one), or SKIP. The SAME axis-read yields different verdicts under different bars, and naming the bar is what makes the verdict honest — a high-Alive / low-Healthy project is a 'try it', not a 'deep-dive', for a production decision. The calibration is the human's non-delegable judgment; the agent supplies the signals, the user decides whether they clear the bar their context sets"
+      - id: handoff-and-traceable
+        description: "The verdict is TRACEABLE and the survivors are HANDED OFF. Every claim points back to a signal pulled at scan — a date, a count, an issue thread, a contributor split — so the user can check the reasoning rather than trust the conclusion; for a batch this is a ranked, justified shortlist, for one repo a go/no-go with reasons (this structured, evidence-backed report is what supersedes the old search-and-score-and-summarize one-shot). A repo worth a DEEP DIVE is routed to the engineering suite — plumb (code craft), assay (the real state of its tests), aegis (security & dependency posture), husbandry (the cost of a long-lived dependency) — and a contribution target to the contribution workflow. touchstone ends at 'worth the deeper look'; it does not read the source line by line"

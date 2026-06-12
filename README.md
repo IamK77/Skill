@@ -2,7 +2,7 @@
 
 Step-by-step engineering and research skills for Claude Code, with a CLI that won't let your coding agent skip a stage or mark one done when it isn't.
 
-[![npm](https://img.shields.io/npm/v/@iamk77/skill-checklist?label=checklist&color=blue)](https://www.npmjs.com/package/@iamk77/skill-checklist) ![suites](https://img.shields.io/badge/suites-3-blue) ![skills](https://img.shields.io/badge/skills-18-blue) ![CLI tests](https://img.shields.io/badge/CLI%20tests-400%2B-brightgreen) ![node](https://img.shields.io/badge/node-%3E%3D18-blue) [![license](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+[![npm](https://img.shields.io/npm/v/@iamk77/skill-checklist?label=checklist&color=blue)](https://www.npmjs.com/package/@iamk77/skill-checklist) ![suites](https://img.shields.io/badge/suites-4-blue) ![skills](https://img.shields.io/badge/skills-20-blue) ![CLI tests](https://img.shields.io/badge/CLI%20tests-400%2B-brightgreen) ![node](https://img.shields.io/badge/node-%3E%3D18-blue) [![license](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
 Your agent writes most of the code now. It also skips the test it said it wrote, marks a check green without running it, and quotes a number it never measured. In the diff, all three look fine.
 
@@ -22,7 +22,7 @@ PHASE 0 verified, proceed to PHASE 1         # the next stage opens only now
 ```
 
 - **The order is enforced, not suggested.** A stage stays shut until every earlier check is recorded as passed. Re-run a check that now fails and it overwrites the old pass, so the gate reflects the current state, not a stale one.
-- **18 skills across 3 suites** — the software lifecycle, distributed-systems correctness, and computational research. Each suite installs as one Claude Code plugin.
+- **20 skills across 4 suites** — the software lifecycle, distributed-systems correctness, computational research, and open-source discovery. Each suite installs as one Claude Code plugin.
 - **It's just files.** A skill is a directory — one `SKILL.md`, a `references/` folder, one `.checklist.yml`. No runtime, no build step. Copy it into `~/.claude/skills/` and it runs without the plugin.
 - **What's enforced, stated plainly.** The CLI enforces the *order* of stages and records that each check was confirmed. It does not yet check the *substance* of a check; that judgment stays with you and the agent. The mechanical-verify rules exist and are tested, but no shipped skill uses them yet.
 
@@ -43,11 +43,12 @@ First run: have existing code? `/engineering:assay path/to/module` — it works 
 
 Plugin-provided skills are prefixed by their plugin name — `/engineering:plumb`, `/distributed:holdfast`; bundling each suite into one plugin makes the prefix a meaningful namespace. To use a skill without plugins instead, copy `skills/<suite>/<name>/` (e.g. `skills/engineering/assay/`) into `~/.claude/skills/` (personal) or `.claude/skills/` (per-project), keep the `checklist` CLI on `PATH`, and drop the prefix: `/assay path/to/module`.
 
-## The three suites
+## The four suites
 
 - **[engineering](#the-engineering-suite)** — the software lifecycle, its security, and the craft of the code itself. 11 skills.
 - **[distributed](#the-distributed-suite)** — correctness for systems that span machines. 1 skill.
 - **[inquiry](#the-inquiry-suite)** — computational research, from a vague area to a published paper. 6 skills.
+- **[quarry](#the-quarry-suite)** — finding and judging other people's open-source, from a need to a repo you can trust. 2 skills.
 
 ## What a gated run looks like
 
@@ -244,6 +245,27 @@ If the first five steps kept their discipline, the paper already exists in piece
 
 Invoke with `/inquiry:envoy <analyzed-results-to-write-up-or-writing-venue-rebuttal-problem>` · stages and references: [skills/inquiry/envoy/](skills/inquiry/envoy/)
 
+## The quarry suite
+
+Where the other suites build and study software, the **quarry** suite is about finding and judging *other people's* — getting from a need, or idle curiosity, to a repository worth trusting, without the usual ritual of searching by keyword and believing the star count. Two skills: one finds, one judges. Both turn on the same shift, which is what the agent changed. It can run forty searches or check fifty repos while you blink, but it trusts the signals cheapest to fake — a high star count, a fluent README — which in 2026 is exactly what an abandoned project or an AI-generated star-farm wears. So the agent does the legwork and you keep the two things it can't: the taste to know what's worth opening, and the calibration of what a verdict means for your risk.
+
+| Skill | Role | Stages |
+|-------|------|:------:|
+| [**`forage`**](#forage) | Discovery — find candidates worth your time, by target or by serendipity, captured cheaply with provenance | 5 |
+| [**`touchstone`**](#touchstone) | Evaluation — scan the dashboards not the code, weight the un-gameable signals over the gameable, score three axes, calibrate to your use | 6 |
+
+### forage
+
+`forage` finds the few repositories worth your time, in either of the two modes finding actually happens in. When you arrive with a concrete need, it sharpens the need-spec until "does this fit?" is a yes/no, then fans every search seam out in parallel — qualifier combinations, a trusted developer's stars, the right awesome list, a project's dependency graph, off-peak trending, the "alternative to X?" threads in issues — and returns a deduped, provenance-tagged shortlist. When you arrive with no goal and just want to be surprised, it ranges the high-signal surfaces (Show HN, the topic corners, the feeds of people whose taste you trust) with an adjacency dial aimed at the orthogonal, and captures what it finds cheaply so none of it is lost. The shift it installs is that search-syntax mastery is commoditized — the agent knows every qualifier — so your edge is the need-spec and the taste, and the agent never decides what is worth opening. Five stages: frame · seams · cast · sift · capture.
+
+Invoke with `/quarry:forage <a-need-to-hunt-or-a-vibe-to-wander>` · stages and references: [skills/quarry/forage/](skills/quarry/forage/)
+
+### touchstone
+
+`touchstone` judges a repository in minutes by scanning its dashboards instead of reading its code. An agent can pull the commit history, issue timeline and contributor graph for fifty repos in seconds, but it ranks them by the two signals cheapest to fake — the star count and a polished README — which is what a dead project or an AI-generated, feature-stacked star-farm wears best. So it inverts the weighting: discount stars and README polish, weight what can't be cheaply faked (commit substance, whether the maintainer actually answers issues, the bus factor, real downstream use, tests and CI), run an explicit slop detector, and score three axes — alive, healthy, well-built — without averaging them into one misleading number. The verdict is calibrated to your use, because the same single-maintainer tool is a fine weekend tryout and a poor production dependency, and every claim traces back to the repo. Six stages: frame · scan · signal-weight · slop-check · score · verdict.
+
+Invoke with `/quarry:touchstone <a-repo-or-shortlist-and-what-you-need-it-for>` · stages and references: [skills/quarry/touchstone/](skills/quarry/touchstone/)
+
 ## checklist
 
 `checklist` is a TypeScript CLI (npm: [`@iamk77/skill-checklist`](https://www.npmjs.com/package/@iamk77/skill-checklist), built on `commander`). It loads a skill's `.checklist.yml`, tracks per-stage pass/fail state in the skill directory, and refuses to open a stage until every check in every prior stage is recorded as `pass` — not merely present. A check that regresses on re-verify overwrites a stale pass, so the gate reflects current state. (`checklist` calls these units `phases`; the skills present them to the user as `stages` — they are the same thing.)
@@ -270,6 +292,8 @@ skills/
     holdfast/
   inquiry/                                                           # the inquiry suite
     prospect/  crucible/  ledger/  forge/  reckoning/  envoy/
+  quarry/                                                            # the quarry suite
+    forage/  touchstone/
                  # each gated skill: SKILL.md  references/  .checklist.yml  LICENSE  NOTICE
                  # pilot (un-gated): SKILL.md  references/  LICENSE  NOTICE
 devtools/
