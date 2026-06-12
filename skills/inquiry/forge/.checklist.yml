@@ -1,0 +1,52 @@
+# Flight checklist for the forge skill — turning the surviving method into
+# production experiment code and running it to produce confirmation evidence,
+# 6 stages, hard GATEs. SKILL.md addresses stages by NAME (checklist verify
+# <name> / check <name> <id>), so the 0-based index never surfaces. STAGE N
+# headings in SKILL.md map to these stages in order: harden -> provenance ->
+# pipeline -> operator -> integrity -> regen. What forge hands forward to
+# reckoning (results analysis) is a results store where every number the paper
+# will cite is on disk, version-tagged, and regenerable by one command.
+phases:
+  - name: harden
+    checks:
+      - id: hardened-to-research-standard
+        description: "The exploration MVP is hardened into experiment code against ONE quality standard — '结果可信且可复现 / results trustworthy and reproducible', NOT '可维护十年 / maintainable for a decade'. So over-abstraction and pretty design patterns are NOT worth the time; exactly four investments are: (1) everything CONFIG-ized — zero magic numbers in code, one config file defines a run completely; (2) metric computation collapsed to a SINGLE code path shared by every method (per-method metric code is the number-one source of misaligned experiments); (3) an INDEPENDENT feasibility checker that shares no logic with any solver, run on EVERY produced solution (the strongest trap for the agent's silent infeasible-solution bugs — a number that 'soars' is, nine times in ten, an infeasible solution); (4) interface FROZEN — once confirmation starts the method's external behavior does not change; to change it is to cut a new version number. The hardening refactor itself is good work to hand the agent"
+      - id: regression-against-mvp
+        description: "After hardening, the new implementation is REGRESSION-checked against the old MVP before the migration counts as done: same config, same seed, several instances — new and old results must MATCH. The reason is the agent-era trap this whole stage exists for: an agent refactor reads clean and passes its own tests yet silently changes behavior, so 'the code is prettier now' is not evidence the numbers are still the same — only the regression match is"
+
+  - name: provenance
+    checks:
+      - id: randomness-recorded-not-eliminated
+        description: "Randomness is MANAGED BY RECORDING, not by killing it with a single global seed. Multiple random sources — instance generation, initial solution, the algorithm's internals, data shuffling — each get an INDEPENDENTLY DERIVED seed, separately recorded, so editing one piece of code does not shift every random stream and destroy comparability with prior runs. On GPU, beware cuDNN's non-deterministic ops and float-accumulation order: for the key comparison experiments turn the determinism switches ON and accept the speed cost. The target is TASK-LEVEL determinism: the same (config, seed) pair yields the same result on any rerun (bit-for-bit where the determinism switches are on; reproducible across machines up to the metric's reported precision) — which is the precondition for both idempotent resume and anti-mixing integrity"
+      - id: run-archive-minimal-sufficient
+        description: "Every formal run AUTO-records the minimal sufficient archive: git commit hash, full config snapshot, environment lockfile (or container image tag), data version (file hash), hardware model, timestamp, and random seed — packed under one RUN ID. This archive is the machine version of the append-only 历程 (lab notebook) that ledger's firewall relies on: the 历程 need only record the run ID, and the evidence chain closes automatically. Three months later, when a reviewer questions a specific number, the run ID lets you checkout the exact code state and replay it bit-for-bit"
+      - id: clean-commit-gated
+        description: "Formal experiments run ONLY from a clean commit — a working tree with uncommitted changes makes the run REFUSE to start (one guard line in the scaffold). This is not fussiness: it is what makes the run-archive's commit hash actually mean something. Without it the recorded hash and the code that ran can silently diverge, and the three-months-later replay reconstructs the wrong state"
+
+  - name: pipeline
+    checks:
+      - id: idempotent-resume
+        description: "The execution loop is a PIPELINE that runs idempotently: the protocol auto-expands into a task queue (the full method × instance × seed grid) -> batch execute -> validate and persist -> auto-summarize, with failure-attribution as a sidecar. On startup the executor checks which (config, seed) combinations already have a VALID result and SKIPS them — so an interruption, a scale-up, or adding seeds is just 'run the same command again', and you NEVER hand-account which runs finished and which did not. Idempotent resume plus task-level determinism (from provenance) is what makes mid-run recovery a non-event"
+      - id: failures-classified
+        description: "Failures are CLASSIFIED and handled by class, never uniformly. RESOURCE failures (OOM, node preemption, timeout) auto-retry, switching to a larger resource tier. CODE failures (an exception, or a feasibility-check that does not pass) are NEVER auto-retried — they are marked and escalated. The reason is sharp: the correct response to a code bug is the graded handling of the operator stage, NOT rerunning until it happens not to error; an auto-retried code failure is a bug being laundered into a 'flaky' result"
+
+  - name: operator
+    checks:
+      - id: agent-is-operator-not-writer
+        description: "During the formal run the agent's role SWITCHES from developer to OPERATOR, and the switch is enforced by PERMISSION, not by instruction. The experiment code is FROZEN; the agent holds READ and EXECUTE only, NO WRITE. It submits tasks, watches logs, attributes and retries per the failure rules, and produces progress and anomaly reports ('73% done, method B's failure rate on the large tier is abnormally high, suspected memory issue') — but it may NOT 'helpfully fix' a number that looks wrong, may NOT adjust a validation threshold to make the check pass, and any code change must pass YOUR review and bump the version. The reason is a documented agent failure mode: coding agents tend to optimize 'the test passed', not 'the result is correct', and the shortest path to a passing validator is to edit the validator. Permission isolation closes that path mechanically — far more reliable than telling it not to"
+      - id: bug-response-graded
+        description: "A mid-run bug is near-inevitable, so its response is PRE-PLANNED and GRADED by blast radius. A bug affecting ALL methods (e.g. an instance-loading error): fix, bump the version, and rerun EVERYTHING — painful but fairness is non-negotiable. A bug affecting SOME methods: fix and rerun ALL affected combinations, not merely the one whose breakage was most visible. The single most dangerous move — fix the bug, rerun only a part, and let old and new numbers share one table — is forbidden here (it is caught structurally at the integrity stage). Every bug-and-rerun decision is appended to the 历程 and the protocol changelog, never made silently"
+
+  - name: integrity
+    checks:
+      - id: results-version-tagged
+        description: "Mixing old and new numbers in one table — 混表 — is the single most common way experiment data rots: it is silent and, months later, un-auditable. The structural defense: every result row is TAGGED with the code version that produced it, and the summary script FORCIBLY checks that a single table draws from a single version, erroring out and refusing to emit the table on any mismatch. A discipline you must trust to a machine, because the human eye cannot see a version mismatch in a column of numbers"
+      - id: single-source-of-truth
+        description: "All run results live in ONE results store (SQLite is plenty), and the raw logs and solution files are archived by run ID and kept — reviewers, OR journals especially, may demand them. One source of truth means there is exactly one place a number can come from, which is what makes the next stage's one-command regeneration possible and what stops two subtly-different copies of 'the results' from drifting apart"
+
+  - name: regen
+    checks:
+      - id: one-command-regeneration
+        description: "THE governing standard of the whole step: every table and every figure the paper will contain is generated by a SCRIPT from the results store, by ONE command, with NO manual number-editing anywhere in the chain (a hand-edited spreadsheet is the number-one channel for untraceable error). This single 'one-command regeneration' bar simultaneously buys reproducibility, anti-rot, and most of the reproduction package for free — and it is what makes the stage-5 analysis loop cheap: changing a figure's definition, adding seeds, or swapping a statistical test all become 'edit the script, rerun one command'"
+      - id: repro-package-smoke-tested
+        description: "The reproduction package is accumulated AS YOU GO, never crammed before submission: a repro/ directory holding the environment lockfile, the data fetch-and-preprocess scripts, a one-command script that regenerates the main tables, and a README — each experiment class adds its command as it completes. Periodically the agent executes the README FROM SCRATCH in a FRESH clean environment, because a repro package's most common death is 'works on the author's machine', and the clean-environment smoke test is exactly the dull, well-bounded job the agent is best at. The step is done when: every protocol number is on disk and version-consistent, any table or figure regenerates by one command, the clean-environment smoke test passes, and the 历程 evidence chain is complete"

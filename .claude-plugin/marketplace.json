@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Agent-era skill suites for Claude Code: engineering, distributed, and inquiry, gated by the checklist CLI",
-    "version": "1.3.0"
+    "version": "1.4.0"
   },
   "plugins": [
     {
@@ -39,13 +39,15 @@
     },
     {
       "name": "inquiry",
-      "description": "Do computational research that survives review — the agent-era methodology for going from a vague area to published results, for fields where you run experiments to publish (machine learning, combinatorial optimization, operations research, systems, scheduling). A pipeline of gated lenses for the first three research steps: prospect (find and prove a defensible gap — mine-don't-read, seven seams run in parallel, survive an adversarial 'prove it's already done' attack), crucible (forge the method — race death-cause-orthogonal variants to death against pre-committed kills, measure the ceiling with an oracle ladder first, trap the agent's infeasible-solution bugs with an independent feasibility checker), and ledger (design the experiments — write down what counts as evidence before you look, firewall exploration from confirmation, freeze the protocol before the run). Across all three the agent is the means (parallel miner, prototyper, experiment operator), never the oracle. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "description": "Do computational research that survives review — the agent-era methodology for going from a vague area to published results, for fields where you run experiments to publish (machine learning, combinatorial optimization, operations research, systems, scheduling). A pipeline of gated lenses for five research steps: prospect (find and prove a defensible gap — mine-don't-read, seven seams run in parallel, survive an adversarial 'prove it's already done' attack), crucible (design the method — race death-cause-orthogonal variants to death against pre-committed kills, measure the ceiling with an oracle ladder first, trap the agent's infeasible-solution bugs with an independent feasibility checker), ledger (design the experiments — write down what counts as evidence before you look, firewall exploration from confirmation, freeze the protocol before the run), forge (run the experiments — harden the method into production experiment code, run it idempotently with the agent as a read-only operator, regenerate every table and figure with one command), and reckoning (analyze the results — audit before you read, prove WHY with mechanism probes, defend against the garden of forking paths, settle every claim to a verdict). Across all five the agent is the means (parallel miner, prototyper, experiment operator, adversarial reviewer), never the oracle. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
       "source": "./",
       "strict": false,
       "skills": [
         "./skills/inquiry/prospect",
         "./skills/inquiry/crucible",
-        "./skills/inquiry/ledger"
+        "./skills/inquiry/ledger",
+        "./skills/inquiry/forge",
+        "./skills/inquiry/reckoning"
       ]
     }
   ]

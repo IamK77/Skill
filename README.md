@@ -157,13 +157,15 @@ Invoke with `/distributed:holdfast <design-or-code>` · stages and references: [
 
 ## The inquiry suite
 
-Where the engineering and distributed suites are about *building* software, the **inquiry** suite is about *doing computational research* — the work of going from a vague area to published results in any field where you run experiments to publish (machine learning, combinatorial optimization, operations research, systems, scheduling). It updates human-era research practice for a world where the agent does the searching, reading, reproducing, and drafting — and therefore fools you by default, optimizing for output that *looks* like a result. Three skills so far form a pipeline over the first three research steps, each handing the next a concrete artifact: **prospect** (find and prove the gap) → **crucible** (forge the method) → **ledger** (design the experiments).
+Where the engineering and distributed suites are about *building* software, the **inquiry** suite is about *doing computational research* — the work of going from a vague area to published results in any field where you run experiments to publish (machine learning, combinatorial optimization, operations research, systems, scheduling). It updates human-era research practice for a world where the agent does the searching, reading, reproducing, and drafting — and therefore fools you by default, optimizing for output that *looks* like a result. Five skills so far form a pipeline over the first five research steps, each handing the next a concrete artifact: **prospect** (find and prove the gap) → **crucible** (design the method) → **ledger** (design the experiments) → **forge** (run the experiments) → **reckoning** (analyze the results).
 
 | Skill | Role | Stages |
 |-------|------|:------:|
 | [**`prospect`**](#prospect) | Research-gap prospecting — bound the ground, mine candidate gaps in parallel, attack & rank, kill cheaply, land the gap | 6 |
 | [**`crucible`**](#crucible) | Method design — decidable spec, oracle ceiling, race death-orthogonal variants in a feasibility-checked tournament, deepen with theory / ablation / novelty | 7 |
 | [**`ledger`**](#ledger) | Experiment design — claim-evidence matrix, exploration/confirmation firewall, instances & fair baselines, statistics, ablation & sensitivity, frozen protocol | 7 |
+| [**`forge`**](#forge) | Experiment run — harden the method to research-standard code, per-run provenance, idempotent pipeline with a read-only operator agent, version-tag integrity, one-command regeneration | 6 |
+| [**`reckoning`**](#reckoning) | Results analysis — audit before reading, distribution & slices with honest statistics, ablation traps, mechanism probes, failure boundary, claim verdicts, systematized red-team | 7 |
 
 ### prospect
 
@@ -179,9 +181,21 @@ Invoke with `/inquiry:crucible <gap-to-turn-into-a-method-or-method-to-stress-te
 
 ### ledger
 
-`ledger` owns step three — turning a forged method into evidence a reviewer believes. The one shift it installs is **write down what counts as evidence before you look at the data**: the protocol (claims, instances, baselines, metrics, and the conditions that count as support *or* refutation) is frozen *before* the main run, because running first and choosing the story after is the experiment-version of p-hacking. Its keystone is a **firewall between exploration and confirmation** — chaos-testing an MVP generates hypotheses into an append-only notebook whose numbers never enter the paper, and confirmation re-runs the survivors on fresh seeds and instances under the frozen protocol. The agent is the experiment operator (batch-submit, monitor, auto-retry, summarize), never the judge of what the numbers mean. Its seven stages: matrix · firewall · instances · baselines · stats · ablation · freeze.
+`ledger` owns step three — turning the method crucible produced into evidence a reviewer believes. The one shift it installs is **write down what counts as evidence before you look at the data**: the protocol (claims, instances, baselines, metrics, and the conditions that count as support *or* refutation) is frozen *before* the main run, because running first and choosing the story after is the experiment-version of p-hacking. Its keystone is a **firewall between exploration and confirmation** — chaos-testing an MVP generates hypotheses into an append-only notebook whose numbers never enter the paper, and confirmation re-runs the survivors on fresh seeds and instances under the frozen protocol. The agent is the experiment operator (batch-submit, monitor, auto-retry, summarize), never the judge of what the numbers mean. Its seven stages: matrix · firewall · instances · baselines · stats · ablation · freeze.
 
 Invoke with `/inquiry:ledger <method-to-design-experiments-for-or-protocol-to-stress-test>` · stages and references: [skills/inquiry/ledger/](skills/inquiry/ledger/)
+
+### forge
+
+`forge` owns step four — turning the surviving method and frozen protocol into real, executed, recorded evidence. The one shift it installs is **the run is frozen and the agent becomes an operator**: the experiment code is hardened and frozen, and the agent's role switches from developer to **operator holding read and execute only — no write** — because a coding agent optimizes "the test passed", not "the result is correct", and the shortest path to a passing validator is to *edit the validator*; permission isolation closes that path where exhortation cannot. The step's governing standard is **one-command regeneration** — every table and figure rebuilds from the raw results by a single command, which buys reproducibility, anti-data-rot, and the reproduction package at once. Along the way it hardens the MVP to the research standard (config-ize, single metric path, **independent feasibility checker**, freeze the interface), stamps every run with a provenance archive behind a clean-commit gate, runs the grid through an idempotent pipeline that auto-retries resource failures but never code failures, and guards integrity by version-tagging every result so a summary script refuses a mixed table. Its six stages: harden · provenance · pipeline · operator · integrity · regen.
+
+Invoke with `/inquiry:forge <method-and-protocol-to-run-or-experiment-run-problem-to-fix>` · stages and references: [skills/inquiry/forge/](skills/inquiry/forge/)
+
+### reckoning
+
+`reckoning` owns step five — turning a finished results store into settled claims, mechanism evidence, and paper-grade figures. The one shift it installs is **analysis is audit, attribution, and the language of evidence — not "compute a mean and see who is bigger"**: you **audit before you read** (a too-good number is a bug or an infeasible solution until it survives that suspicion), you prove **why** the method wins with **mechanism probes** — checkable predictions that are *not the main result itself*, the line between a publishable paper and a strong one — and you defend against the **garden of forking paths**, the danger the agent era amplifies, because when experiments are cheap, unconscious cheating is cheap; the same cheap compute is flipped from a false-positive factory into a robustness proof by running the *whole* analysis multiverse instead of the prettiest path. The agent is the **means** — the auditor, the probe runner, the systematized adversarial reviewer — never the oracle; you keep three judgments (the unit of analysis, what prediction the mechanism implies, how to settle each claim). Its seven stages — audit · distribution · ablation · mechanism · boundary · verdict · redteam — end with a paper that already exists in pieces: claims as argument, protocol as method, probes as discussion.
+
+Invoke with `/inquiry:reckoning <results-to-analyze-or-analysis-claim-figure-to-stress-test>` · stages and references: [skills/inquiry/reckoning/](skills/inquiry/reckoning/)
 
 ## checklist
 
@@ -208,7 +222,7 @@ skills/
   distributed/                                                       # the distributed suite
     holdfast/
   inquiry/                                                           # the inquiry suite
-    prospect/  crucible/  ledger/
+    prospect/  crucible/  ledger/  forge/  reckoning/
                  # each gated skill: SKILL.md  references/  .checklist.yml  LICENSE  NOTICE
                  # pilot (un-gated): SKILL.md  references/  LICENSE  NOTICE
 devtools/
