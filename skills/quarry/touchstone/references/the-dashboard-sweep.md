@@ -177,7 +177,7 @@ gh api repos/OWNER/REPO/git/trees/HEAD --jq '.tree[] | .path' | head -60
 
 (or `gh api repos/OWNER/REPO/contents/` for just the root level). Then check for five things:
 
-**A `tests/` or `test/` directory** (or `__tests__`, `spec/`, `*_test.go` alongside sources). *Good:* a real test directory with real test files. *Bad:* none — the maintainer ships untested, and you'll inherit that. (Whether the tests are *real* or hollow is `assay`'s call; here you only record presence.)
+**A `tests/` or `test/` directory** (or `__tests__`, `spec/`, `*_test.go` alongside sources). *Good:* a real test directory with real test files. *Bad:* none visible — but record this as *no separate test tree*, not *untested*: Rust keeps its tests in `#[cfg(test)]` modules inside the source files, and Python and JS often inline them, so a missing `tests/` folder is not proof of no tests. Presence is all you record here; how *strong* the suite is (its test-function and assertion density, counted inline) is measured at the score stage (see [scoring-and-verdict.md](scoring-and-verdict.md)), and whether the tests are *real or hollow* is `assay`'s deeper call.
 
 **CI under `.github/workflows/`.** Pull it:
 
