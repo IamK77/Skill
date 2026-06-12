@@ -157,7 +157,7 @@ Invoke with `/distributed:holdfast <design-or-code>` · stages and references: [
 
 ## The inquiry suite
 
-Where the engineering and distributed suites are about *building* software, the **inquiry** suite is about *doing computational research* — the work of going from a vague area to published results in any field where you run experiments to publish (machine learning, combinatorial optimization, operations research, systems, scheduling). It updates human-era research practice for a world where the agent does the searching, reading, reproducing, and drafting — and therefore fools you by default, optimizing for output that *looks* like a result. Five skills so far form a pipeline over the first five research steps, each handing the next a concrete artifact: **prospect** (find and prove the gap) → **crucible** (design the method) → **ledger** (design the experiments) → **forge** (run the experiments) → **reckoning** (analyze the results).
+Where the engineering and distributed suites are about *building* software, the **inquiry** suite is about *doing computational research* — the work of going from a vague area to published results in any field where you run experiments to publish (machine learning, combinatorial optimization, operations research, systems, scheduling). It updates human-era research practice for a world where the agent does the searching, reading, reproducing, drafting, and defending — and therefore fools you by default, optimizing for output that *looks* like a result. Six skills form the complete pipeline over all six research steps, each handing the next a concrete artifact: **prospect** (find and prove the gap) → **crucible** (design the method) → **ledger** (design the experiments) → **forge** (run the experiments) → **reckoning** (analyze the results) → **envoy** (write it up, submit, and defend). Across all six the human keeps four things — taste, spec, judgment, and the signature on the claims — and everything else is discipline and the agent.
 
 | Skill | Role | Stages |
 |-------|------|:------:|
@@ -166,6 +166,7 @@ Where the engineering and distributed suites are about *building* software, the 
 | [**`ledger`**](#ledger) | Experiment design — claim-evidence matrix, exploration/confirmation firewall, instances & fair baselines, statistics, ablation & sensitivity, frozen protocol | 7 |
 | [**`forge`**](#forge) | Experiment run — harden the method to research-standard code, per-run provenance, idempotent pipeline with a read-only operator agent, version-tag integrity, one-command regeneration | 6 |
 | [**`reckoning`**](#reckoning) | Results analysis — audit before reading, distribution & slices with honest statistics, ablation traps, mechanism probes, failure boundary, claim verdicts, systematized red-team | 7 |
+| [**`envoy`**](#envoy) | Writing, submission & rebuttal — figure-first skeleton, claim-organized sections, the three agent red-lines (every number to a run id), venue-fit submission, the four-beat rebuttal, the revise-before-resubmit ladder | 6 |
 
 ### prospect
 
@@ -197,6 +198,12 @@ Invoke with `/inquiry:forge <method-and-protocol-to-run-or-experiment-run-proble
 
 Invoke with `/inquiry:reckoning <results-to-analyze-or-analysis-claim-figure-to-stress-test>` · stages and references: [skills/inquiry/reckoning/](skills/inquiry/reckoning/)
 
+### envoy
+
+`envoy` owns step six — turning a settled set of claims and figures into a published paper. The one shift it installs is **the paper already exists in pieces**: if the prior discipline held, the claims are its argument, the frozen protocol its experiments section, the mechanism probes its discussion, the difference table its related work — so writing is *stringing an existing argument into prose*, not composing from scratch. And it is the step with the **sharpest human/agent boundary**: the agent polishes, runs the consistency vet, and reader-tests (a clean session restating the paper marks the exact spots you wrote unclearly), and — the agent era's one real change to rebuttal — runs the experiments forge's one-command pipeline now makes feasible *inside the rebuttal window*; but the **cardinal sin** is the agent writing a sentence whose evidence it never saw, so every number traces to a run id, and the story, the contribution, and the signature stay in the author's hand. Its six stages — skeleton · draft · vet · submit · rebuttal · persist — carry the work from a figure-first skeleton through the court of peers, including the 48-hour rule, the four-beat rebuttal, and the revise-before-resubmit ladder. When the paper lands, the research is done and the next project re-enters at `prospect`.
+
+Invoke with `/inquiry:envoy <analyzed-results-to-write-up-or-writing-venue-rebuttal-problem>` · stages and references: [skills/inquiry/envoy/](skills/inquiry/envoy/)
+
 ## checklist
 
 `checklist` is a TypeScript CLI (npm: [`@iamk77/skill-checklist`](https://www.npmjs.com/package/@iamk77/skill-checklist), built on `commander`). It loads a skill's `.checklist.yml`, tracks per-stage pass/fail state in the skill directory, and refuses to open a stage until every check in every prior stage is recorded as `pass` — not merely present. A check that regresses on re-verify overwrites a stale pass, so the gate reflects current state. (`checklist` calls these units `phases`; the skills present them to the user as `stages` — they are the same thing.)
@@ -222,7 +229,7 @@ skills/
   distributed/                                                       # the distributed suite
     holdfast/
   inquiry/                                                           # the inquiry suite
-    prospect/  crucible/  ledger/  forge/  reckoning/
+    prospect/  crucible/  ledger/  forge/  reckoning/  envoy/
                  # each gated skill: SKILL.md  references/  .checklist.yml  LICENSE  NOTICE
                  # pilot (un-gated): SKILL.md  references/  LICENSE  NOTICE
 devtools/
