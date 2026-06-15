@@ -1,0 +1,24 @@
+# Flight checklist for the lookout skill — 4 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: preview -> instrument -> telemetry -> conscience.
+phases:
+  - name: preview
+    checks:
+      - id: preview-and-progressive-rollout-set
+        description: "A PREVIEW DEPLOY per PR (every PR gets a clickable URL) — high leverage because the perception contract can only be judged BY EYE, so a preview compresses the design feedback loop from days to minutes and reviewers review the running thing, not the diff; AND progressive rollout / feature flags set up — deploy decoupled from release, ramp 1% → 10% → 100%, roll back with a flag in seconds (faster than redeploy), with A/B tests living here. The triad: ship small, ship often, roll back fast"
+
+  - name: instrument
+    checks:
+      - id: health-and-perception-instrumented
+        description: "The always-on, non-negotiable health/perception instrument class wired: ERROR TRACKING — every uncaught and deliberately-logged error with enough context to reproduce (user action, route, release version), source maps uploaded so stacks are real, CORRELATED WITH RELEASE so 'errors spiked in version X' is visible; RUM / Core Web Vitals (LCP, INP, CLS) measured on REAL USERS (field), NOT just the lab — because the lab is a fast machine on fast network while real users are mid-range phones on 4G, and field data is the truth (these metrics are psychophysics encoded as numbers, the closest proxy to 'does it feel right'); and the basics SEGMENTED by device/network/route so a regression localizes to a population instead of hiding in an average"
+
+  - name: telemetry
+    checks:
+      - id: telemetry-tied-to-decisions
+        description: "Product analytics governed by ONE RULE — every event tracked names the decision it will drive; no decision → don't collect it (kills both monitoring bloat and metric creep). TRACK: the critical-path JTBD funnels from bearings (completion rate per step, to FIND PROBLEMS not optimize engagement), honest pain signals (rage clicks, repeated retries, dead clicks), and the guardrail metrics. DON'T track (or only very deliberately): vanity metrics no decision hangs on (monitoring debt + privacy risk); personal data beyond a decision's need (DATA MINIMIZATION — every extra data point widens your asymmetry over the user, so this is ethics, not just compliance); and do NOT set engagement/time as the north-star you OPTIMIZE — observe it, never point the gradient at it, because it is exactly the loss function that discovers manipulation"
+
+  - name: conscience
+    checks:
+      - id: objective-function-ethics-gate-passed
+        description: "The pre-launch objective-function ETHICS GATE passed before any A/B test or metric-driven rollout (bearings's charter back for its exam): (1) NORTH-STAR declared and unique; (2) GUARDRAILS declared and read ON THE SAME DASHBOARD as the experiment (mis-orders, rage-clicks, churn, a11y errors, support tickets), not checked after; (3) ADVERSARY CHECK — 'cheapest, most manipulative path to move this number?' and is it forbidden/guarded; (4) REFLECTIVE-SELF check — if the metric only moves by siding with the user's impulsive self over the self they'd endorse on reflection, STOP; (5) REVERSIBILITY/PUBLICITY — if the user saw every mechanism and intent, would they still endorse it; (6) FRICTION SYMMETRY — where this makes something easier/harder at a user-vs-business divergence, whom does it serve (GDPR Art. 7, withdraw-as-easy-as-give, is the legal floor; apply the principle everywhere); (7) STOP-CONDITION + KILL-SWITCH declared before you have feelings about the result. A/B run honestly: pre-register hypothesis/metrics/stopping-rule (no peeking-until-significant), and on a tie default to the LEAST MANIPULATIVE variant; honest defaults (the default is the strongest lever — make it the choice the user would endorse). The real villain is the loss function: choose it, guard it, give it a kill-switch"

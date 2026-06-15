@@ -1,0 +1,24 @@
+# Flight checklist for the keel skill — 4 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: seams -> slice -> contract -> floor.
+phases:
+  - name: seams
+    checks:
+      - id: seams-enumerated-and-pierced
+        description: "Every real integration SEAM this architecture has enumerated and required of the skeleton — build/dev (toolchain builds, serves, HMR), DATA (one real API call to a real-or-stub backend, NOT mock data, types from the contract), AUTH (real login → session → credentialed request → server-side validation; the most underrated seam — run the whole token flow even against a stub), RENDER/HYDRATION (for SSR/RSC/islands, server-render → hydrate → interactive with NO mismatch — the classic ship-day killer), STATE (one full server-state round-trip: fetch → cache → mutate → invalidate → re-render), STYLE/SCOPE (scoped, themeable output; tokens reach components), DEPLOY (commit → CI → a preview/staging env mirroring prod), OBSERVABILITY (error tracking + RUM wired FROM the skeleton, not deferred), CONFIG/SECRETS (env + local/preview/prod differences work end to end). Any real seam the skeleton does not cross is one chosen to be first exercised under deadline pressure — so all are named now, because the project dies at the seams, not in any one component"
+
+  - name: slice
+    checks:
+      - id: vertical-slice-pierces-the-stack
+        description: "ONE real-but-trivial feature chosen that is describable in a sentence yet passes through the WHOLE stack — the canonical 'a logged-in user sees their own name fetched from the server, can edit it, and the change persists and re-renders' crosses auth, data, the full state round-trip, render, and (once deployed) deploy + config, with zero product value and complete structural coverage ('looks empty, bones all present'). The test applied: does the slice give EVERY enumerated seam at least one chance to leak? A slice that never touches auth or never hits a real deploy does not count. Build DEEP through every seam first, not WIDE across static pages — because mock-built 'completeness' is a lie about how much integration risk remains"
+
+  - name: contract
+    checks:
+      - id: contract-cannot-drift
+        description: "Types GENERATED from a single source (OpenAPI / GraphQL / tRPC) and wired into the build so front-end and back-end types cannot be hand-written and drift apart (identity-synchronization across the network boundary), with the executable acceptance test: change a field on the server and the CLIENT MUST FAIL TO COMPILE — if it doesn't, the contract is fake (only hand-copied types that will silently go stale). Stub-impl-OK-but-stub-contract-NOT: a not-yet-built backend may return fake data but must speak the REAL contract (real types, real auth shape, real error shape), and any mock (MSW-style) is BACKED BY THE GENERATED SCHEMA so it can't drift from the real shape — a mock that disagrees with reality is the most dangerous artifact in the build. Design tokens are executable too: change a token and every consumer changes, or the token isn't really wired in"
+
+  - name: floor
+    checks:
+      - id: walking-skeleton-accepted
+        description: "All NINE acceptance conditions hold: (1) a real, trivial feature runs user-action → server → screen on a DEPLOY ENVIRONMENT, not localhost; (2) it passed through real AUTH if any; (3) data comes from a real API typed by the GENERATED CONTRACT — a server field change fails the client build; (4) every PR triggers CI (typecheck + lint + test + build), red blocks merge; (5) every PR gets a clickable PREVIEW deploy; (6) deployed-app errors land in ERROR TRACKING; (7) preview/staging CONFIG (env, secrets) mirrors prod; (8) ROLLBACK works in minutes; (9) another engineer can clone → install → run → deploy on the README ALONE with no tribal knowledge. Number nine is the MASTER GATE: it proves the build doesn't live in one person's head (bus factor > 1) — pass it and the stage is genuinely over, fail it and the build has a single point of failure made of a human"

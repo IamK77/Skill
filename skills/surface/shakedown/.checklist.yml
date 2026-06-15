@@ -1,0 +1,24 @@
+# Flight checklist for the shakedown skill — 4 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: behavior -> levels -> boundary -> prune.
+phases:
+  - name: behavior
+    checks:
+      - id: behavior-not-structure-tested
+        description: "Every test settled against THE ONE QUESTION — does it go red on a BEHAVIOR change (a safety net: lets you refactor freely, screams on real regressions) or on an IMPLEMENTATION change with behavior unchanged (a straitjacket: reddens on every refactor, so you fix tests instead of code and learn to ignore red, killing the suite). The executable litmus applied — 'if I rewrote the internals but kept the observable behavior, would this test still pass?'; pass → keep, break → it tests structure, rewrite or delete. BEHAVIOR (assert this) = what a user or a module's consumer observes: given this input/interaction → this rendered result / output / world-effect. INTERNAL (never assert) = state-variable names, useReducer-vs-useState, render counts, that a private function was called, the internal data shape. Classic straitjackets named and rejected: asserting 'internal count is 3', 'this private fn was called with X', and whole-tree snapshots; the good test is 'after clicking +, the screen shows 3'"
+
+  - name: levels
+    checks:
+      - id: tested-at-the-right-level
+        description: "Each test placed at the level where its bug lives — the TESTING TROPHY, not the pyramid (frontend bugs cluster at integration: seams, two-graph drift, state out of sync — not in single pure functions). UNIT: pure functions / derivations / complex algorithms / state-machine transitions (deterministic in→out, no IO — the one place unit truly shines). INTEGRATION/BEHAVIOR (the bulk): a component's/feature's user-visible behavior via testing-library (the four states as scenarios; test rendering + interaction, never internals). E2E (thin): cross-page critical journeys (signup, checkout, login) via Playwright — ONLY revenue/auth/irreversible paths, slow and costly, kept few. TYPE SYSTEM (free): anything types guarantee (illegal states, field spelling, the contract) is NOT tested — let the compiler fail. Plus visual-regression screenshot diffs and axe + keyboard-walkthrough for a11y. The mass goes in the middle; spending the budget on unit tests spends it where the fewest bugs are"
+
+  - name: boundary
+    checks:
+      - id: mocked-at-the-network-boundary
+        description: "Mocking done at the NETWORK boundary, not the module/function boundary — an MSW-style network mock so the test still exercises the REAL component + state + logic integration (where the bugs live), faking only the one true external seam; mocking at the module boundary replaces that integration with stubs so the test proves your wiring-of-mocks, not your code. The mock MUST speak the real contract (generated from / validated against the real API schema) or you get the worst outcome — a green test over a shape production doesn't return (keel's stub-contract rule, in the test layer). And: don't mock the thing you're testing, and don't over-mock (which turns an integration test into 'I asserted the mock returned what I told it to' — testing nothing)"
+
+  - name: prune
+    checks:
+      - id: non-tests-pruned-and-suite-trusted
+        description: "The what-NOT-to-test list applied — don't test the framework/library (that useState updates, that the router navigates); don't test implementation details (internal state, render counts, private calls); don't snapshot large component trees (brittle, unreviewed, rot into reflexive 'update snapshot'); don't unit-test pure pass-through glue; don't chase 100% coverage (it forces straitjacket tests on trivial code — coverage finds untested risk, it is not a KPI); don't mock the thing under test. KEEP-A-TEST-IFF both hold: it catches a regression you'd actually ship AND it survives a refactor — missing either → cut (a red test that can't name the broken user-visible thing is at the wrong level). And PROVE THE SUITE CAN GO RED: run mutation testing (or deliberately break a behavior) and confirm a test catches it — an assertion no mutation reddens is a behavior no one is actually testing"

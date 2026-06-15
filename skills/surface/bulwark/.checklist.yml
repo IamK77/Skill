@@ -1,0 +1,30 @@
+# Flight checklist for the bulwark skill — 5 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: enforce -> prune -> conway -> system -> vitals.
+# 1-to-N is a STEADY STATE: there is no exit, the vitals replace exit criteria.
+phases:
+  - name: enforce
+    checks:
+      - id: boundaries-machine-enforced
+        description: "The architecture made SELF-ENFORCING — a boundary in a head/wiki is already violated, only one the machine rejects at merge holds. DEPENDENCY/IMPORT RULES encoded (eslint-plugin-boundaries / no-restricted-imports / dependency-cruiser): 'layer A can't import layer B', 'features can't import each other's internals, only the public entry', 'UI layer can't touch the data layer' — violations turn CI red, fossilizing the designed module graph into a code fact. The PUBLIC-API (single-entry) module pattern: each module exposes one index, deep imports lint-banned, so the graph keeps the shape you designed not 'whoever was in a hurry'. State classification lint-checked where possible (ban global-store/localStorage writes outside designated layers; flag the useEffect-syncs-state-into-state smell), architecture FITNESS FUNCTIONS in CI (no circular deps, layer X ∌ Y, route bundle under budget), and CODEOWNERS on load-bearing files. The IMMUNE-SYSTEM meta-rule: every accidental violation that could have been caught becomes a new permanent lint rule — the boundary set grows by turning each real violation into a guard"
+
+  - name: prune
+    checks:
+      - id: abstractions-pruned-and-state-reclassified
+        description: "The counter-move to the agent's add-never-remove default. EXTRACT/DELETE/KEEP per abstraction: used 3+ times AND genuinely shared behavior? No (once/twice, or coincidental 'sharing') → premature → INLINE IT BACK (duplication cheaper than wrong abstraction); consumers fighting it with flag-args or all needing escape hatches? → it coupled unrelated things → split/delete (the flag-argument is the tell — a flagged abstraction is two things in one coat); consumers can't escape an edge case? → refactor to headless/compound or delete; load-bearing + stable (widely used, rarely changes, no one fights it)? → keep. Maintenance bias: when unsure, DELETE-AND-DUPLICATE (a wrong abstraction is an invisible edge coupling distant things). PRUNE THE DEAD (knip/ts-prune): unused exports, stale feature flags (the one rolled to 100% months ago and never deleted = an un-merged fork), stored derived state; audit the import graph for new cycles/cross-layer leaks; and RECLASSIFY drifted state — the global store's size is wellspring's thermometer, so when it grows, re-run the classification tree and move server-cache back to the cache layer"
+
+  - name: conway
+    checks:
+      - id: module-edges-aligned-to-team-edges
+        description: "Module edges aligned to TEAM edges (a system's structure mirrors its org's communication structure whether you want it or not) — one team owns a module end to end, so the code's seams become the org's seams instead of fighting them. The executable PROBE applied: map 'to change X, who must be in the room?' — if a routine change needs more than one team, the boundary is misplaced (split it along the team line). INVERSE CONWAY used deliberately: to get a target architecture, first shape the teams that would produce it"
+
+  - name: system
+    checks:
+      - id: design-system-is-a-real-artifact
+        description: "The design system made a REAL, discoverable artifact rather than folklore that dies with the people holding it. A LIVING COMPONENT CATALOG (Storybook-style): each reusable component documents its states — including seaworthy's four (loading/error/empty/edge) as stories — so components are found and reused, not reinvented; executable check — can a newcomer find and reuse an existing component instead of building a duplicate? (constant reinvention = the catalog is untrue or undiscoverable). TOKENS as the single source of visual decisions (from keel) so re-theming is one edit not a manhunt; and ADRs as the living 'why' — not a rotting exhaustive API doc but load-bearing decision records that keep the reasoning alive after the deciders have gone"
+
+  - name: vitals
+    checks:
+      - id: architecture-vitals-healthy
+        description: "The steady-state health read (replacing an exit criterion, because 1-to-N has no finish). The single best EXTERNAL metric: how fast a newcomer ships ON THE DOCS ALONE — healthy = days not weeks (clone, README runs+deploys it per keel's reproducibility gate, clear boundaries locate the module, reuse from the catalog, ship a slice down a proven path); unhealthy = weeks and a senior must walk them through 'what not to touch' (the architecture lives in a head, not the structure — exactly the entropy fought). Standing health signs: boundaries machine-enforced with each new violation class turned into a rule; the global store stays small as features grow; the cost of the Nth feature ≈ the first (no entropy tax); abstractions pruned not piled; module edges match team edges. Track 'time to first independent delivery' — if it's climbing, rot is outrunning the documentation of it. Re-run the loop as the system grows"

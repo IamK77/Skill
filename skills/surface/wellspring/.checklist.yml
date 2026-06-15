@@ -1,0 +1,24 @@
+# Flight checklist for the wellspring skill — 4 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: classify -> source -> machine -> flow.
+phases:
+  - name: classify
+    checks:
+      - id: state-classified-by-bucket
+        description: "Every meaningful piece of state run down the five-question tree (cheapest, most local answer first, stop on first hit) and assigned to the ONE bucket that owns it: Q1 computable from existing state → DERIVED (never stored, recomputed); Q2 canonical copy owned by the server / persisted / changeable by other sessions → SERVER-CACHE (query/cache layer with invalidation, dedup, background refresh — not a variable); Q3 should survive refresh / be shareable / take part in back-forward → URL STATE (router); Q4 genuinely client-owned and needed by components with no clean parent-child line → SHARED CLIENT STATE (store/signals/context), but only after lifting-to-a-common-ancestor-and-passing-props is ruled out; Q5 otherwise → LOCAL UI STATE (the default). The STORE-SIZE THERMOMETER applied: what landed in Q4 should be tiny — a large global store is near-proof of misclassification, usually server-cache masquerading as client state"
+
+  - name: source
+    checks:
+      - id: source-of-truth-minimized
+        description: "The DUPLICATE-FACT AUDIT run — for each piece of state, 'is this same fact stored anywhere else?'; if yes, one copy made derived (computed from the other) or deleted, because the same fact stored twice is a sync bug waiting to fire (items + selectedItemId = fine, two facts; items + filteredItems = bug, the second is derived; server user copied to local userName = bug). The ONE legitimate copy named as what it is — a FORM is a deliberate, explicitly-committed FORK of the server truth into a local editable draft, written back at an explicit commit point — which dissolves most 'where does form state go?' confusion. The source of truth is kept minimal and everything else derived"
+
+  - name: machine
+    checks:
+      - id: hard-interactions-as-explicit-machines
+        description: "Hard interactions modeled as EXPLICIT state machines (the behavioral twin of 'make illegal states unrepresentable') — booleans counted, and three-or-more interdependent ones (isLoading/isError/isSuccess/isSubmitting) recognized as an implicit machine and made explicit: (1) legal states collapsed into ONE variable (status: 'idle' | 'submitting' | 'success' | 'error'), not N booleans; (2) legal transitions listed (which state → which, on which event); (3) anything not in the transition table now cannot happen. The executable check applied — 'can my UI be isLoading AND isError at once?'; if the types allow it, it isn't modeled — collapse to a union. A status enum + reducer suffices for simple cases; a statechart library (XState) only when nested/parallel states or guarded/delayed transitions appear"
+
+  - name: flow
+    checks:
+      - id: data-flow-and-component-api-disciplined
+        description: "Data wired along the DATA-DEPENDENCY GRAPH, not forced through the component tree (the two graphs have different shapes; every state tool is a bypass for where they disagree): consumer is a descendant of the owner → PROPS, and where intermediate layers don't care, COMPOSITION (pass components as children/slots) bypasses them with no state library (the underrated move that dissolves most prop-drilling); consumers scattered (distant cousins, deep leaves) → a BYPASS CHANNEL chosen by update frequency — low-frequency stable values (theme, current user, locale) via Context, high-frequency / fine-grained via a store/signals/atoms WITH SELECTORS (Context re-renders all consumers on any change). Component API: COMPOSITION OVER CONFIG, the RULE OF THREE (don't abstract the first/second occurrence; extract on the third once stable), and the ESCAPE-HATCH TEST (a consumer hitting an edge case can escape — compound components / headless hooks can, a config-driven monolith can't); give primitives, not monoliths"

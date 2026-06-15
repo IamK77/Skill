@@ -1,0 +1,33 @@
+# Flight checklist for the bearings skill — 5 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: chart -> contract -> source -> render -> compass.
+phases:
+  - name: chart
+    checks:
+      - id: journeys-and-paths-mapped
+        description: "The domain modeled as a NOUN-VERB list before any data table (nouns → data-model skeleton, verbs → interaction vocabulary; a verb whose noun and effect you can't name means the domain isn't understood — stop); the few critical journeys written as JTBD ('when [situation] the user wants [motivation] so that [outcome]', all three filled, especially the 'so that' that later defines success); journeys RANKED by frequency × consequence into hot paths (optimize relentlessly) vs cold paths (good-enough), with ~80% of the polish concentrated on 2–3 hot paths rather than spread evenly; and the THINKS-VS-ACTUALLY gap list drawn per journey (what the user believes is happening vs what actually is) — each gap is a site for later illusion-maintenance and the seed of seaworthy's work"
+
+  - name: contract
+    checks:
+      - id: perception-contract-set
+        description: "Each key interaction TIERED by latency tolerance WITH its architecture consequence written down — Instant (<100ms, must feel like direct manipulation) forbids a network round-trip on that path → it must be local or optimistic; Responsive (<1s) may be async but needs an immediate visual acknowledgement; Tolerable (<10s) must show progress (skeleton/bar), never a blank screen; Long (>10s) becomes a background task + notification. The right-hand column is the point: judging an interaction 'instant' LOCKS an architecture constraint before the first line of code. Plus the animation budget fixed as contract not taste — motion is causal narrative (micro-feedback ~150ms, transitions ~250–300ms, one consistent easing curve) — because this is the one part of the spec that lives in the user's nervous system and can't be unit-tested"
+
+  - name: source
+    checks:
+      - id: source-of-truth-mapped
+        description: "A SOURCE-OF-TRUTH table built — for each class of core data, the location of its CANONICAL copy named (server / URL / local client / collaborative CRDT) and nothing left as a '?' (the classic unresolved cell, e.g. the shopping cart, is exactly the decision to make now, not discover later); derived/computed values explicitly NOT given a home (they are recomputed, never stored — storing a derivative signs a 'remember to sync it' contract you will break); the table doubles as the one-page boundary doc that wellspring later refines into the full state classification"
+      - id: consistency-and-trust-boundary-fixed
+        description: "The CONSISTENCY MODEL chosen per data class down the decision tree, defaulting to the WEAKEST sufficient one and escalating only when a real requirement forces it (changes-while-watched? → realtime/poll/subscribe; multiple users edit the same thing? → conflict resolution / CRDT, a whole-architecture fork that is a rewrite if bolted on later; must work offline? → local-first, the client becomes a distributed node) — no CRDT on something nobody co-edits because 'collaboration is cool'; AND the TRUST BOUNDARY drawn — every client input treated as hostile, with the server-side re-validations and re-authorizations named explicitly (this one has no exceptions)"
+
+  - name: render
+    checks:
+      - id: rendering-and-platform-decided
+        description: "The rendering architecture DERIVED FROM REQUIREMENTS not popularity — down the tree: need SEO or fast first paint on weak network → SSR/SSG; content basically static → SSG / MPA + progressive enhancement (cheapest, most robust); logged-in app, strong interaction, SEO irrelevant → SPA or RSC; need both SEO and local interactivity → islands / partial hydration. AND the PLATFORM KEEP-OR-REBUILD list walked — URL-as-state, the back button, scroll restoration, accessibility, view transitions — each marked 'keep native' or 'rebuild myself', with every 'rebuild' recognized as a debt being signed here (the true cost of a SPA hides in the rows marked rebuild). Choosing an architecture = choosing which free platform powers you keep and which you hand-rebuild"
+
+  - name: compass
+    checks:
+      - id: north-star-and-guardrails-set
+        description: "ONE north-star metric declared and 2–3 GUARDRAIL metrics that will never be allowed to worsen even if the north-star climbs (mis-order rate, rage-clicks, churn, a11y errors) — the guardrails are the teeth of the ethics; AND the reversibility / publicity test installed as a standing rule (if the asymmetry were erased and the user could see every mechanism and your true intent, would they still endorse this design?), designing for the user's REFLECTIVE self (the one they'd endorse afterward) not the impulsive self that moves the metric — done now because the moment the metric dashboard exists it starts pulling every decision"
+      - id: objective-function-premortem-done
+        description: "The objective-function PRE-MORTEM run — playing the A/B-test gradient-descent optimizer against yourself: 'to push this north-star up, what is the cheapest, most manipulative path?' — and those answers written down as exactly what must be forbidden by rule and blocked by the guardrails, because an objective function pointed at a human nervous system will discover manipulation as a local optimum with no one having designed it (the same membrane that maintains a user's mental model is the one that manipulates it). Ten minutes playing the adversary here is set against a half-year of 'the metric went up but users are angry'"

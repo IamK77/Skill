@@ -1,0 +1,24 @@
+# Flight checklist for the seaworthy skill — 4 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: states -> illusion -> reach -> budget.
+phases:
+  - name: states
+    checks:
+      - id: four-states-designed
+        description: "The four failure modes designed as FIRST-CLASS (not // TODOs), each to its bar. LOADING: no layout shift (skeleton dimensions match final content, protect CLS); first-load (skeleton) distinguished from background-refresh (keep old data + unobtrusive indicator, stale-while-revalidate, never blank on refetch); perception thresholds respected (no spinner-flash under ~100ms; delay ~200–300ms; progress only past ~1s). ERROR: tell the user what happened and what they can do, NEVER lose their input; recoverable (retry) vs unrecoverable (exit/help) distinguished; error boundaries scoped (one block failing ≠ blank page); reported to error tracking; no user-blaming, no internal leaks. EMPTY: empty-because-new (onboarding CTA) vs empty-because-filtered (explain + one-click clear) vs empty-because-error (that's the error state); first-run empty treated as a product opportunity. EDGE: 0/1/many; very long/short content; slow/offline/stale; RACES (rapid clicks, out-of-order responses — cancel stale requests so old can't overwrite new); permission lost mid-session; collaborator changed the same thing"
+
+  - name: illusion
+    checks:
+      - id: illusion-maintenance-applied
+        description: "The user's causal story maintained against an async, failing machine (what ships is a maintained ILLUSION of direct manipulation, not a correct program). OPTIMISTIC UPDATES with rollback for 'instant'-tier changes: optimistically change the cache → send request → on success confirm/replace with server response → ON FAILURE ROLL BACK AND TELL THE USER (the step most often skipped — a silently-failing optimistic update is a trust-corroding lie). WHEN NOT optimistic: consequential/irreversible actions (payment, deletion) get an honest pending state, not the reassuring lie — cheap/reversible/high-frequency → optimistic, consequential → honestly wait (the ethics landing in code: don't lie about things with consequences). ANIMATION as causal narrative: anything appearing/moving/disappearing from a user action animates from/to its causal source (deleted row collapses, new item slides from the 'add' button, modal expands from trigger); decorative motion that narrates no causality is deleted; prefers-reduced-motion honored"
+
+  - name: reach
+    checks:
+      - id: accessibility-built-in
+        description: "Accessibility BUILT IN from the slice (the second render tree), not bolted on. Semantic HTML first, with the executable check — UNPLUG THE MOUSE and complete the key path with the keyboard alone; if you can't, it's broken — run PER SLICE, not as a final retrofit (which costs several times as much and is an inclusion/ethics issue, not just technical). Focus MANAGED: after route change / modal open / async completion, focus destination decided (modal opens → focus moves in and is trapped; closes → returns to trigger). ARIA ONLY when native semantics fall short (a real <button> beats <div role=button tabindex=0 onKeyDown>). Made a GATE: an automated checker (axe-style) in CI + a key-path keyboard-walkthrough line on the PR checklist"
+
+  - name: budget
+    checks:
+      - id: performance-budget-enforced
+        description: "'Feels fast' made a NUMBER that CI enforces (because 'optimize later' never happens and costs ~10× when it does), translating bearings's perception contract into gates. Numeric budgets set: INP < 200ms, LCP < 2.5s, CLS < 0.1, and a per-route bundle-size budget (the perception thresholds as numbers). Enforced in CI: Lighthouse-CI / bundle-size checks that go RED on regression so a perf regression is caught in the PR that CAUSED it, not three months later in prod with no one knowing which change did it. High-leverage moves applied: don't blank on refetch (perceived perf), match skeleton dimensions (CLS), code-split by route, lazy-load below the fold, keep a single interaction's main-thread work under ~50ms (INP), push heavy work to a web worker or chunk it"
