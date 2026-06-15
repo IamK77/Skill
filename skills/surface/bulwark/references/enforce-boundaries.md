@@ -128,7 +128,7 @@ The lint *catches* the smell; the *fix* (inline the derived value, reclassify th
 
 ## Deliverable 4 — architecture fitness functions in CI
 
-A **fitness function** is an executable assertion about the *structure itself* — not about behavior, which the tests own ([../SKILL.md](../SKILL.md) routes behavior to `shakedown`), but about the architecture's invariants. (Gloss it on first use for the user: a fitness function is a test that fails the build when the *shape* of the codebase violates a property you decided must always hold.) Run them in CI; a violation turns the build red.
+A **fitness function** is an executable assertion about the *structure itself* — not about behavior, which the tests own ([../SKILL.md](../SKILL.md) routes behavior to `trials`), but about the architecture's invariants. (Gloss it on first use for the user: a fitness function is a test that fails the build when the *shape* of the codebase violates a property you decided must always hold.) Run them in CI; a violation turns the build red.
 
 The three from the source, each a property a `dependency-cruiser`-class tool or a bundle analyzer can assert:
 

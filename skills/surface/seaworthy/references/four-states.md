@@ -126,7 +126,7 @@ The list to walk per slice:
 - **A skeleton whose mismatched dimensions cost CLS, or a load that blows the INP budget** → [accessibility-and-performance.md](accessibility-and-performance.md), where the perception thresholds become hard CI numbers (CLS < 0.1, INP < 200ms) that fail the build.
 - **An error or edge state that has no keyboard path or steals focus** → the a11y section of [accessibility-and-performance.md](accessibility-and-performance.md) (an error toast the keyboard can't reach is not done).
 - **A state that is missing because the *source of truth* was mis-classified upstream** (e.g. a filter that should have been URL state, so it has no shareable empty) → that's `wellspring`'s state map; the four states grow directly out of it.
-- **Every state you build here is a testable behavior** → `shakedown` (correctness): feed loading → assert skeleton; feed an error response → assert the error UI *and that input survived*; feed empty → assert the CTA; feed data → assert content. The four states are the test cases, not guesses.
+- **Every state you build here is a testable behavior** → `trials` (correctness): feed loading → assert skeleton; feed an error response → assert the error UI *and that input survived*; feed empty → assert the CTA; feed data → assert content. The four states are the test cases, not guesses.
 
 ---
 

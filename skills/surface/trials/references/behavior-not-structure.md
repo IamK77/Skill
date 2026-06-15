@@ -1,6 +1,6 @@
 # Behavior, Not Structure — the litmus that separates a net from a shackle
 
-This reference is the depth behind **STAGE 0 — Behavior** of the [../SKILL.md](../SKILL.md) flight plan, the first and load-bearing stage of `shakedown`. It governs one check: **`behavior-not-structure-tested`** — every test settled against the one question before any other call about it is made.
+This reference is the depth behind **STAGE 0 — Behavior** of the [../SKILL.md](../SKILL.md) flight plan, the first and load-bearing stage of `trials`. It governs one check: **`behavior-not-structure-tested`** — every test settled against the one question before any other call about it is made.
 
 It is the engine the rest of the skill bolts onto. [test-levels.md](test-levels.md) decides *where* a behavior test should live (the trophy); [mocking-and-pruning.md](mocking-and-pruning.md) decides *what to fake* and *what to cut*. Both presuppose the call this doc owns: **is this assertion coupled to behavior, or to structure?** Get that wrong and a perfectly-placed, perfectly-mocked test is still a shackle.
 
@@ -22,7 +22,7 @@ The governing fact, inherited from [the-membrane.md](the-membrane.md) (AXIS 1 �
 
 ## The one question, and why it decides everything
 
-Everything in `shakedown` is one sentence expanded. Before you write or judge a test, settle what it is coupled to by asking:
+Everything in `trials` is one sentence expanded. Before you write or judge a test, settle what it is coupled to by asking:
 
 > **Does this test go red when the *behavior* changes, or when the *implementation* changes?**
 

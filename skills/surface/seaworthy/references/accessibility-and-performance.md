@@ -210,7 +210,7 @@ This file owns **accessibility** and the **performance budget**; the adjacent co
 - **`prefers-reduced-motion`, optimistic UI, and the machine-correct-vs-mind-correct negotiation** → [illusion-maintenance.md](illusion-maintenance.md). Honoring reduced motion is both accessibility *and* ethics; it's executed there, alongside causal animation.
 - **Why these two checks read the way they do** → [the-membrane.md](the-membrane.md) (the MEDIUM axis for accessibility, the MIND axis for the budget). Re-read the governing card at each gate.
 - **The perception thresholds these numbers encode, and the source-of-truth/state classification upstream** → the suite's earlier stages (`bearings`'s perception contract, `wellspring`'s state map). The budget *translates* that contract into CI; it does not redefine it.
-- **The behaviors the four states test, and the testing layers** → the next skill in the suite (`shakedown`/correctness): the axe check and the keyboard walk are gates *here*; the broader test trophy (accessibility as a CI gate alongside integration/behavior tests) is the testing stage's.
+- **The behaviors the four states test, and the testing layers** → the next skill in the suite (`trials`/correctness): the axe check and the keyboard walk are gates *here*; the broader test trophy (accessibility as a CI gate alongside integration/behavior tests) is the testing stage's.
 - **Standing up RUM and error tracking in production** → the suite's delivery/observability stage. This file consumes field data as the truth behind the lab gate; it does not build the monitoring.
 
 ---

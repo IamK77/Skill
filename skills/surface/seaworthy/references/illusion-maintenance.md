@@ -199,7 +199,7 @@ When a slice fails the bar, the disposition routes by *what* failed — and most
 - The **perception thresholds and durations** the optimism and animation rely on come from `bearings`'s perception contract upstream; the **perf budget** that keeps the interaction in its tier (INP under the line, no main-thread stalls) is [accessibility-and-performance.md](accessibility-and-performance.md)'s gate.
 - The **`prefers-reduced-motion`** variant is also an accessibility concern — its keyboard/focus/semantic siblings are [accessibility-and-performance.md](accessibility-and-performance.md)'s; here it is the *ethics-of-motion* framing only.
 - The **identity / key correctness** behind the race edge is detected in [four-states.md](four-states.md)'s edge bar; here it is the race-condition framing.
-- The **shakedown** skill tests all of this next: each of the four states and the rollback are *behaviors*, not guesses — feed a failing request and assert the UI rolled back and confessed; the four states you maintained here are exactly its test scenarios.
+- The **trials** skill tests all of this next: each of the four states and the rollback are *behaviors*, not guesses — feed a failing request and assert the UI rolled back and confessed; the four states you maintained here are exactly its test scenarios.
 
 > **The one-line check at the gate, the same one the membrane closes on:** *would you dare yank the network cable in front of the user?* If a dropped request leaves a lie on the screen that you never retract, the illusion isn't maintained — it's a betrayal the agent couldn't feel and the test couldn't catch. That is what this gate exists to refuse.
 

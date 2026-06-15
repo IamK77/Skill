@@ -149,12 +149,12 @@ This is why pruning **cannot be left to discipline or to the agent** — it must
 
 A prune *found* and not *performed* is worthless — the same SHIFT as a smell listed but never fixed. The gate is not "I identified the dead code"; it is "each finding has a disposition." Route accordingly:
 
-- **The wrong abstraction** → inline it back (small, do it now under existing behavior tests) or split it. The *refactoring mechanics* — small steps, behavior pinned with characterization tests first — are [`husbandry`](../../../engineering/husbandry)'s; designing the tests that pin behavior before you touch it is the suite's testing stage (`shakedown`). Prune names the call; those execute it safely.
+- **The wrong abstraction** → inline it back (small, do it now under existing behavior tests) or split it. The *refactoring mechanics* — small steps, behavior pinned with characterization tests first — are [`husbandry`](../../../engineering/husbandry)'s; designing the tests that pin behavior before you touch it is the suite's testing stage (`trials`). Prune names the call; those execute it safely.
 - **The dead** (unused exports, stale flags, stored derived state) → delete, ruthlessly. This is the cheapest, safest legibility win there is, and the one most often skipped.
 - **The drifted state** → reclassify per the tree; the *source-of-truth discipline* and the classification tree itself are `wellspring`'s.
 - **A new cycle or cross-layer leak** found during the import-graph audit → don't just fix it; turn it into a permanent lint rule via the immune-system meta-rule in [enforce-boundaries.md](enforce-boundaries.md), so the prune pass *feeds* the enforcement engine instead of repeating itself.
 
-Prune is the maintenance loop, not a finish — 1-to-N is a steady state. It re-runs every time the store-size thermometer climbs or the dead-code pass finds new accretion, and its findings flow outward: to `enforce` (new rules), to `husbandry`/`shakedown` (safe refactor), and back to `wellspring` (reclassification). The standing sign that it's working is the one [vitals](../SKILL.md) reads — *abstractions pruned not piled, and the global store stays small as features grow.*
+Prune is the maintenance loop, not a finish — 1-to-N is a steady state. It re-runs every time the store-size thermometer climbs or the dead-code pass finds new accretion, and its findings flow outward: to `enforce` (new rules), to `husbandry`/`trials` (safe refactor), and back to `wellspring` (reclassification). The standing sign that it's working is the one [vitals](../SKILL.md) reads — *abstractions pruned not piled, and the global store stays small as features grow.*
 
 ---
 

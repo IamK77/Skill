@@ -1,5 +1,5 @@
 ---
-name: shakedown
+name: trials
 description: >
   The correctness lens for a frontend build, organized around one question that
   decides whether your test suite is a safety net or a straitjacket: does this test
@@ -30,11 +30,11 @@ Copyright 2026 IamK77 — Licensed under the Apache License, Version 2.0.
 See ./LICENSE and ./NOTICE · https://www.apache.org/licenses/LICENSE-2.0
 -->
 
-# shakedown
+# trials
 
 !`checklist init ${CLAUDE_SKILL_DIR} --force`
 
-A shakedown cruise takes a finished ship out into real conditions to find what actually breaks under use — not to inspect how the engine is wired. `shakedown` is the fifth skill of the `surface` suite, the correctness lens, and it tests a frontend the same way: against observable behavior under real use, never against internal structure. Everything follows from one question you nail down first: **does this test go red when the *behavior* changes, or when the *implementation* changes?** It runs across gated stages and will not advance past a **GATE** until the `checklist` tool clears it — order enforced, substance yours.
+Sea trials take a newly-built ship out under real conditions to prove how it actually *behaves* — not to inspect how its parts are bolted together. `trials` is the fifth skill of the `surface` suite, the correctness lens, and it tests a frontend the same way: against observable behavior under real use, never against internal structure. Everything follows from one question you nail down first: **does this test go red when the *behavior* changes, or when the *implementation* changes?** It runs across gated stages and will not advance past a **GATE** until the `checklist` tool clears it — order enforced, substance yours.
 
 **The one question, and why it decides everything.** A test that reddens only when *behavior* changes is a **safety net**: it lets you refactor with confidence and screams when a real regression slips in. A test that reddens when the *implementation* changes while behavior holds is a **straitjacket**: every refactor turns it red for nothing, so you spend your time fixing tests instead of code — and, worse, you learn to ignore red, at which point the whole suite is dead. The executable litmus: *if I rewrote this unit's internals but kept its observable behavior, would this test still pass?* If yes, it's a good test; if it breaks, it tests structure — rewrite or delete it. The whole skill is that one sentence expanded.
 
@@ -45,7 +45,7 @@ This is where the agent era bites:
 - **The agent over-mocks and mocks the wrong layer.** It will mock the module under test (so the test asserts the mock returned what you told it to — testing nothing) and write mocks whose shape doesn't match the real contract (green test, broken prod). The honest seam to fake is the *network*, with a schema-backed mock.
 - **The agent chases coverage and writes snapshots.** 100% coverage and a wall of big snapshot tests *look* like rigor and are mostly straitjackets — brittle, unreviewed, "just update the snapshot." Coverage is a tool for finding untested risk, not a target.
 
-**Read [references/the-membrane.md](references/the-membrane.md) first** — the heart; for `shakedown`, the relevant truth is that the frontend's spec is *observable behavior* (the correctness benchmark is a user, not an internal structure) and the bugs live where the two graphs drift and the seams meet — so you test behavior, at the integration level. Load at the start, re-check at every gate.
+**Read [references/the-membrane.md](references/the-membrane.md) first** — the heart; for `trials`, the relevant truth is that the frontend's spec is *observable behavior* (the correctness benchmark is a user, not an internal structure) and the bugs live where the two graphs drift and the seams meet — so you test behavior, at the integration level. Load at the start, re-check at every gate.
 
 **Speak the user's language.** The calls here are the user's — is this worth an E2E, is this test pinning behavior or structure, is this mock honest. Read their fluency and gloss a term on first use (*behavior vs implementation*, the *testing trophy*, *integration test* / testing-library, *E2E* / Playwright, the *network boundary*, MSW, *mutation testing*, a *snapshot* test). A "this test is bad" you can't justify by the litmus is a style opinion, not a finding.
 
@@ -53,12 +53,12 @@ This is where the agent era bites:
 
 The depth lives in `references/`. Open each when a stage sends you there — not all upfront.
 
-- **[references/the-membrane.md](references/the-membrane.md)** — the heart: the seven axes reframed for the agent era; for `shakedown`, the spec-is-observable-behavior truth and the seams/two-graphs as where bugs cluster. Load at the start, re-check at every gate.
+- **[references/the-membrane.md](references/the-membrane.md)** — the heart: the seven axes reframed for the agent era; for `trials`, the spec-is-observable-behavior truth and the seams/two-graphs as where bugs cluster. Load at the start, re-check at every gate.
 - [references/behavior-not-structure.md](references/behavior-not-structure.md) — the engine: the rewrite-internals litmus, what counts as "behavior" (user-observable / consumer-observable) vs "internal" (state names, render counts, private calls), the classic straitjackets, and the good-test rewrite.
 - [references/test-levels.md](references/test-levels.md) — the testing trophy as a judgment table: what goes to unit (pure logic, derivations, the state-machine transitions), integration/behavior (the bulk — the four states as scenarios), E2E (revenue/auth/irreversible only), the type system (free), visual regression, and a11y checks.
 - [references/mocking-and-pruning.md](references/mocking-and-pruning.md) — mock at the network boundary not the module boundary (schema-backed), the what-NOT-to-test list, the keep-a-test-iff-it-catches-a-real-regression-AND-survives-refactor rule, when to stop, and proving the suite can go red (mutation / a deliberate break).
 
-> **The arc is one question, applied at every level.** Four stages — behavior · levels · boundary · prune — turn "we have tests" into "we have a safety net": behavior fixes the litmus that separates a net from a shackle; levels puts each test at the level where its bug lives (the trophy); boundary fakes only the network, with a contract-true mock; prune cuts the tests that don't earn their keep and proves the survivors can actually fail. `shakedown` gates all four; `lookout` (delivery & observability) is the next step — tests guard the known behavior before merge, monitoring catches the unknown after.
+> **The arc is one question, applied at every level.** Four stages — behavior · levels · boundary · prune — turn "we have tests" into "we have a safety net": behavior fixes the litmus that separates a net from a shackle; levels puts each test at the level where its bug lives (the trophy); boundary fakes only the network, with a contract-true mock; prune cuts the tests that don't earn their keep and proves the survivors can actually fail. `trials` gates all four; `lookout` (delivery & observability) is the next step — tests guard the known behavior before merge, monitoring catches the unknown after.
 
 ---
 
@@ -120,9 +120,9 @@ Open **[references/mocking-and-pruning.md](references/mocking-and-pruning.md)** 
 
 ## The thread through all of it
 
-`shakedown` is **the correctness stage** of the `surface` suite, and it is one sentence applied four ways: test behavior, not structure. It takes `seaworthy`'s four states as ready-made test scenarios (you don't guess what to test — the loading/error/empty/edge states you built *are* the cases), and `wellspring`'s state machine transitions as the rare genuine unit tests, and it hands `lookout` a suite that guards known behavior before merge so monitoring can be aimed at the unknown after. The through-line is the suite's own — *push correctness into structure* — here as: tests coupled to observable behavior make refactoring safe, which is what keeps the structure you built in the earlier stages cheap to change.
+`trials` is **the correctness stage** of the `surface` suite, and it is one sentence applied four ways: test behavior, not structure. It takes `seaworthy`'s four states as ready-made test scenarios (you don't guess what to test — the loading/error/empty/edge states you built *are* the cases), and `wellspring`'s state machine transitions as the rare genuine unit tests, and it hands `lookout` a suite that guards known behavior before merge so monitoring can be aimed at the unknown after. The through-line is the suite's own — *push correctness into structure* — here as: tests coupled to observable behavior make refactoring safe, which is what keeps the structure you built in the earlier stages cheap to change.
 
-It pairs with the engineering suite without duplicating it. `assay` is the *general* risk-driven testing craft (what to test, the test doubles, proving the suite can go red) — `shakedown` is its frontend dialect: the testing *trophy* (not pyramid) because UI bugs cluster at integration, testing-library behavior testing, network-boundary mocking, and the four-states-as-cases handoff. For an agent the lever is the same as everywhere in the suite: it writes tests that go green by pinning the implementation, over-mocks, and chases coverage — optimizing for "passed," not "correct" — so the litmus, the levels, the boundary, and the keep-iff rule must be **applied and gated**, with the suite proven able to go red.
+It pairs with the engineering suite without duplicating it. `assay` is the *general* risk-driven testing craft (what to test, the test doubles, proving the suite can go red) — `trials` is its frontend dialect: the testing *trophy* (not pyramid) because UI bugs cluster at integration, testing-library behavior testing, network-boundary mocking, and the four-states-as-cases handoff. For an agent the lever is the same as everywhere in the suite: it writes tests that go green by pinning the implementation, over-mocks, and chases coverage — optimizing for "passed," not "correct" — so the litmus, the levels, the boundary, and the keep-iff rule must be **applied and gated**, with the suite proven able to go red.
 
 ## Anti-patterns (use as a pre-flight checklist)
 

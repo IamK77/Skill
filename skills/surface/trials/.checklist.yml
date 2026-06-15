@@ -1,4 +1,4 @@
-# Flight checklist for the shakedown skill — 4 stages, hard GATEs.
+# Flight checklist for the trials skill — 4 stages, hard GATEs.
 # SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
 # so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
 # stages in order: behavior -> levels -> boundary -> prune.
