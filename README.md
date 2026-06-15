@@ -2,7 +2,7 @@
 
 Step-by-step engineering and research skills for Claude Code, with a CLI that won't let your coding agent skip a stage or mark one done when it isn't.
 
-[![npm](https://img.shields.io/npm/v/@iamk77/skill-checklist?label=checklist&color=blue)](https://www.npmjs.com/package/@iamk77/skill-checklist) ![suites](https://img.shields.io/badge/suites-4-blue) ![skills](https://img.shields.io/badge/skills-20-blue) ![CLI tests](https://img.shields.io/badge/CLI%20tests-400%2B-brightgreen) ![node](https://img.shields.io/badge/node-%3E%3D18-blue) [![license](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+[![npm](https://img.shields.io/npm/v/@iamk77/skill-checklist?label=checklist&color=blue)](https://www.npmjs.com/package/@iamk77/skill-checklist) ![suites](https://img.shields.io/badge/suites-5-blue) ![skills](https://img.shields.io/badge/skills-27-blue) ![CLI tests](https://img.shields.io/badge/CLI%20tests-400%2B-brightgreen) ![node](https://img.shields.io/badge/node-%3E%3D18-blue) [![license](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
 Your agent writes most of the code now. It also skips the test it said it wrote, marks a check green without running it, and quotes a number it never measured. In the diff, all three look fine.
 
@@ -22,7 +22,7 @@ PHASE 0 verified, proceed to PHASE 1         # the next stage opens only now
 ```
 
 - **The order is enforced, not suggested.** A stage stays shut until every earlier check is recorded as passed. Re-run a check that now fails and it overwrites the old pass, so the gate reflects the current state, not a stale one.
-- **20 skills across 4 suites** — the software lifecycle, distributed-systems correctness, computational research, and open-source discovery. Each suite installs as one Claude Code plugin.
+- **27 skills across 5 suites** — the software lifecycle, distributed-systems correctness, computational research, open-source discovery, and a frontend from 0 to 1. Each suite installs as one Claude Code plugin.
 - **It's just files.** A skill is a directory — one `SKILL.md`, a `references/` folder, one `.checklist.yml`. No runtime, no build step. Copy it into `~/.claude/skills/` and it runs without the plugin.
 - **What's enforced, stated plainly.** The CLI enforces the *order* of stages and records that each check was confirmed. It does not yet check the *substance* of a check; that judgment stays with you and the agent. The mechanical-verify rules exist and are tested, but no shipped skill uses them yet.
 
@@ -43,12 +43,13 @@ First run: have existing code? `/engineering:assay path/to/module` — it works 
 
 Plugin-provided skills are prefixed by their plugin name — `/engineering:plumb`, `/distributed:holdfast`; bundling each suite into one plugin makes the prefix a meaningful namespace. To use a skill without plugins instead, copy `skills/<suite>/<name>/` (e.g. `skills/engineering/assay/`) into `~/.claude/skills/` (personal) or `.claude/skills/` (per-project), keep the `checklist` CLI on `PATH`, and drop the prefix: `/assay path/to/module`.
 
-## The four suites
+## The five suites
 
 - **[engineering](#the-engineering-suite)** — the software lifecycle, its security, and the craft of the code itself. 11 skills.
 - **[distributed](#the-distributed-suite)** — correctness for systems that span machines. 1 skill.
 - **[inquiry](#the-inquiry-suite)** — computational research, from a vague area to a published paper. 6 skills.
 - **[quarry](#the-quarry-suite)** — finding and judging other people's open-source, from a need to a repo you can trust. 2 skills.
+- **[surface](#the-surface-suite)** — building a modern frontend from 0 to 1; the suite's first domain vertical. 7 skills.
 
 ## What a gated run looks like
 
@@ -266,6 +267,62 @@ Invoke with `/quarry:forage <a-need-to-hunt-or-a-vibe-to-wander>` · stages and 
 
 Invoke with `/quarry:touchstone <a-repo-or-shortlist-and-what-you-need-it-for>` · stages and references: [skills/quarry/touchstone/](skills/quarry/touchstone/)
 
+## The surface suite
+
+Where the other suites are deliberately domain-agnostic, the **surface** suite is the first vertical: building a modern **frontend** from 0 to 1. It exists because frontend is the one discipline whose "correct" is not checked against a document — its benchmark is a human nervous system (16ms is a fusion threshold, 100ms is "I touched it directly"), so **taste is load-bearing and cannot be outsourced**, and as the agent writes the code the leverage migrates from the keyboard to the membrane between machine and mind: *which boundary, whose source of truth, what causal story forms in the user's head, and whose interest the optimizer serves.* Seven gated lenses run the build lifecycle, each handing the next a concrete artifact, with three principles threaded through all of them — **boundaries > frameworks**, **allocate caution by reversibility** (one-way vs two-way doors), and **the source of truth lives in the user's mind, not the database**.
+
+| Skill | Lifecycle role | Stages |
+|-------|----------------|:------:|
+| [**`bearings`**](#bearings) | Before the first line — model the mind, fix the one-way doors, write the perception contract, set the objective function | 5 |
+| [**`keel`**](#keel) | Walking skeleton — pierce every integration seam with one real-but-trivial slice, with a contract that can't drift | 4 |
+| [**`wellspring`**](#wellspring) | State architecture (the heart) — classify state, minimize the source of truth, model the implicit machine | 4 |
+| [**`seaworthy`**](#seaworthy) | Build, unhappy-path-first — the four states are the product; illusion-maintenance, accessibility, a perf budget | 4 |
+| [**`shakedown`**](#shakedown) | Correctness — test behavior not structure (the testing trophy), mock only the network | 4 |
+| [**`lookout`**](#lookout) | Delivery & observability — RUM as psychophysics, plus the pre-launch objective-function ethics gate | 4 |
+| [**`bulwark`**](#bulwark) | 1→N — fight entropy by making the architecture self-enforcing; a steady state | 5 |
+
+### bearings
+
+`bearings` is the work before the first line of code — the stage that writes no business logic yet decides the project's fate, because it pins the decisions that are brutal to reverse while reversing them is still free. It resists the agent's instinct to scaffold, and instead models the user's mind (not the database), fixes the boundaries and the source-of-truth one-way doors, writes the perception contract (the latency tiers that become architecture constraints), and sets the objective function and its guardrails *before* the metrics dashboard exists to pull every decision. Its output is five one-page artifacts the whole build honors.
+
+Invoke with `/surface:bearings <the-frontend-product-or-feature-to-scope>` · stages and references: [skills/surface/bearings/](skills/surface/bearings/)
+
+### keel
+
+`keel` lays the walking skeleton: the thinnest possible feature that nonetheless passes through every real integration **seam** — auth, the data contract, hydration, the state round-trip, deploy, config — end to end, deployed, on day one, while a leak is still free to fix. It exists because projects die at the seams, not in any one component, and the agent hides that risk by building wide on mock data ("looks 90% done"). Its output is a deployed, CI-green, real-but-trivial slice and a contract generated from one source so types can't drift.
+
+Invoke with `/surface:keel <the-architecture-to-prove-end-to-end>` · stages and references: [skills/surface/keel/](skills/surface/keel/)
+
+### wellspring
+
+`wellspring` is the state architecture — the heart of the system, where the project's complexity ceiling is set. Its one idea is that nearly all frontend bugs are state with more than one copy drifting out of sync, so it relentlessly **classifies** every piece of state into the single bucket that owns it (most of what looks "global" is server-cache in disguise), minimizes the source of truth and derives the rest, models hard interactions as explicit state machines, and wires data along the dependency graph rather than down the component tree. Its output is a written state-classification map.
+
+Invoke with `/surface:wellspring <the-application-state-to-architect-or-audit>` · stages and references: [skills/surface/wellspring/](skills/surface/wellspring/)
+
+### seaworthy
+
+`seaworthy` builds the feature, with one inverted discipline: the happy path is ~40% done, not 90%, so you design the **unhappy paths first**. What you ship is not a correct program but a maintained *illusion* of direct manipulation over an async, failing machine — so the loading / error / empty / edge states are the product (illusion-maintenance: optimistic updates with rollback, animation as causal narrative), and accessibility and a performance budget are built into every slice, not bolted on. Its output is feature slices that catch the user when the system breaks.
+
+Invoke with `/surface:seaworthy <the-feature-slice-to-build-or-audit>` · stages and references: [skills/surface/seaworthy/](skills/surface/seaworthy/)
+
+### shakedown
+
+`shakedown` is correctness, organized around one question that decides whether a test suite is a safety net or a straitjacket: does the test go red when *behavior* changes, or when the *implementation* changes? It tests observable behavior, never internal structure, and spends the test budget where frontend bugs actually cluster — at integration — which makes the right shape a testing **trophy**, not the classic pyramid. It mocks only the network (with a contract-true mock), prunes the tests that don't earn their keep, and proves the suite can go red.
+
+Invoke with `/surface:shakedown <the-feature-or-suite-to-test-or-audit>` · stages and references: [skills/surface/shakedown/](skills/surface/shakedown/)
+
+### lookout
+
+`lookout` is delivery and observability — and the place the suite's ethics becomes a launch gate. Shipping is the start of the conversation with reality, so every change gets a preview, and the real world is instrumented (RUM is psychophysics encoded as numbers — field, not lab). The heavy part: because A/B testing is a gradient-descent optimizer that will **discover manipulation as a local optimum with no one designing it**, the objective function set in `bearings` returns here as a pre-launch ethics gate with declared guardrails and an automatic kill-switch. The real villain is never a person — it is the loss function.
+
+Invoke with `/surface:lookout <the-delivery/observability-to-set-up-or-the-metric/experiment-to-gate>` · stages and references: [skills/surface/lookout/](skills/surface/lookout/)
+
+### bulwark
+
+`bulwark` is the 1-to-N work, where the enemy is no longer building but **entropy** — boundaries eroded one "just this once" import at a time, the two graphs drifting apart as features pile on. Its one move is to make the architecture *self-enforcing*, because at scale no one remembers the rules: boundaries fossilized into lint and fitness functions, wrong abstractions pruned (not just stacked), module edges aligned to team edges (Conway), and the design system kept a living, discoverable artifact. There is no exit — 1-to-N is a steady state, read by one external metric: how fast a newcomer ships on the docs alone.
+
+Invoke with `/surface:bulwark <the-living-frontend-system-to-keep-changeable>` · stages and references: [skills/surface/bulwark/](skills/surface/bulwark/)
+
 ## checklist
 
 `checklist` is a TypeScript CLI (npm: [`@iamk77/skill-checklist`](https://www.npmjs.com/package/@iamk77/skill-checklist), built on `commander`). It loads a skill's `.checklist.yml`, tracks per-stage pass/fail state in the skill directory, and refuses to open a stage until every check in every prior stage is recorded as `pass` — not merely present. A check that regresses on re-verify overwrites a stale pass, so the gate reflects current state. (`checklist` calls these units `phases`; the skills present them to the user as `stages` — they are the same thing.)
@@ -294,6 +351,8 @@ skills/
     prospect/  crucible/  ledger/  forge/  reckoning/  envoy/
   quarry/                                                            # the quarry suite
     forage/  touchstone/
+  surface/                                                           # the surface suite
+    bearings/  keel/  wellspring/  seaworthy/  shakedown/  lookout/  bulwark/
                  # each gated skill: SKILL.md  references/  .checklist.yml  LICENSE  NOTICE
                  # pilot (un-gated): SKILL.md  references/  LICENSE  NOTICE
 devtools/
