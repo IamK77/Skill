@@ -6,7 +6,7 @@ phases:
   - name: frame
     checks:
       - id: security-stance-set
-        description: "Defense sized to risk (够用就好): crown jewels named and data classified (sensitive/PII/regulated), exposure and threat sized, and the timeless principles set as the standard every later stage applies — least privilege, defense in depth, fail secure, minimize attack surface, no security through obscurity, zero trust; the CIA goal (confidentiality/integrity/availability) and the governing fact internalized that security is RISK MANAGEMENT not a quest for the absolute (assume the attacker knows the system and any single layer can fail); SETUP vs AUDIT mode chosen"
+        description: "Defense sized to risk (够用就好): crown jewels named and data classified (sensitive/PII/regulated), exposure and threat sized, and the timeless principles set as the standard every later stage applies — least privilege, defense in depth, fail secure, minimize attack surface, no security through obscurity, zero trust; the CIA goal (confidentiality/integrity/availability) and the governing fact internalized that security is RISK MANAGEMENT not a quest for the absolute (assume the attacker knows the system and any single layer can fail); SETUP vs AUDIT mode chosen; and when auditing software you OPERATE but did not AUTHOR, each gap split into deployment-owned (config/secrets/exposure/host — you can fix) vs product-owned (code/architecture — only upgrade, configure around, or report upstream), with the findings that SURVIVE a correctly-hardened deployment surfaced as the product's own — the high-value finding a purely adversarial pass buries among config gaps"
 
   - name: model
     checks:

@@ -67,6 +67,8 @@ Security investment must match what is at stake — *够用就好*; a system hol
 
 **Decide the mode: SETUP or AUDIT.** **SETUP**: build security in from the start as you design and code. **AUDIT / security review** (the common case — an existing system): assess each control capability by capability with evidence (is there a threat model? is input validated? are secrets in a manager? are the gates running?), and fix the gaps — never reporting a control sound because it is *named* rather than *enforced*.
 
+**Name who owns the fix — especially when you operate software you did not author** (an OSS product, a vendored service, a dependency you deploy). Split every gap into two kinds: the ones the **deployment** owns — config, secrets, network exposure, host — which *you* can close, and the ones the **product** owns — its code and architecture — which you can only configure around, upgrade, or report upstream. The most important finding is the one that **survives a correctly-hardened deployment**: it is the product's, no operator can close it, and it is exactly the one a purely adversarial pass buries among the config gaps. The decision tree routes this question (the deployment-vs-product axis) so it is not left to chance. The mirror image, for SETUP of something *others* will deploy: the same axis says make the safe configuration the **default**, because a protection you leave to the operator is one you have not actually shipped.
+
 ### GATE — clear before MODEL
 1. `checklist check frame security-stance-set`
 2. `checklist verify frame`

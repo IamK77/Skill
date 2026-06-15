@@ -51,6 +51,21 @@ Defense is a cost; match it to what a breach would actually cost — *够用就�
 
 > The trap this kills: reporting a control sound because it *exists* rather than because it *blocks*. `present-unenforced` is the most dangerous status — an advisory scanner or a UI-only authz check looks like a defense and stops nothing. A control is only real once it is enforced *and* something has tried to get past it.
 
+### The deployment-vs-product axis (when you operate what you did not author)
+
+A second axis cuts across the status taxonomy whenever the system under review is one you **operate but did not write** — an OSS product, a vendored service, a dependency you deploy. Now "fix the gap" forks by *who can fix it*, and the two are not equally valuable to surface:
+
+| Owner | What it covers | Closed by | The finding's value |
+|---|---|---|---|
+| **Deployment** | config, secrets, network exposure, host, the options you chose | you, by deploying correctly | real, but it is *your* posture — another operator may already have it right |
+| **Product** | the code and architecture anyone running it inherits | only an upstream change (or your own fork) | highest — it **survives a correctly-hardened deployment**, no operator can close it, and it is what the maintainer must hear |
+
+- **PREDICATE:** would a *correctly-hardened deployment* (auth on, least exposure / bound to loopback, strong secrets, current version) still have this gap? If yes → **product-owned**; if no → **deployment-owned**.
+- **DEFAULT** on a coin-flip: the cheapest way to settle it is to *harden the deployment and look again* — close the config gaps first, then see what is still standing. What remains is the product's, and ranks above anything a config change would have erased. This is the operator's lens the adversarial pass does not supply on its own: a default install falling over proves little about the product; a flaw still live after you did everything right proves a lot.
+- **FALLBACK** when you cannot harden it yourself to test (no control over the build, can't change the config): reason it through from the code and the defaults, tag the finding *product-owned / unverified-against-hardening*, and say so — never let a deployment-fault and a product-fault be reported as the same thing.
+
+> The agent blind spot this kills: an agent reviewing software it operates conflates the **deployment** with the **product** — it reports "I broke the default install" with the same weight as "this is broken in code no matter how you run it," because it has no notion of *who ships the fix*. Separating the two turns a generic "your defaults are bad" into the specific, high-value "this survives correct deployment — it's yours to patch." A product-owned finding you cannot fix yourself routes to coordinated disclosure (the `gungnir` skill's report stage owns that loop).
+
 ---
 
 ## The STRIDE threat-model router (STAGE 1)

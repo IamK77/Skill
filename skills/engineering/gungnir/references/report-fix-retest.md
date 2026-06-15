@@ -17,6 +17,7 @@ The two checks this stage gates are `findings-fixed-and-retested` and `validatio
   - [A finding that drives a fix](#a-finding-that-drives-a-fix)
   - [Rank by severity: impact × exploitability](#rank-by-severity-impact--exploitability)
   - [The severity triage matrix](#the-severity-triage-matrix)
+  - [The deployment-vs-product axis — when you didn't write what you're attacking](#the-deployment-vs-product-axis--when-you-didnt-write-what-youre-attacking)
   - [Drive the fix — gungnir finds, `aegis` and `husbandry` fix](#drive-the-fix--gungnir-finds-aegis-and-husbandry-fix)
   - [Re-test: a fix never re-attacked is a hope](#re-test-a-fix-never-re-attacked-is-a-hope)
   - [The "is this finding actually closed" bar](#the-is-this-finding-actually-closed-bar)
@@ -78,6 +79,19 @@ Score each confirmed finding on both axes and let the cell decide urgency — th
 - **DEFAULT** on a coin-flip between two cells: size to the **higher** cell for anything touching data, money, authentication, or availability — under-ranking a hole that turns out to expose regulated data is the catastrophic error; over-ranking a cosmetic leak costs a few minutes of fix budget. And take chaining into account: a "minor + minor" that [chaining-and-impact.md](chaining-and-impact.md) showed combining into account takeover is ranked at the *chain's* severity, not either part's.
 - **FALLBACK** when you cannot rank because the business impact is genuinely unknown (you can't tell whether the exposed field is sensitive, or how reachable the path is in production): do **not** silently assign a rank and move on — surface the technical finding and the open severity question to the user, the same way the depth-by-risk TREE in [decision-tree.md](decision-tree.md) hands the data-sensitivity call back to the user. Severity that depends on business context is exactly the input the agent is not equipped to supply alone.
 
+### The deployment-vs-product axis — when you didn't write what you're attacking
+
+The impact × exploitability matrix ranks *how bad* a finding is. A second, orthogonal question decides *whose finding it is* — and it only arises when the target is your own **deployment of software you did not author** (an OSS product, a vendored service, a component you operate). STAGE 0 clears on owning or being authorized to test *this deployment*; that is not the same as owning *the code*. So a confirmed finding splits two ways:
+
+- **Deployment-owned** — it exists because of *this instance's* config, secrets, network exposure, or version: no auth enabled, bound to `0.0.0.0`, a default DB password, a stale build. You can close it yourself, and another operator running the same software may already have closed it. Real, but it is your posture, not the product's.
+- **Product-owned** — it lives in the code and architecture anyone running the software inherits, and **survives a correctly-hardened deployment**: auth on, least exposure, strong secrets, current version, and the flaw is *still there*. No operator can close it; only an upstream change (or your own fork) can.
+
+The product-owned finding is the higher-value one, and it is precisely the one a purely adversarial pass buries — because the adversary's job is to get in by *any* path, so it reports "the default install fell over" with the same triumph as "this is broken no matter how you run it." The operator's lens is what separates them, and the cheapest way to apply it is mechanical: **harden the deployment, then attack again.** What dies when you turn auth on and bind to loopback was deployment-owned; what is still standing is the product's, and that is the finding worth a maintainer's time.
+
+- **PREDICATE:** with the deployment hardened to its documented secure configuration, does the finding still reproduce?
+- **DEFAULT** on a coin-flip: re-test it against a hardened instance before you rank it — the answer reclassifies the finding and usually changes who you send it to. Treat "survives hardening" as a headline of the report, not a footnote.
+- **FALLBACK** when you cannot stand up a hardened instance: reason it from the code and the defaults, tag it *product-owned / unverified-against-hardening*, and say so — never report a config fault and a code fault as the same "the product is broken."
+
 ### Drive the fix — gungnir finds, `aegis` and `husbandry` fix
 
 gungnir's job ends at a *proven, ranked, reproducible* finding. It does **not** own the fix — that is a deliberate division of labor, and keeping it clean is what makes the spear a spear:
@@ -86,6 +100,8 @@ gungnir's job ends at a *proven, ranked, reproducible* finding. It does **not** 
 - Hand the **change** to the `husbandry` skill. The mechanics of taking a fix to verified closure — triage as a defect queue, reproduce-before-you-fix, drive to the *root cause* rather than the crash site, leave a regression test behind — are `husbandry`'s defect-management discipline. A finding that gets a symptom patched rather than its root cause fixed will re-open under a slightly different request, exactly as `husbandry` warns; route the finding into that discipline rather than improvising a one-off patch.
 
 Practically, treat the confirmed findings as a **defect queue**: rank by the matrix above, work highest-severity first (never first-found-first), and record an explicit, user-owned *accept-the-risk* decision for any finding deliberately not fixed — with the reason and the condition that would reopen it — exactly as `husbandry` records a WON'T-FIX. An un-actioned finding rotting at the bottom of the list is indistinguishable from a hole nobody noticed.
+
+**When the finding is product-owned and you do not maintain the code, the loop changes shape.** You cannot hand it to `aegis`/`husbandry` to fix — there is no branch of yours to fix. The closed loop becomes **coordinated disclosure**: report it privately to the maintainer (a `SECURITY.md` channel, GitHub private vulnerability reporting, or a security contact — never a public issue for a live, exploitable hole), give them a reasonable window before any public writeup, offer a patch if you can, and **re-test against their fixed release** rather than a local branch. The deployment-owned half you still close yourself, the same day, via the normal `aegis`/`husbandry` handoff. For the product-owned half the disposition is "disclosed, awaiting upstream fix," tracked until the patched version ships and you have re-attacked it — the loop is closed by *their* release, not your report.
 
 > The agent failure mode this guards against (SHIFT 6): producing the report turns the task green, so the agent's reward arrives before anything is fixed, and driving each finding to a real fix is extra work with no further green. The division of labor makes the fix a *handoff with an owner* — `aegis` for the defense, `husbandry` for the change — so a finding is not "done" when written, only when its owner has closed it and gungnir has re-attacked it.
 
