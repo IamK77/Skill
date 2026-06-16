@@ -21,6 +21,68 @@ interface Classification {
   explicit: boolean;
 }
 
+// Run variables (from `init --var`) overlaid on a process-env fallback. Empty
+// when nothing was captured and the env supplies nothing.
+export type VerifyVars = Record<string, string>;
+
+// Thrown by interpolate() when a `${name}` references a variable that is neither
+// a captured run var nor a process-env var. Carried up to runCheck and turned
+// into a located `error` result (never a half-interpolated command that runs).
+class UndefinedVarError extends Error {
+  constructor(public readonly varName: string) {
+    super(`undefined variable "\${${varName}}"`);
+    // NB: `varName`, not `name` — `name` is Error.prototype.name, which we set to
+    // the class name here; an earlier `public readonly name` field was clobbered
+    // by this line, so the hint below mis-rendered the variable as the class name.
+    this.name = 'UndefinedVarError';
+  }
+}
+
+// Substitute ${name} placeholders in a shell:/script: rule string.
+//
+//   - precedence: a captured run var (init --var) outranks a process-env var of
+//     the same name; if neither is set the reference is an error.
+//   - escaping: a doubled `$$` is a literal `$`, so `$${HOME}` emits the literal
+//     text `${HOME}` and is never interpolated. This is the only escape; it lets
+//     a rule include a shell `${...}` expansion that bash should evaluate at run
+//     time rather than checklist expanding at verify time.
+//   - `${name}` names match /[A-Za-z_][A-Za-z0-9_]*/; a `${` that does not open a
+//     well-formed name is left verbatim (e.g. bash `${1}`, `${arr[0]}`).
+export function interpolate(template: string, vars: VerifyVars): string {
+  let out = '';
+  let i = 0;
+  while (i < template.length) {
+    const ch = template[i];
+    if (ch === '$' && template[i + 1] === '$') {
+      // Escaped dollar: emit one literal `$`, consume both, and do NOT treat the
+      // following `{` as opening a placeholder.
+      out += '$';
+      i += 2;
+      continue;
+    }
+    if (ch === '$' && template[i + 1] === '{') {
+      const close = template.indexOf('}', i + 2);
+      const name = close === -1 ? '' : template.slice(i + 2, close);
+      if (close !== -1 && /^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) {
+        const value = Object.prototype.hasOwnProperty.call(vars, name)
+          ? vars[name]
+          : process.env[name];
+        if (value === undefined) {
+          throw new UndefinedVarError(name);
+        }
+        out += value;
+        i = close + 1;
+        continue;
+      }
+      // Not a checklist placeholder (no close brace, or a non-identifier body
+      // like ${1} / ${arr[0]}): pass `${` through untouched for bash to handle.
+    }
+    out += ch;
+    i += 1;
+  }
+  return out;
+}
+
 function classifyVerify(verify: string): Classification {
   for (const [prefix, kind] of Object.entries(PREFIX_MAP)) {
     if (verify.startsWith(prefix)) {
@@ -120,7 +182,12 @@ async function runScript(scriptPath: string, cwd: string, explicit: boolean): Pr
   return runScriptFile(realResolved, cwd);
 }
 
-export async function runCheck(item: CheckItem, cwd: string, targetPath: string): Promise<CheckItemResult> {
+export async function runCheck(
+  item: CheckItem,
+  cwd: string,
+  targetPath: string,
+  vars: VerifyVars = {},
+): Promise<CheckItemResult> {
   if (!item.verify) {
     return { item, kind: 'manual' };
   }
@@ -131,16 +198,35 @@ export async function runCheck(item: CheckItem, cwd: string, targetPath: string)
   try {
     switch (kind) {
       case 'builtin':
+        // builtins take a fixed name, not a templated command — no interpolation.
         result = await runBuiltin(value, targetPath);
         break;
-      case 'script':
-        result = await runScript(value, cwd, explicit);
+      case 'script': {
+        // Interpolate FIRST, then containment-vet the resulting path: a `${...}`
+        // can supply part of a script path, but the vetted real path is still
+        // what gets executed, so an interpolated value cannot escape the dir.
+        const scriptPath = interpolate(value, vars);
+        result = await runScript(scriptPath, cwd, explicit);
         break;
+      }
       case 'shell':
-        result = await runShell(value, cwd);
+        result = await runShell(interpolate(value, vars), cwd);
         break;
     }
   } catch (e) {
+    // A located, human-readable error for an unresolved `${name}` — and NOT a
+    // half-interpolated command that silently runs. Attributed to the check id,
+    // same shape as a crashing-handler error below.
+    if (e instanceof UndefinedVarError) {
+      return {
+        item,
+        kind: 'mechanical',
+        result: {
+          status: 'error',
+          message: `${item.id}: ${e.message} in verify rule "${item.verify}" — pass it with \`checklist init <skill> --var ${e.varName}=...\` or export ${e.varName} in the environment`,
+        },
+      };
+    }
     // A handler that THROWS (e.g. a builtin hitting js-yaml's parser on a
     // SKILL.md with malformed frontmatter) must degrade to this one check's
     // error result, attributed to its id — not abort the whole verify batch

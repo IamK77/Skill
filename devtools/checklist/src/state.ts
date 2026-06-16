@@ -24,6 +24,11 @@ const STATE_FILE = '.checklist.state.json';
 export interface ChecklistState {
   // keyed by phase NAME (case-folded), then by check id.
   checked: Record<string, Record<string, CheckResult>>;
+  // Run variables captured at `init --var name=value`. They are interpolated
+  // into `${name}` placeholders inside shell:/script: verify rules at verify
+  // time, so a single shipped skill can carry a mechanical gate (e.g.
+  // `shell:${test_cmd}`) that is bound to the concrete target at init.
+  vars?: Record<string, string>;
 }
 
 // Resolve the XDG state directory for checklist. Precedence:
@@ -154,7 +159,10 @@ export function mergeAndSaveState(stateFile: string, updates: ChecklistState): C
     // merge with, so degrade to a plain (atomic) replace with our records.
     onDisk = { checked: {} };
   }
-  const merged: ChecklistState = { ...onDisk, ...updates, checked: {} };
+  // Preserve the run vars across check/verify merges: they are seeded once at
+  // init and the delta (`updates`) never carries them, so the on-disk copy is
+  // authoritative.
+  const merged: ChecklistState = { ...onDisk, ...updates, vars: onDisk.vars, checked: {} };
   for (const [phase, items] of Object.entries(onDisk.checked)) {
     merged.checked[phase] = { ...items };
   }
@@ -179,6 +187,25 @@ export function clearState(stateFile: string): void {
 // tests that still pass a numeric index (it is simply String()-coerced).
 function phaseKeyOf(phase: string | number): string {
   return String(phase).toLowerCase();
+}
+
+// `init` seeds the state file with the run variables (and an empty `checked`),
+// atomically replacing whatever was there. Used instead of clearState when
+// `--var` is supplied, so the captured vars are on disk before the first verify
+// reads them. Takes the resolved state-FILE path (XDG), like saveState/clearState.
+export function writeInitialState(stateFile: string, vars: Record<string, string>): void {
+  saveState(stateFile, { checked: {}, vars });
+}
+
+// The run variables recorded at init, or {} if none were captured. A missing or
+// malformed `vars` (anything that is not a plain object) is treated as "no vars"
+// rather than thrown, so an older state file without the field still loads.
+export function loadVars(state: ChecklistState): Record<string, string> {
+  const vars = state.vars;
+  if (typeof vars !== 'object' || vars === null || Array.isArray(vars)) {
+    return {};
+  }
+  return vars;
 }
 
 export function isItemChecked(state: ChecklistState, phase: string | number, itemId: string): boolean {

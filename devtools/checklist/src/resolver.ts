@@ -4,7 +4,7 @@ import * as path from 'node:path';
 import type { ChecklistConfig, Phase, PhaseResult } from './types.js';
 import type { ChecklistState } from './state.js';
 import { isPhaseComplete } from './state.js';
-import { runCheck } from './runner.js';
+import { runCheck, type VerifyVars } from './runner.js';
 
 // cwd-independent record of the active checklist dir. `init` writes it, and every
 // later command resolves it no matter which directory they run from — so the skill
@@ -131,9 +131,15 @@ export function findPhaseIndex(config: ChecklistConfig, nameOrIndex: string): nu
   return idx;
 }
 
-export async function runPhase(phase: Phase, phaseIndex: number, cwd: string, targetPath: string): Promise<PhaseResult> {
+export async function runPhase(
+  phase: Phase,
+  phaseIndex: number,
+  cwd: string,
+  targetPath: string,
+  vars: VerifyVars = {},
+): Promise<PhaseResult> {
   const checks = await Promise.all(
-    phase.checks.map(item => runCheck(item, cwd, targetPath))
+    phase.checks.map(item => runCheck(item, cwd, targetPath, vars))
   );
 
   let mechanicalPassed = 0;

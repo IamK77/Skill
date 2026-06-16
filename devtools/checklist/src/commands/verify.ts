@@ -1,5 +1,5 @@
 import { loadChecklist } from '../loader.js';
-import { loadState, mergeAndSaveState, setItemResult, stateFilePath, journalDir, type ChecklistState } from '../state.js';
+import { loadState, loadVars, mergeAndSaveState, setItemResult, stateFilePath, journalDir, type ChecklistState } from '../state.js';
 import { findPhaseIndex, gatePriorPhases, runPhase, resolveDir } from '../resolver.js';
 import { formatVerifyResult, formatGateFailure } from '../formatter.js';
 import { appendEvents, journalPathFor, runStamp, type JournalEvent } from '../journal.js';
@@ -20,7 +20,7 @@ export async function verifyCommand(phaseArg: string, options: { dir?: string; p
       process.exit(1);
     }
 
-    const result = await runPhase(config.phases[phaseIndex], phaseIndex, cwd, targetPath);
+    const result = await runPhase(config.phases[phaseIndex], phaseIndex, cwd, targetPath, loadVars(state));
 
     const updates: ChecklistState = { checked: {} };
     const events: JournalEvent[] = [];

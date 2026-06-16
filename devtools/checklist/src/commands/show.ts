@@ -1,5 +1,5 @@
 import { loadChecklist } from '../loader.js';
-import { loadState, stateFilePath } from '../state.js';
+import { loadState, loadVars, stateFilePath } from '../state.js';
 import { findPhaseIndex, gatePriorPhases, runPhase, resolveDir } from '../resolver.js';
 import { formatOverview, formatPhaseShow, formatGateFailure, formatStateJson } from '../formatter.js';
 
@@ -33,7 +33,7 @@ export async function showCommand(phaseArg?: string, options?: { dir?: string; p
       process.exit(1);
     }
 
-    const result = await runPhase(config.phases[phaseIndex], phaseIndex, cwd, targetPath);
+    const result = await runPhase(config.phases[phaseIndex], phaseIndex, cwd, targetPath, loadVars(state));
     console.log(formatPhaseShow(result, state, config.phases.length));
   } catch (e) {
     console.error(e instanceof Error ? e.message : String(e));

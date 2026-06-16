@@ -30,12 +30,22 @@ const program = new Command()
 const DIR_OPT = ['-d, --dir <dir>', 'Directory containing .checklist.yml'] as const;
 const PATH_OPT = ['-p, --path <path>', 'Target skill directory for builtins (defaults to --dir)'] as const;
 
+// Collect a repeatable flag into an array (commander keeps only the last value
+// for a single-value option otherwise).
+const collect = (value: string, previous: string[]): string[] => previous.concat([value]);
+
 program
   .command('init [dir]')
   .description('Load .checklist.yml, clear state, show ready summary')
   .option(...DIR_OPT)
   .option(...PATH_OPT)
   .option('--force', 'Clear existing state without prompting')
+  .option(
+    '--var <name=value>',
+    'Capture a run variable for ${name} interpolation in shell:/script: verify rules (repeatable)',
+    collect,
+    [],
+  )
   .action(initCommand);
 
 program
