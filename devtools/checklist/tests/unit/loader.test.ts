@@ -125,6 +125,7 @@ phases:
       id: 'build-ok',
       description: 'Build succeeds',
       verify: undefined,
+      evidenceRequired: false,
     });
   });
 
@@ -237,11 +238,13 @@ phases:
       id: 'compile',
       description: 'TypeScript compiles',
       verify: 'tsc --noEmit',
+      evidenceRequired: false,
     });
     expect(build.checks[1]).toEqual({
       id: 'lint',
       description: 'Linter passes',
       verify: 'eslint .',
+      evidenceRequired: false,
     });
 
     // Second phase
@@ -252,11 +255,13 @@ phases:
       id: 'docker',
       description: 'Docker image builds',
       verify: undefined,
+      evidenceRequired: false,
     });
     expect(deploy.checks[1]).toEqual({
       id: 'push',
       description: 'Image pushed to registry',
       verify: 'docker push myapp',
+      evidenceRequired: false,
     });
   });
 });

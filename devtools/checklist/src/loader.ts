@@ -70,10 +70,31 @@ export function loadChecklist(dir: string): ChecklistConfig {
       if (verify !== undefined && typeof verify !== 'string') {
         throw new Error(`Phase "${phase.name}", check "${check.id}": "verify" must be a string`);
       }
+      // Per-item opt-in for required evidence. The only accepted value is the
+      // literal string "required" (mirroring `evidence: required` in the docs).
+      // A truthy-but-wrong value (a typo, a YAML indentation mistake turning it
+      // into a mapping, a stray boolean) is rejected at the parse boundary
+      // rather than silently treated as "not required" — the same refuse-to-load
+      // posture the loader takes for a malformed `verify`. A check with both
+      // `verify` and `evidence: required` is also rejected: a mechanical check
+      // is cleared by `verify`, never by `check --evidence`, so the combination
+      // can never be satisfied and almost certainly signals a config mistake.
+      const evidence = check.evidence;
+      let evidenceRequired = false;
+      if (evidence !== undefined) {
+        if (evidence !== 'required') {
+          throw new Error(`Phase "${phase.name}", check "${check.id}": "evidence" may only be the string "required"`);
+        }
+        if (verify !== undefined) {
+          throw new Error(`Phase "${phase.name}", check "${check.id}": "evidence: required" is for manual checks; this check has a "verify" rule (it is mechanical, cleared by \`checklist verify\`)`);
+        }
+        evidenceRequired = true;
+      }
       return {
         id: check.id,
         description: check.description,
         verify,
+        evidenceRequired,
       };
     });
 

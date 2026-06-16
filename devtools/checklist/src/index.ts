@@ -7,6 +7,7 @@ import { verifyCommand } from './commands/verify.js';
 import { checkCommand } from './commands/check.js';
 import { phasesCommand } from './commands/phases.js';
 import { resetCommand } from './commands/reset.js';
+import { reportCommand } from './commands/report.js';
 
 // Single source of truth for the version: read it from package.json at
 // runtime rather than hard-coding it here. Works from both src/ (tests) and
@@ -41,6 +42,7 @@ program
   .description('Show checklist overview, or a specific phase with readings')
   .option(...DIR_OPT)
   .option(...PATH_OPT)
+  .option('--json', 'Emit machine-readable current state (for hooks/statusline)')
   .action(showCommand);
 
 program
@@ -55,6 +57,7 @@ program
   .description('Manually confirm a human-judgment check item')
   .option(...DIR_OPT)
   .option(...PATH_OPT)
+  .option('--evidence <text>', 'Cite the basis for this confirmation (file:line, command output, artifact path); required when the check sets evidence: required')
   .action(checkCommand);
 
 program
@@ -67,9 +70,16 @@ program
 program
   .command('reset')
   .alias('done')
-  .description('End-of-run cleanup: clear this skill\'s state and active pointer')
+  .description('End-of-run cleanup: clear this skill\'s state and active pointer (run journal retained)')
   .option(...DIR_OPT)
   .option(...PATH_OPT)
   .action(resetCommand);
+
+program
+  .command('report')
+  .description('Render a markdown gate-trail from the append-only run journal')
+  .option(...DIR_OPT)
+  .option(...PATH_OPT)
+  .action(reportCommand);
 
 program.parse();

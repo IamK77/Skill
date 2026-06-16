@@ -1,7 +1,8 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { clearState, stateFilePath } from '../state.js';
+import { clearState, stateFilePath, journalDir } from '../state.js';
 import { resolveDir, clearActivePointer } from '../resolver.js';
+import { appendEvents, journalPathFor, runStamp, type JournalEvent } from '../journal.js';
 
 const CONFIG_FILE = '.checklist.yml';
 
@@ -28,8 +29,29 @@ export function resetCommand(options?: { dir?: string; path?: string }): void {
   // THIS target only, leaving any other target's state for the same skill intact.
   const target = options?.path || process.cwd();   // key by project cwd, not the shared skill dir
   const stateFile = stateFilePath(targetDir, target);
+
+  // Mark the run boundary in the journal BEFORE clearing state. `reset`/`done`
+  // clears the mutable state file but deliberately leaves the runs/ trail
+  // standing — so "done" no longer wipes the audit trace. This line records that
+  // the run ended, so a later `report` shows the close of each run. The journal
+  // lives under the XDG state home (journalDir), never the read-only skill dir.
+  const resetEvent: JournalEvent = {
+    ts: new Date().toISOString(),
+    kind: 'reset',
+    phaseIndex: -1,
+    phaseName: '',
+    itemId: '',
+    status: 'pass',
+    message: 'run reset — state cleared, journal retained',
+  };
+  try {
+    appendEvents(journalPathFor(journalDir(targetDir), runStamp()), [resetEvent]);
+  } catch {
+    /* journal is a best-effort trace */
+  }
+
   clearState(stateFile);
   const pointerCleared = clearActivePointer(targetDir);
   const pointerNote = pointerCleared ? ' and active pointer' : '';
-  console.log(`checklist reset: cleared state${pointerNote} for ${targetDir}`);
+  console.log(`checklist reset: cleared state${pointerNote} for ${targetDir} (run journal retained)`);
 }

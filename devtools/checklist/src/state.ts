@@ -63,6 +63,19 @@ export function stateFilePath(skillDir: string, targetPath: string): string {
   return path.join(stateHomeDir(), stateKey(skillDir, targetPath));
 }
 
+// The run journal's BASE dir, under the XDG state home — NEVER inside skillDir,
+// which is read-only under a plugin install (a package-managed cache whose fate on
+// update is uncertain). Keyed by the SKILL dir only (not the target), so one skill
+// keeps a single append-only gate-trail across the projects it reviews and `report`
+// needs only the skill dir. journalPathFor/readJournal add the `runs/` subdir.
+export function journalDir(skillDir: string): string {
+  const skill = path.resolve(skillDir);
+  const hash = createHash('sha256').update(skill).digest('hex').slice(0, 16);
+  const base = path.basename(skill) || 'skill';
+  const safeBase = base.replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 40);
+  return path.join(stateHomeDir(), `${safeBase}.${hash}.journal`);
+}
+
 // The legacy state location: `.checklist.state.json` INSIDE the skill dir.
 export function legacyStateFilePath(skillDir: string): string {
   return path.resolve(skillDir, STATE_FILE);

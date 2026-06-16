@@ -1,6 +1,7 @@
 import type { ChecklistConfig, PhaseResult, CheckItemResult } from './types.js';
 import type { ChecklistState } from './state.js';
-import { isItemChecked, isPhaseComplete, phaseProgress } from './state.js';
+import { getItemResult, isItemChecked, isPhaseComplete, phaseProgress } from './state.js';
+import type { JournalEvent } from './journal.js';
 
 function padDots(left: string, right: string, width: number = 50): string {
   const dotsCount = width - left.length - right.length;
@@ -151,8 +152,9 @@ export function formatVerifyResult(result: PhaseResult, state: ChecklistState, t
   return lines.join('\n');
 }
 
-export function formatCheckConfirm(phaseIndex: number, itemId: string): string {
-  return `[x] ${itemId} .. confirmed`;
+export function formatCheckConfirm(phaseIndex: number, itemId: string, evidence?: string): string {
+  const base = `[x] ${itemId} .. confirmed`;
+  return evidence ? `${base}\n       evidence: ${evidence}` : base;
 }
 
 export function formatGateFailure(failedPhase: string, failedIndex: number): string {
@@ -163,4 +165,111 @@ export function formatPhases(config: ChecklistConfig): string {
   return config.phases
     .map((p, i) => `${i}: ${p.name} (${p.checks.length} checks)`)
     .join('\n');
+}
+
+const STATUS_MARK: Record<string, string> = { pass: '[x]', fail: '[FAIL]', error: '[ERROR]' };
+
+// Render the append-only run journal as a markdown gate-trail. This is the
+// audit artifact: it shows every check/verify/reset event, in order, with the
+// evidence string the agent supplied — fitting the repo's output/ report habit.
+//
+// Honest framing: this trail proves WHAT was recorded and WHEN, not that the
+// evidence is real or the work was actually done. Manual checks are still
+// agent-entered; the evidence column forces specificity, the trail leaves an
+// audit trace. It is a record, not a verifier.
+export function formatReport(events: JournalEvent[], config?: ChecklistConfig): string {
+  const lines: string[] = ['# checklist gate-trail', ''];
+
+  if (config) {
+    lines.push(`Checklist: ${config.phases.length} phases`, '');
+  }
+
+  if (events.length === 0) {
+    lines.push('_No journal events recorded yet._', '');
+    lines.push('> The journal proves what was recorded and when; manual checks are still');
+    lines.push('> agent-entered, so a recorded pass is a claim with a cited basis, not a proof.');
+    return lines.join('\n');
+  }
+
+  lines.push('| time (UTC) | event | phase | check | status | evidence / detail |');
+  lines.push('| --- | --- | --- | --- | --- | --- |');
+
+  for (const e of events) {
+    const mark = STATUS_MARK[e.status] ?? e.status;
+    const phase = e.kind === 'reset' ? '—' : `${e.phaseIndex} (${e.phaseName})`;
+    const check = e.kind === 'reset' ? '—' : e.itemId;
+    // The evidence string is what an `evidence: required` check was based on;
+    // otherwise fall back to the recorded message (the runner output, or
+    // "confirmed" for a bare manual check).
+    const detail = (e.evidence ?? e.message ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
+    lines.push(`| ${e.ts} | ${e.kind} | ${phase} | ${check} | ${mark} | ${detail} |`);
+  }
+
+  lines.push('');
+  lines.push('> The journal proves what was recorded and when; manual checks are still');
+  lines.push('> agent-entered, so a recorded pass is a claim with a cited basis, not a proof.');
+  return lines.join('\n');
+}
+
+export interface StateJsonPhase {
+  index: number;
+  name: string;
+  complete: boolean;
+  done: number;
+  total: number;
+  checks: {
+    id: string;
+    description: string;
+    kind: 'manual' | 'mechanical';
+    evidenceRequired: boolean;
+    status: 'pass' | 'fail' | 'error' | 'unchecked';
+    message?: string;
+    evidence?: string;
+  }[];
+}
+
+export interface StateJson {
+  phases: StateJsonPhase[];
+  allComplete: boolean;
+  currentPhase: number | null;
+}
+
+// Machine-readable current state — a foundation for hooks/statusline. Built
+// from the config (the shape) overlaid with the recorded state (the readings),
+// so it reports CURRENT pass-status (the gate's notion), not mere row existence.
+export function buildStateJson(config: ChecklistConfig, state: ChecklistState): StateJson {
+  let currentPhase: number | null = null;
+
+  const phases: StateJsonPhase[] = config.phases.map((phase, i) => {
+    const ids = phase.checks.map(c => c.id);
+    // Key state by phase NAME, not index: state.ts stores results under the
+    // case-folded phase name (phaseKeyOf), so an index lookup (`state.checked["0"]`)
+    // always misses and every check reports `unchecked`. Use the state module's own
+    // name-keyed helpers so --json matches the human `show`.
+    const complete = isPhaseComplete(state, phase.name, ids);
+    const { done, total } = phaseProgress(state, phase.name, ids);
+    if (!complete && currentPhase === null) currentPhase = i;
+
+    const checks = phase.checks.map(c => {
+      const rec = getItemResult(state, phase.name, c.id);
+      return {
+        id: c.id,
+        description: c.description,
+        kind: (c.verify ? 'mechanical' : 'manual') as 'manual' | 'mechanical',
+        evidenceRequired: c.evidenceRequired === true,
+        status: (rec?.status ?? 'unchecked') as 'pass' | 'fail' | 'error' | 'unchecked',
+        ...(rec?.message !== undefined ? { message: rec.message } : {}),
+        ...(rec?.evidence !== undefined ? { evidence: rec.evidence } : {}),
+      };
+    });
+
+    return { index: i, name: phase.name, complete, done, total, checks };
+  });
+
+  const allComplete = phases.every(p => p.complete);
+  return { phases, allComplete, currentPhase: allComplete ? null : currentPhase };
+}
+
+export function formatStateJson(config: ChecklistConfig, state: ChecklistState): string {
+  return JSON.stringify(buildStateJson(config, state), null, 2);
 }
