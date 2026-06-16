@@ -14,9 +14,20 @@ import { lintCommand } from './commands/lint.js';
 // runtime rather than hard-coding it here. Works from both src/ (tests) and
 // dist/ (the shipped build) because package.json is one level up in each.
 // This is what lets release-please bump the version in package.json alone.
-const { version } = JSON.parse(
-  readFileSync(join(__dirname, '..', 'package.json'), 'utf8'),
-) as { version: string };
+//
+// The self-carry bundle (npm run bundle -> bundle/checklist.mjs) is a single
+// file with no package.json beside it, so the runtime read would fail there.
+// `npm run bundle` therefore esbuild-`--define`s BUNDLED_VERSION to the
+// package.json version at bundle time; this `declare` lets tsc type the
+// replaced literal, and the `typeof` guard keeps the unbundled dist/ build
+// (where the define is absent) on the original package.json read.
+declare const __CHECKLIST_BUNDLED_VERSION__: string;
+const bundledVersion =
+  typeof __CHECKLIST_BUNDLED_VERSION__ === 'string' ? __CHECKLIST_BUNDLED_VERSION__ : '';
+const version =
+  bundledVersion ||
+  (JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf8')) as { version: string })
+    .version;
 
 const program = new Command()
   .name('checklist')
