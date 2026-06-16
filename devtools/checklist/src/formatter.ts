@@ -2,6 +2,7 @@ import type { ChecklistConfig, PhaseResult, CheckItemResult } from './types.js';
 import type { ChecklistState } from './state.js';
 import { getItemResult, isItemChecked, isPhaseComplete, phaseProgress } from './state.js';
 import type { JournalEvent } from './journal.js';
+import type { LintDiagnostic, LintResult } from './lint.js';
 
 function padDots(left: string, right: string, width: number = 50): string {
   const dotsCount = width - left.length - right.length;
@@ -272,4 +273,56 @@ export function buildStateJson(config: ChecklistConfig, state: ChecklistState): 
 
 export function formatStateJson(config: ChecklistConfig, state: ChecklistState): string {
   return JSON.stringify(buildStateJson(config, state), null, 2);
+}
+
+// Render lint diagnostics grouped by file, each with its severity, rule, what is
+// wrong, and how to fix it — followed by a one-line summary. Returns the report
+// and a count of errors vs warnings so the command layer can pick the exit code.
+export function formatLintReport(result: LintResult): {
+  report: string;
+  errorCount: number;
+  warningCount: number;
+} {
+  const { skillDirs, diagnostics } = result;
+  const errorCount = diagnostics.filter(d => d.severity === 'error').length;
+  const warningCount = diagnostics.filter(d => d.severity === 'warning').length;
+
+  const lines: string[] = [];
+
+  if (skillDirs.length === 0) {
+    lines.push('no skill directories found (a skill dir contains a .checklist.yml)');
+    return { report: lines.join('\n'), errorCount, warningCount };
+  }
+
+  // Group by file for a readable, located report.
+  const byFile = new Map<string, LintDiagnostic[]>();
+  for (const d of diagnostics) {
+    const arr = byFile.get(d.file);
+    if (arr) arr.push(d);
+    else byFile.set(d.file, [d]);
+  }
+
+  for (const [file, diags] of byFile) {
+    lines.push(file);
+    for (const d of diags) {
+      const tag = d.severity === 'error' ? 'ERROR' : 'WARN ';
+      lines.push(`  ${tag} [${d.rule}] ${d.message}`);
+      if (d.fix) {
+        lines.push(`        fix: ${d.fix}`);
+      }
+    }
+    lines.push('');
+  }
+
+  const skillWord = skillDirs.length === 1 ? 'skill' : 'skills';
+  if (errorCount === 0 && warningCount === 0) {
+    lines.push(`lint: ${skillDirs.length} ${skillWord} OK — no problems found`);
+  } else {
+    const parts: string[] = [];
+    if (errorCount > 0) parts.push(`${errorCount} error${errorCount === 1 ? '' : 's'}`);
+    if (warningCount > 0) parts.push(`${warningCount} warning${warningCount === 1 ? '' : 's'}`);
+    lines.push(`lint: ${parts.join(', ')} across ${skillDirs.length} ${skillWord}`);
+  }
+
+  return { report: lines.join('\n'), errorCount, warningCount };
 }

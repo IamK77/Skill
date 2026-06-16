@@ -8,6 +8,7 @@ import { checkCommand } from './commands/check.js';
 import { phasesCommand } from './commands/phases.js';
 import { resetCommand } from './commands/reset.js';
 import { reportCommand } from './commands/report.js';
+import { lintCommand } from './commands/lint.js';
 
 // Single source of truth for the version: read it from package.json at
 // runtime rather than hard-coding it here. Works from both src/ (tests) and
@@ -81,5 +82,14 @@ program
   .option(...DIR_OPT)
   .option(...PATH_OPT)
   .action(reportCommand);
+
+program
+  .command('lint [path]')
+  .description('Validate skill checklists: yml schema + SKILL.md parity (CI / authoring gate)')
+  .option(...DIR_OPT)
+  .option(...PATH_OPT)
+  .option('--strict', 'Treat warnings as errors (non-zero exit)')
+  .option('--json', 'Emit machine-readable lint results')
+  .action(lintCommand);
 
 program.parse();
