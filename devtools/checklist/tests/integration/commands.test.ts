@@ -10,6 +10,7 @@ import { checkCommand } from '../../src/commands/check.js';
 import { phasesCommand } from '../../src/commands/phases.js';
 import { resetCommand } from '../../src/commands/reset.js';
 import { writeActivePointer } from '../../src/resolver.js';
+import { stateFilePath } from '../../src/state.js';
 import * as loader from '../../src/loader.js';
 
 // ── Helpers ─────────────────────────────────────────────────────────
@@ -23,18 +24,28 @@ function writeChecklist(content: string): void {
   fs.writeFileSync(path.join(tmpDir, '.checklist.yml'), content, 'utf-8');
 }
 
+// State no longer lives inside the skill dir; it is a (skill,target)-keyed file
+// under the sandboxed XDG state home. Every command in this suite resolves to
+// (skill=tmpDir, target=tmpDir), so that is the file these helpers read/write.
+function statePath(): string {
+  return stateFilePath(tmpDir, tmpDir);
+}
+
 function writeState(state: object): void {
-  fs.writeFileSync(
-    path.join(tmpDir, '.checklist.state.json'),
-    JSON.stringify(state, null, 2),
-    'utf-8',
-  );
+  const p = statePath();
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, JSON.stringify(state, null, 2), 'utf-8');
 }
 
 function readState(): Record<string, unknown> {
-  const p = path.join(tmpDir, '.checklist.state.json');
+  const p = statePath();
   if (!fs.existsSync(p)) return {};
   return JSON.parse(fs.readFileSync(p, 'utf-8'));
+}
+
+// The skill dir must stay clean: the new model never writes a state file into it.
+function skillDirHasStateFile(): boolean {
+  return fs.existsSync(path.join(tmpDir, '.checklist.state.json'));
 }
 
 function logged(): string {
@@ -125,7 +136,10 @@ describe('initCommand', () => {
 
     const output = logged();
     expect(output).toContain('previous state cleared');
-    expect(fs.existsSync(path.join(tmpDir, '.checklist.state.json'))).toBe(false);
+    // The relocated (skill,target) state file is cleared…
+    expect(fs.existsSync(statePath())).toBe(false);
+    // …and the skill dir is never written to.
+    expect(skillDirHasStateFile()).toBe(false);
     expect(exitSpy).not.toHaveBeenCalled();
   });
 
@@ -221,9 +235,10 @@ describe('showCommand', () => {
 
   it('shows phase detail when prior phases are complete', async () => {
     writeChecklist(TWO_PHASE_YML);
+    // State is keyed by phase NAME now (case-folded): Setup -> 'setup'.
     writeState({
       checked: {
-        '0': {
+        setup: {
           env: { status: 'pass', message: 'ok' },
           approve: { status: 'pass', message: 'confirmed' },
         },
@@ -281,7 +296,7 @@ describe('verifyCommand', () => {
     expect(output).toContain('PASS');
 
     const state = readState() as { checked: Record<string, Record<string, { status: string }>> };
-    expect(state.checked['0']['compile'].status).toBe('pass');
+    expect(state.checked['build']['compile'].status).toBe('pass');
   });
 
   it('records failing mechanical results so the gate reflects them', async () => {
@@ -303,7 +318,7 @@ phases:
     const state = readState() as { checked: Record<string, Record<string, { status: string }>> };
     // The failing result IS recorded (status 'fail') so a later gate read sees
     // current reality — a stale pass cannot survive a regression.
-    expect(state.checked['0']['fail-check'].status).toBe('fail');
+    expect(state.checked['build']['fail-check'].status).toBe('fail');
   });
 
   it('exits with gate failure when prior phase is incomplete', async () => {
@@ -360,8 +375,8 @@ phases:
 
     expect(exitSpy).toHaveBeenCalledWith(1);
     const state = readState() as { checked: Record<string, Record<string, { status: string }>> };
-    expect(state.checked['0']['pass-one'].status).toBe('pass');
-    expect(state.checked['0']['fail-one'].status).toBe('fail');
+    expect(state.checked['build']['pass-one'].status).toBe('pass');
+    expect(state.checked['build']['fail-one'].status).toBe('fail');
   });
 });
 
@@ -381,8 +396,8 @@ describe('checkCommand', () => {
     expect(output).toContain('confirmed');
 
     const state = readState() as { checked: Record<string, Record<string, { status: string; message: string }>> };
-    expect(state.checked['0']['review'].status).toBe('pass');
-    expect(state.checked['0']['review'].message).toBe('confirmed');
+    expect(state.checked['build']['review'].status).toBe('pass');
+    expect(state.checked['build']['review'].message).toBe('confirmed');
     expect(exitSpy).not.toHaveBeenCalled();
   });
 
@@ -497,14 +512,17 @@ describe('phasesCommand', () => {
 // ═══════════════════════════════════════════════════════════════════════
 
 describe('resetCommand', () => {
-  it('clears the state file in the resolved dir', () => {
+  it('clears the (skill,target) state file and never touches the skill dir', () => {
     writeChecklist(MINIMAL_YML);
-    writeState({ checked: { '0': { item: { status: 'pass', message: 'ok' } } } });
-    expect(fs.existsSync(path.join(tmpDir, '.checklist.state.json'))).toBe(true);
+    writeState({ checked: { build: { item: { status: 'pass', message: 'ok' } } } });
+    expect(fs.existsSync(statePath())).toBe(true);
 
     resetCommand({ dir: tmpDir });
 
-    expect(fs.existsSync(path.join(tmpDir, '.checklist.state.json'))).toBe(false);
+    // The relocated state file for this (skill,target) is removed…
+    expect(fs.existsSync(statePath())).toBe(false);
+    // …and the skill dir was never written to.
+    expect(skillDirHasStateFile()).toBe(false);
     expect(logged()).toContain('cleared state');
   });
 
@@ -534,25 +552,25 @@ describe('resetCommand', () => {
   });
 
   it('REFUSES and deletes nothing when the target has no .checklist.yml', () => {
-    // No writeChecklist: tmpDir is an unrelated dir. A stray state file here must
-    // survive — reset must not clobber a directory the user never named.
-    writeState({ checked: { '0': { item: { status: 'pass', message: 'ok' } } } });
+    // No writeChecklist: tmpDir is an unrelated dir. The (skill,target) state file
+    // must survive — reset must not clobber state for a dir the user never named.
+    writeState({ checked: { build: { item: { status: 'pass', message: 'ok' } } } });
 
     resetCommand({ dir: tmpDir });
 
     expect(exitSpy).toHaveBeenCalledWith(1);
     expect(errored()).toContain('no active checklist to reset');
-    expect(fs.existsSync(path.join(tmpDir, '.checklist.state.json'))).toBe(true); // untouched
+    expect(fs.existsSync(statePath())).toBe(true); // untouched
   });
 
   it('REFUSES rather than falling back to cwd when nothing resolves', () => {
     const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tmpDir);
-    writeState({ checked: { '0': { item: { status: 'pass', message: 'ok' } } } });
+    writeState({ checked: { build: { item: { status: 'pass', message: 'ok' } } } });
 
     resetCommand(); // no --dir, no env, no pointer -> would have resolved to cwd
 
     expect(exitSpy).toHaveBeenCalledWith(1);
-    expect(fs.existsSync(path.join(tmpDir, '.checklist.state.json'))).toBe(true); // cwd state untouched
+    expect(fs.existsSync(statePath())).toBe(true); // cwd state untouched
     cwdSpy.mockRestore();
   });
 });

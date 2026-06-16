@@ -293,13 +293,14 @@ describe('gatePriorPhases', () => {
   });
 
   it('all prior phases complete passes the gate', () => {
+    // State is keyed by phase NAME (case-folded): Phase-0 -> 'phase-0', etc.
     const state: ChecklistState = {
       checked: {
-        '0': {
+        'phase-0': {
           'p0-a': { status: 'pass', message: 'ok' },
           'p0-b': { status: 'pass', message: 'ok' },
         },
-        '1': {
+        'phase-1': {
           'p1-a': { status: 'pass', message: 'ok' },
         },
       },
@@ -314,7 +315,7 @@ describe('gatePriorPhases', () => {
   it('first prior phase incomplete fails with that phase info', () => {
     const state: ChecklistState = {
       checked: {
-        '0': {
+        'phase-0': {
           'p0-a': { status: 'pass', message: 'ok' },
           // p0-b is missing
         },
@@ -330,7 +331,7 @@ describe('gatePriorPhases', () => {
   it('second prior phase incomplete (first complete) fails with second phase info', () => {
     const state: ChecklistState = {
       checked: {
-        '0': {
+        'phase-0': {
           'p0-a': { status: 'pass', message: 'ok' },
           'p0-b': { status: 'pass', message: 'ok' },
         },
@@ -356,7 +357,7 @@ describe('gatePriorPhases', () => {
   it('blocks when a prior phase item is fail/error, not a pass', () => {
     const state: ChecklistState = {
       checked: {
-        '0': {
+        'phase-0': {
           'p0-a': { status: 'fail', message: 'failed' },
           'p0-b': { status: 'error', message: 'errored' },
         },

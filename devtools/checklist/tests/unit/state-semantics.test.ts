@@ -29,16 +29,19 @@ import {
 } from '../../src/state.js';
 import type { CheckResult } from '../../src/types.js';
 
-const STATE_FILE = '.checklist.state.json';
-
+// state.ts now takes a state FILE path, not a dir; `sf` is that file inside the
+// throwaway dir. (The basename is arbitrary now — it is not the in-skill-dir
+// `.checklist.state.json`, which the new model never reads or writes.)
 let tmpDir: string;
+let sf: string;
 
 function write(raw: string): void {
-  fs.writeFileSync(path.join(tmpDir, STATE_FILE), raw, 'utf-8');
+  fs.writeFileSync(sf, raw, 'utf-8');
 }
 
 beforeEach(() => {
   tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'checklist-state-sem-'));
+  sf = path.join(tmpDir, 'state.json');
 });
 
 afterEach(() => {
@@ -50,39 +53,39 @@ describe('loadState malformed equivalence classes', () => {
   // equivalence class hitting a different clause of the guard.
   it('rejects JSON null (the !parsed clause) as malformed', () => {
     write('null');
-    expect(() => loadState(tmpDir)).toThrow(/malformed/);
+    expect(() => loadState(sf)).toThrow(/malformed/);
   });
 
   it('rejects a JSON number as malformed', () => {
     write('42');
-    expect(() => loadState(tmpDir)).toThrow(/malformed/);
+    expect(() => loadState(sf)).toThrow(/malformed/);
   });
 
   it('rejects a JSON string as malformed', () => {
     write('"hello"');
-    expect(() => loadState(tmpDir)).toThrow(/malformed/);
+    expect(() => loadState(sf)).toThrow(/malformed/);
   });
 
   it('rejects a JSON boolean as malformed', () => {
     write('true');
-    expect(() => loadState(tmpDir)).toThrow(/malformed/);
+    expect(() => loadState(sf)).toThrow(/malformed/);
   });
 
   it('rejects an object missing the "checked" key as malformed', () => {
     // typeof undefined !== 'object' -> the third clause fires.
     write('{}');
-    expect(() => loadState(tmpDir)).toThrow(/malformed/);
+    expect(() => loadState(sf)).toThrow(/malformed/);
   });
 
   it('rejects an object whose "checked" is a number as malformed', () => {
     write('{"checked":42}');
-    expect(() => loadState(tmpDir)).toThrow(/malformed/);
+    expect(() => loadState(sf)).toThrow(/malformed/);
   });
 
   it('includes the resolved file path in the malformed error', () => {
     write('[1,2,3]');
-    const expectedPath = path.resolve(tmpDir, STATE_FILE);
-    expect(() => loadState(tmpDir)).toThrow(expectedPath);
+    const expectedPath = sf;
+    expect(() => loadState(sf)).toThrow(expectedPath);
   });
 });
 
@@ -90,18 +93,18 @@ describe('loadState corrupt vs malformed boundary', () => {
   it('treats an empty file as corrupt (JSON.parse throws on "")', () => {
     // Boundary: '' is NOT valid JSON, so it routes to /corrupt/, not /malformed/.
     write('');
-    expect(() => loadState(tmpDir)).toThrow(/corrupt/);
+    expect(() => loadState(sf)).toThrow(/corrupt/);
   });
 
   it('treats whitespace-only content as corrupt', () => {
     write('   \n  ');
-    expect(() => loadState(tmpDir)).toThrow(/corrupt/);
+    expect(() => loadState(sf)).toThrow(/corrupt/);
   });
 
   it('includes the resolved file path in the corrupt error', () => {
     write('{ not json');
-    const expectedPath = path.resolve(tmpDir, STATE_FILE);
-    expect(() => loadState(tmpDir)).toThrow(expectedPath);
+    const expectedPath = sf;
+    expect(() => loadState(sf)).toThrow(expectedPath);
   });
 });
 
@@ -113,17 +116,17 @@ describe('loadState rejects non-object `checked` (null / array)', () => {
   // parse boundary with the documented malformed-state error.
   it('rejects checked:null with the malformed error (not a downstream crash)', () => {
     write('{"checked":null}');
-    expect(() => loadState(tmpDir)).toThrow('state file is malformed');
+    expect(() => loadState(sf)).toThrow('state file is malformed');
   });
 
   it('rejects checked as an array with the malformed error', () => {
     write('{"checked":[]}');
-    expect(() => loadState(tmpDir)).toThrow('state file is malformed');
+    expect(() => loadState(sf)).toThrow('state file is malformed');
   });
 
   it('ignores extra unknown keys alongside a valid checked object', () => {
     write('{"checked":{"0":{"a":{"status":"pass","message":""}}},"extra":1}');
-    const state = loadState(tmpDir) as ChecklistState & { extra?: number };
+    const state = loadState(sf) as ChecklistState & { extra?: number };
     expect(state.checked['0']['a']).toEqual({ status: 'pass', message: '' });
     expect(state.extra).toBe(1);
   });
@@ -134,8 +137,8 @@ describe('saveState formatting and overwrite', () => {
     const state: ChecklistState = {
       checked: { '0': { a: { status: 'pass', message: 'ok' } } },
     };
-    saveState(tmpDir, state);
-    const raw = fs.readFileSync(path.join(tmpDir, STATE_FILE), 'utf-8');
+    saveState(sf, state);
+    const raw = fs.readFileSync(sf, 'utf-8');
     // JSON.stringify(_, null, 2) -> nested keys indented by 2/4/... spaces.
     expect(raw).toContain('\n  "checked"');
     expect(raw).toContain('\n    "0"');
@@ -149,9 +152,9 @@ describe('saveState formatting and overwrite', () => {
     const second: ChecklistState = {
       checked: { '1': { b: { status: 'pass', message: 'new' } } },
     };
-    saveState(tmpDir, first);
-    saveState(tmpDir, second);
-    const loaded = loadState(tmpDir);
+    saveState(sf, first);
+    saveState(sf, second);
+    const loaded = loadState(sf);
     expect(loaded).toEqual(second);
     // The old phase '0' must be entirely gone, not merged.
     expect(loaded.checked['0']).toBeUndefined();
@@ -159,8 +162,8 @@ describe('saveState formatting and overwrite', () => {
 
   it('round-trips an empty state', () => {
     const empty: ChecklistState = { checked: {} };
-    saveState(tmpDir, empty);
-    expect(loadState(tmpDir)).toEqual(empty);
+    saveState(sf, empty);
+    expect(loadState(sf)).toEqual(empty);
   });
 });
 
@@ -237,30 +240,30 @@ describe('setItemResult state-progression (call it twice)', () => {
 });
 
 describe('clearState idempotency and write-then-clear-then-resolve', () => {
-  const filePath = () => path.join(tmpDir, STATE_FILE);
+  const filePath = () => sf;
 
   it('is idempotent: clearing twice on a missing file does not throw', () => {
     expect(() => {
-      clearState(tmpDir);
-      clearState(tmpDir);
+      clearState(sf);
+      clearState(sf);
     }).not.toThrow();
     expect(fs.existsSync(filePath())).toBe(false);
   });
 
   it('is idempotent: save, clear, clear again -> still gone, no throw', () => {
-    saveState(tmpDir, { checked: { '0': { a: { status: 'pass', message: '' } } } });
+    saveState(sf, { checked: { '0': { a: { status: 'pass', message: '' } } } });
     expect(fs.existsSync(filePath())).toBe(true);
-    clearState(tmpDir);
+    clearState(sf);
     expect(fs.existsSync(filePath())).toBe(false);
-    expect(() => clearState(tmpDir)).not.toThrow();
+    expect(() => clearState(sf)).not.toThrow();
     expect(fs.existsSync(filePath())).toBe(false);
   });
 
   it('write-then-clear-then-resolve returns a fresh empty state', () => {
-    saveState(tmpDir, { checked: { '0': { a: { status: 'pass', message: 'recorded' } } } });
-    clearState(tmpDir);
+    saveState(sf, { checked: { '0': { a: { status: 'pass', message: 'recorded' } } } });
+    clearState(sf);
     // After clearing, the file is gone, so loadState falls back to empty state.
-    expect(loadState(tmpDir)).toEqual({ checked: {} });
+    expect(loadState(sf)).toEqual({ checked: {} });
   });
 });
 
@@ -297,9 +300,9 @@ describe('phaseProgress counting boundaries', () => {
 
 describe('saveState atomicity — observable surface (white-box pins live in state-atomic-write.test.ts)', () => {
   it('leaves no temp litter after a successful save', () => {
-    saveState(tmpDir, { checked: {} });
-    saveState(tmpDir, { checked: { '1': { b: { status: 'fail', message: 'x' } } } });
-    expect(fs.readdirSync(tmpDir)).toEqual([STATE_FILE]);
+    saveState(sf, { checked: {} });
+    saveState(sf, { checked: { '1': { b: { status: 'fail', message: 'x' } } } });
+    expect(fs.readdirSync(tmpDir)).toEqual([path.basename(sf)]);
   });
 });
 
@@ -315,10 +318,10 @@ describe('mergeAndSaveState — concurrent load-modify-save interleave (lost-upd
     setItemResult(aUpdates, 0, 'from-a', { status: 'pass', message: 'a' });
     setItemResult(bUpdates, 1, 'from-b', { status: 'pass', message: 'b' });
 
-    mergeAndSaveState(tmpDir, aUpdates); // …A lands first…
-    mergeAndSaveState(tmpDir, bUpdates); // …then B, which never saw A's record
+    mergeAndSaveState(sf, aUpdates); // …A lands first…
+    mergeAndSaveState(sf, bUpdates); // …then B, which never saw A's record
 
-    const final = loadState(tmpDir);
+    const final = loadState(sf);
     expect(isItemChecked(final, 0, 'from-a')).toBe(true); // pre-fix: lost
     expect(isItemChecked(final, 1, 'from-b')).toBe(true);
   });
@@ -329,23 +332,23 @@ describe('mergeAndSaveState — concurrent load-modify-save interleave (lost-upd
     setItemResult(aUpdates, 0, 'x', { status: 'pass', message: 'a' });
     setItemResult(bUpdates, 0, 'y', { status: 'fail', message: 'b' });
 
-    mergeAndSaveState(tmpDir, aUpdates);
-    mergeAndSaveState(tmpDir, bUpdates);
+    mergeAndSaveState(sf, aUpdates);
+    mergeAndSaveState(sf, bUpdates);
 
-    const final = loadState(tmpDir);
+    const final = loadState(sf);
     expect(getItemResult(final, 0, 'x')).toEqual({ status: 'pass', message: 'a' });
     expect(getItemResult(final, 0, 'y')).toEqual({ status: 'fail', message: 'b' });
   });
 
   it('our fresh result for an item we re-ran wins over the on-disk record', () => {
     // Disk holds an older pass; this run re-verified the item and it FAILED.
-    saveState(tmpDir, { checked: { '0': { x: { status: 'pass', message: 'stale' } } } });
+    saveState(sf, { checked: { '0': { x: { status: 'pass', message: 'stale' } } } });
     const updates: ChecklistState = { checked: {} };
     setItemResult(updates, 0, 'x', { status: 'fail', message: 'regressed' });
 
-    mergeAndSaveState(tmpDir, updates);
+    mergeAndSaveState(sf, updates);
 
-    expect(getItemResult(loadState(tmpDir), 0, 'x')).toEqual({
+    expect(getItemResult(loadState(sf), 0, 'x')).toEqual({
       status: 'fail',
       message: 'regressed',
     });
@@ -355,38 +358,38 @@ describe('mergeAndSaveState — concurrent load-modify-save interleave (lost-upd
     // The audit scenario: another invocation records a FAIL for x after we
     // loaded (when x was still a pass). Our save of an unrelated item must keep
     // their fail — re-writing our stale snapshot would re-green a failing gate.
-    saveState(tmpDir, { checked: { '0': { x: { status: 'pass', message: 'old' } } } });
-    loadState(tmpDir); // our invocation loads while x is still green
-    saveState(tmpDir, { checked: { '0': { x: { status: 'fail', message: 'regressed' } } } });
+    saveState(sf, { checked: { '0': { x: { status: 'pass', message: 'old' } } } });
+    loadState(sf); // our invocation loads while x is still green
+    saveState(sf, { checked: { '0': { x: { status: 'fail', message: 'regressed' } } } });
 
     const updates: ChecklistState = { checked: {} }; // delta: only OUR new item
     setItemResult(updates, 0, 'y', { status: 'pass', message: 'confirmed' });
-    mergeAndSaveState(tmpDir, updates);
+    mergeAndSaveState(sf, updates);
 
-    const final = loadState(tmpDir);
+    const final = loadState(sf);
     expect(getItemResult(final, 0, 'x')!.status).toBe('fail'); // not resurrected
     expect(isItemChecked(final, 0, 'y')).toBe(true);
   });
 
   it('degrades to a plain replace when the on-disk file went corrupt since our load', () => {
-    fs.writeFileSync(path.join(tmpDir, STATE_FILE), '{ torn write', 'utf-8');
+    fs.writeFileSync(sf, '{ torn write', 'utf-8');
     const updates: ChecklistState = { checked: {} };
     setItemResult(updates, 0, 'a', { status: 'pass', message: 'ok' });
 
-    const merged = mergeAndSaveState(tmpDir, updates);
+    const merged = mergeAndSaveState(sf, updates);
 
     expect(merged).toEqual(updates);
-    expect(loadState(tmpDir)).toEqual(updates); // file is valid again
+    expect(loadState(sf)).toEqual(updates); // file is valid again
   });
 
   it('returns the merged state it wrote (disk records + our delta)', () => {
-    saveState(tmpDir, { checked: { '0': { a: { status: 'pass', message: 'kept' } } } });
+    saveState(sf, { checked: { '0': { a: { status: 'pass', message: 'kept' } } } });
     const updates: ChecklistState = { checked: {} };
     setItemResult(updates, 1, 'b', { status: 'pass', message: 'new' });
 
-    const merged = mergeAndSaveState(tmpDir, updates);
+    const merged = mergeAndSaveState(sf, updates);
 
-    expect(merged).toEqual(loadState(tmpDir));
+    expect(merged).toEqual(loadState(sf));
     expect(getItemResult(merged, 0, 'a')).toEqual({ status: 'pass', message: 'kept' });
     expect(getItemResult(merged, 1, 'b')).toEqual({ status: 'pass', message: 'new' });
   });

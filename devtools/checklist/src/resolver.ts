@@ -156,7 +156,9 @@ export function gatePriorPhases(
   for (let i = 0; i < targetPhaseIndex; i++) {
     const phase = config.phases[i];
     const ids = phase.checks.map(c => c.id);
-    if (!isPhaseComplete(state, i, ids)) {
+    // Key by phase NAME, not index: reordering phases in the .checklist.yml must
+    // not mis-attach an old pass to the check that now sits at the same index.
+    if (!isPhaseComplete(state, phase.name, ids)) {
       return {
         passed: false,
         failedPhase: phase.name,

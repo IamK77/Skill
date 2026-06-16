@@ -1,15 +1,16 @@
 import { loadChecklist } from '../loader.js';
-import { loadState, mergeAndSaveState, setItemResult, type ChecklistState } from '../state.js';
+import { loadState, mergeAndSaveState, setItemResult, stateFilePath, type ChecklistState } from '../state.js';
 import { findPhaseIndex, gatePriorPhases, runPhase, resolveDir } from '../resolver.js';
 import { formatVerifyResult, formatGateFailure } from '../formatter.js';
 
 export async function verifyCommand(phaseArg: string, options: { dir?: string; path?: string }): Promise<void> {
   const cwd = resolveDir(options.dir);
   const targetPath = options.path || cwd;
+  const stateFile = stateFilePath(cwd, targetPath);
 
   try {
     const config = loadChecklist(cwd);
-    const state = loadState(cwd);
+    const state = loadState(stateFile);
     const phaseIndex = findPhaseIndex(config, phaseArg);
 
     const gate = gatePriorPhases(config, phaseIndex, state);
@@ -27,7 +28,7 @@ export async function verifyCommand(phaseArg: string, options: { dir?: string; p
         // an earlier verify and has since regressed overwrites its stale pass and
         // the gate (isItemChecked === 'pass') sees current reality, instead of a
         // failing re-verify silently leaving the old pass (and the gate) standing.
-        setItemResult(updates, phaseIndex, c.item.id, c.result);
+        setItemResult(updates, result.phaseName, c.item.id, c.result);
       }
     }
 
@@ -36,7 +37,7 @@ export async function verifyCommand(phaseArg: string, options: { dir?: string; p
     // load survive, and our stale in-memory copies of untouched items cannot
     // clobber newer results. Print from the merged state so the summary matches
     // what is actually on disk.
-    const merged = mergeAndSaveState(cwd, updates);
+    const merged = mergeAndSaveState(stateFile, updates);
     console.log(formatVerifyResult(result, merged, config.phases.length));
 
     if (result.mechanicalPassed < result.mechanicalTotal) {

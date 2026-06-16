@@ -33,6 +33,7 @@ import * as path from 'node:path';
 import { verifyCommand } from '../../src/commands/verify.js';
 import { checkCommand } from '../../src/commands/check.js';
 import { showCommand } from '../../src/commands/show.js';
+import { stateFilePath } from '../../src/state.js';
 
 let tmpDir: string;
 let flagPath: string;
@@ -53,7 +54,9 @@ function clearSpies(): void {
   exitSpy.mockClear();
 }
 function readState(): { checked: Record<string, Record<string, { status?: string }>> } {
-  const p = path.join(tmpDir, '.checklist.state.json');
+  // State now lives under the (sandboxed) XDG state home, keyed by (skill,target).
+  // Commands here run with { dir: tmpDir, path: tmpDir }, so that is the key.
+  const p = stateFilePath(tmpDir, tmpDir);
   return JSON.parse(fs.readFileSync(p, 'utf-8'));
 }
 
@@ -100,7 +103,7 @@ describe('ASSAY: re-verify that goes RED must revoke the stale pass (gate proper
     // Arrange: flag present -> first verify is GREEN and records the gate as pass.
     fs.writeFileSync(flagPath, '');
     await verifyCommand('0', { dir: tmpDir, path: tmpDir });
-    expect(readState().checked['0']['gate-check'].status).toBe('pass');
+    expect(readState().checked['phase0']['gate-check'].status).toBe('pass');
 
     // Act: the gated condition reverts; re-verify the SAME phase (call-it-again).
     fs.rmSync(flagPath);
@@ -113,7 +116,7 @@ describe('ASSAY: re-verify that goes RED must revoke the stale pass (gate proper
 
     // ORACLE: a live-RED mechanical check must NOT leave a stale `pass` standing.
     // The recorded state must no longer claim the gate passed.
-    const recorded = readState().checked['0']?.['gate-check'];
+    const recorded = readState().checked['phase0']?.['gate-check'];
     expect(recorded?.status).not.toBe('pass');
   });
 

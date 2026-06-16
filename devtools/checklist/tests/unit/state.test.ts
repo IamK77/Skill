@@ -16,9 +16,13 @@ import {
 import type { CheckResult } from '../../src/types.js';
 
 let tmpDir: string;
+// state.ts now takes a state FILE path, not a dir; each test points at a file
+// inside its throwaway dir.
+let sf: string;
 
 beforeEach(() => {
   tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'checklist-state-test-'));
+  sf = path.join(tmpDir, 'state.json');
 });
 
 afterEach(() => {
@@ -27,7 +31,7 @@ afterEach(() => {
 
 describe('loadState', () => {
   it('returns empty state when no file exists', () => {
-    const state = loadState(tmpDir);
+    const state = loadState(sf);
     expect(state).toEqual({ checked: {} });
   });
 
@@ -39,24 +43,20 @@ describe('loadState', () => {
         },
       },
     };
-    fs.writeFileSync(
-      path.join(tmpDir, '.checklist.state.json'),
-      JSON.stringify(existing),
-      'utf-8',
-    );
+    fs.writeFileSync(sf, JSON.stringify(existing), 'utf-8');
 
-    const state = loadState(tmpDir);
+    const state = loadState(sf);
     expect(state).toEqual(existing);
   });
 
   it('throws a clear error when the state file is corrupt JSON', () => {
-    fs.writeFileSync(path.join(tmpDir, '.checklist.state.json'), '{ not valid json', 'utf-8');
-    expect(() => loadState(tmpDir)).toThrow(/corrupt/);
+    fs.writeFileSync(sf, '{ not valid json', 'utf-8');
+    expect(() => loadState(sf)).toThrow(/corrupt/);
   });
 
   it('throws a clear error when the state file is valid JSON but malformed', () => {
-    fs.writeFileSync(path.join(tmpDir, '.checklist.state.json'), '[1,2,3]', 'utf-8');
-    expect(() => loadState(tmpDir)).toThrow(/malformed/);
+    fs.writeFileSync(sf, '[1,2,3]', 'utf-8');
+    expect(() => loadState(sf)).toThrow(/malformed/);
   });
 });
 
@@ -70,11 +70,10 @@ describe('saveState', () => {
       },
     };
 
-    saveState(tmpDir, state);
+    saveState(sf, state);
 
-    const filePath = path.join(tmpDir, '.checklist.state.json');
-    expect(fs.existsSync(filePath)).toBe(true);
-    const raw = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    expect(fs.existsSync(sf)).toBe(true);
+    const raw = JSON.parse(fs.readFileSync(sf, 'utf-8'));
     expect(raw).toEqual(state);
   });
 
@@ -88,24 +87,23 @@ describe('saveState', () => {
       },
     };
 
-    saveState(tmpDir, state);
-    const loaded = loadState(tmpDir);
+    saveState(sf, state);
+    const loaded = loadState(sf);
     expect(loaded).toEqual(state);
   });
 });
 
 describe('clearState', () => {
   it('removes state file', () => {
-    const filePath = path.join(tmpDir, '.checklist.state.json');
-    fs.writeFileSync(filePath, '{}', 'utf-8');
-    expect(fs.existsSync(filePath)).toBe(true);
+    fs.writeFileSync(sf, '{}', 'utf-8');
+    expect(fs.existsSync(sf)).toBe(true);
 
-    clearState(tmpDir);
-    expect(fs.existsSync(filePath)).toBe(false);
+    clearState(sf);
+    expect(fs.existsSync(sf)).toBe(false);
   });
 
   it('no-op when file does not exist', () => {
-    expect(() => clearState(tmpDir)).not.toThrow();
+    expect(() => clearState(sf)).not.toThrow();
   });
 });
 
