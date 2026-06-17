@@ -79,6 +79,8 @@ Seven stages, *roughly* in order (greenfield walks them front to back; real work
 
 See **[references/suite-map.md](references/suite-map.md)** for each stage's role in full, the entry-stage decision, the confusable-pair disambiguation, and ready-made sequences ("greenfield frontend", "I inherited a messy frontend", "make this production-ready and ethical", "it feels janky", "my state is a mess").
 
+See **[references/lifecycle-handbook.md](references/lifecycle-handbook.md)** for the 0→1 frontend lifecycle phases and which skill owns each — the map for placing a task at its entry stage.
+
 ---
 
 ## The triage procedure
