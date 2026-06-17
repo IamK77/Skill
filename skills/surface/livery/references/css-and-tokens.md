@@ -326,3 +326,25 @@ Fix: batch all reads first, then all writes. Use `requestAnimationFrame` to defe
 - **Performance panel** — flame chart for long tasks, forced synchronous layout markers, frame timeline.
 
 Systematic cascade debug: open Styles → find the target property → read rules from top (highest priority) down → identify the winner and the loser → check origin, layer, specificity, source order in that sequence. Never trial-and-error `!important`.
+
+---
+
+## Auditing an existing surface (the retrofit inventory)
+
+Most real work is not greenfield — it is an existing surface thick with ad-hoc values, and `livery`'s entry mode-note routes that work through one inventory pass *before* STAGE 0. This is the inverse of everything above: instead of how the token system lives in the browser, it is where the **un-tokenized** values hide. The inventory feeds the gates; it never decides the target values (that stays each gate's taste call).
+
+**Why inventory before retrofit:** you cannot tokenize what you can't see. The goal is a clustered map of every hand-picked value, grouped by the system that will absorb it (color · type · space · form · motion).
+
+**Where literals hide — the four hiding places to sweep:**
+1. **Raw CSS / SCSS** — `#hex`, `rgb()`/`hsl()`, bare `px` on font-size/margin/padding/gap, one-off `box-shadow`, `border-radius`, `transition`/`animation` durations.
+2. **CSS-in-JS** (styled-components / emotion / vanilla-extract) — template-literal values and style-object props.
+3. **JS/TS token-ish objects** — color maps, spacing constants, theme objects that duplicate (or contradict) the CSS.
+4. **Inline `style=` attributes and Tailwind arbitrary values** (`bg-[#2f6ae0]`, `mt-[13px]`).
+
+**The cross-language duplication trap:** the subtler bug is not a magic literal but the SAME palette/scale maintained in two places or two languages (a CSS `--color-primary` and a JS `colors.primary` that drift). Detection: collect literals from all four hiding places into one list, normalize (lowercase hex, `px`→number), and look for near-duplicates and same-value-two-homes. This is why **`surface:wellspring`** treats the design system as state — one source of truth; on retrofit you are collapsing N sources into one. (bearings↔livery is already lane-marked; this names livery↔wellspring.) The full CSS↔JS mechanics — the four single-source options and the inline-style-beats-class-rules trap — are in [tokens-across-css-and-js.md](tokens-across-css-and-js.md); don't re-derive them here.
+
+**From inventory to system, not inventory to spec:** cluster, count, and rank by spread — the value typed in the most places is the highest-value token to extract first. Hand the clusters to the stages; **do not decide the target values here** — that is each gate's taste call. The inventory tells you what exists, never what's right.
+
+**Spacing gets equal billing:** treat magic `px` spacing (margin/padding/gap) as a first-class cluster alongside color — it is typically the MOST pervasive ad-hoc value. STAGE 1's spacing scale absorbs it (the scale-design technique is in type.md under *Spacing scale & vertical rhythm*; the `--space` calc plumbing is above).
+
+**Retrofit ordering note:** color and spacing usually dominate the inventory, so the STAGE 0→3 order still holds — you simply enter each stage with a populated cluster instead of a blank page.

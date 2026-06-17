@@ -68,9 +68,17 @@ Strategies: (1) **super-family / type system** — one family shipping sans/seri
 - **Line-height is inverse to size, and systematized:** tight on display (1.0–1.2), loose on body (1.5–1.65). Set it per role, not per element.
 - For 400% reflow without clipping, measure with `max-width` in `ch`/`rem` — never a fixed px width that crops on zoom.
 
-## Vertical rhythm
+## Spacing scale & vertical rhythm
 
-Hold spacing to a baseline so blocks stack on a shared grid. Derive margins/leading from the same rem-based unit as the scale, so headings, paragraphs, and lists land on consistent intervals — one system, not per-block nudges.
+Spacing is the same rhythm as type, derived from the same rem-based unit — so it lives here, gated alongside the type scale, not scattered as magic px. The gate decides *taste* (which base unit, which density); this is the encodable technique it commits to tokens.
+
+- **Pick one base unit.** `4px` (tight, dense product/data UI) or `8px` (the common default). Everything derives from it.
+- **Generate a small stepped scale** — multiples of the base, or a ~1.5×-ish geometric run — **capped at ~7 steps** mapped to semantic roles: component-internal padding · inter-component gap · section rhythm. The role names are the tokens (`xs/sm/md/lg/xl/2xl/3xl`); components reference steps, never raw px.
+- **Reference steps from components, never magic px.** `padding: var(--space-md)`, not `padding: 13px`. A gap not in the scale is the most pervasive ad-hoc tell in real UIs (`padding: 13px` here, `margin-top: 22px` there, a different gutter per component).
+- **Same rem unit as the type scale** so spacing and the vertical baseline rhythm agree — one rhythm, not two. Hold spacing to a baseline so headings, paragraphs, and lists land on consistent intervals — one system, not per-block nudges.
+- **Density is a single knob.** Compact ↔ airy is the base re-tuned once (and re-mapped through the scale), not per-screen nudging.
+- **Prefer `gap`** (flex/grid) over margins for inter-element spacing — it sidesteps margin-collapse ambiguity.
+- Derive concrete values with `calc(var(--space-base) * n)` — see css-and-tokens.md for the `--space` token plumbing.
 
 ## Numerics — the agent's blind spot
 
@@ -180,6 +188,7 @@ Type that looks right in English is not yet correct. The agent's signature failu
 | hierarchy | size × weight; line-height inverse to size; `font-optical-sizing: auto` |
 | pairing | concord or contrast, not conflict; 2 default / 3 ceiling; share x-height |
 | measure / line-height | 45–75ch (~66), `max-width: 65ch`; display 1.0–1.2 / body 1.5–1.65, by role |
+| spacing | one base (4/8px) → ~7-step scale; reference steps, never magic px; same rem rhythm as type |
 | tracking | display negative / caps +0.05–0.1em; unit `em` |
 | numerals | width: tables/live → `tabular-nums` (forced); glyph: UI lining / prose oldstyle; `slashed-zero` for code/IDs; format via `Intl.NumberFormat` |
 | features | `font-variant-*` first, `font-feature-settings` backstop; true small-caps; explore `ss01–ss20` |
