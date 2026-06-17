@@ -1,0 +1,28 @@
+# Flight checklist for the livery skill — 4 stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
+# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
+# stages in order: color -> type -> form -> motion.
+# Stage count stays 4; the `type` stage (STAGE 1 — Type & space) carries TWO checks
+# (type scale + spacing scale), the same one-phase-two-checks shape bearings uses.
+phases:
+  - name: color
+    checks:
+      - id: color-system-as-tokens
+        description: "The color system committed as TOKENS in a perceptual space (oklch — not hex/hsl, so lightness and chroma are independent and steps are perceptually even) BEFORE any component is colored. A neutral ramp built on purpose (a chosen temperature/hue, not pure #888 gray) plus a small set of semantic roles (surface / text / border / accent / the four feedback states), each a lightness step that HOLDS its contrast relationship across both light and dark. Dark theme is NOT invert() — it is a re-tuned ramp (compressed contrast range, de-saturated/raised accents, elevation by lighter surface not bigger shadow). Every text/background pair verified at DESIGN time against WCAG (4.5:1 body, 3:1 large & UI/non-text), not patched after. Data-viz uses a scale engineered for perceptual uniformity + colorblind-safety, never a hand-picked rainbow. Hard rule: no raw color literal in a component — only token references; a value not in the system does not ship. This binds across the CSS↔JS boundary too: when styles live in JS (inline-style objects, a JS color object, CSS-in-JS), there is ONE source of truth and the other language only reads from it — the palette is never maintained in two places, and no inline-style literal sneaks past the token system (inline styles outrank class rules)."
+
+  - name: type
+    checks:
+      - id: type-scale-and-rhythm-systematized
+        description: "A modular type SCALE chosen as a ratio (≈1.2 body UI → 1.333 editorial, not arbitrary px), expressed fluidly with clamp() so it breathes between breakpoints without a cascade of media queries. A deliberate pairing (or one well-chosen family) with each weight's ROLE named. Measure held to ~45–75ch on running text; line-height set by role (tight on display, ~1.5 on body); a consistent vertical rhythm. Numerics handled (tabular-nums for columns/data, lining vs oldstyle chosen on purpose). The optical tells that separate pro from amateur are addressed: negative letter-spacing on large display, font-feature-settings the face actually offers, and a metrics-compatible fallback stack so a late webfont causes NO layout shift. Sizes/leading/spacing live as tokens; components reference scale steps, never magic px."
+      - id: spacing-scale-systematized
+        description: "A spacing SCALE committed as tokens: one base unit (typically 4 or 8px) generating a small geometric/stepped set (e.g. xs/sm/md/lg/xl/2xl/3xl), with every gap, padding, margin, and gutter referencing a step — never a magic px (no `padding: 13px`, no per-component gutter). The scale shares the type scale's rem-based rhythm so spacing and vertical rhythm land on one system. A density is chosen on purpose (compact for dense data/dashboard UI, airier for marketing) rather than nudged by eye. This is the most pervasive ad-hoc tell in real UIs; a spacing value not in the scale does not ship."
+
+  - name: form
+    checks:
+      - id: depth-and-form-from-one-light-model
+        description: "Elevation derives from ONE consistent light model — shadows share a single light direction and are layered (ambient + direct, umbra/penumbra), never a lone fuzzy box-shadow; elevation maps to a tokenized z-scale (resting / raised / overlay / modal), not ad-hoc blur values. Radii tokenized and concentric (inner radius = outer − padding) so nested corners look intentional. Gradients/texture used only with a job (depth, focus, brand) and banding-free (perceptual interpolation / dithering). Icons come from ONE set with matched stroke-width, grid, and optical sizing tuned to the type. Imagery is aspect-ratio-boxed (no CLS), responsive/art-directed, with a deliberate loading + placeholder strategy. Canvas/WebGL only where the DOM genuinely can't go, always with a fallback. Like color and type: every radius, shadow, and surface is a system token, not a magic value."
+
+  - name: motion
+    checks:
+      - id: motion-has-purpose-physics-and-a-reduced-path
+        description: "Every animation maps to a PURPOSE (orient on state change, show causality/continuity, mask latency, direct attention) — motion without a job is deleted. Dynamics chosen by physics, not defaults: spring / mass-damping for interruptible, gesture-driven, or 'natural' motion (a re-triggered animation continues from current velocity, it does not jank-restart); easing curves with short durations (≈150–300ms) for discrete UI transitions — the two never confused. Motion INTENSITY is calibrated to the surface — the purpose taxonomy is constant, but a marketing/brand surface may spend expressive, signature motion while a data/tool/dashboard surface restrains to orientation + causality + latency-masking only (crisp, short, no distracting re-fire under streaming data). Gesture interactions arbitrate intent correctly (scroll-vs-drag, nested-gesture conflict resolution, Pointer Events not mouse-only). Non-negotiables: a real prefers-reduced-motion path (re-tuned, not just removed), compositor-only properties (transform/opacity — never animating layout/paint), and 60fps held under load. The FEEL is the product: latency is masked and the user's causal story is preserved — their action visibly and immediately causes the result."
