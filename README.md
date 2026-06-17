@@ -22,7 +22,7 @@ PHASE 0 verified, proceed to PHASE 1         # the next stage opens only now
 ```
 
 - **The order is enforced, not suggested.** A stage stays shut until every earlier check is recorded as passed. Re-run a check that now fails and it overwrites the old pass, so the gate reflects the current state, not a stale one.
-- **28 skills across 5 suites** — the software lifecycle, distributed-systems correctness, computational research, open-source discovery, and a frontend from 0 to 1. Each suite installs as one Claude Code plugin.
+- **37 skills across 6 suites** — the software lifecycle, distributed-systems correctness, computational research, open-source discovery, a frontend from 0 to 1, and the design craft behind it. Each suite installs as one Claude Code plugin.
 - **It's just files.** A skill is a directory — one `SKILL.md`, a `references/` folder, one `.checklist.yml`. No runtime, no build step. Copy it into `~/.claude/skills/` and it runs without the plugin.
 - **What's enforced, stated plainly.** The CLI enforces the *order* of stages and records that each check was confirmed. It does not yet check the *substance* of a check; that judgment stays with you and the agent. The mechanical-verify rules exist and are tested, but no shipped skill uses them yet.
 
@@ -39,6 +39,7 @@ npm install -g @iamk77/skill-checklist   # the CLI that enforces every gate — 
 /plugin install inquiry@skill
 /plugin install quarry@skill
 /plugin install surface@skill
+/plugin install atelier@skill
 ```
 
 First run: have existing code? `/engineering:assay path/to/module` — it works on any module and audits the tests you already have. Starting something new? `/engineering:groundwork <the-feature>`, or `/surface:bearings <the-feature>` for a frontend. Not sure which skill fits? `/engineering:pilot <your task>` (or `/surface:pilot` for frontend work) routes you — or tells you when no skill is needed.
@@ -54,6 +55,7 @@ Five suites, each installed as one plugin and documented on its own page. The pe
 - **[inquiry](skills/inquiry/)** — computational research, from a vague area to a published paper. *6 skills.*
 - **[quarry](skills/quarry/)** — finding and judging other people's open-source, from a need to a repo you can trust. *2 skills.*
 - **[surface](skills/surface/)** — building a modern frontend from 0 to 1; the suite's first domain vertical. *8 skills.*
+- **[atelier](skills/atelier/)** — the design craft behind a premium interface: color, type, layout, form, and motion as one system. *9 skills.*
 
 Every gated skill is the same shape — a `SKILL.md` walking ordered stages, each closed by a hard **GATE** the `checklist` CLI won't let the agent read past until the prior checks are recorded as passed. The navigators (`pilot`) are un-gated dispatchers and carry no `.checklist.yml`.
 
