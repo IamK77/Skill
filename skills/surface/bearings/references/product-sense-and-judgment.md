@@ -177,6 +177,8 @@ Your MacBook with a fast connection and a mouse is the single least representati
 
 High craft = a set of deliberate non-default choices. Every dimension below can be codified as a rule, a token, or a quantified threshold. If you cannot articulate why you made the choice, you defaulted.
 
+> Lane note: this section is the **judgment** layer — *which* non-default choice and *why*. The **execution technique** behind each dimension (oklch ramps, modular type scales, the single-light-source depth model, spring physics) lives in `surface:livery`. bearings decides; livery builds. Don't re-teach the how here.
+
 ### Color
 - **Build color systems in oklch, not hsl.** HSL's lightness is perceptually non-uniform — same L value looks dramatically different across hues. oklch L is perceptually consistent.
 - **Never use pure neutral grays.** Tint grays toward the brand hue at very low chroma (C ≈ 0.005–0.03). Pure gray is amateur; micro-tinted gray has character and unifies the surface.
