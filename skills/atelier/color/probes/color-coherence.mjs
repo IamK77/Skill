@@ -61,15 +61,19 @@ function toOklch(r, g, b) {
 }
 const relLum = (r, g, b) => 0.2126 * srgbToLin(r) + 0.7152 * srgbToLin(g) + 0.0722 * srgbToLin(b)
 const wcag = (c1, c2) => { const a = relLum(...c1), b = relLum(...c2), hi = Math.max(a, b), lo = Math.min(a, b); return (hi + 0.05) / (lo + 0.05) }
-const parseRGB = s => { const m = (s || '').match(/rgba?\(([^)]+)\)/); if (!m) return null; const p = m[1].split(',').map(parseFloat); return { r: p[0], g: p[1], b: p[2], a: p[3] === undefined ? 1 : p[3] } }
 const fmt = ({ L, C, H }) => `oklch(${L.toFixed(3)} ${C.toFixed(3)} ${C < 0.004 ? '—' : H.toFixed(0)})`
 const hueGap = (a, b) => { const d = Math.abs(a - b) % 360; return d > 180 ? 360 - d : d }
 
 // ---------- browser-side extractor (runs via Runtime.evaluate) ----------
 function extract() {
   const vw = innerWidth, vh = innerHeight, out = []
-  const opaque = c => { const m = (c || '').match(/[\d.]+/g); return m ? (m[3] === undefined ? 1 : +m[3]) >= 0.5 : false }
-  const effBg = el => { let n = el; while (n) { const c = getComputedStyle(n).backgroundColor; if (opaque(c)) return c; n = n.parentElement } return getComputedStyle(document.body).backgroundColor || 'rgb(255,255,255)' }
+  // Normalize ANY computed color string (rgb/rgba/oklch/lab/color()/hex/keyword) to the
+  // [r,g,b,a] actually rendered, by painting it on a 1x1 canvas and reading the pixel.
+  // A plain regex only handles rgb() and silently drops oklch/color() — the exact syntaxes
+  // this suite mandates — which would make every modern palette read as a false "clean".
+  const cx = document.createElement('canvas').getContext('2d', { willReadFrequently: true })
+  const norm = str => { if (!str) return null; cx.clearRect(0, 0, 1, 1); cx.fillStyle = '#000'; cx.fillStyle = str; cx.fillRect(0, 0, 1, 1); const d = cx.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2], d[3] / 255] }
+  const effBg = el => { let n = el; while (n) { const c = norm(getComputedStyle(n).backgroundColor); if (c && c[3] >= 0.5) return c; n = n.parentElement } return norm(getComputedStyle(document.body).backgroundColor) || [255, 255, 255, 1] }
   for (const el of document.querySelectorAll('*')) {
     const r = el.getBoundingClientRect()
     if (r.width <= 0 || r.height <= 0) continue
@@ -81,7 +85,7 @@ function extract() {
     if (el.className && typeof el.className === 'string') cls = '.' + el.className.trim().split(/\s+/).join('.')
     const sel = el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + cls
     const hasText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())
-    out.push({ sel, area, bg: cs.backgroundColor, effBg: effBg(el), color: cs.color, hasText, fontSize: parseFloat(cs.fontSize), bold: (parseInt(cs.fontWeight) || 400) >= 600 })
+    out.push({ sel, area, bg: norm(cs.backgroundColor), effBg: effBg(el), color: norm(cs.color), hasText, fontSize: parseFloat(cs.fontSize), bold: (parseInt(cs.fontWeight) || 400) >= 600 })
   }
   return JSON.stringify({ vw, vh, area: vw * vh, els: out })
 }
@@ -128,9 +132,9 @@ const pct = a => (100 * a / data.area).toFixed(1) + '%'
 
 const bgByColor = new Map()
 for (const e of data.els) {
-  const c = parseRGB(e.bg); if (!c || c.a < 0.5) continue
-  const ok = toOklch(c.r, c.g, c.b), key = `${c.r},${c.g},${c.b}`
-  const cur = bgByColor.get(key) || { rgb: [c.r, c.g, c.b], ok, area: 0 }; cur.area += e.area; bgByColor.set(key, cur)
+  const c = e.bg; if (!c || c[3] < 0.5) continue
+  const ok = toOklch(c[0], c[1], c[2]), key = `${c[0]},${c[1]},${c[2]}`
+  const cur = bgByColor.get(key) || { rgb: [c[0], c[1], c[2]], ok, area: 0 }; cur.area += e.area; bgByColor.set(key, cur)
 }
 const neutralsLight = [...bgByColor.values()].filter(s => s.ok.C < 0.04 && s.ok.L > 0.82).sort((a, b) => b.area - a.area)
 const pageTemp = neutralsLight[0] || null
@@ -159,10 +163,10 @@ for (let i = 0; i < accents.length; i++) for (let j = i + 1; j < accents.length;
 // R5 text contrast vs the actual (ancestor-resolved) background
 for (const e of data.els) {
   if (!e.hasText) continue
-  const tc = parseRGB(e.color), bgc = parseRGB(e.effBg); if (!tc || tc.a < 0.5 || !bgc) continue
-  const bg = [bgc.r, bgc.g, bgc.b], ratio = wcag([tc.r, tc.g, tc.b], bg)
+  const tc = e.color, bgc = e.effBg; if (!tc || tc[3] < 0.5 || !bgc) continue
+  const bg = [bgc[0], bgc[1], bgc[2]], ratio = wcag([tc[0], tc[1], tc[2]], bg)
   const large = e.fontSize >= 24 || (e.fontSize >= 18.66 && e.bold), floor = large ? 3 : 4.5
-  if (ratio < floor) flag(ratio < floor - 1 ? 'major' : 'minor', 'contrast', `text on "${e.sel}" is ${ratio.toFixed(2)}:1 (WCAG floor ${floor}:1 for this size) — ${toOklch(tc.r, tc.g, tc.b).L.toFixed(2)}L text on ${toOklch(...bg).L.toFixed(2)}L bg`)
+  if (ratio < floor) flag(ratio < floor - 1 ? 'major' : 'minor', 'contrast', `text on "${e.sel}" is ${ratio.toFixed(2)}:1 (WCAG floor ${floor}:1 for this size) — ${toOklch(tc[0], tc[1], tc[2]).L.toFixed(2)}L text on ${toOklch(...bg).L.toFixed(2)}L bg`)
 }
 
 // ---------- report ----------
