@@ -48,6 +48,8 @@ const FIXTURES = [
     html: page('oklch(.97 .008 84)', bigBox('oklch(.18 .013 56)')) },
   { name: 'edge/offwhite-ok', expect: { mustNotFlag: ['pure-white'] },
     html: page('oklch(.98 .008 84)', `<p>off-white page</p>`) },
+  { name: 'edge/gradient-bg-no-false-contrast', expect: { mustNotFlag: ['contrast'] },
+    html: page('oklch(.2 .01 56)', `<a style="color:#2a1c0e;background:linear-gradient(145deg,#d8b878,#b87333);padding:14px 28px;border-radius:999px;display:inline-block">Buy now</a>`) },
 
   // ── Layer 2 · whole-design calibration ────────────────────────────────────
   { name: 'calib/good-editorial', expect: { clean: true, tempKnown: true },

@@ -74,7 +74,7 @@ function extract() {
   // this suite mandates — which would make every modern palette read as a false "clean".
   const cx = document.createElement('canvas').getContext('2d', { willReadFrequently: true })
   const norm = str => { if (!str) return null; cx.clearRect(0, 0, 1, 1); cx.fillStyle = '#000'; cx.fillStyle = str; cx.fillRect(0, 0, 1, 1); const d = cx.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2], d[3] / 255] }
-  const effBg = el => { let n = el; while (n) { const c = norm(getComputedStyle(n).backgroundColor); if (c && c[3] >= 0.5) return c; n = n.parentElement } return norm(getComputedStyle(document.body).backgroundColor) || [255, 255, 255, 1] }
+  const effBg = el => { let n = el; while (n) { const s = getComputedStyle(n); if (s.backgroundImage && s.backgroundImage !== 'none') return 'gradient'; const c = norm(s.backgroundColor); if (c && c[3] >= 0.5) return c; n = n.parentElement } return norm(getComputedStyle(document.body).backgroundColor) || [255, 255, 255, 1] }
   for (const el of document.querySelectorAll('*')) {
     const r = el.getBoundingClientRect()
     if (r.width <= 0 || r.height <= 0) continue
@@ -166,7 +166,8 @@ for (let i = 0; i < accents.length; i++) for (let j = i + 1; j < accents.length;
 // R5 text contrast vs the actual (ancestor-resolved) background
 for (const e of data.els) {
   if (!e.hasText) continue
-  const tc = e.color, bgc = e.effBg; if (!tc || tc[3] < 0.5 || !bgc) continue
+  const tc = e.color, bgc = e.effBg; if (!tc || tc[3] < 0.5) continue
+  if (!Array.isArray(bgc)) continue   // non-solid backdrop (gradient/image) — contrast not reliably assessable; defer to axe-core
   const bg = [bgc[0], bgc[1], bgc[2]], ratio = wcag([tc[0], tc[1], tc[2]], bg)
   const large = e.fontSize >= 24 || (e.fontSize >= 18.66 && e.bold), floor = large ? 3 : 4.5
   if (ratio < floor) flag(ratio < floor - 1 ? 'major' : 'minor', 'contrast', `text on "${e.sel}" is ${ratio.toFixed(2)}:1 (WCAG floor ${floor}:1 for this size) — ${toOklch(tc[0], tc[1], tc[2]).L.toFixed(2)}L text on ${toOklch(...bg).L.toFixed(2)}L bg`)

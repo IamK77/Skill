@@ -41,10 +41,15 @@ input to the GATE, not a pass/fail.
 
 ### Honest limits
 
-- **Contrast** is subtle (background resolution, overlap, gradients). This probe does the
-  ancestor-resolved common case; for a rigorous a11y audit defer to `axe-core` / Lighthouse.
-  The probe's *unique* value is the **system-level** checks (temperature, pure-black/white,
-  sprawl) that standard tools do not have.
+- **Contrast** is subtle (background resolution, overlap, blend modes). This probe does the
+  ancestor-resolved solid-color case and **skips text on a gradient/image backdrop** (it
+  can't reduce that to one color, so it stays silent rather than false-alarm) — for a
+  rigorous a11y audit defer to `axe-core` / Lighthouse. The probe's *unique* value is the
+  **system-level** checks (temperature, pure-black/white, sprawl) that standard tools lack.
+- **Temperature is assessed on light-default pages** (it anchors on the dominant *light*
+  neutral). On a dark-dominant page it reports temperature "unknown" and skips the
+  temperature-break check; the polarity-independent checks (pure-black/white, sprawl) still
+  run. (Dark-page temperature anchoring is a known next step.)
 - It reads the **rendered DOM**, so colors inside `<canvas>`, WebGL, or flattened images are
   invisible to it (that surface belongs to `atelier:graphics`).
 - It samples one viewport at one size; run it at the breakpoints that matter.
