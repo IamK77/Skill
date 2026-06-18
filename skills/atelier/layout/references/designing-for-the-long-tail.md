@@ -28,7 +28,9 @@ Design for the extremes first, then confirm the comfortable middle works too.
 - `text-overflow: ellipsis` + `overflow: hidden` + `white-space: nowrap` — for single-line
   truncation. Always provide the full content via `title` attribute or a tooltip for truncated
   text.
-- `-webkit-line-clamp` with `display: -webkit-box` — for multi-line truncation.
+- `display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: N; overflow: hidden` — for
+  multi-line truncation. (The modern `line-clamp` / `-webkit-line-clamp` shorthand is landing but still
+  needs the box-orient/box display today.)
 
 **The too-short case.** An element designed for a name like "Alex" must also hold "Dr. María
 Guadalupe Hernández-Castillo". Allocate layout width for the expected maximum, not the
@@ -220,7 +222,7 @@ Before the final gate, walk through the layout with this checklist:
 - [ ] Layout at 320px viewport width — no horizontal scroll?
 - [ ] Layout at 400% browser zoom — readable without horizontal scroll?
 - [ ] RTL direction (`dir="rtl"`) — does the layout mirror correctly?
-- [ ] Disabled images (`-webkit-appearance: none`, image blocked) — does the layout hold its space?
+- [ ] Images blocked / failed to load (no-image session, broken src) — does the container hold its reserved space (aspect-ratio / min-height)?
 - [ ] Third-party widget blocked — does the layout not collapse?
 - [ ] Skeleton → loaded state transition — no layout shift?
 - [ ] High-contrast mode (Windows) — meaningful content still visible?

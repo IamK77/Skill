@@ -1,8 +1,3 @@
-<!--
-Copyright 2026 IamK77 — Licensed under the Apache License, Version 2.0.
-See ./LICENSE and ./NOTICE · https://www.apache.org/licenses/LICENSE-2.0
--->
-
 ---
 name: pilot
 description: >-
@@ -28,6 +23,10 @@ description: >-
 argument-hint: "<the design task, goal, or confusion — e.g. 'make this dashboard look premium' or 'the colors feel cheap'>"
 allowed-tools: Read, Grep, Glob, Bash
 ---
+<!--
+Copyright 2026 IamK77 — Licensed under the Apache License, Version 2.0.
+See ./LICENSE and ./NOTICE · https://www.apache.org/licenses/LICENSE-2.0
+-->
 
 # pilot
 

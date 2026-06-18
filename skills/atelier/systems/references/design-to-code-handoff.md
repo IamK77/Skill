@@ -44,7 +44,7 @@ Drift enters through one of four channels. The audit watches all four.
 **Channel 1: Literal values in component source.**
 
 ```bash
-# catch hex / rgb / hsl literals in component source
+# catch hex / rgb / hsl / oklch literals in component source
 grep -rE '(#[0-9a-fA-F]{3,8}|rgb\(|hsl\(|oklch\()' src/components/ \
   --include='*.tsx' --include='*.css' | grep -v 'tokens\|palette\|__tests__'
 ```

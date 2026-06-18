@@ -155,4 +155,4 @@ If step-900 on step-50 doesn't hit primary-text Lc, adjust the L values — typi
 
 **Why not pure black and pure white:**
 - Pure black (#000) reads as a "hole" on screen — a void rather than a surface. It also produces halation (glare/blooming) on high-brightness displays and is hard on the eyes over long sessions.
-- Pure white (#fff) makes contrast excessive when paired with pure black (21:1 WCAG, which is past the comfort optimum). Off-white at L≈0.985 and near-black at L≈0.160 hit a contrast of roughly 12–13:1 — well above accessibility minimums and within the comfortable reading band.
+- Pure white (#fff) makes contrast excessive when paired with pure black (21:1 WCAG, which is past the comfort optimum). Off-white at L≈0.985 and near-black at L≈0.160 hit a contrast of roughly 18.6:1 — well above accessibility minimums, and trimmed off the 21:1 ceiling, but still sitting at the high end of (just above) the 9–14:1 comfort band; lift the text L toward step-900 (L≈0.22) if you want body copy to land inside that band rather than at maximum legibility. See the comfort-band discussion in **[contrast-and-bw.md](contrast-and-bw.md)**.

@@ -126,13 +126,13 @@ dwelling longer at the transparent end and compressing the transition.
 
 Approximate an eased scrim with multiple color stops:
 ```css
-/* Eased scrim: fast-to-slow fade (ease-in-style) */
+/* Eased scrim: most of the alpha drops early, then a long thin tail toward zero */
 linear-gradient(
   in oklab,
   oklch(0.10 0.00 0 / 0.85) 0%,
-  oklch(0.10 0.00 0 / 0.70) 20%,
-  oklch(0.10 0.00 0 / 0.40) 50%,
-  oklch(0.10 0.00 0 / 0.10) 80%,
+  oklch(0.10 0.00 0 / 0.45) 20%,
+  oklch(0.10 0.00 0 / 0.18) 50%,
+  oklch(0.10 0.00 0 / 0.06) 80%,
   oklch(0.10 0.00 0 / 0)    100%
 )
 ```
@@ -203,8 +203,9 @@ entire surface does not look like film grain — it looks like a noise filter. R
 grain is *luminance-dependent*: strongest in the midtones, weaker in deep shadows and
 bright highlights. To approximate this in CSS, modulate the noise layer's opacity with a
 luminance mask (a gradient or blend mode that reduces the grain at the extremes), or use
-`mix-blend-mode: overlay` which naturally has this property (overlay has no effect at
-50% gray, compounds at extremes, but inverts at pure black/white). For a simpler
+`mix-blend-mode: overlay` which naturally has this property (a 50%-gray blend layer is a
+no-op; the grain's effect peaks in the midtones and falls off toward pure black and pure
+white) — which is exactly the luminance dependence real film grain has. For a simpler
 approach: `mix-blend-mode: soft-light` at very low opacity preserves the luminance
 relationship adequately. Grain size (coarse vs fine) and whether it is monochrome or
 color-shifted are additional decisions for a signature texture. A flat uniform noise

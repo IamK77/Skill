@@ -175,7 +175,7 @@ asterisk when everything is required adds noise without information.
 
 ### Interactive targets and density
 
-- Input height ≥ 44px (minimum touch target size per WCAG 2.5.8; 48px is the Material recommendation)
+- Input height ≥ 44px — 44×44px is WCAG 2.5.5 (Target Size Enhanced, AAA) and the Apple HIG minimum; WCAG 2.5.8 (Target Size Minimum, AA) requires only 24×24px. 48px is the Material recommendation.
 - Gap between fields ≥ `space-4` (16px) — sufficient proximity grouping and sufficient separation
 - Submit button visually distinct from secondary actions
 - Do not disable the submit button until validation has run — allow submission, then display

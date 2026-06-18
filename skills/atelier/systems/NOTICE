@@ -1,4 +1,4 @@
-wellspring — the frontend state-architecture lens: classify state, minimize the source of truth, model the implicit machine, for the agent-assisted era
+systems — the design-system lens: one source of truth for tokens across the CSS↔JS boundary, a living component library, and structural drift audit, for the agent-assisted era
 
 Copyright 2026 IamK77
 

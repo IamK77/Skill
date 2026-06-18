@@ -3,7 +3,7 @@ name: layout
 description: >
   The composition lens for a frontend build — where hierarchy, grid, measure, and spatial rhythm
   are decided, and where "looks amateur" and "won't scale to real data" are determined. Use after
-  the build works (seaworthy) and after or alongside livery's visual-language gates, when
+  the build works (seaworthy) and after or alongside canon's design-language gates, when
   establishing or auditing the compositional structure of a surface. The one shift: hierarchy
   and the grid are DECISIONS, not accidents — the page is *composed* (alignment, measure, spatial
   rhythm), the empty/loading/edge states have a designed visual form, and the surface is built for
@@ -32,7 +32,7 @@ See ./LICENSE and ./NOTICE · https://www.apache.org/licenses/LICENSE-2.0
 
 An *atelier* is a craftsman's working studio — the space where decisions about form, proportion,
 and composition happen before the piece leaves the bench. `layout` is the composition lens of the
-`atelier` suite: where the other skills decide *what it looks like* (color, type, depth, motion),
+`atelier` suite: where the other skills decide *what it looks like* (color, type, form, motion),
 `layout` decides *how it is organized* — the grid, the hierarchy, the reading measure, the spatial
 rhythm, and the shape of every application-layer state. Its product is a **composed surface**: an
 explicit armature, a quantified spacing system, and an application layer that holds its form when
@@ -62,7 +62,7 @@ The depth lives in `references/`. Open each when a stage sends you there — not
 - [references/application-states-and-form-visuals.md](references/application-states-and-form-visuals.md) — the three empty-state types (first-use, cleared, no-results) and their distinct anatomy, micro-interaction state machines (full state coverage: hover/active/focus/disabled/loading/success/error), first-feedback under 100ms, inline validation timing (blur not keydown, early-reward/late-penalty), form-layout rules (top-aligned labels, single-column default, input-width-as-affordance, full state coverage, error display, required/optional marking, touch targets, accessibility).
 - [references/designing-for-the-long-tail.md](references/designing-for-the-long-tail.md) — text overflow strategies (`overflow-wrap`, ellipsis, multi-line clamp), numeric edge cases (large numbers, tabular-nums, zero/null/negative/float display), grid overflow trap (`minmax(0, 1fr)` / `min-width: 0`), scrollbar-gutter, `100dvh` vs `100vh` on mobile, RTL with logical properties and mirrored icons, text expansion for translated content, image and media containers (aspect-ratio, object-fit, CLS), third-party failure resilience, reflow at 320px/400% zoom (WCAG 1.4.10), the long-tail diagnostic checklist.
 
-> **The arc is one composed surface.** Three stages — grid · rhythm · reality — turn a working-but-uncomposed layout into a surface that guides the eye, breathes consistently, and holds its form when real data arrives. Grid commits the armature and hierarchy; rhythm fixes the measure and spatial cadence; reality designs the application layer and stress-tests the long tail. `layout` gates all three; it runs after `seaworthy` (the build is correct) and its composed structure is what `livery` later paints (color, type, depth, motion) and what `bulwark` keeps from drifting at 1→N.
+> **The arc is one composed surface.** Three stages — grid · rhythm · reality — turn a working-but-uncomposed layout into a surface that guides the eye, breathes consistently, and holds its form when real data arrives. Grid commits the armature and hierarchy; rhythm fixes the measure and spatial cadence; reality designs the application layer and stress-tests the long tail. `layout` gates all three; it runs after `seaworthy` (the build is correct) and its composed structure is what the `color`, `type`, `form`, and `motion` lenses later paint and what `bulwark` keeps from drifting at 1→N.
 
 > **Greenfield or retrofit? Decide the entry, not a new stage.** Most real work is an existing layout with ad-hoc spacing, no explicit grid, and states that were never designed. The three stages are the same; the entry differs. For a retrofit: do one inventory pass first — find every magic px gap, every missing state, every place text overflows or a number is truncated. That inventory is raw material for the gates (the scatter of ad-hoc gaps becomes the spacing scale the rhythm stage commits; the missing states become the state machine the reality stage designs). Bring the inventory to STAGE 0 and the gates run unchanged. The composition judgment — what the grid *should* be, what the hierarchy *should* say — stays a gate the user clears.
 
@@ -119,7 +119,7 @@ Open **[references/application-states-and-form-visuals.md](references/applicatio
 
 ## The thread through all of it
 
-`layout` is the suite's **compositional conscience** — the place where the claim that *hierarchy is a decision* finally gets a gate. It runs after `seaworthy` has built the four states and their correctness; its composed structure is what `livery` later paints (the color, the type scale, the depth model, the motion language all make more sense on a composed surface than on an ad-hoc stack of boxes). The through-line is the suite's own — *push correctness into structure* — applied to space: a gap derived from a scale can't drift the way a hand-picked `13px` can, and an empty state designed as a state machine holds its form the way a blank div never can. The line that keeps `layout` honest: **the reference library holds the encodable technique (how the RAM grid works, how proximity is quantified, how logical properties flip for RTL, what the line-box trap is); the composition judgment — which grid, which hierarchy, what density, how the long tail is designed — stays a gate the user clears.** Blur that line and the skill becomes a recipe to follow; hold it and it stays a lens to see through.
+`layout` is the suite's **compositional conscience** — the place where the claim that *hierarchy is a decision* finally gets a gate. It runs after `seaworthy` has built the four states and their correctness; its composed structure is what the `color`, `type`, `form`, and `motion` lenses later paint (the color, the type scale, the depth model, the motion language all make more sense on a composed surface than on an ad-hoc stack of boxes). The through-line is the suite's own — *push correctness into structure* — applied to space: a gap derived from a scale can't drift the way a hand-picked `13px` can, and an empty state designed as a state machine holds its form the way a blank div never can. The line that keeps `layout` honest: **the reference library holds the encodable technique (how the RAM grid works, how proximity is quantified, how logical properties flip for RTL, what the line-box trap is); the composition judgment — which grid, which hierarchy, what density, how the long tail is designed — stays a gate the user clears.** Blur that line and the skill becomes a recipe to follow; hold it and it stays a lens to see through.
 
 ## Anti-patterns (use as a pre-flight checklist)
 

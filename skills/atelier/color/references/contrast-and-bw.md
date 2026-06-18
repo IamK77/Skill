@@ -44,7 +44,7 @@ This hierarchy maps directly to neutral ramp steps: primary text → step-900 on
 
 ## WCAG 2 — the legal floor
 
-WCAG 2.1 is the current accessibility standard in most jurisdictions. It is legally enforced in many contexts. Treat it as a floor you cannot go below.
+WCAG 2.x (2.1/2.2) is the accessibility standard in most jurisdictions. WCAG 2.2 is the latest W3C Recommendation (October 2023); 2.1 remains the most widely legally-referenced, and the contrast success criteria (1.4.3, 1.4.11) are identical across both, so the technique below is unaffected. It is legally enforced in many contexts. Treat it as a floor you cannot go below.
 
 **Contrast ratio formula:** `(L1 + 0.05) / (L2 + 0.05)` where L1 > L2, and L is relative luminance in sRGB.
 
@@ -127,6 +127,6 @@ Color vision deficiency (CVD) affects ~8% of men and ~0.5% of women. Deuteranopi
 
 Contrast has both a lower bound (accessibility) and an upper optimum band. Pure black on pure white (21:1) is *past* the optimum — it scores best on WCAG 2 but produces the most glare.
 
-**Practical optimum for body text:** 9–14:1 WCAG / Lc≈85–95 APCA. Primary text at near-black on off-white (e.g., L=0.16 on L=0.985) lands squarely here — maximum legibility, minimal glare.
+**Practical optimum for body text:** 9–14:1 WCAG / Lc≈85–95 APCA. Strong-text at step-800 on off-white (e.g., L=0.30 on L=0.985) lands squarely here — roughly 9:1, maximum legibility with minimal glare. Near-black at L=0.16 on L=0.985 climbs to ~18.6:1 — above the upper bound, into the glare region — so reserve it for headings, where the higher contrast and larger type are comfortable, rather than for running body copy. This is the same endpoint pair discussed in **[color-spaces-and-neutrals.md](color-spaces-and-neutrals.md)**.
 
 **Disabled states are intentionally below the lower bound** (accessibility-exempt). But intentionally low does not mean invisible — a completely invisible disabled state leaves users confused about whether a feature exists. The ethics: disabled text/controls should be *noticeably* reduced in prominence (communicating "unavailable") but still distinguishable at normal viewing distance. A placeholder at Lc≈25–30 reads as muted; at Lc≈10 it genuinely disappears for many users.

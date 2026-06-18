@@ -82,7 +82,7 @@ Open **[references/spacing-scale.md](references/spacing-scale.md)**. The spacing
 - **Same rem rhythm as type.** `--space-md: 1rem` at 8px base means one line-height worth of space is one spacing token — the vertical rhythm and the spacing scale agree. Hold inter-element spacing to the line grid where the design calls for it.
 - **Density is one knob.** Compact ↔ airy is `--space-base` re-tuned once; the scale multipliers stay constant. Never adjust individual component padding to change density — adjust the base.
 - **Prefer `gap` over margins** for inter-element spacing in flex/grid. Use **logical properties** (`padding-inline`, `margin-block`, `gap`, `inset-inline`) — physical properties (`padding-left`, `margin-right`) break RTL layout silently.
-- **Retrofit path.** Grep for literal `px` values in spacing properties; cluster them to the nearest scale step. `13px` → `sm`, `22px` → `md`. The inventory is the raw material the gate consumes; the taste call (base, density) stays human.
+- **Retrofit path.** Grep for literal `px` values in spacing properties; cluster them to the nearest scale step. At an 8px base (`sm`=8px, `md`=16px, `lg`=24px): `13px` → `md`, `22px` → `lg` — snap to the *nearest* step, never preserve the odd literal. The inventory is the raw material the gate consumes; the taste call (base, density) stays human.
 
 ### GATE
 1. `checklist check spacing spacing-scale-systematized`

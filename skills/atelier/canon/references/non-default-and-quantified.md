@@ -37,7 +37,8 @@ The design brief names each and either adopts it on purpose (with a reason) or r
   | role | WCAG 2 (legal floor) | APCA Lc (perceptual target) |
   |---|---|---|
   | primary body text | ≥4.5:1 | ≥75 |
-  | secondary/supporting text | ≥4.5:1 | ≥60 |
+  | secondary/supporting text | ≥4.5:1 | ≥75 |
+  | tertiary / weak text | ≥4.5:1 | ≥60 |
   | large text / headings | ≥3:1 | ≥60 |
   | UI components, borders | ≥3:1 (1.4.11) | ≥45 |
   | disabled / placeholder | exempt (not invisible) | — |

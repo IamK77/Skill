@@ -253,7 +253,7 @@ Missing any of these creates jarring mismatches — a perfectly dark UI with a w
 
 ## Accessibility in dark mode
 
-**WCAG 2 overstates dark contrast.** WCAG 2's symmetric luminance ratio does not account for polarity (dark-on-light vs light-on-dark reads differently). Off-white text at L≈0.88 on dark-gray at L≈0.14 gives a WCAG ratio of roughly 9:1 — technically excellent — but perceptually this pair may feel softer than its score suggests because the absolute luminance levels are lower. Use APCA (which models polarity) to verify dark-mode contrast, not just WCAG 2.
+**WCAG 2 overstates dark contrast.** WCAG 2's symmetric luminance ratio does not account for polarity (dark-on-light vs light-on-dark reads differently). Off-white text at L≈0.88 on dark-gray at L≈0.14 gives a WCAG ratio of roughly 14:1 — technically excellent — but perceptually this pair feels softer than its score suggests because the absolute luminance levels are lower, which is exactly the overstatement: a high WCAG number that reads gentler in dark mode. Use APCA (which models polarity) to verify dark-mode contrast, not just WCAG 2.
 
 **Off-white is itself an accessibility improvement.** Pure white text on dark backgrounds causes halation for users with astigmatism. Off-white at L≈0.85–0.92 reduces this effect — it's both a comfort and an accessibility improvement.
 

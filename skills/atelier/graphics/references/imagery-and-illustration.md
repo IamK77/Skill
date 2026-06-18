@@ -50,17 +50,15 @@ When width+height are present, the browser automatically applies an intrinsic as
 ```html
 <picture>
   <!-- Art-directed mobile crop (portrait subject, tighter composition) -->
-  <source
-    media="(max-width: 767px)"
-    srcset="hero-mobile.avif 800w, hero-mobile.webp 800w"
-    type="image/avif"
-  />
+  <source media="(max-width: 767px)" type="image/avif"
+          srcset="hero-mobile.avif 800w, hero-mobile@2x.avif 1600w" sizes="100vw" />
+  <source media="(max-width: 767px)" type="image/webp"
+          srcset="hero-mobile.webp 800w, hero-mobile@2x.webp 1600w" sizes="100vw" />
   <!-- Desktop (wide composition) -->
-  <source
-    media="(min-width: 768px)"
-    srcset="hero-desktop.avif 1200w 2x, hero-desktop.avif 1200w"
-    type="image/avif"
-  />
+  <source media="(min-width: 768px)" type="image/avif"
+          srcset="hero-desktop-1200.avif 1200w, hero-desktop-2400.avif 2400w" sizes="100vw" />
+  <source media="(min-width: 768px)" type="image/webp"
+          srcset="hero-desktop-1200.webp 1200w, hero-desktop-2400.webp 2400w" sizes="100vw" />
   <img src="hero-desktop.jpg" width="1200" height="675" alt="..." />
 </picture>
 ```

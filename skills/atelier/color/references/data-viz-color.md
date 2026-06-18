@@ -202,8 +202,8 @@ The viz palette is part of the design system and must be tokenized and consisten
 --viz-seq-9: oklch(0.28 0.10 250);
 
 /* Diverging ramp */
---viz-div-low: oklch(0.55 0.18 27);    /* negative end — orange-red */
---viz-div-mid-low: oklch(0.75 0.08 27);
+--viz-div-low: oklch(0.55 0.17 65);    /* negative end — orange (matches --viz-cat-2 and the blue-orange construction above) */
+--viz-div-mid-low: oklch(0.75 0.08 65);
 --viz-div-mid: oklch(0.94 0.004 250);  /* neutral midpoint — near-white */
 --viz-div-mid-high: oklch(0.75 0.08 250);
 --viz-div-high: oklch(0.55 0.18 250);  /* positive end — blue */
