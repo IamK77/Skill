@@ -23,9 +23,10 @@ import { existsSync } from 'fs'
 
 const sleep = ms => new Promise(r => setTimeout(r, ms))
 
-let target = process.argv[2]
-if (!target) { console.error('usage: node color-coherence.mjs <url|file>'); process.exit(2) }
-if (!/^https?:|^file:/.test(target)) target = 'file://' + (target.startsWith('/') ? target : process.cwd() + '/' + target)
+const jsonMode = process.argv.includes('--json')
+let target = process.argv.slice(2).find(a => !a.startsWith('--'))
+if (!target) { console.error('usage: node color-coherence.mjs [--json] <url|file>'); process.exit(2) }
+if (!/^https?:|^file:|^data:/.test(target)) target = 'file://' + (target.startsWith('/') ? target : process.cwd() + '/' + target)
 
 function findChrome() {
   if (process.env.CHROME_BIN && existsSync(process.env.CHROME_BIN)) return process.env.CHROME_BIN
@@ -101,7 +102,8 @@ async function getPageWs() {
 }
 const chrome = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${PORT}`,
   `--user-data-dir=/tmp/atelier-color-probe-${Date.now()}`, '--no-first-run', '--no-default-browser-check',
-  '--disable-gpu', '--hide-scrollbars', '--window-size=1280,900', target], { stdio: 'ignore' })
+  '--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--hide-scrollbars',
+  '--window-size=1280,900', target], { stdio: 'ignore' })
 
 let data
 try {
@@ -111,12 +113,12 @@ try {
   ws.onmessage = ev => { const m = JSON.parse(ev.data); if (m.id && pend.has(m.id)) { pend.get(m.id)(m); pend.delete(m.id) } }
   const cmd = (method, params = {}) => new Promise(res => { const i = ++id; pend.set(i, res); ws.send(JSON.stringify({ id: i, method, params })) })
   await cmd('Page.enable'); await cmd('Runtime.enable')
-  let prev = -1                       // wait for real render (CDN/SPA apps mount late)
+  let prev = -1                       // wait for real render (CDN/SPA apps mount late); break once the DOM count is stable
   for (let i = 0; i < 40; i++) {
     await sleep(300)
     const c = await cmd('Runtime.evaluate', { expression: `document.querySelectorAll('body *').length`, returnByValue: true })
     const n = c.result?.result?.value ?? 0
-    if (n > 15 && n === prev) break
+    if (n > 0 && n === prev) break    // stable and non-empty
     prev = n
   }
   await sleep(300)
@@ -147,7 +149,8 @@ for (const s of bgByColor.values()) {
 }
 // R3 temperature break
 if (tinted) for (const s of bgByColor.values()) {
-  if (s.area / data.area < 0.04 || s.ok.L <= 0.06) continue
+  if (s.area / data.area < 0.04) continue
+  if (s.ok.L <= 0.06 || (s.ok.L >= 0.995 && s.ok.C < 0.005)) continue  // already flagged pure-black / pure-white
   const untinted = s.ok.C < 0.004
   const offHue = s.ok.C >= 0.01 && hueGap(s.ok.H, pageTemp.ok.H) > 40
   if (untinted || offHue)
@@ -172,13 +175,24 @@ for (const e of data.els) {
 // ---------- report ----------
 const order = { blocker: 0, major: 1, minor: 2 }, icon = { blocker: '🔴', major: '🟠', minor: '🟡' }
 findings.sort((a, b) => (order[a.sev] - order[b.sev]) || (b.area - a.area))
-console.log(`\n  atelier:color coherence probe  ·  ${target.replace('file://', '')}`)
-console.log(`  viewport ${data.vw}×${data.vh}  ·  ${data.els.length} visible elements  ·  page temperature: ${pageTemp ? (tinted ? 'WARM' : 'cool/neutral') + ' ' + fmt(pageTemp.ok) : 'unknown'}`)
-console.log(`  ${'-'.repeat(72)}`)
-if (!findings.length) console.log('  ✓ no encodable color-incoherence detected')
-for (const f of findings) console.log(`  ${icon[f.sev]} [${f.rule}] ${f.msg}`)
 const n = s => findings.filter(f => f.sev === s).length
-console.log(`  ${'-'.repeat(72)}`)
-console.log(`  ${n('blocker')} blocker · ${n('major')} major · ${n('minor')} minor`)
-console.log(`  (the probe flags the off-system FACT; whether a flagged surface is intended — and should`)
-console.log(`   be re-tuned into the system as a token — stays a human GATE.)\n`)
+
+if (jsonMode) {
+  console.log(JSON.stringify({
+    target,
+    temperature: { known: !!pageTemp, warm: !!tinted, oklch: pageTemp ? pageTemp.ok : null },
+    elements: data.els.length,
+    counts: { blocker: n('blocker'), major: n('major'), minor: n('minor') },
+    findings: findings.map(f => ({ rule: f.rule, sev: f.sev, msg: f.msg })),
+  }))
+} else {
+  console.log(`\n  atelier:color coherence probe  ·  ${target.replace('file://', '')}`)
+  console.log(`  viewport ${data.vw}×${data.vh}  ·  ${data.els.length} visible elements  ·  page temperature: ${pageTemp ? (tinted ? 'WARM' : 'cool/neutral') + ' ' + fmt(pageTemp.ok) : 'unknown'}`)
+  console.log(`  ${'-'.repeat(72)}`)
+  if (!findings.length) console.log('  ✓ no encodable color-incoherence detected')
+  for (const f of findings) console.log(`  ${icon[f.sev]} [${f.rule}] ${f.msg}`)
+  console.log(`  ${'-'.repeat(72)}`)
+  console.log(`  ${n('blocker')} blocker · ${n('major')} major · ${n('minor')} minor`)
+  console.log(`  (the probe flags the off-system FACT; whether a flagged surface is intended — and should`)
+  console.log(`   be re-tuned into the system as a token — stays a human GATE.)\n`)
+}

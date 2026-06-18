@@ -49,5 +49,14 @@ input to the GATE, not a pass/fail.
   invisible to it (that surface belongs to `atelier:graphics`).
 - It samples one viewport at one size; run it at the breakpoints that matter.
 
+### Trust
+
+The probe is only as good as its calibration, so it ships with a ground-truth regression
+suite — `node probes/test.mjs` asserts every rule fires on a known violation and stays quiet
+on a known-good design, including a color-syntax matrix (hex/rgb/hsl/oklch/lab/color()) that
+guards against the parser silently skipping a syntax. See **[TESTING.md](TESTING.md)**; CI
+runs it on every probe change.
+
 This is the first of an intended per-lens probe family (type / form / motion / systems each
-have equally probeable anti-patterns). Each lens's `## Anti-patterns` section is the spec.
+have equally probeable anti-patterns). Each lens's `## Anti-patterns` section is the spec,
+and each probe carries its own `test.mjs` regression net.
