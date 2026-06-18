@@ -1,0 +1,30 @@
+name: atelier
+
+# Structural / gate-integrity lint for the atelier suite: guards that every gated skill's
+# SKILL.md and .checklist.yml agree (gate <-> checklist), and that frontmatter / copyright /
+# LICENSE / NOTICE / reference house-style hold. The thing no per-probe test can catch.
+
+on:
+  push:
+    branches: [main]
+    paths: ['skills/atelier/**', 'devtools/atelier-lint.py', '.github/workflows/atelier.yml']
+  pull_request:
+    paths: ['skills/atelier/**', 'devtools/atelier-lint.py', '.github/workflows/atelier.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: atelier-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: structural / gate-integrity lint
+        run: python3 devtools/atelier-lint.py

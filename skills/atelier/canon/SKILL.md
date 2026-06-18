@@ -61,6 +61,7 @@ The depth lives in `references/`. Open each when a stage sends you there — not
 - **[references/non-default-and-quantified.md](references/non-default-and-quantified.md)** — the spine: the anchor (derive the point of view first — POV → style, never the reverse); the three AI default attractors to name and reject; how each aesthetic dimension (color, type, spacing, shadow, radius, motion) moves from agent default to decided-and-measured; the quantification anchors that make taste enforable.
 - [references/surface-archetypes.md](references/surface-archetypes.md) — the five surface archetypes (dashboard / tool / editorial / marketing / data-dense) with their governing constraints, motion budgets, density grades, and the tells that distinguish each from the defaults.
 - [references/product-sense.md](references/product-sense.md) — how the visual serves the user's actual job: the JTBD lens on design, the all-states obligation (not just happy path), the surface-diversity reality check (no average surface), and the ethics of choice architecture.
+- [references/ai-default-attractors.md](references/ai-default-attractors.md) — the full AI-default *signature* (the eleven encodable tells, visual + copy, that mark a design as converged on the mean), the doctrine behind the `ai-default.mjs` detector, and the hard limit: a tell is a question, and 0 tells certifies no point of view.
 
 > **The arc is one design direction.** Three stages — language & archetype · quantified targets · product-sense fit — turn an unanchored brief into a precise design intent the suite's sibling lenses can execute: `color` builds the perceptual ramp the brief names; `type` picks the modular scale the ratio specifies; `layout` applies the density grade; `motion` respects the budget. `canon` gates all three; it runs before any other atelier lens, and its artifacts are the shared contract the whole design build honors.
 
@@ -120,6 +121,18 @@ Open **[references/product-sense.md](references/product-sense.md)**. The design 
 4. `checklist verify sense`
 5. `checklist show` — confirm all three stages passed.
 6. `checklist done` — clear this run's state.
+
+---
+
+## Instruments — the AI-default detector
+
+The gates ask whether your design was *decided*; the agent has no nervous system to feel when it has quietly drifted to the mean instead. **[probes/ai-default.mjs](probes/ai-default.mjs)** is the prosthetic for that drift: point it at a rendered surface and it reads every visible element's computed style + area and the page's text, converts color to OKLCH, and flags the encodable **tells** of the AI-default mean — the slate canvas, the indigo accent band, the unchanged framework palette, voiceless Inter headlines, the aurora backdrop, glassmorphism, the centered hero, the magic-gradient word, and the loudest signal of all, the *copy*: hype phrasing, templated agent telemetry, the stock logo wall.
+
+```bash
+node "${CLAUDE_SKILL_DIR}/probes/ai-default.mjs" http://localhost:5173/   # or ./index.html
+```
+
+Run it after STAGE 0, as a check on the language you just named: if tells fire, the design leaned on a default you may not have decided. **Each tell is a question, not a verdict** — name it, then justify keeping it (a genuinely dark developer tool *should* have a dark canvas) or diverge. Two hard limits keep this honest, and both point back to the POV gate: **escaping one tell by landing on another is not a decision** (fleeing the slate/indigo mean into a warm-cream serif fires zero tells and can still be a hop between attractors), and **0 tells certifies no point of view** — it means only that no *known* default signature fired; voice and situated choices are not detectable. The probe measures the floor of distinctiveness; the ceiling stays the human gate. Doctrine in [references/ai-default-attractors.md](references/ai-default-attractors.md); calibration in [probes/README.md](probes/README.md).
 
 ---
 
