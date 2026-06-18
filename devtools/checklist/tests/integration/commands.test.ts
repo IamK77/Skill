@@ -583,3 +583,58 @@ describe('resetCommand', () => {
     cwdSpy.mockRestore();
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════
+// Two-sessions-same-skill race regression
+// ═══════════════════════════════════════════════════════════════════════
+// The bug this guards: when the run target defaulted to the (shared) skill dir
+// instead of the project cwd, two sessions of ONE skill — invoked the way every
+// gate invokes it (CLAUDE_SKILL_DIR set, NO --path) — collapsed to a single
+// state file, so one session's `init --force` wiped the other's progress.
+//
+// Teeth: skill dir, projA and projB are three DISTINCT dirs. If the default
+// target reverts to the skill dir, both sessions key by (skill, skill) and these
+// assertions fail. With the fix (default target = process.cwd()) they pass.
+// Every other test in this file has cwd == skillDir, so only this one catches it.
+describe('two sessions, same skill, different project cwds — no cross-talk', () => {
+  it("keys state by the project cwd, so session B's init --force never wipes session A", () => {
+    const skill = path.join(tmpDir, 'shared-skill');
+    fs.mkdirSync(skill);
+    fs.writeFileSync(path.join(skill, '.checklist.yml'), MINIMAL_YML, 'utf-8');
+    const projA = fs.realpathSync(fs.mkdtempSync(path.join(tmpDir, 'projA-')));
+    const projB = fs.realpathSync(fs.mkdtempSync(path.join(tmpDir, 'projB-')));
+
+    const savedSkill = process.env.CLAUDE_SKILL_DIR;
+    // Mirror the live harness: every command resolves the one SHARED skill dir,
+    // and the gates pass neither --dir nor --path.
+    process.env.CLAUDE_SKILL_DIR = skill;
+    try {
+      // Session A, working in projA: record a manual pass.
+      process.chdir(projA);
+      initCommand(undefined, { force: true });
+      checkCommand('0', 'review', {});
+
+      // Session B, working in projB: a fresh run of the SAME skill. Its
+      // init --force must touch only B's state, never A's.
+      process.chdir(projB);
+      initCommand(undefined, { force: true });
+
+      const fileA = stateFilePath(skill, projA);
+      const fileB = stateFilePath(skill, projB);
+      expect(fileA).not.toBe(fileB); // distinct (skill, cwd) → distinct files
+
+      // A's progress survived B's reset (under the bug, B wiped the shared file).
+      expect(fs.existsSync(fileA)).toBe(true);
+      const stateA = JSON.parse(fs.readFileSync(fileA, 'utf-8')) as {
+        checked: Record<string, Record<string, { status: string }>>;
+      };
+      expect(stateA.checked['build']['review'].status).toBe('pass');
+
+      // Neither session wrote a state file into the shared skill dir.
+      expect(fs.existsSync(path.join(skill, '.checklist.state.json'))).toBe(false);
+    } finally {
+      if (savedSkill !== undefined) process.env.CLAUDE_SKILL_DIR = savedSkill;
+      else delete process.env.CLAUDE_SKILL_DIR;
+    }
+  });
+});
