@@ -5,8 +5,8 @@
     "email": "chenyinfeng50@gmail.com"
   },
   "metadata": {
-    "description": "Agent-era skill suites for Claude Code: engineering, distributed, inquiry, quarry, and surface, gated by the checklist CLI",
-    "version": "1.6.0"
+    "description": "Agent-era skill suites for Claude Code: engineering, distributed, inquiry, quarry, surface, and atelier, gated by the checklist CLI",
+    "version": "1.7.0"
   },
   "plugins": [
     {
@@ -76,6 +76,23 @@
         "./skills/surface/trials",
         "./skills/surface/lookout",
         "./skills/surface/bulwark"
+      ]
+    },
+    {
+      "name": "atelier",
+      "description": "Design software interfaces to a premium bar — the agent-era methodology for the one discipline whose correctness spec lives in a human nervous system (so taste is load-bearing and cannot be outsourced) and whose unit of quality is a SYSTEM, not a pile of hand-picked values. A pipeline of eight gated lenses across the visual-design system: canon (the design-judgment spine — choose a non-default visual language and a surface archetype, set the quantified targets the other lenses inherit, keep the visual serving the user's job), color (a perceptual oklch palette as tokens — neutral ramp with a temperature, semantic roles, a dark ramp that is re-tuned not inverted, contrast verified at design time, colorblind-safe data-viz), type (a modular type scale + a spacing scale on one rhythm, the optical tells that separate pro from amateur, and text that survives every language — BiDi/RTL, CJK, locale), layout (composition as a decision — the grid and hierarchy, measure and spatial rhythm, designed empty/loading/error states and form visuals, robustness for reality's long tail), form (depth from one light model — layered shadows and a tokenized elevation scale, concentric radii, gradient/texture with a job and without banding), graphics (DOM-first, dropping to Canvas/WebGL/GPU only where the DOM can't go and always with a fallback, plus one icon system and a coherent imagery system), motion (every animation with a purpose and real physics — spring vs easing, gesture intent arbitration, a true reduced-motion path, compositor-only at 60fps), and systems (the design system as one source of truth — tokens that cross the CSS↔JS boundary without drift, a living component library, a design→code handoff that stays in sync). Across all eight the agent emits plausible-but-incoherent values and feels no wrongness — so each layer is a taste decision the human makes and the system enforces. A separate un-gated navigator, pilot, routes a design task to the right entry lens — most design work isn't greenfield — or out to a sibling suite (surface for the CSS mechanism / what-to-build / state / unhappy paths, engineering for code craft, quarry for a library). Installs every skill under the /atelier: prefix. Note: the gates are enforced by the `checklist` CLI, which installs separately — see the repository README.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/atelier/pilot",
+        "./skills/atelier/canon",
+        "./skills/atelier/color",
+        "./skills/atelier/type",
+        "./skills/atelier/layout",
+        "./skills/atelier/form",
+        "./skills/atelier/graphics",
+        "./skills/atelier/motion",
+        "./skills/atelier/systems"
       ]
     }
   ]
