@@ -20,6 +20,25 @@ The design brief names each and either adopts it on purpose (with a reason) or r
 
 ---
 
+## the anchor: derive the point of view first
+
+Before any of the dimensions below, before the visual language is even named, there is one upstream move that everything else derives from: **state the surface's point of view.** This is the difference between a design that has a spine and a design that is a competent average.
+
+**The technique is directional — POV → style, never style → POV.** The agent's failure mode is to reach for a style first (the thing that "looks premium" in its training) and then rationalize it. That reversal is precisely how it lands in one of the three attractors above. The correct order:
+
+1. **Derive the POV from the product's facts, not from aesthetics.** Ask three questions of the product itself: *What does it deliver?* (the artifact the user walks away with) · *What does it cost the user?* (the work it removes or the work it demands) · *What does it believe?* (the one claim it is implicitly arguing). The point of view is the one-sentence synthesis. It is **derivable** — you do not wait for the user to hand it to you; you read it off the product. (You still confirm it with the user; you do not originate it from a blank.)
+2. **Say it without naming a style.** A real POV survives being stated with zero aesthetic words. *"A good cold email is read into existence, not generated — the deliverable is the user's voice, and the cost was the reading no one wants to do"* is a point of view: it names a belief and a cost, and it constrains choices (the output is prose → type is the hero; the value is *reading* → show the reading). *"Clean, modern, trustworthy"* is a **mood** — it names no argument and rules nothing out. If you cannot state your POV without reaching for a style or a feeling, you have not found it yet.
+3. **Derive the language from the POV, then check it didn't just hop attractors.** The visual language is the answer to *"what must this look like, given that POV?"* — and only then is it checked against the three attractors. **Deciding ≠ avoiding:** escaping near-black-neon by landing on warm-cream-serif is not a decision; it is trading one gravity well for another. When the derived language *coincides* with an attractor (it often legitimately will — an editorial product genuinely wants editorial language), the coincidence is fine **only if it falls out of the POV**, not if it was reached for. The gate question is "does the POV demand this?", not "did I pick something other than the last default I used?"
+
+**Two worked examples:**
+
+- **Apple, a gift-occasion page.** POV: *"the product disappears; the human moment (giving) is the subject."* Everything derives: near-empty white ground (the moment needs room, not features), one playful illustrated gesture carrying 100% of the personality (the Chanel-law signature element), product imagery absent (it would make the page about the object, contradicting the POV). The whitespace is not a style choice — it is the POV made visible.
+- **An outreach-research tool.** POV: the cold-email sentence above. Derivation: the deliverable is prose in the user's voice → an **editorial** language with type as the hero (not a dashboard); the value is that it *read* everything → the agent's sources rendered as **footnotes on the letter**, so the apparatus of reading becomes the proof of work; the signature element is that annotation system, not a color. This lands on the warm-cream-editorial attractor — and that is defensible *because the POV demands editorial*, not because editorial "looks nice." Had the POV not demanded it, the same palette would be a hop, not a decision.
+
+The POV is the most leverage-dense decision in the whole build and the one most purely a matter of taste — which is why it is the first gate, and why no number can stand in for it. The dimensions below are how the language, once derived, is made measurable.
+
+---
+
 ## color: from default to decided and measured
 
 **Default:** the agent picks hex/HSL values by eye, generates pure gray neutrals (`#888`, `#ccc`), and uses saturated brand colors that pass no contrast check. Dark mode = `filter: invert()` or a B/W swap.

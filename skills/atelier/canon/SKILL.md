@@ -6,7 +6,8 @@ description: >
   craft lenses enforce are decided. Use before any pixel is placed, before a color
   system is built, before a type scale is chosen. The one shift: good design is NOT
   defaults nudged until it "looks ok" — it is a few NON-DEFAULT, QUANTIFIED decisions
-  made before any pixel: which visual language, which surface archetype, what the
+  made before any pixel: the surface's point of view (derived from the product, not
+  waited for), which visual language that POV demands, which surface archetype, what the
   surface is *for*, and what "premium" means in measurable terms for this surface and
   this user. The agent, having no taste and no nervous system, will always pick the
   bland default — the warm-cream-editorial-serif, the near-black-neon-accent, the
@@ -40,7 +41,7 @@ See ./LICENSE and ./NOTICE · https://www.apache.org/licenses/LICENSE-2.0
 
 A *canon* is the underlying measure from which a craftsman's proportions derive — not a style applied after, but the organizing principle that makes every dimension coherent before a single mark lands. `canon` is the judgment spine of the `atelier` suite: where a frontend build has `bearings` to fix the boundaries before the first line of code, a design build has `canon` to fix the design language before the first visual value. Its product is three one-page artifacts — a design-language brief, a quantified-targets sheet, and a product-sense check — that every later lens (`color`, `type`, `layout`, `form`, `graphics`, `motion`) honors. It runs across gated stages and will not advance past a **GATE** until the `checklist` tool clears it. The gate enforces *order*; the substance of every judgment inside it is yours.
 
-**The governing fact: high-craft design is not defaults nudged until "ok" — it is a small set of NON-DEFAULT, QUANTIFIED decisions made before any pixel.** An agent without guidance converges to three statistical defaults: the warm-cream editorial (off-white ground, high-contrast serif, ochre accent); the near-black neon tool (single fluorescent accent, zero radius, dense grid); the newspaper grid (hairlines, dense columns, pure neutrals). These are not *choices* — they are the agent's aesthetic gravity, the modal outputs of its training. None of them is wrong in principle; each is wrong as a *default*, because it was never *decided*. The craft move is to name the organizing principle first — *which* visual language, *which* archetype, *what* this surface is for — and then derive every subsequent call from that decision rather than from the agent's statistical center of mass.
+**The governing fact: high-craft design is not defaults nudged until "ok" — it is a small set of NON-DEFAULT, QUANTIFIED decisions made before any pixel, all derived from one upstream choice: the surface's point of view.** Style is *derived* from that point of view (POV → style); the agent's signature failure is to run it backwards — reach for a premium-looking style first and reverse-justify it — which is exactly how it lands in the default mean. An agent without guidance converges to three statistical defaults: the warm-cream editorial (off-white ground, high-contrast serif, ochre accent); the near-black neon tool (single fluorescent accent, zero radius, dense grid); the newspaper grid (hairlines, dense columns, pure neutrals). These are not *choices* — they are the agent's aesthetic gravity, the modal outputs of its training. None of them is wrong in principle; each is wrong as a *default*, because it was never *decided*. The craft move is to name the organizing principle first — *which* visual language, *which* archetype, *what* this surface is for — and then derive every subsequent call from that decision rather than from the agent's statistical center of mass.
 
 This is where the agent era bites:
 - **The agent picks plausible-but-unconsidered values and feels no wrongness.** It emits a warm-cream serif because that combination is overrepresented in high-engagement design content, not because it fits your surface. It reaches for rounded corners and drop shadows because those are the defaults of the popular component libraries it has seen, not because they serve your user's cognitive load. It has no nervous system to feel that a dashboard with editorial-weight type is *wrong in kind*, not just aesthetically suboptimal.
@@ -57,7 +58,7 @@ This is where the agent era bites:
 
 The depth lives in `references/`. Open each when a stage sends you there — not all upfront.
 
-- **[references/non-default-and-quantified.md](references/non-default-and-quantified.md)** — the spine: how each aesthetic dimension (color, type, spacing, shadow, radius, motion) moves from agent default to decided-and-measured; the three AI default attractors to name and reject; the quantification anchors that make taste enforable.
+- **[references/non-default-and-quantified.md](references/non-default-and-quantified.md)** — the spine: the anchor (derive the point of view first — POV → style, never the reverse); the three AI default attractors to name and reject; how each aesthetic dimension (color, type, spacing, shadow, radius, motion) moves from agent default to decided-and-measured; the quantification anchors that make taste enforable.
 - [references/surface-archetypes.md](references/surface-archetypes.md) — the five surface archetypes (dashboard / tool / editorial / marketing / data-dense) with their governing constraints, motion budgets, density grades, and the tells that distinguish each from the defaults.
 - [references/product-sense.md](references/product-sense.md) — how the visual serves the user's actual job: the JTBD lens on design, the all-states obligation (not just happy path), the surface-diversity reality check (no average surface), and the ethics of choice architecture.
 
@@ -67,18 +68,20 @@ The depth lives in `references/`. Open each when a stage sends you there — not
 
 ---
 
-## STAGE 0 — Design language & archetype (name the visual language; choose the archetype on purpose)
+## STAGE 0 — Point of view, design language & archetype (derive the POV first; then name the language and choose the archetype on purpose)
 
 Open **[references/non-default-and-quantified.md](references/non-default-and-quantified.md)** and **[references/surface-archetypes.md](references/surface-archetypes.md)**. Fix the design direction *before* any color token is defined or any type scale is chosen.
 
-- **Name the visual language explicitly, including what it is NOT.** A visual language is an organizing principle — *editorial and authoritative* (high typographic contrast, restrained palette, generous whitespace); *precise and tool-like* (strict grid, functional hierarchy, minimal ornament); *warm and inviting* (rounded forms, approachable scale, softer contrast); *data-forward* (tight density, information hierarchy primary, decoration absent). The act of naming forces a choice; the act of naming what it is NOT rules out the agent's default attractors. Write the three AI defaults (warm-cream-serif / near-black-neon / newspaper-hairline) and actively reject or adopt each on purpose.
+- **Derive the point of view first — it is the anchor, and you can derive it yourself.** Before any style, state the surface's single point of view in one sentence — the one thing it is really arguing. The POV is **not an input to wait for** from the user; it is **derivable from the product's own facts**: what it delivers, what it costs the user, what it believes. The direction is one-way: **POV → style**, never style → POV. Picking a "premium-looking" shell first and reverse-justifying it is the exact mechanism by which the agent lands in the default mean. Ground the POV in the product, not the mood — *"a good cold email is read into existence, not generated; the deliverable is the user's voice, the cost was the reading"* is a point of view; *"clean, modern, trustworthy"* is a mood. If you can't state it without naming a style or a feeling, you haven't found it yet. (Apple's gift page: POV *"the product disappears; the human moment is the subject"* → near-empty white, one playful gesture carrying all the personality. Everything downstream is derived from that sentence.)
+- **Name the visual language the POV demands, including what it is NOT.** A visual language is an organizing principle — *editorial and authoritative* (high typographic contrast, restrained palette, generous whitespace); *precise and tool-like* (strict grid, functional hierarchy, minimal ornament); *warm and inviting* (rounded forms, approachable scale, softer contrast); *data-forward* (tight density, information hierarchy primary, decoration absent). It is **derived from the POV** (the answer to *"what must this look like given that POV"*), not pulled off a shelf of styles that "look premium." The act of naming forces a choice; the act of naming what it is NOT rules out the agent's default attractors. Write the three AI defaults (warm-cream-serif / near-black-neon / newspaper-hairline) and actively reject or adopt each on purpose. **Deciding ≠ avoiding:** escaping one attractor by landing on another (fleeing near-black-neon straight into warm-cream-serif) is not a decision — if your named language *coincides* with one of the three, you must justify it **from the POV and archetype** (the surface genuinely *is* editorial), not merely assert you "chose" it.
 - **Choose the surface archetype on purpose.** Five canonical archetypes: **dashboard** (at-a-glance status, scan-first, medium density, orientation motion only); **tool** (task-focused, low decoration, high precision, near-zero expressive motion); **editorial** (reading-forward, long measure, generous leading, type the hero, motion used sparingly for scroll-state); **marketing** (conversion-focused, signature motion permitted, brand-expressive, landing performance critical); **data-dense** (maximum information per pixel, compression over comfort, tabular numerics, motion almost entirely absent). Pick one primary archetype; a surface may straddle two but must name the primary. The archetype governs the motion budget, density grade, and decoration ceiling for every subsequent stage.
 - **Name the one signature element.** The Chanel law: concentrate "bold" on one signature element (a typeface, a palette, a spatial gesture, an accent treatment) and keep everything else restrained. The agent scatters "bold" across every dimension simultaneously; naming the one signature element forces that restraint. Write it down.
 
 ### GATE — clear before QUANTIFIED TARGETS
-1. `checklist check language visual-language-named-and-non-defaults-specified`
-2. `checklist check language surface-archetype-chosen-and-documented`
-3. `checklist verify language`
+1. `checklist check language point-of-view-derived-and-anchored`
+2. `checklist check language visual-language-named-and-non-defaults-specified`
+3. `checklist check language surface-archetype-chosen-and-documented`
+4. `checklist verify language`
 
 ---
 
@@ -128,6 +131,9 @@ The line that keeps `canon` honest: the reference library holds the encodable te
 
 ## Anti-patterns (use as a pre-flight checklist)
 
+- **Style before point of view** — picking a "premium-looking" language first and reverse-justifying it. The direction is POV → style; a style chosen without a POV to derive it from is the agent's default mean wearing a costume.
+- **Point of view stated as a mood** — "clean / modern / trustworthy" is not a POV; it names no argument and constrains no choice. The POV is derived from the product's facts (what it delivers, costs, believes) and survives being said without naming any style.
+- **Hopped attractors and called it a decision** — fleeing near-black-neon into warm-cream-serif (or any attractor into another) is not deciding. If the named language lands on one of the three defaults, it is only a decision when justified from the POV and archetype.
 - **No design brief** — jumping to `color` or `type` without a named visual language; the agent will fill the vacuum with its default attractor.
 - **Language named but not quantified** — "clean and minimal" without a density grade or type ratio is not a brief, it is a direction the agent will interpret as its own default.
 - **Archetype unstated** — building motion, density, and decoration without naming the archetype means every lens will use different defaults; the surface will be incoherent in kind, not just in value.
