@@ -5,7 +5,7 @@ import { formatOverview, formatPhaseShow, formatGateFailure } from '../formatter
 
 export async function showCommand(phaseArg?: string, options?: { dir?: string; path?: string }): Promise<void> {
   const cwd = resolveDir(options?.dir);
-  const targetPath = options?.path || cwd;
+  const targetPath = options?.path || process.cwd();   // key by project cwd, not the shared skill dir
   const stateFile = stateFilePath(cwd, targetPath);
 
   try {

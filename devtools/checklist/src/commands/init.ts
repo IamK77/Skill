@@ -13,7 +13,7 @@ export function initCommand(dir?: string, options?: { force?: boolean; dir?: str
     process.exit(1);
   }
   const targetDir = dir || resolveDir(options?.dir);
-  const target = options?.path || targetDir;
+  const target = options?.path || process.cwd();   // key by project cwd, not the shared skill dir
   const stateFile = stateFilePath(targetDir, target);
   try {
     const config = loadChecklist(targetDir);

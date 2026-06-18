@@ -5,7 +5,7 @@ import { formatCheckConfirm, formatGateFailure } from '../formatter.js';
 
 export function checkCommand(phaseArg: string, itemId: string, options: { dir?: string; path?: string }): void {
   const cwd = resolveDir(options.dir);
-  const target = options.path || cwd;
+  const target = options.path || process.cwd();   // key the run by WHAT you work on (project cwd), not the shared skill dir
   const stateFile = stateFilePath(cwd, target);
 
   try {

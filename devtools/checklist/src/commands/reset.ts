@@ -26,7 +26,7 @@ export function resetCommand(options?: { dir?: string; path?: string }): void {
 
   // reset is per-(skill,target): it clears the state file for THIS skill against
   // THIS target only, leaving any other target's state for the same skill intact.
-  const target = options?.path || targetDir;
+  const target = options?.path || process.cwd();   // key by project cwd, not the shared skill dir
   const stateFile = stateFilePath(targetDir, target);
   clearState(stateFile);
   const pointerCleared = clearActivePointer(targetDir);

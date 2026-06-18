@@ -84,9 +84,17 @@ phases:
 `;
 
 let originalHome: string | undefined;
+let originalCwd: string;
 
 beforeEach(() => {
   tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cmd-test-'));
+  // A run is keyed by the project you work IN (process.cwd()), not the shared
+  // skill dir — so model that by making tmpDir the cwd, then canonicalize tmpDir
+  // to the resolved cwd so the (skill=tmpDir, target=cwd) key these helpers
+  // assume holds exactly (macOS resolves the symlinked tmp path on chdir).
+  originalCwd = process.cwd();
+  process.chdir(tmpDir);
+  tmpDir = process.cwd();
   // Per-test global-pointer sandbox so init's global pointer never leaks into
   // another test's cwd-fallback resolution.
   originalHome = process.env.CHECKLIST_HOME;
@@ -97,6 +105,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  process.chdir(originalCwd);   // leave tmpDir before removing it
   fs.rmSync(tmpDir, { recursive: true, force: true });
   if (originalHome !== undefined) {
     process.env.CHECKLIST_HOME = originalHome;
