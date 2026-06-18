@@ -1,0 +1,43 @@
+name: probe
+
+# Run each atelier lens probe's ground-truth regression suite (test.mjs) whenever a
+# probe changes, so a probe — the instrument the GATE leans on — can't silently regress.
+
+on:
+  push:
+    branches: [main]
+    paths: ['skills/atelier/**/probes/**']
+  pull_request:
+    paths: ['skills/atelier/**/probes/**']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: probe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - uses: browser-actions/setup-chrome@v1
+        id: chrome
+        with:
+          chrome-version: stable
+      - name: run probe test harnesses
+        env:
+          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          shopt -s nullglob
+          found=0
+          for t in skills/atelier/*/probes/test.mjs; do
+            echo "== $t =="
+            node "$t" || exit 1
+            found=1
+          done
+          [ "$found" = 1 ] || { echo "no probe test.mjs found"; exit 1; }
