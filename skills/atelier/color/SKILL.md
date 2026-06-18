@@ -123,6 +123,30 @@ Open **[references/data-viz-color.md](references/data-viz-color.md)**. Data visu
 
 ---
 
+## Instruments — the coherence probe
+
+The gates ask you to *verify* the system; the agent has no nervous system to feel where a
+real surface violates it. **[probes/color-coherence.mjs](probes/color-coherence.mjs)** is
+the prosthetic for the encodable layer: point it at a rendered surface and it reads every
+visible element's computed color and rendered area, converts to OKLCH, and flags the
+off-system facts this lens forbids — pure black / pure white, color-temperature breaks, a
+large off-ramp surface, near-duplicate hand-picked accents, and text below the contrast
+floor.
+
+```bash
+node "${CLAUDE_SKILL_DIR}/probes/color-coherence.mjs" http://localhost:5173/   # or ./index.html
+```
+
+Run it as a pre-check at STAGE 0 (retrofit: inventory what's actually on screen) and again
+before the contrast gate. **It flags the fact; you judge intent** — a large near-black panel
+on a warm page may be a mistake, or a deliberate inversion that should be re-tuned into the
+system as a warm dark-elevation *token*. The probe makes the choice explicit; the GATE is
+still yours. For a rigorous a11y contrast audit, defer to `axe-core`/Lighthouse; the probe's
+unique value is the system-level checks those tools lack. See
+[probes/README.md](probes/README.md).
+
+---
+
 ## The thread through all of it
 
 `color` is the suite's **perceptual conscience** — the place where the claim that *the agent picks plausible-but-incoherent values* finally gets a gate. It runs before any component is colored, and its token system is what `atelier:systems` later governs as a living artifact and what `atelier:canon` uses as a quantified commitment ("contrast target: Lc 75 on body text, Lc 60 on headings, dark base L≈0.14"). The through-line is the suite's own — *push correctness into structure* — applied to color: a value derived from a system can't drift the way a hand-picked one can, so palette coherence becomes structural rather than maintained by vigilance. The line that keeps `color` honest inside a suite that says "the correct isn't in a document": **the document holds the encodable technique (how oklch works, how APCA Lc is bound to size and weight, how a CVD-safe categorical palette is constructed); the taste — which temperature, which accent hue, what the contrast hierarchy actually is — stays a gate the user clears.** Blur that line and the skill becomes a recipe book; hold it and it stays a lens.

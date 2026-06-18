@@ -6,6 +6,38 @@
 
 ---
 
+## Depth is more than shadow — the cue toolbox
+
+Shadow is one depth cue, not the only one — and rarely the strongest. Before stacking
+shadow layers, reach for the cheapest cue that already reads as *deep*; the light model
+below is the systematic core, but a surface can read raised with almost no shadow when a
+stronger cue carries it. The full toolbox, strongest first:
+
+- **Occlusion / overlap — the strongest cue.** One element covering another is read as
+  "in front" instantly and unambiguously, before any shadow is processed. A sheet that
+  simply overlaps the content behind it is already deep. Spend this before spending blur.
+- **Surface brightness.** Brighter reads as nearer — and in dark mode this *replaces*
+  shadow as the primary elevation signal (see the dark-mode flip below): each higher layer
+  lifts its surface L rather than deepening a shadow.
+- **Backdrop blur.** A panel, sheet, or nav over blurred content (`backdrop-filter`) reads
+  as floating above *and* concentrates attention on itself — depth and focus in one move
+  (GPU cost is real; ration it to focal layers).
+- **Scrim / tint.** A semi-opaque darkening layer behind a modal pushes the page back and
+  pulls the dialog forward — the cheapest way to seat an overlay in space.
+- **Scale + shadow, synchronized.** An element that grows as it rises (a modal entering, a
+  card lifting on hover) with its shadow growing in step reads as moving toward the viewer.
+  This is as much a motion concern as a static one — coordinate it with `atelier:motion` so
+  the transform and the shadow animate together, never separately.
+- **Atmospheric perspective (advanced).** Distance desaturates and cools: recessed surfaces
+  lose chroma and drift slightly cooler in hue, near surfaces stay saturated and warm. A
+  whisper of this between background and foreground reads as real space.
+
+The taste call is *which* cue (or which two) carries the depth for a given surface; the
+gate is that whatever you pick is a decided, tokenized cue, not an invented per-component
+`box-shadow`. The light model below is how you make the shadow cue itself systematic.
+
+---
+
 ## Why one light model
 
 A real shadow has a direction. Real elevation has four coordinated outputs from that same
@@ -199,6 +231,7 @@ a clip-path element produces a rectangular ghost shadow that clearly breaks the 
 
 | Item | Rule |
 |---|---|
+| Depth cue priority | Occlusion (strongest) > brightness > backdrop blur > scrim > scale+shadow > atmospheric; pick the cheapest that reads deep before stacking shadows |
 | Light direction | One direction, site-wide — only size and softness change per elevation |
 | Shadow layers | 3–6 layers; offset × 2 per layer; alpha 0.02–0.06 per layer |
 | Shadow color | Surface hue, lower L, slightly higher C; never pure black |

@@ -240,6 +240,29 @@ expensive and gains nothing.
 
 ---
 
+## Progressive blur and compound masks
+
+A single `backdrop-filter: blur()` is uniform — one radius across the whole layer. The
+premium effect (iOS-style nav bars, where content blurs *progressively harder* as it nears
+the bar) cannot be done with one filter, because CSS can't vary blur radius across an
+element. The technique: **stack several `backdrop-filter` layers, each clipped to a thin
+band by a progressive-alpha `mask`,** with the blur radius increasing per band. The bands
+overlap so the ramp reads smooth rather than as discrete steps — the same anti-banding
+logic as a gradient, applied to blur. It is GPU-expensive (each band is a composited blur
+pass), so keep the band count low and reserve it for one focal edge, never scrolling lists.
+
+For the masks themselves, **`mask-composite`** combines multiple mask layers (`add`,
+`subtract`, `intersect`, `exclude`) to build a precise reveal/fade shape from simple
+gradient parts — a mask that fades at two edges but not the corners, or a band that is the
+*difference* of two gradients. Compose the alpha shape from parts rather than hand-authoring
+one complex gradient.
+
+Both are advanced, rarely-done touches: spend them on a signature focal surface, never by
+default. Their alpha fades still follow the eased-scrim rule above (same-color zero-alpha,
+eased multi-stop), not a linear `transparent`.
+
+---
+
 ## Animated gradients
 
 Native CSS gradients cannot transition directly — the browser treats the whole gradient
@@ -307,6 +330,8 @@ Gradients built for a light surface do not simply invert for dark mode. Rethink:
 | Banding | Grain dithering: blue noise (best) / feTurbulence (simpler) |
 | Fade-to-transparent | Same-color zero-alpha, not `transparent` |
 | Scrim alpha | Eased multi-stop, not linear |
+| Progressive blur | Stacked `backdrop-filter` bands + progressive-alpha masks; low band count, ration GPU |
+| Compound mask | `mask-composite` add/subtract from simple gradient parts |
 | Aurora/mesh | 2–4 blobs; moderate saturation; commit or remove |
 | Texture | Job only: depth / focus / brand |
 | Grain blend | `overlay` or `soft-light`; opacity 0.02–0.05; pseudo-element |
