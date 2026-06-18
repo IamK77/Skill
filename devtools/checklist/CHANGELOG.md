@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.4.0](https://github.com/IamK77/Skill/compare/v0.3.0...v0.4.0) (2026-06-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* **checklist:** existing in-skill-dir .checklist.state.json files are abandoned (not migrated); init surfaces a one-line note when it finds one and the file is safe to delete.
+
+### Features
+
+* **checklist:** relocate state to XDG dir, key by (skill,target) and phase name ([b7757df](https://github.com/IamK77/Skill/commit/b7757df244d7007bd2d337e7360cfd6be0fdd1c1))
+
+
+### Bug Fixes
+
+* **checklist:** default the run target to the project cwd, not the skill dir ([ea69aec](https://github.com/IamK77/Skill/commit/ea69aec62875ba6fafad5c32b8617f9c19422627))
+
 ## [0.3.0](https://github.com/IamK77/Skill/compare/v0.2.1...v0.3.0) (2026-06-10)
 
 
