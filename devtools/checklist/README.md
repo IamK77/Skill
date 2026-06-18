@@ -141,12 +141,14 @@ A phase is addressed by `name` (case-insensitive) or by 0-based index. An index 
 
 ## State and files
 
-`checklist` writes two things:
+`checklist` writes two things, and **neither lives inside the skill directory** — the skill dir is treated as read-only (under a plugin install it is a package-managed directory whose fate on update is uncertain):
 
-- `.checklist.state.json` in the skill directory — the per-phase, per-item results (`{ checked: { "<phaseIndex>": { "<itemId>": { status, message } } } }`). This is gitignored. A corrupt or malformed state file is reported with a hint to run `checklist init --force`. Writes are atomic (temp file in the same directory + rename), and `check`/`verify` merge their new records into whatever is on disk at save time, so concurrent invocations don't overwrite each other's results.
+- the **per-run state file**, under an XDG state directory. Its location is `$CHECKLIST_STATE_HOME` if set, else `$XDG_STATE_HOME/checklist`, else `~/.local/state/checklist`. Within that directory the file is keyed per **(skill, target)** pair — its name is the skill's basename plus a sha256 of the resolved `skill\0target` tuple (`<skill-basename>.<hash>.json`). Two references to the same dirs (with/without a trailing slash, relative vs absolute) resolve to one file; a different `--path` target gets its own file. So two concurrent runs of the same skill against different targets keep independent state and cannot stomp each other. The records are keyed per **phase NAME** (case-folded), then per check id (`{ checked: { "<phaseName>": { "<itemId>": { status, message } } } }`). Keying by name (not numeric index) means reordering phases in the `.checklist.yml` never mis-attaches an old pass to whatever check now sits at the old index. A corrupt or malformed state file is reported with a hint to run `checklist init --force`. Writes are atomic (temp file in the same directory + rename), and `check`/`verify` merge their new records into whatever is on disk at save time, so concurrent invocations don't overwrite each other's results.
 - the global `active` pointer file (location described above).
 
-`init --force` clears the state file; `reset`/`done` clears the state file and drops the active pointer when it points at this directory.
+`init --force` clears the (skill, target) state file; `reset`/`done` clears the (skill, target) state file for the target it resolves (`--path`, else the skill dir) and drops the active pointer when it points at this directory.
+
+**Migration note (breaking):** earlier versions wrote `.checklist.state.json` *inside* the skill directory. That location is no longer read, written, or deleted by any command — an existing in-skill-dir `.checklist.state.json` is abandoned (its recorded progress does not carry over). `init` prints a one-line stderr note when it spots one; the file is safe to delete.
 
 ## Run the tests
 
@@ -154,7 +156,7 @@ A phase is addressed by `name` (case-insensitive) or by 0-based index. An index 
 npm test
 ```
 
-Runs the vitest suite. The current run is 471 tests passing (none skipped — the probe suites for the once-deferred defects are fixed and un-skipped), across unit and integration files covering the loader, resolver, runner containment, state semantics, the gate, the builtins, and the command surface.
+Runs the vitest suite. The current run is 482 tests passing (none skipped — the probe suites for the once-deferred defects are fixed and un-skipped), across unit and integration files covering the loader, resolver, runner containment, state semantics, state relocation, the gate, the builtins, and the command surface.
 
 ## License
 

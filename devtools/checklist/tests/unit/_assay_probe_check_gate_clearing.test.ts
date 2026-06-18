@@ -4,6 +4,7 @@ import * as path from 'node:path';
 import * as os from 'node:os';
 
 import { checkCommand } from '../../src/commands/check.js';
+import { stateFilePath } from '../../src/state.js';
 
 // ────────────────────────────────────────────────────────────────────────────
 // assay VERIFY probe — candidate defect:
@@ -36,7 +37,9 @@ function writeChecklist(content: string): void {
 }
 
 function readState(): Record<string, unknown> {
-  const p = path.join(tmpDir, '.checklist.state.json');
+  // State lives under the (sandboxed) XDG state home now, keyed by (skill,target).
+  // checkCommand here runs with { dir: tmpDir } (no --path), so target == tmpDir.
+  const p = stateFilePath(tmpDir, tmpDir);
   if (!fs.existsSync(p)) return {};
   return JSON.parse(fs.readFileSync(p, 'utf-8'));
 }
@@ -93,10 +96,11 @@ describe('check — bogus numeric-prefix phase arg must not silently clear a gat
 
     checkCommand('0typo', 'motivation-identified', { dir: tmpDir });
 
-    // Negative-space: nothing moved on a rejected/garbage reference.
+    // Negative-space: nothing moved on a rejected/garbage reference. State is
+    // keyed by phase NAME now, so charter's key is 'charter' (not '0').
     expect(exitSpy).toHaveBeenCalledWith(1);
     const state = readState() as { checked?: Record<string, unknown> };
-    expect(state.checked?.['0']).toBeUndefined();
+    expect(state.checked?.['charter']).toBeUndefined();
   });
 
   // PROBE 2 — the oracle-HONEST finding (consistency oracle, not a fabricated
@@ -118,7 +122,8 @@ describe('check — bogus numeric-prefix phase arg must not silently clear a gat
     // must never clear a gate in phase 0 (charter). Either it resolves to
     // survey (then gate-blocked → exit 1, no write) or it is rejected — but it
     // must NOT silently pass under charter.
+    // State is keyed by phase NAME now; charter's key is 'charter' (not '0').
     const state = readState() as { checked?: Record<string, Record<string, unknown>> };
-    expect(state.checked?.['0']?.['shared-id']).toBeUndefined();
+    expect(state.checked?.['charter']?.['shared-id']).toBeUndefined();
   });
 });

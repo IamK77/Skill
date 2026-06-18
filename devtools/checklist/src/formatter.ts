@@ -24,8 +24,8 @@ export function formatOverview(config: ChecklistConfig, state: ChecklistState): 
 
   const lines = config.phases.map((phase, i) => {
     const ids = phase.checks.map(c => c.id);
-    const complete = isPhaseComplete(state, i, ids);
-    const { done, total } = phaseProgress(state, i, ids);
+    const complete = isPhaseComplete(state, phase.name, ids);
+    const { done, total } = phaseProgress(state, phase.name, ids);
 
     let status: string;
     if (complete) {
@@ -41,8 +41,8 @@ export function formatOverview(config: ChecklistConfig, state: ChecklistState): 
     return `PHASE ${i}: ${phase.name.toUpperCase().padEnd(20)} ${status}`;
   });
 
-  const allDone = config.phases.every((phase, i) =>
-    isPhaseComplete(state, i, phase.checks.map(c => c.id))
+  const allDone = config.phases.every((phase) =>
+    isPhaseComplete(state, phase.name, phase.checks.map(c => c.id))
   );
 
   if (allDone) {
@@ -58,7 +58,7 @@ export function formatPhaseShow(result: PhaseResult, state: ChecklistState, tota
   const header = `PHASE ${result.phaseIndex}: ${result.phaseName.toUpperCase()}`;
 
   const items = result.checks.map((c, i) => {
-    const checked = isItemChecked(state, result.phaseIndex, c.item.id);
+    const checked = isItemChecked(state, result.phaseName, c.item.id);
     const mark = checked ? '[x]' : '[ ]';
     const num = `${i + 1}.`;
     const line = `${num} ${mark} ${padDots(c.item.id, c.item.description)}`;
@@ -82,7 +82,7 @@ export function formatPhaseShow(result: PhaseResult, state: ChecklistState, tota
   }).join('\n');
 
   const ids = result.checks.map(c => c.item.id);
-  const { done, total } = phaseProgress(state, result.phaseIndex, ids);
+  const { done, total } = phaseProgress(state, result.phaseName, ids);
 
   const lines = [header, '', items, ''];
 
@@ -105,7 +105,7 @@ export function formatVerifyResult(result: PhaseResult, state: ChecklistState, t
     const num = `${i + 1}.`;
 
     if (c.kind === 'manual') {
-      const checked = isItemChecked(state, result.phaseIndex, c.item.id);
+      const checked = isItemChecked(state, result.phaseName, c.item.id);
       if (checked) {
         return `${num} [x] ${padDots(c.item.id, 'confirmed')}`;
       }
@@ -125,7 +125,7 @@ export function formatVerifyResult(result: PhaseResult, state: ChecklistState, t
   }
   if (result.manualCount > 0) {
     const manualChecked = result.checks
-      .filter(c => c.kind === 'manual' && isItemChecked(state, result.phaseIndex, c.item.id))
+      .filter(c => c.kind === 'manual' && isItemChecked(state, result.phaseName, c.item.id))
       .length;
     const remaining = result.manualCount - manualChecked;
     if (remaining > 0) {
@@ -136,7 +136,7 @@ export function formatVerifyResult(result: PhaseResult, state: ChecklistState, t
   // Explicit verdict so `verify` (the gate command) states pass/proceed itself,
   // instead of requiring a follow-up `show`.
   const ids = result.checks.map(c => c.item.id);
-  const { done, total } = phaseProgress(state, result.phaseIndex, ids);
+  const { done, total } = phaseProgress(state, result.phaseName, ids);
   // The verify verdict must reflect THIS run, not just stored progress: never
   // announce "verified, proceed" when a mechanical check failed on this run,
   // even if stored state still carries an earlier (now-stale) pass.

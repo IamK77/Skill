@@ -18,14 +18,17 @@ function makeConfig(phases: string[][]): ChecklistConfig {
   };
 }
 
-// Mark a phase's items as checked in state (status value is irrelevant to the
-// gate; presence is what matters).
+// Mark a phase's items as checked in state. State is keyed by phase NAME now
+// (case-folded), so the helper resolves the name from the config at the given
+// index — the gate reads by name, so writing by index would not satisfy it.
+// (status value is irrelevant to the gate; presence of a pass is what matters.)
 function check(
+  config: ChecklistConfig,
   state: ChecklistState,
   phaseIndex: number,
   ...itemIds: string[]
 ): ChecklistState {
-  const key = String(phaseIndex);
+  const key = config.phases[phaseIndex].name.toLowerCase();
   state.checked[key] = state.checked[key] ?? {};
   for (const id of itemIds) {
     state.checked[key][id] = { status: 'pass', message: 'ok' };
@@ -160,7 +163,7 @@ describe('gatePriorPhases — does NOT gate the target phase itself (i < target,
   it('target phase 1 passes while phase 1 itself is empty, as long as phase 0 is complete', () => {
     // Off-by-one pin: the loop is `i < targetPhaseIndex`. The target's own
     // completeness is irrelevant. Only phase 0 is gated here.
-    const state = check({ checked: {} }, 0, 'a'); // phase 0 complete, phase 1 untouched
+    const state = check(config, { checked: {} }, 0, 'a'); // phase 0 complete, phase 1 untouched
     const result = gatePriorPhases(config, 1, state);
     expect(result.passed).toBe(true);
   });
@@ -168,9 +171,9 @@ describe('gatePriorPhases — does NOT gate the target phase itself (i < target,
   it('target phase 2 fails on phase 1 even when the target (phase 2) is fully complete', () => {
     // Completing the target does not help; an incomplete prior still blocks.
     const state: ChecklistState = { checked: {} };
-    check(state, 0, 'a'); // phase 0 complete
+    check(config, state, 0, 'a'); // phase 0 complete
     // phase 1 (id 'b') left incomplete
-    check(state, 2, 'c'); // target phase 2 complete (should not matter)
+    check(config, state, 2, 'c'); // target phase 2 complete (should not matter)
     const result = gatePriorPhases(config, 2, state);
     expect(result.passed).toBe(false);
     expect(result.failedPhase).toBe('P1');
@@ -190,7 +193,7 @@ describe('gatePriorPhases — reports the EARLIEST incomplete prior phase', () =
     // Mutation mindset: if the loop iterated in reverse or returned the LAST
     // incomplete, this would report P2. Pins forward order + early return.
     const state: ChecklistState = { checked: {} };
-    check(state, 0, 'a'); // complete
+    check(config, state, 0, 'a'); // complete
     // phase 1 'b' missing, phase 2 'c' missing (both incomplete)
     const result = gatePriorPhases(config, 3, state);
     expect(result.passed).toBe(false);
@@ -200,9 +203,9 @@ describe('gatePriorPhases — reports the EARLIEST incomplete prior phase', () =
 
   it('exactly one prior incomplete (a middle one) is reported precisely', () => {
     const state: ChecklistState = { checked: {} };
-    check(state, 0, 'a');
+    check(config, state, 0, 'a');
     // phase 1 'b' missing
-    check(state, 2, 'c'); // complete (out of order completion still counts)
+    check(config, state, 2, 'c'); // complete (out of order completion still counts)
     const result = gatePriorPhases(config, 3, state);
     expect(result.passed).toBe(false);
     expect(result.failedPhase).toBe('P1');
@@ -221,7 +224,7 @@ describe('gatePriorPhases — a prior phase with ZERO checks is vacuously comple
   it('empty prior phase never blocks the gate (isPhaseComplete over [] is true)', () => {
     // Blind spot: isPhaseComplete uses `every`, which is true on an empty list.
     // So a checkless prior phase always passes the gate even with empty state.
-    const state = check({ checked: {} }, 0, 'a'); // only phase 0 needs completing
+    const state = check(config, { checked: {} }, 0, 'a'); // only phase 0 needs completing
     const result = gatePriorPhases(config, 2, state);
     expect(result.passed).toBe(true);
   });
@@ -240,7 +243,7 @@ describe('gatePriorPhases — partial completion of a prior phase still blocks',
   ]);
 
   it('one of two prior checks done → still incomplete → gate fails at that phase', () => {
-    const state = check({ checked: {} }, 0, 'a'); // 'b' still missing
+    const state = check(config, { checked: {} }, 0, 'a'); // 'b' still missing
     const result = gatePriorPhases(config, 1, state);
     expect(result.passed).toBe(false);
     expect(result.failedPhase).toBe('P0');
@@ -255,7 +258,7 @@ describe('gatePriorPhases — CALL-IT-TWICE / write-then-resolve (state advance)
   ]);
 
   it('is a pure read: calling twice on the SAME state yields identical results', () => {
-    const state = check({ checked: {} }, 0, 'a'); // incomplete prior
+    const state = check(config, { checked: {} }, 0, 'a'); // incomplete prior
     const first = gatePriorPhases(config, 1, state);
     const second = gatePriorPhases(config, 1, state);
     expect(first).toEqual(second);
@@ -264,17 +267,17 @@ describe('gatePriorPhases — CALL-IT-TWICE / write-then-resolve (state advance)
   });
 
   it('does not mutate the passed-in state (no self-healing / advancing here)', () => {
-    const state = check({ checked: {} }, 0, 'a');
+    const state = check(config, { checked: {} }, 0, 'a');
     const snapshot = JSON.parse(JSON.stringify(state));
     gatePriorPhases(config, 1, state);
     expect(state).toEqual(snapshot);
   });
 
   it('fail → complete the missing prior item → re-gate now passes (write-then-resolve)', () => {
-    const state = check({ checked: {} }, 0, 'a'); // 'b' missing
+    const state = check(config, { checked: {} }, 0, 'a'); // 'b' missing
     expect(gatePriorPhases(config, 1, state).passed).toBe(false);
 
-    check(state, 0, 'b'); // resolve the gap
+    check(config, state, 0, 'b'); // resolve the gap
     const after = gatePriorPhases(config, 1, state);
     expect(after.passed).toBe(true);
     expect(after.failedPhase).toBeUndefined();
@@ -294,13 +297,13 @@ describe('gatePriorPhases — targetPhaseIndex past the end of the phases array'
     // i runs 0..length-1, which are all valid. With everything complete it
     // passes; this confirms no off-by-one over-reach at the exact length.
     const state: ChecklistState = { checked: {} };
-    check(state, 0, 'a');
-    check(state, 1, 'b');
+    check(config, state, 0, 'a');
+    check(config, state, 1, 'b');
     expect(gatePriorPhases(config, config.phases.length, state).passed).toBe(true);
   });
 
   it('target == phases.length still reports the earliest incomplete among all phases', () => {
-    const state = check({ checked: {} }, 1, 'b'); // phase 0 'a' missing
+    const state = check(config, { checked: {} }, 1, 'b'); // phase 0 'a' missing
     const result = gatePriorPhases(config, config.phases.length, state);
     expect(result.passed).toBe(false);
     expect(result.failedPhase).toBe('P0');
@@ -323,8 +326,8 @@ describe('gatePriorPhases — targetPhaseIndex past the end of the phases array'
     // undefined and `phase.checks` throws a TypeError. Pinning CURRENT
     // behavior — gatePriorPhases has no upper-bound guard on targetPhaseIndex.
     const state: ChecklistState = { checked: {} };
-    check(state, 0, 'a');
-    check(state, 1, 'b');
+    check(config, state, 0, 'a');
+    check(config, state, 1, 'b');
     expect(() => gatePriorPhases(config, config.phases.length + 1, state)).toThrow(
       TypeError,
     );

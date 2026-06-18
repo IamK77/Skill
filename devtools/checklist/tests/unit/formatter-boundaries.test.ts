@@ -40,12 +40,14 @@ function emptyState(): ChecklistState {
   return { checked: {} };
 }
 
+// State is keyed by phase NAME now (case-folded), not numeric index. Each entry
+// names its phase by NAME; the helper folds case to match phaseKeyOf in state.ts.
 function stateWith(
-  entries: { phase: number; id: string; status?: 'pass' | 'fail' | 'error'; message?: string }[],
+  entries: { phase: string; id: string; status?: 'pass' | 'fail' | 'error'; message?: string }[],
 ): ChecklistState {
   const state: ChecklistState = { checked: {} };
   for (const e of entries) {
-    const key = String(e.phase);
+    const key = e.phase.toLowerCase();
     if (!state.checked[key]) state.checked[key] = {};
     state.checked[key][e.id] = { status: e.status ?? 'pass', message: e.message ?? '' };
   }
@@ -213,7 +215,7 @@ describe('formatInit boundaries', () => {
 describe('formatPhaseShow last-phase boundary (the off-by-one zone)', () => {
   it('single-phase config: phaseIndex 0 IS the last phase -> "all phases complete", never "proceed to PHASE 1"', () => {
     const pr = singleMechPhase(0);
-    const state = stateWith([{ phase: 0, id: 'x' }]);
+    const state = stateWith([{ phase: 'P', id: 'x' }]);
     const out = formatPhaseShow(pr, state, 1); // totalPhases = 1
     expect(out).toContain('PHASE 0 passed — all phases complete, run `checklist done`');
     expect(out).not.toContain('proceed to PHASE 1');
@@ -222,7 +224,7 @@ describe('formatPhaseShow last-phase boundary (the off-by-one zone)', () => {
   it('isLast uses >= : phaseIndex one past last (== totalPhases) also yields completion text', () => {
     // Defensive: index 3 with totalPhases 3 -> 3 >= 2 -> isLast true.
     const pr = singleMechPhase(3);
-    const state = stateWith([{ phase: 3, id: 'x' }]);
+    const state = stateWith([{ phase: 'P', id: 'x' }]);
     const out = formatPhaseShow(pr, state, 3);
     expect(out).toContain('PHASE 3 passed — all phases complete');
     expect(out).not.toContain('proceed to PHASE 4');
@@ -230,11 +232,11 @@ describe('formatPhaseShow last-phase boundary (the off-by-one zone)', () => {
 
   it('exact-last boundary: index === totalPhases-1 -> completion; index === totalPhases-2 -> proceed', () => {
     const last = singleMechPhase(4);
-    const lastOut = formatPhaseShow(last, stateWith([{ phase: 4, id: 'x' }]), 5);
+    const lastOut = formatPhaseShow(last, stateWith([{ phase: 'P', id: 'x' }]), 5);
     expect(lastOut).toContain('all phases complete');
 
     const penult = singleMechPhase(3);
-    const penultOut = formatPhaseShow(penult, stateWith([{ phase: 3, id: 'x' }]), 5);
+    const penultOut = formatPhaseShow(penult, stateWith([{ phase: 'P', id: 'x' }]), 5);
     expect(penultOut).toContain('PHASE 3 passed, proceed to PHASE 4');
     expect(penultOut).not.toContain('all phases complete');
   });
@@ -242,14 +244,14 @@ describe('formatPhaseShow last-phase boundary (the off-by-one zone)', () => {
   it('totalPhases undefined: even the genuine last phase says "proceed to PHASE N+1" (cannot know it is last)', () => {
     // This is the pre-fix blind spot: without totalPhases, isLast is false.
     const pr = singleMechPhase(2);
-    const out = formatPhaseShow(pr, stateWith([{ phase: 2, id: 'x' }]), undefined);
+    const out = formatPhaseShow(pr, stateWith([{ phase: 'P', id: 'x' }]), undefined);
     expect(out).toContain('PHASE 2 passed, proceed to PHASE 3');
     expect(out).not.toContain('all phases complete');
   });
 
   it('first phase (index 0) of a multi-phase config proceeds to PHASE 1', () => {
     const pr = singleMechPhase(0);
-    const out = formatPhaseShow(pr, stateWith([{ phase: 0, id: 'x' }]), 4);
+    const out = formatPhaseShow(pr, stateWith([{ phase: 'P', id: 'x' }]), 4);
     expect(out).toContain('PHASE 0 passed, proceed to PHASE 1');
   });
 
@@ -271,7 +273,7 @@ describe('formatPhaseShow last-phase boundary (the off-by-one zone)', () => {
 describe('formatPhaseShow call-it-twice / overwrite semantics', () => {
   it('is a pure function: same inputs render byte-identical twice (no hidden state)', () => {
     const pr = singleMechPhase(1);
-    const state = stateWith([{ phase: 1, id: 'x' }]);
+    const state = stateWith([{ phase: 'P', id: 'x' }]);
     const a = formatPhaseShow(pr, state, 4);
     const b = formatPhaseShow(pr, state, 4);
     expect(a).toBe(b);
@@ -286,11 +288,11 @@ describe('formatPhaseShow call-it-twice / overwrite semantics', () => {
       ],
       mechanicalPassed: 2, mechanicalTotal: 2, manualCount: 0,
     };
-    const partial = formatPhaseShow(pr, stateWith([{ phase: 0, id: 'lint' }]), 3);
+    const partial = formatPhaseShow(pr, stateWith([{ phase: 'Build', id: 'lint' }]), 3);
     expect(partial).toContain('1/2 completed');
     expect(partial).not.toContain('proceed to PHASE 1');
 
-    const full = formatPhaseShow(pr, stateWith([{ phase: 0, id: 'lint' }, { phase: 0, id: 'test' }]), 3);
+    const full = formatPhaseShow(pr, stateWith([{ phase: 'Build', id: 'lint' }, { phase: 'Build', id: 'test' }]), 3);
     expect(full).toContain('PHASE 0 passed, proceed to PHASE 1');
     expect(full).not.toContain('1/2 completed');
   });
@@ -305,7 +307,7 @@ describe('formatPhaseShow call-it-twice / overwrite semantics', () => {
       ],
       mechanicalPassed: 1, mechanicalTotal: 1, manualCount: 1,
     };
-    const out = formatPhaseShow(pr, stateWith([{ phase: 0, id: 'm' }, { phase: 0, id: 'k' }]), 2);
+    const out = formatPhaseShow(pr, stateWith([{ phase: 'Mix', id: 'm' }, { phase: 'Mix', id: 'k' }]), 2);
     expect(out).not.toContain('[manual confirmation required]');
     expect(out).not.toContain('[reading]');
     expect(out).not.toContain('reading-msg');
@@ -320,23 +322,23 @@ describe('formatPhaseShow call-it-twice / overwrite semantics', () => {
 describe('formatVerifyResult last-phase boundary', () => {
   it('single-phase verify: index 0 with totalPhases 1 -> "verified — all phases complete"', () => {
     const pr = singleMechPhase(0);
-    const out = formatVerifyResult(pr, stateWith([{ phase: 0, id: 'x' }]), 1);
+    const out = formatVerifyResult(pr, stateWith([{ phase: 'P', id: 'x' }]), 1);
     expect(out).toContain('PHASE 0 verified — all phases complete, run `checklist done`');
     expect(out).not.toContain('proceed to PHASE 1');
   });
 
   it('non-last verify still proceeds; exact-last vs penultimate differ', () => {
-    const lastOut = formatVerifyResult(singleMechPhase(2), stateWith([{ phase: 2, id: 'x' }]), 3);
+    const lastOut = formatVerifyResult(singleMechPhase(2), stateWith([{ phase: 'P', id: 'x' }]), 3);
     expect(lastOut).toContain('all phases complete');
 
-    const penultOut = formatVerifyResult(singleMechPhase(1), stateWith([{ phase: 1, id: 'x' }]), 3);
+    const penultOut = formatVerifyResult(singleMechPhase(1), stateWith([{ phase: 'P', id: 'x' }]), 3);
     expect(penultOut).toContain('PHASE 1 verified, proceed to PHASE 2');
     expect(penultOut).not.toContain('all phases complete');
   });
 
   it('totalPhases undefined: no "verified — all phases complete", but DOES emit the proceed verdict', () => {
     // done===total so the verdict block runs; isLast false => proceed line.
-    const out = formatVerifyResult(singleMechPhase(0), stateWith([{ phase: 0, id: 'x' }]), undefined);
+    const out = formatVerifyResult(singleMechPhase(0), stateWith([{ phase: 'P', id: 'x' }]), undefined);
     expect(out).toContain('PHASE 0 verified, proceed to PHASE 1');
     expect(out).not.toContain('all phases complete');
   });
@@ -350,7 +352,7 @@ describe('formatVerifyResult last-phase boundary', () => {
       ],
       mechanicalPassed: 1, mechanicalTotal: 2, manualCount: 0,
     };
-    const out = formatVerifyResult(pr, stateWith([{ phase: 0, id: 'a' }]), 3);
+    const out = formatVerifyResult(pr, stateWith([{ phase: 'Build', id: 'a' }]), 3);
     expect(out).not.toContain('verified');
     expect(out).not.toContain('proceed to PHASE');
   });
@@ -379,7 +381,7 @@ describe('formatVerifyResult summary-line equivalence classes', () => {
     };
     // unchecked -> "manual: 1 pending"; checked -> remaining 0 -> no line.
     expect(formatVerifyResult(pr, emptyState())).toContain('manual: 1 pending');
-    expect(formatVerifyResult(pr, stateWith([{ phase: 0, id: 'r' }]))).not.toContain('manual:');
+    expect(formatVerifyResult(pr, stateWith([{ phase: 'Review', id: 'r' }]))).not.toContain('manual:');
   });
 
   it('manual checked count only counts manual-kind items, not stray mechanical state entries with same id', () => {
@@ -394,7 +396,7 @@ describe('formatVerifyResult summary-line equivalence classes', () => {
       mechanicalPassed: 1, mechanicalTotal: 1, manualCount: 2,
     };
     // Only the mechanical id is in state. manualChecked must be 0 -> remaining 2.
-    const out = formatVerifyResult(pr, stateWith([{ phase: 0, id: 'mech' }]), 3);
+    const out = formatVerifyResult(pr, stateWith([{ phase: 'Mix', id: 'mech' }]), 3);
     expect(out).toContain('manual: 2 pending');
   });
 
@@ -446,7 +448,7 @@ describe('formatOverview current-phase math', () => {
   it('a LATER phase started before an earlier one: current phase is the earliest incomplete (PHASE 0)', () => {
     // Phase 2 has progress, phases 0 & 1 untouched. currentPhase must be 0 (first
     // incomplete encountered), NOT 2. This is the out-of-order blind spot.
-    const state = stateWith([{ phase: 2, id: 'c1' }]);
+    const state = stateWith([{ phase: 'C', id: 'c1' }]);
     const out = formatOverview(cfg3, state);
     expect(out).toContain('current phase: PHASE 0');
   });
@@ -455,8 +457,8 @@ describe('formatOverview current-phase math', () => {
     // Phase 0 complete, phase 1 untouched, phase 2 has progress.
     // First non-complete walking 0..n is phase 1 (pending) -> current = 1.
     const state = stateWith([
-      { phase: 0, id: 'a1' }, { phase: 0, id: 'a2' },
-      { phase: 2, id: 'c1' },
+      { phase: 'A', id: 'a1' }, { phase: 'A', id: 'a2' },
+      { phase: 'C', id: 'c1' },
     ]);
     const out = formatOverview(cfg3, state);
     expect(out).toContain('current phase: PHASE 1');
@@ -464,8 +466,8 @@ describe('formatOverview current-phase math', () => {
 
   it('all phases complete EXCEPT the last yields current phase = last index', () => {
     const state = stateWith([
-      { phase: 0, id: 'a1' }, { phase: 0, id: 'a2' },
-      { phase: 1, id: 'b1' },
+      { phase: 'A', id: 'a1' }, { phase: 'A', id: 'a2' },
+      { phase: 'B', id: 'b1' },
     ]);
     const out = formatOverview(cfg3, state);
     expect(out).toContain('current phase: PHASE 2');
@@ -474,9 +476,9 @@ describe('formatOverview current-phase math', () => {
 
   it('every phase complete -> "all phases passed" and NO "current phase" line', () => {
     const state = stateWith([
-      { phase: 0, id: 'a1' }, { phase: 0, id: 'a2' },
-      { phase: 1, id: 'b1' },
-      { phase: 2, id: 'c1' },
+      { phase: 'A', id: 'a1' }, { phase: 'A', id: 'a2' },
+      { phase: 'B', id: 'b1' },
+      { phase: 'C', id: 'c1' },
     ]);
     const out = formatOverview(cfg3, state);
     expect(out).toContain('all phases passed');
@@ -485,7 +487,7 @@ describe('formatOverview current-phase math', () => {
 
   it('single-phase config, complete -> "all phases passed"', () => {
     const cfg1 = makeConfig([{ name: 'Solo', checks: [{ id: 's', description: '' }] }]);
-    const out = formatOverview(cfg1, stateWith([{ phase: 0, id: 's' }]));
+    const out = formatOverview(cfg1, stateWith([{ phase: 'Solo', id: 's' }]));
     expect(out).toContain('all phases passed');
   });
 
@@ -516,7 +518,7 @@ describe('formatOverview current-phase math', () => {
   });
 
   it('partial-progress phase reports "done/total" with the real total, and pads name to width 20', () => {
-    const state = stateWith([{ phase: 0, id: 'a1' }]);
+    const state = stateWith([{ phase: 'A', id: 'a1' }]);
     const line = formatOverview(cfg3, state).split('\n').find(l => l.includes('PHASE 0:'))!;
     expect(line).toContain('[ ] 1/2');
     // name 'A' uppercased + padEnd(20): "A" + 19 spaces between name and status.

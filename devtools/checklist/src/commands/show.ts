@@ -1,15 +1,16 @@
 import { loadChecklist } from '../loader.js';
-import { loadState } from '../state.js';
+import { loadState, stateFilePath } from '../state.js';
 import { findPhaseIndex, gatePriorPhases, runPhase, resolveDir } from '../resolver.js';
 import { formatOverview, formatPhaseShow, formatGateFailure } from '../formatter.js';
 
 export async function showCommand(phaseArg?: string, options?: { dir?: string; path?: string }): Promise<void> {
   const cwd = resolveDir(options?.dir);
-  const targetPath = options?.path || cwd;
+  const targetPath = options?.path || process.cwd();   // key by project cwd, not the shared skill dir
+  const stateFile = stateFilePath(cwd, targetPath);
 
   try {
     const config = loadChecklist(cwd);
-    const state = loadState(cwd);
+    const state = loadState(stateFile);
 
     if (!phaseArg) {
       console.log(formatOverview(config, state));

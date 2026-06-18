@@ -28,10 +28,13 @@ function emptyState(): ChecklistState {
   return { checked: {} };
 }
 
-function stateWith(entries: { phase: number; id: string; status: 'pass' | 'fail' | 'error'; message: string }[]): ChecklistState {
+// State is keyed by phase NAME now (case-folded), not by numeric index. Each
+// entry names its phase by NAME; the helper folds case to match phaseKeyOf in
+// state.ts (so "Build" and "build" reconcile).
+function stateWith(entries: { phase: string; id: string; status: 'pass' | 'fail' | 'error'; message: string }[]): ChecklistState {
   const state: ChecklistState = { checked: {} };
   for (const e of entries) {
-    const key = String(e.phase);
+    const key = e.phase.toLowerCase();
     if (!state.checked[key]) state.checked[key] = {};
     state.checked[key][e.id] = { status: e.status, message: e.message };
   }
@@ -121,7 +124,7 @@ describe('formatOverview', () => {
   });
 
   it('some items checked in phase 0 shows partial progress', () => {
-    const state = stateWith([{ phase: 0, id: 'a', status: 'pass', message: '' }]);
+    const state = stateWith([{ phase: 'Setup', id: 'a', status: 'pass', message: '' }]);
     const result = formatOverview(config, state);
     expect(result).toContain('[ ] 1/2');
     expect(result).toContain('current phase: PHASE 0');
@@ -129,8 +132,8 @@ describe('formatOverview', () => {
 
   it('phase 0 complete, phase 1 pending shows phase 0 passed and current phase 1', () => {
     const state = stateWith([
-      { phase: 0, id: 'a', status: 'pass', message: '' },
-      { phase: 0, id: 'b', status: 'pass', message: '' },
+      { phase: 'Setup', id: 'a', status: 'pass', message: '' },
+      { phase: 'Setup', id: 'b', status: 'pass', message: '' },
     ]);
     const result = formatOverview(config, state);
     // Phase 0 line should show passed
@@ -145,9 +148,9 @@ describe('formatOverview', () => {
 
   it('all phases complete shows "all phases passed"', () => {
     const state = stateWith([
-      { phase: 0, id: 'a', status: 'pass', message: '' },
-      { phase: 0, id: 'b', status: 'pass', message: '' },
-      { phase: 1, id: 'c', status: 'pass', message: '' },
+      { phase: 'Setup', id: 'a', status: 'pass', message: '' },
+      { phase: 'Setup', id: 'b', status: 'pass', message: '' },
+      { phase: 'Build', id: 'c', status: 'pass', message: '' },
     ]);
     const result = formatOverview(config, state);
     expect(result).toContain('all phases passed');
@@ -167,7 +170,7 @@ describe('formatOverview', () => {
       { name: 'Deploy', checks: [{ id: 'd', description: '' }] },
     ]);
     const state = stateWith([
-      { phase: 0, id: 'a', status: 'pass', message: '' },
+      { phase: 'Setup', id: 'a', status: 'pass', message: '' },
     ]);
     const result = formatOverview(threePhaseConfig, state);
     expect(result).toContain('current phase: PHASE 0');
@@ -185,8 +188,8 @@ describe('formatOverview', () => {
       { name: 'Deploy', checks: [{ id: 'e', description: '' }] },
     ]);
     const state = stateWith([
-      { phase: 0, id: 'a', status: 'pass', message: '' },
-      { phase: 1, id: 'c', status: 'pass', message: '' },
+      { phase: 'Setup', id: 'a', status: 'pass', message: '' },
+      { phase: 'Build', id: 'c', status: 'pass', message: '' },
     ]);
     const result = formatOverview(threePhaseConfig, state);
     expect(result).toContain('current phase: PHASE 0');
@@ -270,7 +273,7 @@ describe('formatPhaseShow', () => {
       mechanicalTotal: 1,
       manualCount: 0,
     };
-    const state = stateWith([{ phase: 0, id: 'lint', status: 'pass', message: 'ok' }]);
+    const state = stateWith([{ phase: 'Build', id: 'lint', status: 'pass', message: 'ok' }]);
     const result = formatPhaseShow(phaseResult, state);
     expect(result).toContain('[x]');
     expect(result).not.toContain('[manual confirmation required]');
@@ -291,8 +294,8 @@ describe('formatPhaseShow', () => {
       manualCount: 0,
     };
     const state = stateWith([
-      { phase: 2, id: 'lint', status: 'pass', message: '' },
-      { phase: 2, id: 'test', status: 'pass', message: '' },
+      { phase: 'Build', id: 'lint', status: 'pass', message: '' },
+      { phase: 'Build', id: 'test', status: 'pass', message: '' },
     ]);
     const result = formatPhaseShow(phaseResult, state);
     expect(result).toContain('PHASE 2 passed, proceed to PHASE 3');
@@ -307,7 +310,7 @@ describe('formatPhaseShow', () => {
       mechanicalTotal: 1,
       manualCount: 0,
     };
-    const state = stateWith([{ phase: 2, id: 'ship', status: 'pass', message: '' }]);
+    const state = stateWith([{ phase: 'Deploy', id: 'ship', status: 'pass', message: '' }]);
     const result = formatPhaseShow(phaseResult, state, 3); // 3 phases -> index 2 is last
     expect(result).toContain('all phases complete');
     expect(result).toContain('checklist done');
@@ -323,7 +326,7 @@ describe('formatPhaseShow', () => {
       mechanicalTotal: 1,
       manualCount: 0,
     };
-    const state = stateWith([{ phase: 0, id: 'lint', status: 'pass', message: '' }]);
+    const state = stateWith([{ phase: 'Build', id: 'lint', status: 'pass', message: '' }]);
     const result = formatPhaseShow(phaseResult, state, 3);
     expect(result).toContain('proceed to PHASE 1');
   });
@@ -341,7 +344,7 @@ describe('formatPhaseShow', () => {
       mechanicalTotal: 3,
       manualCount: 0,
     };
-    const state = stateWith([{ phase: 0, id: 'lint', status: 'pass', message: '' }]);
+    const state = stateWith([{ phase: 'Build', id: 'lint', status: 'pass', message: '' }]);
     const result = formatPhaseShow(phaseResult, state);
     expect(result).toContain('1/3 completed');
   });
@@ -396,7 +399,7 @@ describe('formatVerifyResult', () => {
       mechanicalTotal: 1,
       manualCount: 0,
     };
-    const state = stateWith([{ phase: 7, id: 'done-item', status: 'pass', message: 'ok' }]);
+    const state = stateWith([{ phase: 'Disposition', id: 'done-item', status: 'pass', message: 'ok' }]);
     const result = formatVerifyResult(phaseResult, state, 8); // 8 phases -> index 7 is last
     expect(result).toContain('all phases complete');
     expect(result).toContain('checklist done');
@@ -414,7 +417,7 @@ describe('formatVerifyResult', () => {
       mechanicalTotal: 1,
       manualCount: 0,
     };
-    const state = stateWith([{ phase: 0, id: 'lint', status: 'pass', message: 'ok' }]);
+    const state = stateWith([{ phase: 'Build', id: 'lint', status: 'pass', message: 'ok' }]);
     const result = formatVerifyResult(phaseResult, state, 8);
     expect(result).toContain('proceed to PHASE 1');
   });
@@ -486,7 +489,7 @@ describe('formatVerifyResult', () => {
       mechanicalTotal: 0,
       manualCount: 1,
     };
-    const state = stateWith([{ phase: 1, id: 'code-review', status: 'pass', message: 'confirmed' }]);
+    const state = stateWith([{ phase: 'Review', id: 'code-review', status: 'pass', message: 'confirmed' }]);
     const result = formatVerifyResult(phaseResult, state);
     expect(result).toContain('[x]');
     expect(result).toContain('confirmed');
@@ -561,7 +564,7 @@ describe('formatVerifyResult', () => {
       mechanicalTotal: 0,
       manualCount: 3,
     };
-    const state = stateWith([{ phase: 0, id: 'review-a', status: 'pass', message: '' }]);
+    const state = stateWith([{ phase: 'Review', id: 'review-a', status: 'pass', message: '' }]);
     const result = formatVerifyResult(phaseResult, state);
     expect(result).toContain('manual: 2 pending');
   });
@@ -577,7 +580,7 @@ describe('formatVerifyResult', () => {
       mechanicalTotal: 0,
       manualCount: 1,
     };
-    const state = stateWith([{ phase: 0, id: 'review-a', status: 'pass', message: '' }]);
+    const state = stateWith([{ phase: 'Review', id: 'review-a', status: 'pass', message: '' }]);
     const result = formatVerifyResult(phaseResult, state);
     expect(result).not.toContain('manual:');
   });

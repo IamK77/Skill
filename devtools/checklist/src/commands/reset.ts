@@ -1,6 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { clearState } from '../state.js';
+import { clearState, stateFilePath } from '../state.js';
 import { resolveDir, clearActivePointer } from '../resolver.js';
 
 const CONFIG_FILE = '.checklist.yml';
@@ -24,7 +24,11 @@ export function resetCommand(options?: { dir?: string; path?: string }): void {
     return; // ensure the destructive ops below never run even if exit is stubbed
   }
 
-  clearState(targetDir);
+  // reset is per-(skill,target): it clears the state file for THIS skill against
+  // THIS target only, leaving any other target's state for the same skill intact.
+  const target = options?.path || process.cwd();   // key by project cwd, not the shared skill dir
+  const stateFile = stateFilePath(targetDir, target);
+  clearState(stateFile);
   const pointerCleared = clearActivePointer(targetDir);
   const pointerNote = pointerCleared ? ' and active pointer' : '';
   console.log(`checklist reset: cleared state${pointerNote} for ${targetDir}`);
