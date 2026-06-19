@@ -2,24 +2,19 @@
 name: motion
 description: >
   The motion, gesture & feel lens for a frontend build — where every animation
-  earns its place, gesture conflicts are resolved, and the feel IS the product.
-  Use after the build works, when adding interaction physics, when a UI "feels
-  sluggish / disconnected / jank" or "the gesture fights the scroll", or when
-  auditing existing animations for purpose and performance. The one shift: every
-  animation maps to a PURPOSE (orient on state change, show causality, mask
-  latency, direct attention) and its dynamics come from physics (spring vs
-  easing, never confused); gestures arbitrate intent; the feel is the product;
-  compositor-only properties + a real prefers-reduced-motion path are
-  non-negotiable. The agent animates because it can — `transition: all 0.3s`,
-  layout-thrashing, no reduced-motion path — feeling none of the jank, so
-  motion must be purpose-gated and physics-driven. Triggers on "animation /
-  transition / motion / spring / physics", "gesture / drag / scroll / swipe /
+  earns its place and the feel IS the product.
+  Use after the build works, when adding interaction physics, when a UI feels
+  sluggish / janky or the gesture fights the scroll, or auditing animations.
+  The one shift: every animation maps to a PURPOSE and its dynamics come from
+  physics (spring vs easing, never confused); the feel is the product; compositor-
+  only properties + a real reduced-motion path are non-negotiable — the agent
+  animates because it can, feeling none of the jank, so motion must be gated.
+  Triggers on "animation / transition / motion /
+  spring / damping / bounce / easing / physics", "gesture / drag / scroll / swipe /
   scroll-vs-drag", "feels laggy / disconnected / jank / stiff / floaty",
-  "prefers-reduced-motion / a11y", "FLIP / View Transitions / scroll-driven",
-  "60fps / compositor / layout thrashing / will-change", "feels native /
-  feels like an app / hand-feel / touch", "spring / damping / bounce / easing
-  curve", "stagger / orchestration / shared element / morph", "purpose /
-  purposeless / animation without a job".
+  "prefers-reduced-motion / a11y", "FLIP / View Transitions / scroll-driven", "60fps /
+  compositor / layout thrashing / will-change", "feels native / hand-feel / touch /
+  stagger / orchestration / shared element / morph".
 argument-hint: "[the UI / component / interaction to give purposeful motion and physics]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

@@ -6,19 +6,15 @@ description: >
   committed, when establishing or auditing the depth model, or when surfaces "look flat /
   look cheap / look wrong but I can't say why." The one shift: depth comes from ONE
   consistent light model — layered shadows sharing a direction, a tokenized elevation
-  z-scale (resting / raised / overlay / modal), concentric radii (inner = outer − padding),
-  and texture only with a job — the agent invents a fuzzy box-shadow per component and four
-  light directions, feeling no wrongness, so the light model must be DECIDED and gated.
-  Triggers on "shadow / box-shadow / elevation / depth / z-index", "border-radius / corner /
-  squircle / rounded", "gradient / texture / grain / banding / noise", "it looks flat /
-  looks cheap / looks plasticky / looks off", "light model / surface gradient / top highlight
-  / contact shadow", "depth tokens / elevation tokens / z-scale", "concentric / inner radius
-  / outer radius", "card / modal / dropdown / raised surface", "glassmorphism / frosted /
-  backdrop blur / scrim", "aurora / mesh gradient / ambient background". Depth is not a
-  pile of ad-hoc box-shadows — it is a system: one light direction driving four coordinated
-  outputs (cast shadow, contact shadow, top-edge highlight, surface gradient), mapped to a
-  small tokenized z-scale, with radii concentric and shape intentional, and gradient or
-  texture present only when named.
+  z-scale, concentric radii, and texture only with a job — the agent invents a fuzzy
+  box-shadow per component and four light directions, feeling no wrongness, so it must
+  be gated.
+  Triggers on "shadow / box-shadow / elevation / depth / z-index / z-scale / depth tokens",
+  "border-radius / corner / squircle / rounded", "gradient / texture / grain / banding /
+  noise", "it looks flat / looks cheap / looks plasticky / looks off", "card / modal / dropdown
+  / raised surface",
+  "glassmorphism / frosted / backdrop blur / scrim", "aurora / mesh gradient / ambient
+  background".
 argument-hint: "[the UI / component / design system to give a coherent depth model]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

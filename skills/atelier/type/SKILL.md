@@ -2,19 +2,16 @@
 name: type
 description: >
   The type & text lens for a frontend build — where the scale, rhythm, and language-resilience
-  of every string are decided, and where "looks amateur" and "won't work in Japanese" are both
-  fixed. Use when establishing or auditing a type system, when text looks off (too many sizes,
-  wrong spacing, uneven rhythm), or when the UI has never been tested outside English. The one
-  shift: a modular type SCALE + a spacing SCALE on the same rhythm (never magic px sized by
-  eye), AND text that survives EVERY language (i18n/BiDi/CJK/locale) — the agent nudges
-  font-sizes until they "look right" and tests only in English, so the scale and the i18n
-  robustness must be decided and gated. Triggers on "type scale / modular scale / font size /
-  font pairing", "spacing / padding / margin / gap / vertical rhythm", "line height / measure /
-  line length / text wrap", "tabular numbers / numerics / data table typography",
-  "RTL / BiDi / right-to-left / Arabic / Hebrew", "CJK / Chinese / Japanese / Korean",
-  "i18n / internationalization / locale / pluralization", "webfont / CLS / font-display /
-  fallback stack", "letter-spacing / tracking / kerning / OpenType / ligatures",
-  "text looks off / sizes inconsistent / spacing by eye / magic px".
+  of every string are decided. Use when establishing or auditing a type system, when text looks
+  off, or when the UI has never been tested outside English. The one shift: a modular type SCALE
+  + a spacing SCALE on the same rhythm (never magic px), AND text that survives EVERY language
+  (i18n/BiDi/CJK/locale) — the agent nudges font-sizes until they "look right" and tests only in
+  English, so the scale and the i18n robustness must be gated.
+  Triggers on "type scale / modular scale / font size / font pairing", "spacing / padding /
+  margin / gap / vertical rhythm", "line height / measure / line length / text wrap", "tabular
+  numbers / numerics / data table typography", "RTL / BiDi / CJK / i18n / locale /
+  pluralization / internationalization", "webfont / CLS / font-display / fallback stack",
+  "letter-spacing / tracking / kerning / OpenType", "text looks off / spacing by eye / magic px".
 argument-hint: "[the UI / component / design system to give a type system and i18n robustness]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

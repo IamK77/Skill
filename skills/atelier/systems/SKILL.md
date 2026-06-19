@@ -1,26 +1,18 @@
 ---
 name: systems
 description: >
-  The design-system lens for an atelier build — where every token, component, and
-  pattern becomes one coherent, non-drifting artifact, and where "design says one
-  thing, code does another" is decided. Use after the other atelier lenses have
-  produced their tokens (color, type, form, motion), when establishing or auditing
-  a token architecture, when a component library has started to rot, or when the
-  CSS↔JS boundary is being maintained in two places. The one shift: the design system
-  is itself STATE — so it gets ONE source of truth: tokens cross the CSS↔JS boundary
-  from one source (never a palette maintained in two languages), the component/pattern
-  library is a living artifact (not a stale Figma file), and design→code does not
-  drift. The agent re-types tokens per file and lets the system rot, feeling no
-  wrongness — so the single-source token architecture and the living library must be
-  DECIDED and gated. Consumes the output of atelier's other lenses (color / type /
-  form / motion produce the tokens; systems makes them one non-drifting system) and
-  hands the boundary-enforcement contract to surface:bulwark, which enforces it at
-  1→N. Triggers on "design system / token architecture / token source of truth /
-  CSS↔JS / Style Dictionary / vanilla-extract", "component library / Storybook /
-  visual regression / pattern library", "design→code drift / Figma handoff / design
-  sync", "tokens in two languages / two sources of truth / palette duplication",
-  "living documentation / auto-generated props / stability tier", "one source of
-  truth / token taxonomy / @layer tokens".
+  The design-system lens for an atelier build — where tokens, components, and patterns
+  become one coherent, non-drifting artifact, and "design says one thing, code does the
+  other" is decided. Use after the other atelier lenses have produced their tokens,
+  when auditing a token architecture, or when a component library rots. The one shift: the design system is itself
+  STATE, so it gets ONE source of truth — tokens cross the CSS↔JS boundary from one
+  source, the library is a living artifact, design→code does not drift — the agent
+  re-types tokens per file and lets the system rot, so this is gated. Hands the
+  boundary-enforcement contract to surface:bulwark at 1→N. Triggers on
+  "design system / token architecture / token source of truth / @layer tokens / CSS↔JS /
+  Style Dictionary / vanilla-extract", "component library / Storybook / visual regression
+  / pattern library / living documentation / stability tier", "design→code drift / Figma
+  handoff / design sync / tokens in two languages / two sources of truth".
 argument-hint: "[the design system / component library / token architecture to make non-drifting]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

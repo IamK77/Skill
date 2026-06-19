@@ -6,23 +6,13 @@ description: >
   vertical slice, end to end, deployed. Use right after bearings, when starting to
   build, or when a build that grew wide on mock data is hitting integration pain.
   The one shift: a project almost never dies in a hard component — it dies at the
-  SEAMS (front-end/back-end contract mismatch, hydration mismatch, an auth edge,
-  config that differs in prod, the "last 10%" that becomes a cliff) — and the
-  agent makes this worse by building wide on mock data ("looks 90% done") while
-  the real integration risk it never touched waits for the deadline to detonate.
-  So the skeleton is deliberately the thinnest possible feature that nonetheless
-  passes through every real seam once, on the first day, when the cost to fix a
-  leak is near zero. Triggers on "set up the project / scaffold", "walking
+  SEAMS (contract mismatch, hydration mismatch, an auth edge, config that differs in
+  prod, the "last 10%" cliff) — and the agent makes this worse by building wide on
+  mock data ("looks 90% done") while the real integration risk it never touched waits
+  for the deadline to detonate. Triggers on "set up the project / scaffold", "walking
   skeleton / vertical slice", "wire the API / backend", "SSR hydration mismatch",
   "auth / session setup", "CI/CD / preview deploys", "the types are out of sync /
   contract drift", "it works locally but not in prod", "mock vs real data".
-  Installs the seam checklist (every integration point this architecture really
-  has), the one real-but-trivial slice that pierces the whole stack, the contract
-  generated from a single source so types CANNOT drift (change a server field →
-  the client fails to compile), and the nine-point acceptance gate that proves the
-  build doesn't live in one person's head. The agent does the wiring; you keep the
-  calls it cannot make — which seams are real, and whether the contract is genuine
-  or a hand-copied type that will silently rot.
 argument-hint: "[the project or architecture to prove end-to-end with a walking skeleton]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

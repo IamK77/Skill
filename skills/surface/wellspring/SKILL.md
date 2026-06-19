@@ -1,28 +1,20 @@
 ---
 name: wellspring
 description: >
-  The state-architecture lens for a frontend build — the heart of the system,
-  where the deep models become daily keystrokes. Use after keel's skeleton works,
-  when designing or auditing state, or when "it's out of sync" bugs keep
-  appearing. The one shift: almost all frontend complexity comes from state having
-  MULTIPLE COPIES (DOM, memory model, server DB, URL, localStorage, component
-  state) drifting out of sync — so the craft is to relentlessly CLASSIFY each
-  piece of state into the one bucket that owns it, minimize the source of truth and
-  derive the rest, and model hard interactions as explicit state machines. Most of
-  what a novice calls "global state" is really server-cache in disguise; split it
-  out and the global store shrinks by most of its bulk. Triggers on "state
+  The state-architecture lens for a frontend build — the heart of the system. Use
+  after keel's skeleton works, when designing or auditing state, or when "it's out of
+  sync" bugs keep appearing. The one shift: almost all frontend complexity comes from
+  state having
+  MULTIPLE COPIES (DOM, server DB, URL, localStorage) drifting apart — so the
+  craft is to relentlessly CLASSIFY each piece of state into the one bucket that owns
+  it, minimize the source of truth and derive the rest, and model hard interactions
+  as explicit machines. Triggers on "state
   management", "Redux / Zustand / Context / signals / Jotai", "where should this
   state live", "derived state / single source of truth", "this keeps getting out
   of sync", "useEffect to sync state", "prop drilling", "should this be in the
   URL", "a form's state", "too many boolean flags / loading and error flags". The
-  one shift on data flow: the component tree and the data-dependency graph are
-  different shapes, and every state-management tool is a bypass channel for when
-  they disagree. Installs the five-question classification tree (the store-size
-  thermometer), the duplicate-fact audit and forms-as-deliberate-fork, the
-  implicit-to-explicit state-machine move, and the two-graphs data-flow discipline
-  with composition-over-config and the rule of three. The agent does the wiring;
-  you keep the calls it cannot make — what is truly independent state vs derived,
-  and which bucket each piece belongs in.
+  data-flow shift: the component tree and the data-dependency graph are different
+  shapes, and every state tool is a bypass channel for when they disagree.
 argument-hint: "[the application state / data flow to architect or audit]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

@@ -2,17 +2,15 @@
 name: husbandry
 description: >
   Keep a software system cheaply changeable over its whole life — the phase that
-  is 60–80% of total cost and the most under-resourced: classify and fund the
-  maintenance work, make technical debt visible and pay it down, refactor safely
-  under test, manage defects to root cause, evolve versions/APIs/dependencies
-  without breaking callers or hitting EOL, and handle legacy and retirement —
-  tuned for a world where an agent does the maintaining and reaches for a
-  rewrite, incurs debt invisibly, refactors without a net, and rots the docs.
-  Use when the user is maintaining or evolving an existing system, tackling
-  technical debt or a big-rewrite temptation, refactoring, triaging bugs,
-  bumping a major version or deprecating an API, upgrading dependencies or facing
-  an EOL framework, working a legacy system with no tests, or planning to retire
-  one. Triggers on "manage technical debt", "should we rewrite this", "refactor
+  is 60–80% of total cost and most under-resourced — across: classifying and
+  funding it, making technical debt visible and paying it down, refactoring
+  safely under test, defects to root cause, evolving versions/APIs/deps without
+  breaking callers or hitting EOL, and legacy and retirement — tuned for
+  a world where an agent reaches for a rewrite, incurs debt invisibly, refactors
+  without a net, and rots docs. Use when the user is maintaining or evolving an
+  existing system, tackling technical debt or a big-rewrite temptation,
+  refactoring, triaging bugs, evolving a version/API/dependency, or working or
+  retiring a legacy/EOL system. Triggers on "manage technical debt", "should we rewrite this", "refactor
   safely", "the codebase is a mess", "deprecate this API / semver", "upgrade this
   dependency", "legacy system with no tests", "characterization tests / strangler
   fig", "our docs are stale", "bus factor", "sunset / decommission this service".

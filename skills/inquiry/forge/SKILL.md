@@ -1,29 +1,19 @@
 ---
 name: forge
 description: >
-  The experiment-run lens: turn the method that survived crucible into production
-  experiment code and RUN it to produce confirmation-grade evidence — for any field
-  where you run experiments to publish (machine learning, combinatorial optimization,
-  operations research, systems, scheduling). Use when you are past method design and
-  about to run the real experiments: hardening a prototype, setting up runs on a
-  cluster, organizing results, or building a reproduction package. The one shift: the
-  run is FROZEN and the agent's role switches from developer to OPERATOR — read and
-  execute only, no write — because a coding agent optimizes "the test passed", not
-  "the result is correct", and the shortest path to a passing validator is to edit the
-  validator; and the governing standard is ONE-COMMAND REGENERATION — every table and
-  figure in the paper rebuilds from the raw results by a single command, which buys
-  reproducibility, anti-rot, and the repro package at once. Triggers on "run the
-  experiments", "harden / productionize the prototype", "set up the experiment
-  pipeline", "make this reproducible", "organize my results", "reproduction package",
-  "my results don't match / numbers changed", "experiment provenance / seeds / determinism",
-  "cluster runs / resume failed runs". Installs the hardening standard (config-ize,
-  single metric path, independent feasibility checker, freeze the interface), the
-  provenance archive (per-run id, clean-commit gate), the idempotent execution pipeline
-  with classified failures, the operator permission boundary and graded bug response,
-  the version-tag anti-mixing integrity rule, and the one-command regeneration + clean-env
-  repro smoke test that mean the run is DONE. The agent is the MEANS (the operator that
-  runs and reports), never the author of the numbers; you keep two events — protocol-change
-  decisions and anomalies it cannot auto-attribute.
+  The experiment-run lens: turn the method that survived crucible into production code
+  and RUN it to produce confirmation evidence — for any field that runs
+  experiments to publish (ML, optimization, operations research, systems).
+  Use when you are past method design and about to run the real experiments, or
+  stress-testing a run plan. The one shift: the run is FROZEN and the agent's role
+  switches from developer to OPERATOR — read and execute only, no write — because a
+  coding agent optimizes "the test passed", not "the result is correct", and its shortest
+  path to a passing validator is to edit it; and the governing standard is ONE-COMMAND
+  REGENERATION — every table and figure rebuilds from raw results by one command.
+  Triggers on "run the experiments", "harden /
+  productionize the prototype", "set up the experiment pipeline", "make this reproducible
+  / reproduction package", "organize my results", "my results don't match / numbers
+  changed", "provenance / seeds / determinism", "cluster runs / resume".
 argument-hint: "[the method/protocol to harden and run, or the experiment-run problem you're stuck on]"
 allowed-tools: Read Bash Edit Write
 ---

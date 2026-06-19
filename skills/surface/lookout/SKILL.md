@@ -1,30 +1,21 @@
 ---
 name: lookout
 description: >
-  The delivery-and-observability lens for a frontend build — and the place the
-  suite's ethics stops being philosophy and becomes a launch gate. Use when setting
-  up delivery/monitoring, shipping a metric-driven change, or running an A/B test.
-  The mindset shift: shipping is not the finish line, it is the start of the
-  conversation with reality — so every change is made instantly visible (a preview
-  per PR), the real world is instrumented (RUM is psychophysics encoded as numbers;
-  error tracking; product analytics), and — the heavy part — the moment the metrics
-  dashboard is born it starts pulling every decision, so the objective function and
-  guardrails you set in bearings come back here for their exam. A/B testing is a
-  gradient-descent optimizer: point it at an engagement metric over a human nervous
-  system and it will DISCOVER manipulation as a local optimum with no one designing
-  it — the real villain is the loss function. Triggers on "deploy / CI/CD / preview
-  deploys", "feature flags / progressive rollout / canary", "observability /
-  monitoring / RUM / Web Vitals / Sentry / error tracking", "analytics / event
-  tracking / what should we track", "A/B test / experiment", "which metric should we
-  optimize", "is this metric / experiment ethical", "dark pattern". Installs the
-  preview-per-PR + progressive-rollout setup, the two instrument classes (always-on
-  health/perception vs deliberate product analytics), the telemetry discipline (every
-  event tied to a decision; data minimization as ethics), and the pre-launch
-  objective-function ethics gate (north-star + guardrails + adversary pre-mortem +
-  reflective-self + reversibility + friction-symmetry + kill-switch). The agent wires
-  the pipeline and runs the experiments; you keep the calls it cannot make — which
-  metric is the north-star, and whether a winning variant serves the user or exploits
-  them.
+  The delivery-and-observability lens for a frontend build — where the suite's ethics
+  becomes a launch gate. Use when setting up delivery/monitoring, shipping a
+  metric-driven change, or running an A/B test.
+  The mindset shift: shipping is not the finish line but the start of the
+  conversation with reality — so every change is made instantly visible and the real
+  world is instrumented; and the moment the metrics dashboard is born it pulls every
+  decision, so the objective function and guardrails from bearings come back here for
+  their exam. A/B testing is a gradient-descent optimizer: aimed at an engagement
+  metric over a human nervous system it DISCOVERS manipulation as a local optimum —
+  the real villain is the loss function.
+  Triggers on "deploy / CI/CD / preview deploys",
+  "feature flags / progressive rollout / canary", "observability / monitoring / RUM /
+  Web Vitals", "analytics / event tracking", "A/B test / experiment",
+  "which metric should we optimize", "is this metric / experiment ethical", "dark
+  pattern".
 argument-hint: "[the delivery/observability to set up, or the metric/experiment to gate]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

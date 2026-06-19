@@ -2,30 +2,19 @@
 name: ledger
 description: >
   The experiment-design lens: turn the surviving method into a protocol that produces
-  evidence a reviewer believes — for any field where you run experiments to publish
-  (machine learning, combinatorial optimization, operations research, systems,
-  scheduling). Use after crucible has a surviving method, when you are planning the
-  experiments, or stress-testing an experiment plan. The one shift: you write down
-  what counts as EVIDENCE before you look at the data. The protocol — claims,
-  instances, baselines, metrics, and the conditions that count as support OR
-  refutation — is written and FROZEN before the main run, because running a pile of
-  experiments and then choosing the good-looking story is the experiment-version of
-  p-hacking, and reviewers smell it. The keystone is a firewall between EXPLORATION
-  (chaos testing / the MVP — generates hypotheses into an append-only notebook, its
-  numbers never enter the paper) and CONFIRMATION (the surviving hypotheses re-run
-  on fresh seeds and instances under the frozen protocol). Triggers on "design the
-  experiments", "experiment protocol", "which baselines / is this comparison fair",
-  "what metrics / statistical test", "ablation / sensitivity / scaling plan",
-  "how many seeds", "p-hacking / data leakage", "compute budget / how long will
-  this take", "pre-register", "is my evaluation honest". Installs the claim-evidence
-  matrix with pre-written verdicts, the exploration/confirmation firewall with
-  run-provenance, the three-layer instance set with leakage guards, the four
-  baseline classes and the fairness protocol, the metrics-and-statistics protocol
-  (paired tests, multiple-comparison correction, effect size), the ablation /
-  sensitivity / failure plan, and the compute budget with a piloted pipeline and a
-  frozen-protocol changelog. The agent is the means (the experiment operator),
-  never the oracle; you keep the bets — the verdicts written before the data, the
-  firewall, and whether an anomaly is a bug or a result.
+  evidence a reviewer believes — for any field that runs experiments to publish (ML,
+  optimization, operations research, systems). Use after crucible lands a method, when
+  planning the experiments, or stress-testing a plan. The one
+  shift: you write down what counts as EVIDENCE before you look at the data — the
+  protocol (claims, instances, baselines, metrics, and the bar for support OR
+  refutation) is FROZEN before the main run, because choosing a good story after the fact
+  is p-hacking. The keystone is a firewall between EXPLORATION (generates
+  hypotheses, never enters the paper) and CONFIRMATION (survivors, fresh seeds).
+  Triggers on "design the experiments",
+  "experiment protocol", "which baselines / is this comparison fair", "what metrics /
+  statistical test / how many seeds", "ablation / sensitivity / scaling plan",
+  "p-hacking / data leakage", "compute budget / how long",
+  "pre-register", "is my evaluation honest".
 argument-hint: "[the method to design experiments for, or an experiment protocol to stress-test]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

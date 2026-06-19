@@ -2,18 +2,17 @@
 name: gungnir
 description: >
   Attack your own system — under explicit authorization — to prove its defenses
-  hold, before launch and continuously after: scope and authorize the test,
-  recon the attack surface, scan and enumerate, exploit and confirm real
-  vulnerabilities (not scanner false positives), chain small flaws into a real
-  attack and show true impact, then report, drive the fix, and re-test. The
-  offensive half of the security pair (the spear) that proves what the `aegis`
-  skill builds (the shield). Authorized, defensive penetration testing of systems
-  you own or have written permission to test — never anything else. Use when the
-  user wants to penetration-test or security-test their own application before
-  launch, validate that a fix actually closed a hole, run a pre-launch security
-  attack, stand up adversarial security validation in CI or on a cadence, or
-  learn to test for OWASP-class vulnerabilities on their own staging system or a
-  deliberately-vulnerable practice lab. Triggers on "pentest my app", "attack my
+  hold, before launch and continuously after: scope and authorize, recon, scan
+  and enumerate, exploit and confirm real vulnerabilities (not scanner false
+  positives), chain them into real impact, then report and re-test. The
+  offensive half of the security pair (the spear) that proves what the
+  `aegis` skill builds (the shield). Authorized, defensive penetration testing of
+  systems you own or have written permission to test — never anything else. Use
+  when the
+  user wants to penetration-test their own application before launch, validate a
+  fix actually closed a hole, stand up adversarial validation in CI or on a
+  cadence, or learn to test for OWASP-class vulnerabilities on their own staging.
+  Triggers on "pentest my app", "attack my
   own system", "is this actually exploitable", "pre-launch security test",
   "red-team my staging", "test for SQL injection / XSS / IDOR", "set up
   continuous security validation", "OWASP testing".

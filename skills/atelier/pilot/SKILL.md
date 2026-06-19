@@ -1,25 +1,17 @@
 ---
 name: pilot
 description: >-
-  Navigate the atelier design-craft suite: given a visual-design task, route to the right lens — and,
-  because design is a system built in layers, to the right ENTRY lens — or to a sibling suite, or say
-  plainly when no skill is warranted. The un-gated front door to the eight atelier lenses (canon, color,
-  type, layout, form, graphics, motion, systems). Use when you're starting, or part-way through, the
-  visual design of an interface and aren't sure which lens fits, suspect several apply in order, or aren't
-  sure the suite is needed at all. The shift it leans on: "make it look good" is not one decision — it is a
-  small SYSTEM of decided, quantified choices, and the highest-value routing is naming WHERE to enter (no
-  system yet → the design language; colors feel cheap → color; looks like a draft → type; cluttered, no
-  focal point → layout; flat / fake depth → form; need a chart, icon set, or canvas → graphics; lifeless or
-  janky → motion; tokens drifting and the system rotting → systems). Triggers on "make this look premium /
-  high-end", "the design feels cheap / generic / AI-default", "which design skill / where do I start",
-  "the colors are off", "it looks like a draft / unstyled", "it's cluttered / no hierarchy", "it feels flat",
-  "the UI feels lifeless / janky", "our design tokens keep drifting", "design system", "redesign this UI".
-  It also redirects ACROSS suites: how CSS/Grid/cascade actually WORK → surface:keel; what to build / the
-  user's mental model / is this a dark pattern → surface:bearings; state & data → surface:wellspring; the
-  unhappy paths, accessibility, performance budget → surface:seaworthy / lookout; general code craft,
-  architecture, testing, security → engineering; realtime/offline correctness → distributed; choosing a
-  library → quarry. It sequences, redirects, refuses, and disambiguates the confusable lenses — it never
-  does the design itself.
+  Navigate the atelier design-craft suite: given a visual-design task, route to the right lens — and the
+  right ENTRY lens — or to a sibling suite, or say plainly when none fits. The un-gated front
+  door to the eight atelier lenses: canon, color, type, layout, form, graphics, motion, systems. Use when
+  starting or part-way through visual design, unsure which lens fits or whether the suite is needed. The
+  shift: "make it look good" is not one decision — it is a small SYSTEM of quantified choices, and the
+  highest-value routing names WHERE to enter the layered system, not always canon. Triggers on "make this
+  look premium / high-end", "feels cheap / generic / AI-default", "which design skill / where do I
+  start", "redesign this UI". Also redirects ACROSS suites: CSS/Grid mechanics → surface:keel; what
+  to build / mental model / dark pattern → surface:bearings; state & data → surface:wellspring; a11y /
+  perf → surface:seaworthy; code craft / testing / security → engineering; realtime → distributed;
+  library → quarry.
 argument-hint: "<the design task, goal, or confusion — e.g. 'make this dashboard look premium' or 'the colors feel cheap'>"
 allowed-tools: Read, Grep, Glob, Bash
 ---

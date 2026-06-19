@@ -2,26 +2,17 @@
 name: seaworthy
 description: >
   The build-it lens for a frontend feature, with one inverted discipline: the
-  happy path is ~40% done, not 90% — a feature's real quality is entirely in how
-  it catches the user when it breaks, is empty, is slow, or is mis-clicked, so you
-  design the UNHAPPY paths first, not as a polish pass that never gets time. Use
-  when building feature slices (after wellspring's state map), or auditing whether
-  a feature is production-grade. The one shift: what you ship is not "a correct
-  program" but a maintained ILLUSION of direct manipulation over a real,
-  asynchronous, failing system — so loading / error / empty / edge states aren't
-  afterthoughts, they ARE the product (illusion-maintenance), and accessibility and
-  a performance budget are built in from the first slice, not bolted on. Triggers
+  happy path is ~40% done, not 90%, so you design the UNHAPPY paths first, not as a
+  polish pass that never gets time. Use when building feature slices (after
+  wellspring's state map), or auditing whether a feature is production-grade. The one
+  shift: what you ship is not "a correct program" but a maintained ILLUSION of direct
+  manipulation over a real, asynchronous, failing system — so loading / error /
+  empty / edge states aren't afterthoughts, they ARE the product, and accessibility
+  and a performance budget are built in from the first slice, not bolted on. Triggers
   on "build this component / feature", "loading / error / empty states", "optimistic
   update", "skeleton screen", "animation / transition", "accessibility / a11y /
   keyboard / screen reader / focus", "performance / Web Vitals / INP / LCP / CLS /
-  bundle size", "it feels janky / slow", "race condition / stale response". Installs
-  the four-state acceptance (loading/error/empty/edge, each with a concrete bar),
-  the illusion-maintenance toolbox (optimistic UI with rollback, animation as causal
-  narrative, honest pending for consequential actions), accessibility built in (semantic
-  HTML, the keyboard walk, focus management, ARIA last), and the performance budget as
-  hard CI numbers that fail the build. The agent writes the happy path; you keep the
-  calls it cannot make — whether an action is cheap-enough to fake optimistically, and
-  what "feels right" actually is.
+  bundle size", "it feels janky / slow", "race condition / stale response".
 argument-hint: "[the feature slice to build production-grade, or to audit for the unhappy paths]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

@@ -2,29 +2,19 @@
 name: forage
 description: >
   The open-source discovery lens: find the few repositories worth your time —
-  before you sink hours into the wrong one — in either of the two modes that
-  finding actually happens in. TARGETED, when you have a concrete need ("a
-  lightweight task queue to replace Celery"): the agent fans out every search
-  seam in parallel and returns a ranked, deduped candidate shortlist.
-  SERENDIPITOUS, when you have no goal and just want to be surprised: the agent
-  ranges the high-signal surfaces (Show HN, off-peak trending, topic corners,
-  taste-feeds) and brings back the orthogonal finds, captured cheaply so none is
-  lost. The one shift: search-syntax mastery is COMMODITIZED — the agent knows
-  every qualifier — so your edge is the NEED-SPEC and which seams to mine, and
-  serendipity is HARVESTED, not searched. Use when looking for a library, tool,
+  before you sink hours into the wrong one — in either mode finding happens in:
+  TARGETED (a concrete need — the agent fans out every search seam in parallel
+  and returns a ranked, deduped shortlist) or SERENDIPITOUS (no goal — the agent
+  ranges the high-signal surfaces and brings back orthogonal finds, captured
+  cheaply). The one shift: search-syntax mastery is COMMODITIZED, so your edge is
+  the NEED-SPEC and which seams to mine, and serendipity is HARVESTED, not
+  searched. Use when looking for a library, tool,
   framework, reference implementation, or alternative; when browsing for
   interesting projects; or when you keep hitting the same dead high-star repos.
   Triggers on "find a library/tool for X", "alternative to Y", "what should I use
   for", "is there a repo that", "show me interesting projects", "good first
-  issue", "discover repos", "browse GitHub", "find open-source projects".
-  Installs the targeted seams (qualifier-combo search · snowball from taste-stars,
-  awesome lists, dependency graphs and Used-by · code-search · issue "alternatives"
-  threads), the wandering surfaces and the adjacency dial, the provenance rule
-  (no invented repo, no fact the agent didn't pull from the source), and the
-  cheap capture discipline. The agent is the MEANS (the parallel miner and the
-  wanderer), never the judge of what's worth it; you keep two things — the
-  need-spec, and the "眼前一亮 / this one's worth a look" verdict. Hands its
-  shortlist to `touchstone` for evaluation.
+  issue", "discover repos", "browse GitHub", "find open-source projects". Hands
+  its shortlist to `touchstone` for evaluation.
 argument-hint: "[a concrete need to hunt for, or a domain/vibe to wander — or nothing, to just browse]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

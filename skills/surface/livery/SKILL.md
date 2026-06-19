@@ -2,26 +2,20 @@
 name: livery
 description: >
   The visual-craft lens for a frontend build — where the surface gets its color,
-  type, depth, and motion, and where "looks amateur" and "won't evolve" are decided.
-  Use after seaworthy's build works, when establishing or auditing a visual language,
-  or when a UI "looks off but I can't say why". The one shift: a polished interface is
-  not a pile of hand-picked values — every visual value (color, size, spacing, radius,
-  shadow, duration) is a TOKEN derived from a small SYSTEM, and the ad-hoc values are
-  the entropy that makes a UI look amateur and impossible to re-theme. Taste picks the
-  system; the system enforces consistency. Most of what reads as "bad design" is a
-  missing system: magic hex scattered everywhere, dark mode done by invert(), shadows
-  with no shared light source, type sized by eye, spacing nudged by eye, motion with no
-  job. Triggers on "color palette / theme / dark mode / oklch / contrast", "typography
+  type, depth, and motion. Use after seaworthy's build works, when establishing or
+  auditing a visual language, or when a UI "looks off". The one
+  shift: a polished interface is
+  not a pile of hand-picked values — every visual value is a TOKEN derived from a
+  small SYSTEM, and ad-hoc values are the entropy that makes a UI look amateur and
+  impossible to re-theme. Taste picks the system; the system enforces it.
+  Triggers on "color / theme / dark
+  mode / oklch / contrast", "typography
   / font / type scale / spacing", "shadow / elevation / depth / border-radius",
   "gradient / icon / image", "animation / transition / motion / gesture / spring",
-  "design system / design tokens", "make it look good / polished / premium", "it looks
-  off / cheap / inconsistent". The benchmark here is not a document — it is a human
-  nervous system (16ms fusion, 100ms "I touched it directly"), so taste is load-bearing
-  and cannot be outsourced; the agent picks plausible-but-incoherent values and feels
-  none of the wrongness, so the system must be DECIDED and gated. Installs the
-  perceptual color system, the modular fluid type scale and its spacing scale, the
-  single-light-source depth model, and purpose-and-physics motion — each committed as
-  tokens before components consume them.
+  "design system / design tokens", "make it look good / polished", "it looks
+  off / cheap / inconsistent". The benchmark is a human nervous system, not a
+  document, so taste is load-bearing and cannot be outsourced; the agent picks
+  plausible-but-incoherent values and feels none of the wrongness.
 argument-hint: "[the UI / component / design system to give a coherent visual language]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

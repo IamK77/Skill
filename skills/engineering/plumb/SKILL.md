@@ -2,18 +2,16 @@
 name: plumb
 description: >
   Audit code for craft — and write it craft-grade — so it stays cheap to read
-  and change: intent-revealing names, small single-purpose functions, comments
-  that explain why (not what), earned abstraction (DRY but not premature),
-  cohesion and low coupling, SOLID and design patterns as guidance not dogma,
-  the trust-chain escape hatches (Any/cast/isinstance/getattr and their
-  cross-language family) contained at the edges, the classic code smells swept,
-  and testability used as the design litmus — tuned for a world where an agent
-  writes plausible-but-clever code, over-abstracts, names vaguely, rots comments,
-  and is itself the next reader. The cross-cutting craft/legibility lens. Use when
-  the user wants a code review or quality audit, asks whether code is clean /
-  readable / well-named / over-engineered, wants to tame complexity or a "clever"
-  module, mentions code smells, SOLID, design patterns, DRY, or refactoring for
-  clarity, or asks "is this good code". Triggers on "review this code", "is this
+  and change, across: intent-revealing names, small focused functions,
+  why-not-what comments, earned abstraction (DRY but not premature), cohesion and
+  low coupling, SOLID and patterns as guidance not dogma, trust-chain escape
+  hatches (Any/cast/isinstance/getattr) contained at the edges, code smells, and
+  testability as the design litmus — tuned for a world where an agent writes
+  plausible-but-clever code, over-abstracts, names vaguely, rots comments, and is
+  the next reader. The cross-cutting craft/legibility lens. Use when the
+  user wants a code review or quality audit, asks whether code is clean or
+  over-engineered, wants to tame a "clever" module, or mentions code smells,
+  SOLID, patterns, DRY, or refactoring. Triggers on "review this code", "is this
   clean / readable", "code smells", "this is too clever / over-engineered",
   "naming", "should I use a design pattern here", "DRY this up", "audit code
   quality", "make this legible".
