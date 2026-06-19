@@ -9,10 +9,9 @@ description: >
   from the product), the visual language that POV demands, the archetype, and what
   "premium" means in measurable terms. The agent, with no taste, defaults to the bland
   statistical mean of its training (e.g. warm-cream-editorial-serif), so these must be
-  DECIDED and GATED. Triggers on "start a design / set up the design / where to start
-  visually", "which visual language / what style / what should this look like", "what
-  kind of surface / what archetype", "design brief / design direction / visual
-  identity", "make it feel premium". The spine to atelier as bearings is to surface:
+  DECIDED and GATED. Triggers on "start a design / where to start visually", "which
+  visual language / what style", "design brief / design direction". The spine to
+  atelier as bearings is to surface:
   canon decides the direction the sibling lenses execute.
 argument-hint: "[the surface, product, or design problem to set a design direction for]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch

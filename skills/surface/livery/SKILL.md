@@ -8,12 +8,9 @@ description: >
   not a pile of hand-picked values — every visual value is a TOKEN derived from a
   small SYSTEM, and ad-hoc values are the entropy that makes a UI look amateur and
   impossible to re-theme. Taste picks the system; the system enforces it.
-  Triggers on "color / theme / dark
-  mode / oklch / contrast", "typography
-  / font / type scale / spacing", "shadow / elevation / depth / border-radius",
-  "gradient / icon / image", "animation / transition / motion / gesture / spring",
-  "design system / design tokens", "make it look good / polished", "it looks
-  off / cheap / inconsistent". The benchmark is a human nervous system, not a
+  Triggers on "color / theme / dark mode", "typography / type scale / spacing",
+  "design system / design tokens", "make it look good / it looks off / cheap". The
+  benchmark is a human nervous system, not a
   document, so taste is load-bearing and cannot be outsourced; the agent picks
   plausible-but-incoherent values and feels none of the wrongness.
 argument-hint: "[the UI / component / design system to give a coherent visual language]"

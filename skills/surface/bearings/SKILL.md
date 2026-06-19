@@ -10,11 +10,8 @@ description: >
   doors get a default for agents); and THE SOURCE OF TRUTH LIVES IN THE USER'S MIND,
   not the database. The one shift:
   frontend is the one discipline whose correctness spec lives in a brain, so taste is
-  load-bearing and cannot be outsourced. Triggers on "starting
-  a frontend project / from scratch", "which framework / React or X", "how should I
-  architect this UI", "what should the data
-  model be", "do we need realtime / offline / collaboration", "SSR or SPA or RSC",
-  "is this design manipulative / dark pattern", "what metric should we optimize".
+  load-bearing and cannot be outsourced. Triggers on "starting a frontend / from
+  scratch", "which framework", "how should I architect this UI".
 argument-hint: "[the frontend product or feature to scope before building]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

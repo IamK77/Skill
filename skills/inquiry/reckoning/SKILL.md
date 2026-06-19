@@ -10,10 +10,8 @@ description: >
   proven otherwise); you prove WHY the method wins with mechanism probes; and you defend
   against the garden of forking
   paths, which the agent era amplifies because cheap experiments make cheating cheap.
-  Triggers on "analyze the results", "read the main table / the
-  ablation", "is this result significant / real / statistical test / effect size",
-  "which is better", "make the figures / plots", "interpret these numbers / why does my
-  method work", "the result looks too good", "review my results / write up".
+  Triggers on "analyze the results", "is this result significant / real", "which is
+  better", "the result looks too good".
 argument-hint: "[the results to analyze, or the analysis/claim/figure you're stuck on]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

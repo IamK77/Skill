@@ -9,9 +9,8 @@ description: >
   microservices, picking a tech stack or database, defining APIs or module
   boundaries, deciding how to realize non-functional requirements (scale,
   availability, security), writing an ADR, or about to build something
-  structurally non-trivial. Triggers on "design the architecture", "what stack
-  should I use", "monolith or microservices", "how should I structure this",
-  "design the data model / API", "system design".
+  structurally non-trivial. Triggers on "design the architecture / system design",
+  "monolith or microservices", "what stack should I use".
 argument-hint: "[system / feature / change to architect]"
 allowed-tools: Read Bash Edit Write
 ---

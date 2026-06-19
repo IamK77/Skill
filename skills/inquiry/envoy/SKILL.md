@@ -10,10 +10,9 @@ description: >
   prior claims, protocol, and probes are its argument, experiments, and discussion — so
   writing strings an existing argument into prose, not composing from scratch; the
   agent polishes and checks consistency, but the human keeps the story and signature,
-  and every number must trace to a run id. Triggers on "write the paper /
-  write up", "intro / related work / experiments section", "which venue / where should
-  I submit", "write a rebuttal / respond to reviewers", "the paper got rejected / where
-  to resubmit", "camera-ready", "reproduction package / anonymize".
+  and every number must trace to a run id. Triggers on "write the paper / write up",
+  "which venue / where should I submit", "write a rebuttal / respond to reviewers",
+  "the paper got rejected / where to resubmit".
 argument-hint: "[the analyzed results/paper to write up, or the writing/venue/rebuttal problem you're stuck on]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---
