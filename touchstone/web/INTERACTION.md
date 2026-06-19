@@ -60,7 +60,8 @@ skill's content with its multi-turn structure; the mini-harness isolates content
 ## Run controls & gating
 
 - `trials` per arm: integer 1–8 (default 4).
-- `concurrency` = 12 (fixed).
+- `concurrency` = 12 local / **8 on claude.ai** (it rate-limits harder). Rate-limit (429/529/503)
+  model calls are **retried** with exponential backoff + jitter; non-rate-limit errors fail fast.
 - **Run button enabled** iff `!running && fixtures.length && configReady`, where
   `configReady = providerReady && (≥1 arm selected) && skillReady`.
 - A status line echoes: env/model, and the cost preview

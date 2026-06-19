@@ -55,13 +55,26 @@ Open the URL, **fill in the provider** (kind + base URL + model + API key) right
 on your machine (the browser never hits a third-party API directly — CORS would block it). Non-secret
 fields persist in `localStorage`; the **key is in memory only, never written to disk**.
 
-### On claude.ai (the artifact)
+### On claude.ai (clone the repo, invoke the artifact)
 
-`skill-ab-experiment.jsx` is a **self-contained** version for a claude.ai artifact — paste the whole
-file in. It embeds the engine, the styles, the skill text, and the fixture, and uses claude.ai's
-injected credentials (no key). It is **generated from these same sources** by `node build-artifact.mjs`
-(so the artifact and the local page render identically and run the identical logic) — don't hand-edit
-it; edit the sources and rebuild.
+Give claude.ai this repo's URL; it clones, and you point it at a **self-contained** artifact:
+
+```
+touchstone/artifacts/<suite>-<name>.jsx     # e.g. touchstone/artifacts/surface-wellspring.jsx
+```
+
+Each artifact embeds the engine, styles, the skill's `SKILL.md`, and the fixture(s) — one file per
+skill, runs on claude.ai's injected credentials (no key), at concurrency 8 (12 trips claude.ai's rate
+limit). It is **generated from these same sources** by `build-artifact.mjs`, so it renders identically
+to the local page and runs the identical logic.
+
+- **Build one locally:** `node build-artifact.mjs --skill surface/wellspring` → `artifacts/surface-wellspring.jsx`.
+- **Kept in sync automatically:** the `touchstone-artifacts` GitHub Action rebuilds and commits the
+  artifacts whenever a source or skill changes (like release-please maintains CHANGELOG) — so the
+  committed file a clone gets is never stale. **Don't hand-edit the artifact; edit the sources.**
+- One transformation is applied to the embedded *data* only: the literal ES-module keyword is escaped
+  to `import` (decode-identity — byte-for-byte the same at runtime) so claude.ai's regex
+  dependency pre-scan doesn't mistake the *reviewed code's* own imports for real dependencies.
 
 ### Headless / CI
 
@@ -123,7 +136,8 @@ Disabled fixtures live in `evals/<suite>/<name>/_disabled-fixtures/` (move back 
 | `web/index.html` | the web UI (the product surface). |
 | `web/tokens.css · type.css · layout.css · form.css · motion.css` | the design system (built with the `atelier` suite). |
 | `web/DESIGN-CANON.md · *-REPORT.md · INTERACTION.md` | the design brief, measured-contrast report, and the visual-agnostic logic spec. |
-| `build-artifact.mjs` | generates the self-contained claude.ai `skill-ab-experiment.jsx` from these sources. |
+| `build-artifact.mjs` | `--skill <suite>/<name>` → generates the self-contained claude.ai artifact into `artifacts/`. Reads from disk (no server); self-checks for stray imports. |
+| `artifacts/<suite>-<name>.jsx` | the generated claude.ai artifacts (one per skill) — kept in sync by the `touchstone-artifacts` Action; don't hand-edit. |
 | `color-build.mjs` | rebuilds + **measures** the colour tokens' contrast (WCAG + APCA); exits non-zero on a floor miss (CI-able). |
 | `providers.mjs · node-lib.mjs · server.mjs` | the model client, Node-only loaders, and the local server. |
 | `run.mjs · compare.mjs · regrade.mjs` | headless CLI variants. |
