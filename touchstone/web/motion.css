@@ -1,0 +1,65 @@
+/* skill-lab — motion language (single source). Built by atelier:motion.
+ * Budget (canon) = restrained → minimal. This is an INSTRUMENT: motion may only orient, show
+ * causality, or mask latency — never read as marketing flourish. Compositor-only (transform/opacity).
+ * Nothing fires repeatedly or unpredictably during reading.
+ */
+
+:root {
+  /* durations — discrete UI ≤200ms; the bar fill (latency-mask/progress) may reach 240ms */
+  --dur-instant: 0ms;     /* focus rings — no transition */
+  --dur-fast:    120ms;   /* hover / press feedback */
+  --dur-base:    180ms;   /* entrance / discrete transitions */
+  --dur-fill:    240ms;   /* result bar grow (progress) */
+  /* easing tokens — entrance ease-out, exit ease-in, A→B ease-in-out */
+  --ease-out:    cubic-bezier(0, 0, 0.2, 1);
+  --ease-in:     cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---- PURPOSE-CLASSIFIED animations (each maps to a job; nothing decorative) ---- */
+
+/* feedback — primary CTA acknowledges the pointer (transform only) */
+.btn-run { transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out); }
+.btn-run:hover:not(:disabled) { transform: translateY(-1px); }
+.btn-run:active:not(:disabled) { transform: translateY(0); }
+
+/* feedback — input/control focus & fill (opacity/colour only; focus ring itself is instant) */
+.field input, .field select { transition: border-color var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out); }
+
+/* progress / latency-mask — result bar grows via scaleX (NEVER width). transform-origin set in layout.css. */
+.bar-fill {
+  transform: scaleX(var(--fill, 0));            /* JS sets --fill = mean/10 (0..1) */
+  transition: transform var(--dur-fill) var(--ease-out);
+}
+
+/* orient — the result panel and freshly-arrived sections fade+rise once on mount (not on every update) */
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.result-panel, .error-block { animation: rise var(--dur-base) var(--ease-out) both; }
+
+/* causality — details disclosure (the review grows from its summary) */
+details.trial > .review-body { transform-origin: top; }
+
+/* NOTE on the run log: lines are appended INSTANTLY (first feedback <100ms, latency-mask). They are
+ * deliberately NOT animated per-line — animating a fast stream during a run would be noise, and the
+ * reading-period rule forbids repeated/unpredictable motion. The streaming itself is the signal. */
+
+/* ---- GESTURE / intent arbitration (STAGE 1) ----
+ * This surface has NO drag/swipe/carousel/pinch gestures — only native scroll: the page, plus two
+ * inner scrollers (.log, .review-body). The only arbitration needed is scroll-chaining containment,
+ * solved declaratively (no non-passive preventDefault, no touch-action hacks). */
+.log, .review-body { overscroll-behavior: contain; }   /* inner scroll won't chain to the page */
+/* All actions have a non-gesture path (buttons/inputs/keyboard); no gesture-only interaction exists. */
+
+/* ---- REDUCED MOTION (STAGE 2): re-tuned, not stripped — snap, keep the meaning ---- */
+@media (prefers-reduced-motion: reduce) {
+  .btn-run, .field input, .field select { transition: none; }
+  .btn-run:hover:not(:disabled) { transform: none; }      /* keep the colour change as feedback */
+  .bar-fill { transition: none; }                          /* bar jumps to position (still shows the value) */
+  .result-panel, .error-block { animation: none; }         /* appears instantly, no translate (vestibular-safe) */
+  /* .skeleton / badge pulse already disabled in layout.css under this query */
+}
+
+/* ---- COMPOSITOR / 60fps (STAGE 2) ----
+ * Only transform & opacity are animated anywhere above — no width/height/top/left/margin → no reflow,
+ * stays on the compositor thread. No `will-change` left on permanently. The bar track clips the
+ * rounded fill via overflow:hidden (layout.css). Colour transitions are on tokens already in oklch. */

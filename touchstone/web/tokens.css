@@ -1,0 +1,112 @@
+/* skill-lab — color tokens (THE single source of truth)
+ * Built & measured by atelier:color (see color-build.mjs + COLOR-REPORT.md).
+ * Three layers: raw oklch ramp → semantic alias → component reads ONLY the alias.
+ * Theme switch = remap the alias layer (NOT filter:invert). Hex in comments = sRGB fallback.
+ *
+ * CONSISTENCY (local ≡ claude.ai): this block is the canonical source; it is embedded
+ * VERBATIM into both web/index.html and the JSX artifact's <style>. Never hand-type a
+ * color in a component — reference var(--…) so the two targets cannot drift.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* ---- raw neutral ramp — WARM paper&ink (H 85, low chroma, no pure gray) ---- */
+  --paper-50:  oklch(0.985 0.004 85);  /* #fbfaf7 page (paper)        */
+  --paper-100: oklch(0.967 0.006 85);  /* #f6f4f0 raised surface      */
+  --paper-150: oklch(0.945 0.008 85);  /* #efece7 recessed / track    */
+  --n-200:     oklch(0.905 0.010 85);  /* #e3dfd8 faint rule          */
+  --n-300:     oklch(0.850 0.012 85);  /* #d1cdc5 hairline / divider  */
+  --n-400:     oklch(0.720 0.014 85);  /* #a9a49b disabled            */
+  --n-500:     oklch(0.620 0.015 85);  /* #8a867c placeholder / fn-border */
+  --n-600:     oklch(0.520 0.016 85);  /* #6d685f tertiary text       */
+  --n-700:     oklch(0.430 0.016 85);  /* #544f46 secondary text      */
+  --n-800:     oklch(0.320 0.014 85);  /* #36322b strong text         */
+  --ink:       oklch(0.235 0.012 85);  /* #211e18 primary text (ink)  */
+  --ink-950:   oklch(0.180 0.010 85);  /* #14110d headline / max ink  */
+
+  /* ---- raw accent ramp — deep evergreen (H 158); accent-600 is the canon anchor ---- */
+  --accent-700: oklch(0.420 0.078 158); /* #205a3c hover               */
+  --accent-600: oklch(0.470 0.075 158); /* #32684a link/brand/positive */
+  --accent-500: oklch(0.560 0.090 158); /* #418460                     */
+  --accent-300: oklch(0.760 0.075 158); /* #88c09f dark-mode accent    */
+  --accent-200: oklch(0.860 0.045 158); /* #b9dac6                     */
+
+  /* ---- raw semantics ---- */
+  --neg-raw:    oklch(0.500 0.060 55);  /* #7e5a42 sober ochre-brown (NOT alarmist red) */
+  --err-raw:    oklch(0.500 0.130 28);  /* #a04037 genuine system error */
+  --err-bg-raw: oklch(0.960 0.020 30);  /* #ffedea                     */
+
+  /* ===== semantic alias layer (components read ONLY these) — LIGHT ===== */
+  --bg:            var(--paper-50);
+  --surface:       var(--paper-100);
+  --surface-2:     var(--paper-150);   /* recessed input fill / bar track */
+  --elevated:      var(--paper-50);    /* result panel sits on paper, lifted by shadow not fill */
+  --text:          var(--ink);
+  --text-strong:   var(--ink-950);
+  --text-2:        var(--n-700);       /* secondary — caveats live here, NEVER dialed paler */
+  --text-3:        var(--n-600);       /* tertiary / caption */
+  --placeholder:   var(--n-500);
+  --border-subtle: var(--n-300);       /* decorative rule / section hairline (1.4.11-exempt) */
+  --border-strong: var(--n-500);       /* functional input/interactive border (≥3:1) */
+  --accent:        var(--accent-600);
+  --accent-hover:  var(--accent-700);
+  --on-accent:     var(--paper-50);
+  --link:          var(--accent-600);
+  --focus:         var(--accent-600);
+  --delta-pos:     var(--accent-600);  /* positive / zero delta */
+  --delta-neg:     var(--neg-raw);     /* negative delta (sober) */
+  --error:         var(--err-raw);
+  --error-bg:      var(--err-bg-raw);
+
+  /* ---- data-viz (categorical, n=2; gray the control, spend color on the signal) ---- */
+  --viz-track:     var(--paper-150);
+  --viz-base:      var(--n-600);       /* "no skill" arm — grayed, de-emphasized */
+  --viz-treat:     var(--accent-600);  /* "skill as workflow" arm — the signal   */
+}
+
+/* ===== DARK — re-tuned ramp (NOT invert): deep warm base, elevation by lighter surface,
+   off-white text, accent L↑ C↓. Zero-JS baseline via @media; [data-theme] overrides it. ===== */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg:            oklch(0.150 0.008 85);  /* deep warm gray (halation-safe, not #000) */
+    --surface:       oklch(0.190 0.009 85);  /* raised by LIGHTER surface */
+    --surface-2:     oklch(0.235 0.010 85);
+    --elevated:      oklch(0.235 0.010 85);  /* result panel = highest surface */
+    --text:          oklch(0.910 0.006 85);  /* off-white, not #fff */
+    --text-strong:   oklch(0.950 0.005 85);
+    --text-2:        oklch(0.865 0.008 85);  /* secondary (APCA-tuned) */
+    --text-3:        oklch(0.790 0.010 85);  /* tertiary */
+    --placeholder:   oklch(0.560 0.011 85);
+    --border-subtle: oklch(0.340 0.010 85);
+    --border-strong: oklch(0.700 0.013 85);
+    --accent:        oklch(0.760 0.072 158); /* L↑ C↓ vs light */
+    --accent-hover:  oklch(0.700 0.075 158);
+    --on-accent:     oklch(0.180 0.010 85);
+    --link:          oklch(0.760 0.072 158);
+    --focus:         oklch(0.760 0.072 158);
+    --delta-pos:     oklch(0.760 0.072 158);
+    --delta-neg:     oklch(0.770 0.065 60);
+    --error:         oklch(0.780 0.110 28);
+    --error-bg:      oklch(0.260 0.040 28);
+    --viz-track:     oklch(0.190 0.009 85);
+    --viz-base:      oklch(0.620 0.012 85);  /* grayed control */
+    --viz-treat:     oklch(0.760 0.072 158); /* signal */
+  }
+}
+
+/* explicit overrides for the three-state toggle (light / dark / system) */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: oklch(0.150 0.008 85); --surface: oklch(0.190 0.009 85); --surface-2: oklch(0.235 0.010 85);
+  --elevated: oklch(0.235 0.010 85); --text: oklch(0.910 0.006 85); --text-strong: oklch(0.950 0.005 85);
+  --text-2: oklch(0.865 0.008 85); --text-3: oklch(0.790 0.010 85); --placeholder: oklch(0.560 0.011 85);
+  --border-subtle: oklch(0.340 0.010 85); --border-strong: oklch(0.700 0.013 85);
+  --accent: oklch(0.760 0.072 158); --accent-hover: oklch(0.700 0.075 158); --on-accent: oklch(0.180 0.010 85);
+  --link: oklch(0.760 0.072 158); --focus: oklch(0.760 0.072 158);
+  --delta-pos: oklch(0.760 0.072 158); --delta-neg: oklch(0.770 0.065 60);
+  --error: oklch(0.780 0.110 28); --error-bg: oklch(0.260 0.040 28);
+  --viz-track: oklch(0.190 0.009 85); --viz-base: oklch(0.620 0.012 85); --viz-treat: oklch(0.760 0.072 158);
+}
+/* [data-theme="light"] inherits :root (the light default) — no override needed. */

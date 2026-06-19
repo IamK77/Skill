@@ -1,0 +1,14 @@
+{
+  "id": "lobechat-op-usage-derive",
+  "skill": "surface/wellspring",
+  "repo": "lobehub/lobe-chat",
+  "commit": "32cf754ae3d0bcf59bb842e837de7f7b01efb3d2",
+  "pr": "https://github.com/lobehub/lobe-chat/pull/15819",
+  "file": "the operation-usage module, EXACTLY the 3 files the commit modified, in full: src/store/chat/slices/aiChat/actions/gatewayEventHandler.ts (672L) + .../heterogeneousAgentExecutor.ts (1531L) — the two store write-paths — + src/features/Conversation/ChatInput/OpStatusTray.tsx (consumer); plus src/utils/operationUsageMetrics.ts (unchanged context: the accumulate + derive primitives)",
+  "language": "tsx",
+  "domain_tags": ["derived-state", "single-source-of-truth", "store-vs-derive"],
+  "target": "before.txt",
+  "answer": "after.txt",
+  "answer_key": "fix.diff",
+  "fix_summary": "The operation's token-usage total was kept as a PARALLEL ACCUMULATOR in the chat store: BOTH gatewayEventHandler.ts AND heterogeneousAgentExecutor.ts called addUsageToOperationMetrics on every step_complete/turn_metadata event and stored the running total via updateOperationMetadata; OpStatusTray then PREFERRED that stored total, deriving from per-message usage only as a fallback. The maintainer DELETED the stored accumulation in both handlers and made the tray derive the total from per-message usage — explicitly 'single source of truth', fixing drift between the tray and the per-bubble numbers. The util operationUsageMetrics.ts (unchanged) carries both the accumulate primitive and the derive fold, side by side. SCOPE: before.txt is the WHOLE module the maintainer touched, full files, UN-curated — the parallel-accumulation write-path (the actual sin) is in front of the reviewer amid ~2700 lines of real handler code, NOT excerpted to point at the answer. An earlier version omitted the store write-paths, so every trial missed the bug (it was off-screen); that data point was void. NOTE: provenance only — the grader scores against fix.diff."
+}

@@ -1,0 +1,83 @@
+/* skill-lab — depth & shape (single source). Built by atelier:form.
+ * Consumes tokens.css. Restraint is the rule: this is an instrument, not a decorated surface.
+ * canon "kill card-soup" → only the RESULT panel is elevated (the hero); every other section sits
+ * FLAT on the paper (resting), separated by a hairline. Inputs are RECESSED (--surface-2).
+ *
+ * ONE LIGHT MODEL — light direction = overhead (shadows cast straight down; only size/softness
+ * changes per elevation step, never direction). Shadows are hue-tinted (warm, H 85), never black.
+ */
+
+:root {
+  /* ---- radius scale (role-mapped) — realises the fallbacks layout.css references ---- */
+  --radius-xs:   4px;     /* chip / tag-pill inner */
+  --radius-sm:   6px;     /* input / button / bar-fill ends / review-body */
+  --radius-md:   8px;
+  --radius-lg:   12px;    /* the result panel (the one elevated surface) */
+  --radius-2xl:  16px;
+  --radius-full: 9999px;  /* pills, dots, bar-track */
+
+  /* ---- elevation z-scale (light): layered cast (≥2) + contact + top-edge highlight + face gradient ---- */
+  --z-resting: none;                                   /* sections: flat on paper, hairline only */
+  --shadow-raised:                                     /* the result panel */
+    0 1px 2px -1px oklch(0.40 0.020 85 / 0.10),         /* contact */
+    0 8px 24px -4px oklch(0.40 0.020 85 / 0.10);        /* ambient */
+  --shadow-overlay:                                    /* native popovers / future menus */
+    0 2px 5px -1px oklch(0.40 0.020 85 / 0.10),
+    0 16px 40px -6px oklch(0.40 0.020 85 / 0.12);
+  --edge-highlight: inset 0 1px 0 oklch(1 0 0 / 0.55); /* top-edge light on the raised face */
+  /* surface gradient on the raised face — job = DEPTH (named, STAGE 2). 1.5% L delta, oklab interp. */
+  --surface-gradient: linear-gradient(in oklab to bottom, oklch(0.990 0.004 85), oklch(0.975 0.006 85));
+}
+
+/* DARK: diffuse shadows nearly vanish — elevation switches mechanism. The lighter --elevated surface
+   (tokens.css) + the top-edge highlight carry the signal; shadow layers thin but persist. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --shadow-raised:  0 1px 2px oklch(0 0 0 / 0.40), 0 8px 24px -4px oklch(0 0 0 / 0.45);
+    --shadow-overlay: 0 2px 6px oklch(0 0 0 / 0.45), 0 18px 44px -6px oklch(0 0 0 / 0.55);
+    --edge-highlight: inset 0 1px 0 oklch(1 0 0 / 0.08);  /* primary elevation cue on dark */
+    --surface-gradient: linear-gradient(in oklab to bottom, oklch(0.250 0.010 85), oklch(0.228 0.010 85));
+  }
+}
+[data-theme="dark"] {
+  --shadow-raised:  0 1px 2px oklch(0 0 0 / 0.40), 0 8px 24px -4px oklch(0 0 0 / 0.45);
+  --shadow-overlay: 0 2px 6px oklch(0 0 0 / 0.45), 0 18px 44px -6px oklch(0 0 0 / 0.55);
+  --edge-highlight: inset 0 1px 0 oklch(1 0 0 / 0.08);
+  --surface-gradient: linear-gradient(in oklab to bottom, oklch(0.250 0.010 85), oklch(0.228 0.010 85));
+}
+
+/* ---- the one elevated surface ---- */
+.result-panel {
+  box-shadow: var(--edge-highlight), var(--shadow-raised);
+  background-color: var(--elevated);
+  background-image: var(--surface-gradient);          /* face gradient, job = depth */
+  border-color: var(--border-subtle);
+  /* radius-lg already set in layout.css; overflow:hidden so the face gradient + children clip cleanly */
+  overflow: hidden;
+}
+
+/* resting surfaces stay flat — explicit, so no stray shadow creeps in */
+.section, .field, .arm-row, .fixtures-list { box-shadow: var(--z-resting); }
+
+/* CONCENTRIC RADIUS LAW (inner = outer − gap), verified:
+ *   result-panel radius-lg(12) has padding --space-xl(32) → inner elements (bars, scores, breakdown)
+ *   sit far from the corners (32 ≫ 12), so each keeps its role radius without pinching. The bar-track
+ *   is radius-full (a pill — concentric-exempt). review-body radius-sm(6) lives inside <details>, not
+ *   flush within a rounded container. No nesting here violates the law.
+ * Where a rounded child IS flush to a rounded parent in future, apply: inner = outer − padding (≤0 → 0).
+ */
+.bar-track, .bar-fill { border-radius: var(--radius-full); }
+.review-body { border-radius: var(--radius-sm); }
+.tag-pill { border-radius: var(--radius-full); }
+
+/* SHAPE LANGUAGE = plain round, chosen (not defaulted): an instrument reads honest and unfussy;
+ * superellipse/bevel would add personality this POV doesn't want. Applied consistently via the scale. */
+
+/* TEXTURE / GRADIENT intent (STAGE 2):
+ *   - the ONLY gradient is --surface-gradient (job = DEPTH) on the raised face; interpolated in oklab.
+ *   - aurora / mesh / ambient glow: DECLINED on purpose — they are the current "AI aesthetic" and the
+ *     instrument POV rejects decoration without a job.
+ *   - banding: the face gradient is a 1.5% L delta over a bounded panel (not a full-bleed hero), well
+ *     within 8-bit tolerance; no large subtle gradient exists, so grain dithering is not required.
+ *   - no `transparent` fades anywhere (no fade-to-nothing gradients in the system).
+ */

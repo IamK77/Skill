@@ -1,0 +1,139 @@
+/* skill-lab — type system (single source). Built by atelier:type.
+ * Pairs with tokens.css (color). Components reference these tokens / classes — never a magic px.
+ *
+ * FONT STRATEGY = system stacks (decided: identity over flourish).
+ * No webfont, no @font-face, no CDN → local ≡ claude.ai render identically on a given device,
+ * zero CLS, zero FOUT by construction. (Metrics-matched fallback is N/A: there is no webfont to swap.)
+ * Cost accepted: no bespoke Newsreader serif; ui-serif (Apple = New York) carries the quiet
+ * authoritative headline — Apple/OpenAI-native, fitting the "honest instrument" POV.
+ */
+
+:root {
+  /* ---- families ---- */
+  --font-serif: ui-serif, "New York", Georgia, "Times New Roman", serif;          /* headline (quiet authority) */
+  --font-sans:  ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* UI / body */
+  --font-mono:  ui-monospace, "SF Mono", "Menlo", "Cascadia Code", Consolas, monospace; /* data / delta / IDs */
+
+  /* ---- type scale — fluid clamp(), rem intercept (WCAG 1.4.4 safe). Editorial regime: ratio 1.333.
+         Range: 360px → 1040px viewport. The delta numeral is the largest (signature > headline). ---- */
+  --t-delta:   clamp(2.75rem, 2.088rem + 2.94vw, 4rem);     /* 44 → 64  signature metric (mono, tabular) */
+  --t-h1:      clamp(1.875rem, 1.544rem + 1.47vw, 2.5rem);  /* 30 → 40  serif headline (quiet, < delta)  */
+  --t-h2:      clamp(1.5rem, 1.30rem + 0.88vw, 1.875rem);   /* 24 → 30 */
+  --t-h3:      clamp(1.25rem, 1.117rem + 0.59vw, 1.5rem);   /* 20 → 24 */
+  --t-lead:    clamp(1.125rem, 1.026rem + 0.44vw, 1.3125rem); /* 18 → 21 lead/method blurb */
+  --t-body:    1rem;        /* 16  body / method prose */
+  /* ---- compact UI cluster — near-linear ~1.125 (deliberate tool-UI exception) ---- */
+  --t-ui:      0.875rem;    /* 14  controls / table body */
+  --t-small:   0.8125rem;   /* 13  secondary control text */
+  --t-caption: 0.75rem;     /* 12  caption / caveat / log */
+  --t-eyebrow: 0.6875rem;   /* 11  uppercase section label */
+
+  /* ---- line-height (inverse with size) ---- */
+  --lh-display: 1.05;   /* delta / display */
+  --lh-heading: 1.18;   /* h1–h3 (≤1.25) */
+  --lh-body:    1.6;    /* body (≥1.5) */
+  --lh-small:   1.65;   /* small / caption (≥1.6) */
+
+  /* ---- tracking (three-level) ---- */
+  --ls-display: -0.022em;  /* display / headline (≤ −0.02) */
+  --ls-body:    0;
+  --ls-eyebrow: 0.085em;   /* uppercase eyebrow / all-caps (+0.05…0.10) */
+
+  /* ---- weights (hierarchy = size × weight, both tokenized) ---- */
+  --fw-reg: 400; --fw-med: 500; --fw-semi: 600; --fw-bold: 700;
+
+  /* ---- measure ---- */
+  --measure: 68ch;   /* running prose cap (~65–70ch) */
+
+  /* ---- spacing scale (STAGE 1) — base 4px, half-geometric; rem rhythm (md = 1rem = one body line-ish) ---- */
+  --space-base: 4px;
+  --space-2xs: 0.25rem;  /*  4 */
+  --space-xs:  0.5rem;   /*  8 */
+  --space-sm:  0.75rem;  /* 12 */
+  --space-md:  1rem;     /* 16 */
+  --space-lg:  1.5rem;   /* 24 */
+  --space-xl:  2rem;     /* 32 */
+  --space-2xl: 3rem;     /* 48 */
+  --space-3xl: 4rem;     /* 64 */
+  --space-4xl: 6rem;     /* 96 */
+  /* Group-proximity law (gate): section gap (≥2xl) ≥ 2× intra-group gap (md/lg). The editorial
+     "float on paper" depends on it — sections separated by ≥ 2× the within-card spacing. */
+}
+
+/* ================= base typographic rules ================= */
+body, .ui {
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
+  font-variant-numeric: oldstyle-nums;     /* prose numbers sit in text; data uses .mono/.tnum */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* the quiet authoritative serif headline (NOT the signature — kept < delta) */
+.headline {
+  font-family: var(--font-serif);
+  font-size: var(--t-h1);
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-display);
+  font-weight: var(--fw-semi);
+  text-wrap: balance;                       /* no orphaned last line on multi-line headings */
+}
+.h2 { font-family: var(--font-serif); font-size: var(--t-h2); line-height: var(--lh-heading); letter-spacing: var(--ls-display); font-weight: var(--fw-semi); text-wrap: balance; }
+.h3 { font-size: var(--t-h3); line-height: var(--lh-heading); font-weight: var(--fw-semi); text-wrap: balance; }
+
+/* method blurb / lead reading */
+.lead  { font-size: var(--t-lead); line-height: var(--lh-body); max-inline-size: var(--measure); text-wrap: pretty; }
+.prose { font-size: var(--t-body); line-height: var(--lh-body); max-inline-size: var(--measure); text-wrap: pretty; }
+
+/* uppercase section eyebrow */
+.eyebrow {
+  font-size: var(--t-eyebrow);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  font-weight: var(--fw-semi);
+  line-height: var(--lh-small);
+  font-feature-settings: "case" 1, "cpsp" 1;  /* all-caps spacing refinement */
+}
+
+/* caption / caveat / log — secondary/tertiary text (still legible: color sets the floor, not the size) */
+.caption { font-size: var(--t-caption); line-height: var(--lh-small); }
+
+/* data / mono — the signature delta + all numeric columns */
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums lining-nums slashed-zero; }
+.tnum { font-variant-numeric: tabular-nums lining-nums; }   /* any number in a column / updating in place */
+.delta {
+  font-family: var(--font-mono);
+  font-size: var(--t-delta);
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums lining-nums slashed-zero;
+}
+
+/* compact UI text (tool cluster) */
+.t-ui    { font-size: var(--t-ui); }
+.t-small { font-size: var(--t-small); }
+
+/* ================= i18n posture (STAGE 2) ================= */
+/* Product decision: the bench UI is English-only (a dev tool for an English-context suite) — full
+   ICU/locale-routing is out of scope by RESTRAINT (over-building for zero real locales). But the
+   cheap structural correctness that prevents real bugs is non-negotiable and applied here: */
+
+/* 1) Logical properties everywhere (RTL-safe insurance at no cost): components use padding-inline,
+      margin-block, inset-inline, gap, max-inline-size, text-align: start — NOT left/right.
+      (Enforced by convention + the .lead/.prose rules above using max-inline-size, not max-width.) */
+
+/* 2) Arbitrary MODEL/USER-generated text — the review bodies and the run log — can contain ANY
+      script (CJK code/comments, RTL, mixed). Isolate direction + break long code tokens safely. */
+.user-text {
+  unicode-bidi: isolate;          /* (use dir="auto" on the element too) — no direction contamination */
+  overflow-wrap: anywhere;        /* long unbroken code tokens / URLs can't overflow the panel */
+  line-break: strict;             /* respect CJK kinsoku (禁則) if the review contains CJK */
+  white-space: pre-wrap;          /* preserve the review's own line breaks (it's quoted code/prose) */
+}
+
+/* 3) tabular-nums on all data (above) so digits don't jitter as values update in place.
+   4) No string-concatenated UI messages with pluralization risk; the few dynamic strings are
+      simple counts shown beside a fixed label, not grammatical sentences that inflect. */
