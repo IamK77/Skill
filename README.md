@@ -59,6 +59,16 @@ Five suites, each installed as one plugin and documented on its own page. The pe
 
 Every gated skill is the same shape — a `SKILL.md` walking ordered stages, each closed by a hard **GATE** the `checklist` CLI won't let the agent read past until the prior checks are recorded as passed. The navigators (`pilot`) are un-gated dispatchers and carry no `.checklist.yml`.
 
+## Which skills you start, which the agent runs
+
+The skills split by who pulls the trigger — and the line between them is the one thing an agent can't do for you: judgment.
+
+- **You start these.** Each opens with a call only you can make — a taste decision, a one-way-door architecture choice, which gap to bet on — and an agent left to run one alone just fills in a plausible default and hands you a confident, hollow result. Reach for them when *you* are setting direction: `bearings` and `canon` for a frontend's architecture and visual language, `groundwork` and `load-bearing` for what to build and how to structure it, `prospect` / `crucible` / `ledger` / `reckoning` / `envoy` for the bets in a research project, `touchstone` for trusting a dependency. The agent still does the work behind each gate — it just can't place the bet. (`gungnir`, offensive security, is yours for a different reason: it must not act without your authorization.)
+- **The agent reaches for these on its own.** They exist because an agent skips them by default — it writes the happy path and stops, ships a vulnerability green, reaches for a distributed lock by reflex. Disciplines like `seaworthy`, `trials`, `assay`, `flightline`, `stationkeeping`, `husbandry`, `plumb`, `holdfast`, and `aegis` are guardrails it should apply to its own output without being asked.
+- **`pilot`** (one per suite) is the front door for either: the agent runs it to route a task — and to tell you when the next call is yours to make.
+
+It's a spectrum, not a wall — many skills are *you set two or three gates, the agent runs the rest*. But it's why the two kinds read differently: a skill you trigger names the decision moment in a line or two; a skill the agent triggers carries a wider net of keywords so it catches the work inside a task.
+
 ## checklist
 
 `checklist` is a TypeScript CLI (npm: [`@iamk77/skill-checklist`](https://www.npmjs.com/package/@iamk77/skill-checklist), built on `commander`). It loads a skill's `.checklist.yml`, tracks per-stage pass/fail state in the skill directory, and refuses to open a stage until every check in every prior stage is recorded as `pass` — not merely present. A check that regresses on re-verify overwrites a stale pass, so the gate reflects current state. (`checklist` calls these units `phases`; the skills present them to the user as `stages` — they are the same thing.)

@@ -10,10 +10,8 @@ description: >
   signals and weighting the un-fakeable ones (commit substance, issue-response
   quality, bus factor, real "Used by", tests and CI). Use when sizing up a repo
   or a batch before depending on, contributing to, or learning from it; or to vet
-  a shortlist from `forage`. Triggers on
-  "is this repo any good", "should I use/trust this library", "evaluate this
-  project", "is this maintained", "is this AI-generated slop", "compare these
-  repos", "vet this dependency", "rate this GitHub project". Hands deep-dive
+  a shortlist from `forage`. Triggers on "is this repo any good", "should I trust
+  this library", "vet this dependency", "is this maintained". Hands deep-dive
   survivors to the engineering suite.
 argument-hint: "[a repo (or batch / forage shortlist) to evaluate, and what you'd use it for]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch

@@ -12,10 +12,8 @@ description: >
   user wants to penetration-test their own application before launch, validate a
   fix actually closed a hole, stand up adversarial validation in CI or on a
   cadence, or learn to test for OWASP-class vulnerabilities on their own staging.
-  Triggers on "pentest my app", "attack my
-  own system", "is this actually exploitable", "pre-launch security test",
-  "red-team my staging", "test for SQL injection / XSS / IDOR", "set up
-  continuous security validation", "OWASP testing".
+  Triggers on "pentest my app / attack my own system", "red-team my staging", "is
+  this actually exploitable", "pre-launch security test".
 argument-hint: "[your own / authorized target to attack — a staging system or lab]"
 allowed-tools: Read Bash Edit Write
 ---

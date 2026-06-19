@@ -9,11 +9,8 @@ description: >
   already have. The one shift: a gap is NOT read out of the literature, it is
   MINED out — by running fixed extraction strategies in parallel — and then it
   must SURVIVE an adversarial "prove it's already been done" attack before you bet
-  on it. Triggers on "what should I work on", "find a research gap / research
-  direction", "literature review", "survey this area", "I have no idea / I'm stuck
-  for a topic", "has anyone done X", "is this novel / is my contribution enough",
-  "pick baselines / benchmark", "reproduce this paper", "review whether this gap
-  holds".
+  on it. Triggers on "what should I work on", "find a research gap / direction",
+  "literature review", "is this novel / has anyone done X".
 argument-hint: "[the rough area to prospect for a gap, or the gap/idea you want stress-tested]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

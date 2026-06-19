@@ -10,10 +10,8 @@ description: >
   criteria written BEFORE the race (you fall in love with what you built), on a scaffold
   whose independent feasibility checker traps the agent's silent bugs (a
   variant that "soars" is usually infeasible); and you measure the ceiling FIRST.
-  Triggers on "design a method / algorithm / model", "how should I approach this", "which
-  variant is better / ablation", "is my contribution novel enough", "prove a bound /
-  approximation ratio / convergence", "oracle / skyline / upper bound experiment",
-  "what's my baseline gap", "is this method real or a bug".
+  Triggers on "design a method / algorithm", "how should I approach this", "which
+  variant is better", "is this method real or a bug".
 argument-hint: "[the gap to turn into a method, or a method/variant to stress-test]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

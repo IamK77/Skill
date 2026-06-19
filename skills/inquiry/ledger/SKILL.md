@@ -10,11 +10,8 @@ description: >
   refutation) is FROZEN before the main run, because choosing a good story after the fact
   is p-hacking. The keystone is a firewall between EXPLORATION (generates
   hypotheses, never enters the paper) and CONFIRMATION (survivors, fresh seeds).
-  Triggers on "design the experiments",
-  "experiment protocol", "which baselines / is this comparison fair", "what metrics /
-  statistical test / how many seeds", "ablation / sensitivity / scaling plan",
-  "p-hacking / data leakage", "compute budget / how long",
-  "pre-register", "is my evaluation honest".
+  Triggers on "design the experiments / experiment protocol", "which baselines / is
+  this comparison fair", "p-hacking / pre-register", "is my evaluation honest".
 argument-hint: "[the method to design experiments for, or an experiment protocol to stress-test]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---
