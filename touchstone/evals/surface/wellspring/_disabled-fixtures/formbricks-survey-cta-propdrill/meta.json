@@ -1,0 +1,14 @@
+{
+  "id": "formbricks-survey-cta-propdrill",
+  "skill": "surface/wellspring",
+  "repo": "formbricks/formbricks",
+  "commit": "b8c361fcf3a8879d1b61e59b01d3e4d3dfe19cd0",
+  "pr": "https://github.com/formbricks/formbricks/pull/7754",
+  "file": "apps/web/app/(app)/environments/[environmentId]/surveys/[surveyId]/(analysis)/summary/components/SurveyAnalysisCTA.tsx",
+  "language": "tsx",
+  "domain_tags": ["prop-drilling", "context", "data-flow"],
+  "target": "before.tsx",
+  "answer": "after.tsx",
+  "answer_key": "fix.diff",
+  "fix_summary": "The maintainer stopped prop-drilling `survey` and `environment` through SurveyAnalysisCTA (which already used useEnvironment() for `project`) and its children; both are now read from context via useSurvey()/useEnvironment(), and the drilled props were removed from the call sites. NOTE: this summary is provenance only — the grader scores against fix.diff (the real change), never this prose."
+}

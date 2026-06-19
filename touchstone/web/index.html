@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>touchstone</title>
+  <!-- atelier design system — authored as lens files, served locally; the claude.ai artifact
+       inlines the same concatenated CSS so the two targets render identically. -->
+  <link rel="stylesheet" href="./web/tokens.css" />
+  <link rel="stylesheet" href="./web/type.css" />
+  <link rel="stylesheet" href="./web/layout.css" />
+  <link rel="stylesheet" href="./web/form.css" />
+  <link rel="stylesheet" href="./web/motion.css" />
+  <!-- FOUC-free theme (zero-JS baseline is in tokens.css; this honours an explicit toggle) -->
+  <script>
+    try { var t = localStorage.getItem('skilllab.theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+  </script>
+  <!-- No build step: React + ReactDOM (UMD globals) + Babel transform the JSX in
+       the browser. The shared engine + harness are pulled in with dynamic import(). -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-presets="react">
+  (async () => {
+    const { useState, useEffect } = React;
+    const core = await import("./core.mjs");      // the SAME engine the terminal uses
+
+    // claude.ai mode: call the Anthropic API directly with NO key — claude.ai injects
+    // authorization. (The original callClaude, inlined so the page is self-contained.)
+    async function callClaudeProxy(messages, opts = {}) {
+      const body = { model: opts.model || "claude-sonnet-4-6", max_tokens: opts.maxTokens ?? 1500, messages };
+      if (opts.system) body.system = opts.system;
+      if (opts.temperature != null) body.temperature = opts.temperature;
+      const r = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error("Anthropic API " + r.status);
+      return (d.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n");
+    }
+
+    // The manipulated variable: the SAME small review loop (draft → self-revise) runs on BOTH arms;
+    // the only difference is whether the skill's guidance is in context.
+    const ARMS = {
+      base:  { label: "no skill",   blurb: "the small review loop (draft → self-revise), no skill in context" },
+      skill: { label: "with skill", blurb: "the same loop, with the skill's guidance in context — the only difference" },
+    };
+    const ARM_ORDER = ["base", "skill"];
+    const clamp = (s) => { const n = Math.round(Number(s)); return Number.isFinite(n) ? Math.max(0, Math.min(10, n)) : 0; };
+    const pct = (x) => (x == null ? "—" : Math.round(x * 100) + "%");
+    const ls = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch (e) { return d; } };
+    const save = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+
+    function App() {
+      const [mode, setMode] = useState(null);           // 'local' | 'claudeai'
+      const [skill] = useState(() => {
+        try { return new URLSearchParams(location.search).get("skill") || "surface/wellspring"; }
+        catch (e) { return "surface/wellspring"; }
+      });
+      const [skillStruct, setSkillStruct] = useState(null);   // {skillMd, references, checklist} for harness
+      const [fixtures, setFixtures] = useState([]);
+      const [profile, setProfile] = useState({});
+
+      const [flavor, setFlavor] = useState(() => ls("skilllab.flavor", "openai"));
+      const [baseUrl, setBaseUrl] = useState(() => ls("skilllab.baseUrl", "https://api.deepseek.com/v1"));
+      const [model, setModel] = useState(() => ls("skilllab.model4", "deepseek-v4-pro"));
+      const [apiKey, setApiKey] = useState("");
+      const [claudeModel, setClaudeModel] = useState("claude-sonnet-4-6");
+
+      const [arms, setArms] = useState({ base: true, skill: true });
+      const [trials, setTrials] = useState(4);
+      const concurrency = 12;
+      const [running, setRunning] = useState(false);
+      const [log, setLog] = useState([]);
+      const [results, setResults] = useState([]);   // [{fixture, arm, meanFound, fpRate, n, records}]
+      const [err, setErr] = useState("");
+      const push = (line) => setLog((l) => [...l.slice(-400), line]);
+
+      useEffect(() => { save("skilllab.flavor", flavor); }, [flavor]);
+      useEffect(() => { save("skilllab.baseUrl", baseUrl); }, [baseUrl]);
+      useEffect(() => { save("skilllab.model4", model); }, [model]);
+
+      useEffect(() => {
+        fetch("/api/config").then((r) => { if (!r.ok) throw 0; return r.json(); })
+          .then(() => setMode("local")).catch(() => setMode("claudeai"));
+        fetch("/api/fixtures?skill=" + encodeURIComponent(skill)).then((r) => r.json())
+          .then((d) => { setSkillStruct(d.skillStruct || null); setFixtures(d.fixtures || []); setProfile(d.profile || {}); })
+          .catch((e) => setErr(String(e.message || e)));
+      }, []);
+
+      const callModel = (role) => async (messages, opts) => {
+        if (mode === "claudeai") return callClaudeProxy(messages, { ...opts, model: claudeModel });
+        const provider = { flavor, baseUrl, apiKey, model };
+        const r = await fetch("/api/model", {
+          method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ role, messages, opts, provider }),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || j.error) throw new Error(j.error || ("HTTP " + r.status));
+        return j.text;
+      };
+
+      const providerReady = mode === "claudeai" ? !!claudeModel
+        : flavor === "openai" ? !!(baseUrl && model && apiKey) : !!(model && apiKey);
+      const selected = ARM_ORDER.filter((a) => arms[a]);
+      const skillReady = !arms.skill || !!(skillStruct && skillStruct.skillMd);
+      const configReady = providerReady && selected.length >= 1 && skillReady;
+      const toggleArm = (a) => setArms((s) => ({ ...s, [a]: !s[a] }));
+
+      async function run() {
+        setRunning(true); setErr(""); setResults([]); setLog([]);
+        const callReview = callModel("review"), callGrade = callModel("grade");
+        const domain = profile.domain || "architecture";
+        const system = profile.reviewSystem;
+        const units = [];
+        for (const fx of fixtures) for (const arm of selected) for (let t = 1; t <= trials; t++) units.push({ fx, arm, t });
+        const done = [];
+        const recompute = () => {
+          const groups = {};
+          for (const d of done) (groups[d.fixture + "|" + d.arm] ||= []).push(d.record);
+          setResults(Object.entries(groups).map(([k, recs]) => {
+            const [fixture, arm] = k.split("|");
+            return { fixture, arm, ...core.summarize(recs), records: recs };
+          }));
+        };
+        try {
+          await core.mapPool(units, concurrency, async (u) => {
+            const tag = `[${u.fx.id}] ${u.arm} · t${u.t}`;
+            try {
+              // SAME small loop on BOTH arms — the ONLY difference is whether the skill is in context.
+              const skillText = u.arm === "skill" ? ((skillStruct && skillStruct.skillMd) || null) : null;
+              const mh = await core.runMiniHarness({
+                callModel: callReview, code: u.fx.before, skillText, domain, system, maxTokens: 8000,
+                onEvent: (e) => push(`${tag} · ${e.phase}`),
+              });
+              const c = await core.gradeConsensus({ callGrade, code: u.fx.before, diff: u.fx.diff, review: mh.review, domain });
+              const harmMajority = c.grades.filter((x) => x.harmful).length > c.grades.length / 2;
+              const rec = { trial: u.t, foundScore: c.score, foundWhy: c.grades[0].why, harmful: harmMajority, review: mh.review,
+                gradeScores: c.scores, gradeEscalated: c.escalated, turns: mh.turns };
+              // false-positive control: SAME loop on the already-fixed code → does it cry wolf?
+              const mhFP = await core.runMiniHarness({
+                callModel: callReview, code: u.fx.after, skillText, domain, system, maxTokens: 8000,
+                onEvent: (e) => push(`${tag} · fp ${e.phase}`),
+              });
+              const fpg = await core.gradeFalsePositive({ callGrade, diff: u.fx.diff, review: mhFP.review, domain });
+              rec.falsePositive = fpg.falsePositive; rec.fpWhy = fpg.why; rec.cleanReview = mhFP.review;
+              done.push({ fixture: u.fx.id, arm: u.arm, record: rec });
+              recompute();
+            } catch (e) {
+              push(`${tag} · SKIPPED — ${String(e.message || e)}`);
+            }
+          });
+          push("done.");
+        } catch (e) { setErr(String(e.message || e)); }
+        setRunning(false);
+      }
+
+      // mean score for an arm across all fixtures
+      const aggOf = (arm) => {
+        const rows = results.filter((r) => r.arm === arm);
+        if (!rows.length) return null;
+        const meanFound = rows.reduce((a, r) => a + r.meanFound, 0) / rows.length;
+        const fpRows = rows.filter((r) => r.fpRate != null);
+        const fpRate = fpRows.length ? fpRows.reduce((a, r) => a + r.fpRate, 0) / fpRows.length : null;
+        const n = rows.reduce((a, r) => a + r.n, 0);
+        return { meanFound, fpRate, n };
+      };
+      const agg = Object.fromEntries(ARM_ORDER.map((a) => [a, aggOf(a)]));
+      // headline comparison: workflow vs no-skill if both present, else whatever pair we have
+      const hi = agg.skill ? "skill" : null;
+      const lo = agg.base ? "base" : null;
+      const delta = hi && lo && agg[hi] && agg[lo] ? agg[hi].meanFound - agg[lo].meanFound : null;
+      const haveResults = ARM_ORDER.some((a) => agg[a]);
+      const envLabel = mode === "local" ? "this machine" : mode === "claudeai" ? "claude.ai" : "detecting…";
+      const envKey = mode === "local" ? "local" : mode === "claudeai" ? "claudeai" : "detecting";
+
+      return (
+        <div className="shell">
+          {/* ── masthead ── */}
+          <header className="masthead">
+            <span className="wordmark"><span className="brand-dot" />touchstone</span>
+            <span className="badge" data-env={envKey}>{envLabel}</span>
+          </header>
+
+          {/* ── hero / the question (the empty-screen focal: persuade with zero data) ── */}
+          <section className="section hero">
+            <div className="gutter-label"><div className="eyebrow">Controlled experiment</div></div>
+            <div className="section-body">
+              <h1 className="headline">
+                Does <span className="mono">{skill.split("/").pop()}</span> change the review?
+              </h1>
+              <p className="lead">
+                Both arms run the <b>same small review loop</b> — a draft, then a self-revision pass — on the same code,
+                same model, same blind grader (it never sees the skill). The <b>one variable</b> is whether the skill's
+                guidance is in context. The grader scores the review 0–10, crediting the maintainer's real fix <b>or any
+                equal-or-better genuine improvement</b>; the maintainer's diff is the known-good anchor (= 6), not the
+                only right answer.
+              </p>
+            </div>
+          </section>
+
+          {/* ── fixtures (the credibility evidence — real before→after commits) ── */}
+          {fixtures.length > 0 && (
+            <section className="section">
+              <div className="gutter-label">
+                <div className="eyebrow">Fixtures</div>
+                <div className="caption">real before→after commits ({fixtures.length})</div>
+              </div>
+              <div className="section-body fixtures-list">
+                {fixtures.map((f) => (
+                  <div className="fixture" key={f.id}>
+                    <div>
+                      <span className="repo">{f.repo}</span>
+                      {f.pr ? <span className="caption"> · <a href={f.pr} target="_blank" rel="noreferrer">source</a></span> : null}
+                    </div>
+                    <div className="prose">{f.fix_summary}</div>
+                    <div className="caption file mono">{f.file}</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ── provider (mode-driven panel) ── */}
+          <section className="section">
+            <div className="gutter-label">
+              <div className="eyebrow">Provider</div>
+              <div className="caption">{mode === "claudeai" ? "claude.ai" : "this machine"}</div>
+            </div>
+            <div className="section-body">
+              {mode == null && <div className="caption">detecting environment…</div>}
+              {mode === "local" && (
+                <>
+                  <div className="field-grid">
+                    <label className="field"><span className="field-label">kind</span>
+                      <select className="select" value={flavor} disabled={running} onChange={(e) => setFlavor(e.target.value)}>
+                        <option value="openai">OpenAI-compatible (DeepSeek / dsv4 / …)</option>
+                        <option value="anthropic">Anthropic (your key)</option>
+                      </select>
+                    </label>
+                    {flavor === "openai" && (
+                      <label className="field"><span className="field-label">base URL</span>
+                        <input className="input" value={baseUrl} disabled={running} placeholder="https://api.deepseek.com/v1"
+                          onChange={(e) => setBaseUrl(e.target.value)} />
+                      </label>
+                    )}
+                    <label className="field"><span className="field-label">model</span>
+                      <input className="input" value={model} disabled={running} placeholder="deepseek-v4-pro"
+                        onChange={(e) => setModel(e.target.value)} />
+                    </label>
+                    <label className="field"><span className="field-label">API key</span>
+                      <input className="input" type="password" value={apiKey} disabled={running} placeholder="sk-…"
+                        onChange={(e) => setApiKey(e.target.value)} />
+                    </label>
+                  </div>
+                  <p className="caption">
+                    Your key stays on this machine — sent only to your local server (<span className="mono">localhost</span>),
+                    which makes the provider call. Browsers can't reach providers like dsv4 directly (CORS). Not saved to disk.
+                  </p>
+                </>
+              )}
+              {mode === "claudeai" && (
+                <>
+                  <div className="field-grid">
+                    <label className="field"><span className="field-label">model</span>
+                      <select className="select" value={claudeModel} disabled={running} onChange={(e) => setClaudeModel(e.target.value)}>
+                        <option value="claude-sonnet-4-6">claude-sonnet-4-6</option>
+                        <option value="claude-haiku-4-5-20251001">claude-haiku-4-5 (more headroom)</option>
+                        <option value="claude-opus-4-8">claude-opus-4-8 (ceiling risk)</option>
+                      </select>
+                    </label>
+                  </div>
+                  <p className="caption">Running in claude.ai — injected credentials, no key needed.</p>
+                </>
+              )}
+            </div>
+          </section>
+
+          {/* ── delivery arms ── */}
+          <section className="section">
+            <div className="gutter-label"><div className="eyebrow">Delivery modes</div><div className="caption">what to compare</div></div>
+            <div className="section-body">
+              {ARM_ORDER.map((a) => (
+                <label className="arm-row" key={a}>
+                  <span className="arm-head">
+                    <input type="checkbox" checked={arms[a]} disabled={running} onChange={() => toggleArm(a)} />
+                    {ARMS[a].label}
+                  </span>
+                  <span className="arm-blurb">{ARMS[a].blurb}</span>
+                </label>
+              ))}
+              {arms.skill && !skillReady && (
+                <div className="warn-inline">
+                  the “with skill” arm needs the skill text (SKILL.md) — not available here.
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* ── controls + cost line ── */}
+          <section className="section">
+            <div className="gutter-label"><div className="eyebrow">Run</div></div>
+            <div className="section-body">
+              <div className="controls">
+                <label className="field" style={{ flex: "0 0 auto" }}><span className="field-label">trials / mode</span>
+                  <input className="input" type="number" min={1} max={8} value={trials} disabled={running}
+                    style={{ inlineSize: "5rem" }}
+                    onChange={(e) => setTrials(Math.max(1, Math.min(8, +e.target.value || 1)))} />
+                </label>
+                <button className="btn-run" onClick={run} disabled={running || !fixtures.length || !configReady}>
+                  {running ? "Running…" : "Run experiment"}
+                </button>
+              </div>
+              <p className="cost-line">
+                {mode == null ? "detecting environment…" : mode === "local"
+                  ? `${flavor}${model ? " / " + model : ""}${providerReady ? "" : "  — fill the provider above"}`
+                  : `claude.ai / ${claudeModel}`}
+                {"   ·   "}{fixtures.length} fixture × {selected.length} mode × {trials} = {fixtures.length * selected.length * trials} trials
+                {"  "}· each arm: 2-pass loop ×2 (before+after FP) + consensus grading 2–3 calls/trial, ≤{concurrency} at once
+              </p>
+            </div>
+          </section>
+
+          {/* ── error (a designed product moment, not a blank/500) ── */}
+          {err && (
+            <div className="error-block">
+              <div>Error: {err}</div>
+              <div className="retry-hint">Check the provider and press <b>Run experiment</b> to try again.</div>
+            </div>
+          )}
+
+          {/* ── result skeleton (running, before first unit completes — matches loaded geometry) ── */}
+          {running && !haveResults && (
+            <div className="result-panel">
+              <div className="eyebrow">Result</div>
+              <div className="delta-row"><div className="skeleton delta-sk" /></div>
+              <div className="skeleton bar-sk" /><div className="skeleton bar-sk" />
+            </div>
+          )}
+
+          {/* ── result (the delta is the focal element) ── */}
+          {haveResults && (
+            <div className="result-panel">
+              <div className="eyebrow">Result · review-quality 0–10 (6 = the maintainer's change)</div>
+              {delta != null && (
+                <div className="delta-row">
+                  <div className="delta" data-sign={delta < 0 ? "neg" : "pos"}>
+                    {delta >= 0 ? "+" : "−"}{Math.abs(delta).toFixed(1)}
+                  </div>
+                  <div className="delta-caption">
+                    points <b>{ARMS[hi].label}</b> {delta < 0 ? "loses to" : "adds over"} <b>{ARMS[lo].label}</b><br />
+                    <span className="mono">{agg[lo].meanFound.toFixed(1)} → {agg[hi].meanFound.toFixed(1)}</span>
+                  </div>
+                </div>
+              )}
+              {ARM_ORDER.filter((a) => agg[a]).map((a) => (
+                <div className="arm-score" key={a}>
+                  <div className="arm-score-head">
+                    <span>{ARMS[a].label}{agg[a].fpRate != null ? <span className="caption">  · false-pos {pct(agg[a].fpRate)}</span> : null}</span>
+                    <span className="mono">{agg[a].meanFound.toFixed(2)}/10 <span className="caption">(n={agg[a].n})</span></span>
+                  </div>
+                  <div className="bar-track"><div className="bar-fill" data-arm={a} style={{ "--fill": agg[a].meanFound / 10 }} /></div>
+                </div>
+              ))}
+              {fixtures.length > 1 && (
+                <div className="per-fixture">
+                  <div className="caption">per fixture</div>
+                  {fixtures.map((f) => {
+                    const cells = ARM_ORDER.filter((a) => arms[a]).map((a) => {
+                      const r = results.find((x) => x.fixture === f.id && x.arm === a);
+                      return r ? `${ARMS[a].label} ${r.meanFound.toFixed(1)}` : null;
+                    }).filter(Boolean);
+                    return cells.length ? <div className="mono" key={f.id}>{f.id}: {cells.join(" · ")}</div> : null;
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── why · per-trial verdicts ── */}
+          {haveResults && (
+            <section className="section">
+              <div className="gutter-label"><div className="eyebrow">Why</div><div className="caption">grader verdicts · expand to read the review</div></div>
+              <div className="section-body">
+                {ARM_ORDER.filter((a) => arms[a]).flatMap((a) => results.filter((r) => r.arm === a)).map((r, ri) => (
+                  <div className="why-group" key={ri}>
+                    <div className="why-group-head">{r.fixture} · {ARMS[r.arm].label}</div>
+                    {(r.records || []).map((rec, i) => (
+                      <details className="trial" key={i}>
+                        <summary>
+                          <span className="mono">t{rec.trial}: <b>{rec.foundScore}/10</b></span>
+                          {rec.gradeScores ? <span className="caption mono">{"  "}· graded {rec.gradeScores.join("/")}{rec.gradeEscalated ? " →3" : ""}</span> : null}
+                          {rec.foundWhy ? <span className="caption"> — {rec.foundWhy}</span> : ""}
+                          {("falsePositive" in rec) ? <span className="caption">{` · false-pos ${rec.falsePositive ? "YES" : "no"}${rec.fpWhy ? " — " + rec.fpWhy : ""}`}</span> : ""}
+                        </summary>
+                        <div className="review-body user-text" dir="auto">
+                          {rec.review}{rec.cleanReview ? "\n\n— — — review of the ALREADY-FIXED code — — —\n\n" + rec.cleanReview : ""}
+                        </div>
+                      </details>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ── run log ── */}
+          {(running || log.length > 0) && (
+            <section className="section">
+              <div className="gutter-label"><div className="eyebrow">Run log {running ? "· live" : ""}</div></div>
+              <div className="section-body">
+                <div className="log user-text" dir="auto">
+                  {log.map((l, i) => <div key={i}>{l}</div>)}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ── read-honestly footer (first-class persuasion content, not fine print) ── */}
+          <div className="footer">
+            <b>Read honestly:</b> one fixture is one data point and N is small — a signal, not a proof.
+            The grader credits <i>any</i> genuinely-better recommendation, not only the maintainer's exact change (fairer, but more
+            subjective). The <span className="mono">workflow</span> arm is a faithful <i>reimplementation</i> of running a
+            skill as a gated agent (text-marker tools, deterministic gates) — not literally Claude Code — and it costs ~5–13× the
+            calls. Code is not executed: this measures the review's advice, not whether a rewrite compiles.
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  })();
+  </script>
+</body>
+</html>

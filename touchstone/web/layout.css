@@ -1,0 +1,183 @@
+/* skill-lab — composition / layout (single source). Built by atelier:layout.
+ * Consumes tokens.css (color) + type.css (scale, spacing). Logical properties throughout (RTL-safe).
+ * Armature: an editorial single column on paper; sections FLOAT (no card-soup), separated by
+ * whitespace + a hairline rule + an uppercase label-gutter. The result panel is the ONE elevated
+ * surface (form lens supplies the shadow). Focal element = the delta numeral (resulted) / the
+ * headline + Run CTA (empty).
+ */
+
+/* ---------- shell & masthead ---------- */
+.shell {
+  max-inline-size: 54rem;                 /* ~864px; content column lands ~68ch */
+  margin-inline: auto;
+  padding-inline: clamp(var(--space-md), 4vw, var(--space-2xl));
+  padding-block: var(--space-xl) var(--space-3xl);
+}
+.masthead {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-md);
+  padding-block-end: var(--space-md);
+  border-block-end: 1px solid var(--border-subtle);
+  margin-block-end: var(--space-2xl);
+}
+.wordmark { display: inline-flex; align-items: center; gap: var(--space-xs); font-weight: var(--fw-semi); }
+.brand-dot { inline-size: 0.5rem; block-size: 0.5rem; border-radius: 9999px; background: var(--accent); }
+.badge {
+  font-size: var(--t-eyebrow); letter-spacing: var(--ls-eyebrow); text-transform: uppercase;
+  color: var(--text-3); display: inline-flex; align-items: center; gap: var(--space-2xs);
+}
+.badge::before { content: ""; inline-size: 0.4rem; block-size: 0.4rem; border-radius: 9999px; background: var(--text-3); }
+.badge[data-env="local"]::before    { background: var(--accent); }
+.badge[data-env="claudeai"]::before { background: var(--accent); }
+.badge[data-env="detecting"]::before{ background: var(--border-strong); animation: pulse 1.4s ease-in-out infinite; }
+
+/* ---------- the label-gutter section grid (Stripe/Tailwind-docs idiom) ---------- */
+.section {
+  display: grid;
+  grid-template-columns: [label] 9rem [content] minmax(0, 1fr);
+  gap: var(--space-lg);
+  padding-block-start: var(--space-2xl);
+  margin-block-start: var(--space-2xl);
+  border-block-start: 1px solid var(--border-subtle);
+}
+.section:first-of-type { margin-block-start: 0; padding-block-start: 0; border-block-start: 0; }
+.gutter-label { grid-column: label; align-self: start; } /* an .eyebrow lives here, hangs in the rail */
+.section-body { grid-column: content; min-inline-size: 0; }            /* min-inline-size:0 = grid overflow guard */
+.section-body > * + * { margin-block-start: var(--space-md); }         /* intra-section rhythm */
+
+/* hero/question section: headline + method blurb (the empty-screen focal) */
+.hero .headline { margin-block-end: var(--space-sm); }
+
+/* ---------- forms / tool cluster (compact density) ---------- */
+.field-grid { display: flex; flex-wrap: wrap; gap: var(--space-sm) var(--space-md); align-items: end; }
+.field { display: flex; flex-direction: column; gap: var(--space-2xs); min-inline-size: 0; flex: 1 1 12rem; }
+.field > label, .field-label { font-size: var(--t-small); color: var(--text-2); }
+.field input, .field select, .input, .select {
+  font-family: var(--font-sans); font-size: var(--t-ui); color: var(--text);
+  background: var(--surface-2);                       /* recessed (ground-colored) input */
+  border: 1px solid var(--border-strong);             /* functional border (≥3:1) */
+  border-radius: var(--radius-sm, 6px);
+  padding-block: var(--space-xs); padding-inline: var(--space-sm);
+  min-block-size: 2.75rem;                             /* ≥44px touch target */
+}
+.field input::placeholder { color: var(--placeholder); }
+.field input:focus-visible, .field select:focus-visible, .btn-run:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--focus); outline-offset: 2px;
+}
+.field input:disabled, .field select:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* delivery arms */
+.arm-row { display: flex; flex-direction: column; gap: var(--space-2xs);
+  padding-block: var(--space-xs); min-block-size: 2.75rem; }
+.arm-row .arm-head { display: flex; align-items: center; gap: var(--space-xs); font-weight: var(--fw-med); }
+.arm-row input[type="checkbox"] { inline-size: 1.1rem; block-size: 1.1rem; accent-color: var(--accent); }
+.arm-row .arm-blurb { font-size: var(--t-small); color: var(--text-2); }
+.tag-pill { font-size: var(--t-eyebrow); letter-spacing: var(--ls-eyebrow); text-transform: uppercase;
+  color: var(--text-3); border: 1px solid var(--border-subtle); border-radius: 9999px;
+  padding-inline: var(--space-xs); padding-block: 1px; }
+
+/* ---------- controls + cost line ---------- */
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-md); }
+.btn-run {
+  font: inherit; font-weight: var(--fw-semi); font-size: var(--t-ui);
+  color: var(--on-accent); background: var(--accent); border: 0;
+  border-radius: var(--radius-sm, 6px);
+  padding-block: var(--space-sm); padding-inline: var(--space-lg);
+  min-block-size: 2.75rem; cursor: pointer;            /* the ONE colored action (primary CTA) */
+}
+.btn-run:hover:not(:disabled) { background: var(--accent-hover); }
+.btn-run:disabled { opacity: 0.45; cursor: not-allowed; }
+.cost-line { font-size: var(--t-caption); color: var(--text-3); }
+
+/* ---------- the result panel — the ONE elevated surface; the delta is the focal element ---------- */
+.result-panel {
+  grid-column: 1 / -1;                                 /* breaks the label-gutter — full content width */
+  background: var(--elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg, 12px);               /* form lens supplies shadow + concentric radii */
+  padding: var(--space-xl);
+  margin-block-start: var(--space-2xl);
+}
+.delta-row { display: flex; align-items: baseline; gap: var(--space-md); flex-wrap: wrap;
+  margin-block: var(--space-sm) var(--space-lg); }
+.delta { color: var(--delta-pos); }                    /* .delta sizing in type.css */
+.delta[data-sign="neg"] { color: var(--delta-neg); }   /* equal dignity — same size/panel, only color+sign differ */
+.delta-caption { font-size: var(--t-small); color: var(--text-2); }
+
+/* per-arm score bars (data-viz: gray base, accent treat; bar fills via scaleX in motion lens) */
+.arm-score { margin-block-start: var(--space-md); }
+.arm-score-head { display: flex; justify-content: space-between; align-items: baseline;
+  font-size: var(--t-small); margin-block-end: var(--space-2xs); }
+.bar-track { block-size: 0.5rem; border-radius: 9999px; background: var(--viz-track); overflow: hidden; }
+.bar-fill  { block-size: 100%; border-radius: 9999px; transform-origin: inline-start; }
+.bar-fill[data-arm="base"]    { background: var(--viz-base); }
+.bar-fill[data-arm="harness"] { background: var(--viz-treat); }
+.per-fixture { margin-block-start: var(--space-lg); font-size: var(--t-small); color: var(--text-2); }
+.per-fixture > * + * { margin-block-start: var(--space-2xs); }
+
+/* ---------- why / per-trial breakdown ---------- */
+.why-group { margin-block-start: var(--space-lg); }
+.why-group-head { font-size: var(--t-small); font-weight: var(--fw-semi); margin-block-end: var(--space-xs); }
+details.trial { border-block-start: 1px solid var(--border-subtle); }
+details.trial > summary {
+  cursor: pointer; list-style: none; padding-block: var(--space-xs);
+  font-size: var(--t-small); min-block-size: 2.75rem; display: flex; align-items: center; gap: var(--space-xs);
+}
+details.trial > summary::-webkit-details-marker { display: none; }
+.review-body {                                          /* arbitrary model text — see type.css .user-text */
+  font-family: var(--font-mono); font-size: var(--t-caption); color: var(--text-2);
+  background: var(--surface); border-radius: var(--radius-sm, 6px);
+  padding: var(--space-sm); margin-block-start: var(--space-xs);
+  max-block-size: 28rem; overflow: auto; scrollbar-gutter: stable;
+}
+
+/* ---------- run log ---------- */
+.log {
+  font-family: var(--font-mono); font-size: var(--t-caption); color: var(--text-3);
+  line-height: var(--lh-small); max-block-size: 24rem; overflow: auto; scrollbar-gutter: stable;
+}
+
+/* ---------- state blocks ---------- */
+.error-block {                                          /* DISTINCT from empty — a designed product moment */
+  grid-column: 1 / -1;
+  background: var(--error-bg); color: var(--error);
+  border: 1px solid var(--error); border-radius: var(--radius-sm, 6px);
+  padding: var(--space-md); font-size: var(--t-ui);
+}
+.error-block .retry-hint { color: var(--text-2); font-size: var(--t-small); }
+.warn-inline {                                          /* harness-unavailable: caution, not alarm */
+  font-size: var(--t-small); color: var(--text-2);
+  border-inline-start: 2px solid var(--border-strong);
+  padding-inline-start: var(--space-sm); margin-block-start: var(--space-sm);
+}
+.skeleton {                                             /* matches result-panel geometry — no layout shift */
+  border-radius: var(--radius-sm, 6px); background: var(--surface-2);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+.skeleton.delta-sk { block-size: 3.5rem; inline-size: 8rem; }
+.skeleton.bar-sk   { block-size: 0.5rem; margin-block-start: var(--space-md); }
+
+/* ---------- footer (read-honestly) ---------- */
+.footer {
+  grid-column: content;
+  margin-block-start: var(--space-3xl); padding-block-start: var(--space-lg);
+  border-block-start: 1px solid var(--border-subtle);
+  font-size: var(--t-caption); color: var(--text-2); max-inline-size: var(--measure);
+}
+
+/* ---------- long-tail / overflow guards ---------- */
+.fixtures-list .repo { font-weight: var(--fw-med); }
+.fixtures-list .file, .truncate-path { overflow-wrap: anywhere; }
+.user-text, .review-body, .log { overflow-wrap: anywhere; }   /* long unbroken code tokens can't blow out */
+
+/* ---------- responsive: stack the label-gutter ≤720px; hold density to 320px ---------- */
+@media (max-width: 720px) {
+  .section { grid-template-columns: 1fr; gap: var(--space-sm); }
+  .gutter-label { grid-column: 1; }
+  .section-body { grid-column: 1; }
+  .footer { grid-column: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge[data-env="detecting"]::before, .skeleton { animation: none; }
+}
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }

@@ -1,0 +1,138 @@
+commit 32cf754ae3d0bcf59bb842e837de7f7b01efb3d2 — fix(chat): derive operation token usage from messages, not a parallel accumulation (lobehub/lobe-chat)
+
+----- src/features/Conversation/ChatInput/OpStatusTray.tsx -----
+@@ -12,12 +12,7 @@ import { useChatStore } from '@/store/chat';
+ import { operationSelectors } from '@/store/chat/selectors';
+ import { AI_RUNTIME_OPERATION_TYPES } from '@/store/chat/slices/operation/types';
+ import { shinyTextStyles } from '@/styles';
+-import {
+-  calculateOperationUsageMetrics,
+-  hasOperationUsageMetrics,
+-  mergeOperationUsageMetrics,
+-  type OperationUsageMetrics,
+-} from '@/utils/operationUsageMetrics';
++import { calculateOperationUsageMetrics } from '@/utils/operationUsageMetrics';
+ 
+ import { contextSelectors, dataSelectors, useConversationStore } from '../store';
+ import { type ActivityKey, resolveOperationActivity } from '../utils/operationActivity';
+@@ -238,7 +233,6 @@ const OpStatusTray = memo<OpStatusTrayProps>(({ topAttached }) => {
+     let latestActivityStart = -1;
+     let statusSeed: string | undefined;
+     let stepCount = 0;
+-    let usageMetrics: OperationUsageMetrics | undefined;
+     const runtimeOperationIds: string[] = [];
+ 
+     for (const op of ops) {
+@@ -256,9 +250,6 @@ const OpStatusTray = memo<OpStatusTrayProps>(({ topAttached }) => {
+ 
+       runtimeOperationIds.push(op.id);
+       stepCount = Math.max(stepCount, normalizeStepCount(op.metadata.stepCount));
+-      if (hasOperationUsageMetrics(op.metadata.usageMetrics)) {
+-        usageMetrics = mergeOperationUsageMetrics(usageMetrics, op.metadata.usageMetrics);
+-      }
+ 
+       if (earliestStart === undefined || op.metadata.startTime < earliestStart) {
+         earliestStart = op.metadata.startTime;
+@@ -271,7 +262,6 @@ const OpStatusTray = memo<OpStatusTrayProps>(({ topAttached }) => {
+       startTime: earliestStart,
+       statusSeed,
+       steps: stepCount,
+-      usageMetrics,
+     };
+   });
+   const operationsByMessage = useChatStore((s) => s.operationsByMessage);
+@@ -289,17 +279,16 @@ const OpStatusTray = memo<OpStatusTrayProps>(({ topAttached }) => {
+     [operationState.operationIdsKey],
+   );
+ 
+-  // Fallback for older / reloaded operation state: derive usage from messages
+-  // produced by this operation when live operation metadata is unavailable.
+-  const fallbackMetrics = useMemo(() => {
++  // Single source of truth: derive the operation total from the same per-message
++  // usage shown on each bubble, so the tray always equals their sum. (Updates as
++  // messages refresh — no separate live accumulation that can drift.)
++  const usageMetrics = useMemo(() => {
+     return calculateOperationUsageMetrics(dbMessages, operationIds, operationsByMessage);
+   }, [dbMessages, operationIds, operationsByMessage]);
+ 
+   if (!operationState.startTime) return null;
+ 
+-  const { totalCost, totalTokens } = hasOperationUsageMetrics(operationState.usageMetrics)
+-    ? operationState.usageMetrics
+-    : fallbackMetrics;
++  const { totalCost, totalTokens } = usageMetrics;
+   const elapsed = now - operationState.startTime;
+   const costLabel = t('chat:opStatusTray.cost');
+   const stepLabel = t('chat:opStatusTray.steps');
+
+----- src/store/chat/slices/aiChat/actions/gatewayEventHandler.ts -----
+@@ -19,7 +19,6 @@ import { messageService } from '@/services/message';
+ import { emitClientAgentSignalSourceEvent } from '@/store/chat/slices/aiChat/actions/agentSignalBridge';
+ import type { ChatStore } from '@/store/chat/store';
+ import { notifyDesktopHumanApprovalRequired } from '@/store/chat/utils/desktopNotification';
+-import { addUsageToOperationMetrics, type OperationUsageLike } from '@/utils/operationUsageMetrics';
+ 
+ // Lazy-loaded to break the import cycle:
+ //   gateway.ts → gatewayEventHandler.ts → executors/index.ts (which pulls in
+@@ -56,10 +55,6 @@ interface ToolPayloadIdentity {
+   toolCallId?: string;
+ }
+ 
+-type StepCompleteDataWithUsage = StepCompleteData & {
+-  usage?: OperationUsageLike | null;
+-};
+-
+ /**
+  * Extract `{ identifier, apiName, params, toolCallId }` from a stream event's
+  * tool payload. Returns `undefined` when the payload is malformed so the
+@@ -512,14 +507,7 @@ export const createGatewayEventHandler = (
+       }
+ 
+       case 'step_complete': {
+-        const data = event.data as StepCompleteDataWithUsage | undefined;
+-
+-        if (data?.phase === 'turn_metadata' && data.usage) {
+-          const operation = get().operations[operationId];
+-          get().updateOperationMetadata(operationId, {
+-            usageMetrics: addUsageToOperationMetrics(operation?.metadata?.usageMetrics, data.usage),
+-          });
+-        }
++        const data = event.data as StepCompleteData | undefined;
+ 
+         // Refresh on execution_complete to ensure final step state is consistent
+         if (data?.phase === 'execution_complete') {
+
+----- src/store/chat/slices/aiChat/actions/heterogeneousAgentExecutor.ts -----
+@@ -38,7 +38,6 @@ import { threadService } from '@/services/thread';
+ import { type ChatStore, useChatStore } from '@/store/chat/store';
+ import { resolveNotificationNavigatePath } from '@/store/chat/utils/desktopNotification';
+ import { markdownToTxt } from '@/utils/markdownToTxt';
+-import { addUsageToOperationMetrics } from '@/utils/operationUsageMetrics';
+ 
+ import { messageMapKey } from '../../../utils/messageMapKey';
+ import { mergeQueuedMessages } from '../../operation/types';
+@@ -1197,19 +1196,11 @@ export const executeHeterogeneousAgent = async (
+       // ─── step_complete with turn_metadata: per-step usage + model/provider ───
+       // The reducer writes usage/model/provider onto the current step's
+       // assistant (main) or the subagent's in-thread assistant (delegated).
+-      // `result_usage` (grand total) is ignored by the reducer. Main usage also
+-      // feeds the operation's usage-metrics tray — a renderer-only side effect
+-      // the reducer doesn't model, so it stays here. Not forwarded (bookkeeping).
++      // `result_usage` (grand total) is ignored by the reducer. The operation
++      // usage tray derives its total from these per-message usages directly
++      // (OpStatusTray → calculateOperationUsageMetrics), so there is no separate
++      // accumulation here. Not forwarded (bookkeeping).
+       if (event.type === 'step_complete' && event.data?.phase === 'turn_metadata') {
+-        if (!event.data.subagent && event.data.usage) {
+-          const operation = get().operations[operationId];
+-          get().updateOperationMetadata(operationId, {
+-            usageMetrics: addUsageToOperationMetrics(
+-              operation?.metadata?.usageMetrics,
+-              event.data.usage,
+-            ),
+-          });
+-        }
+         persistQueue = persistQueue.then(() => reduceAndApplyMain(event));
+         return;
+       }
+
