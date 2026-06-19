@@ -2,29 +2,19 @@
 name: touchstone
 description: >
   The repository-evaluation lens: judge whether a repo is worth your time in a
-  few minutes — by SCANNING its dashboards, not reading its code. It runs the
-  five-glance checkup (homepage · README skeleton · issue & PR interaction ·
-  the Insights/contributors view · the file tree) and scores three axes —
-  ALIVE (still maintained?), HEALTHY (will it be orphaned?), and WELL-BUILT
-  (is the code likely any good?). The one shift: an agent can check fifty repos
-  in seconds, but it over-trusts exactly the two signals that are easiest to
-  fake — the star count and a polished README — which is precisely what an
-  abandoned project or an AI-generated, feature-stacked, star-farmed repo wears
-  best. So touchstone INVERTS the weighting: discount the gameable signals,
-  weight the ones that can't be faked (commit substance, issue-RESPONSE quality,
-  bus factor, real downstream "Used by", tests and CI), and trace every judgment
-  to the actual repo. Use when sizing up a repo or a batch before depending on,
-  contributing to, or learning from them; when a project "looks good" and you
-  want to know if it really is; or to vet a shortlist from `forage`. Triggers on
+  few minutes — by SCANNING its dashboards, not reading its code — scoring three
+  axes: ALIVE, HEALTHY, and WELL-BUILT. The one shift: an agent can check fifty
+  repos in seconds but over-trusts the two signals easiest to fake — star count
+  and a polished README — exactly what an abandoned or AI-generated, star-farmed
+  repo wears best; so touchstone INVERTS the weighting, discounting the gameable
+  signals and weighting the un-fakeable ones (commit substance, issue-response
+  quality, bus factor, real "Used by", tests and CI). Use when sizing up a repo
+  or a batch before depending on, contributing to, or learning from it; or to vet
+  a shortlist from `forage`. Triggers on
   "is this repo any good", "should I use/trust this library", "evaluate this
   project", "is this maintained", "is this AI-generated slop", "compare these
-  repos", "vet this dependency", "rate this GitHub project". Installs the
-  five-glance dashboard sweep, the gameable-vs-un-gameable signal weighting, the
-  AI-slop / star-farm detector, the three-axis score, and the verdict calibrated
-  to YOUR use-context (a weekend tryout and a production dependency pass
-  different bars). The agent is the MEANS (the dashboard reader and the
-  adversary), never the oracle; you keep the calibration — what the score means
-  for your risk. Hands deep-dive survivors to the engineering suite.
+  repos", "vet this dependency", "rate this GitHub project". Hands deep-dive
+  survivors to the engineering suite.
 argument-hint: "[a repo (or batch / forage shortlist) to evaluate, and what you'd use it for]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

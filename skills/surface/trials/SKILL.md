@@ -3,9 +3,9 @@ name: trials
 description: >
   The correctness lens for a frontend build, organized around one question that
   decides whether your test suite is a safety net or a straitjacket: does this test
-  go red when BEHAVIOR changes (a net — it lets you refactor freely and warns on real
-  regressions) or when the IMPLEMENTATION changes (a shackle — it reddens on every
-  refactor, so you fix tests instead of code, and learn to ignore red). Use after
+  go red when BEHAVIOR changes (a net — it warns on real regressions) or when the
+  IMPLEMENTATION changes (a shackle — it reddens on every refactor, so you fix tests
+  instead of code, and learn to ignore red). Use after
   seaworthy's slices exist, when writing or auditing frontend tests, or when a suite
   is brittle. The one shift: test BEHAVIOR, not internal structure — and put the test
   budget where frontend bugs actually cluster (integration: the seams, the two-graph
@@ -13,14 +13,7 @@ description: >
   classic pyramid. Triggers on "what / how should I test this UI", "unit vs
   integration vs E2E", "testing-library / Playwright / Cypress / Vitest / Jest",
   "my tests break on every refactor", "snapshot tests", "should I mock this",
-  "test coverage / 100%", "is this test worth keeping", "flaky tests". Installs the
-  behavior-not-structure litmus (rewrite internals, keep behavior → still green?), the
-  test-level judgment table (the trophy: a little static, mostly integration, a thin
-  E2E layer, almost no unit), mocking at the NETWORK boundary not the module boundary
-  (schema-backed, so green tests can't hide broken prod), and the what-NOT-to-test
-  list with the keep-a-test-iff rule. The agent writes tests that pass; you keep the
-  call it cannot make — whether a passing suite actually protects behavior or just
-  pins the current implementation.
+  "test coverage / 100%", "is this test worth keeping", "flaky tests".
 argument-hint: "[the frontend feature/suite to test or audit for behavior-vs-structure]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

@@ -1,0 +1,32 @@
+name: skill-lint
+
+# Repo-wide frontmatter guard for EVERY skill in EVERY suite: enforces the
+# platform's hard limit — an Agent Skill's `description` must be <= 1024 chars,
+# or the loader silently truncates it and breaks skill discovery. Suite-agnostic
+# (atelier.yml owns atelier's gate-integrity checks); this one only guards the
+# limit so an over-long description can never land on main unnoticed again.
+
+on:
+  push:
+    branches: [main]
+    paths: ['skills/**', 'devtools/skill-lint.py', '.github/workflows/skill-lint.yml']
+  pull_request:
+    paths: ['skills/**', 'devtools/skill-lint.py', '.github/workflows/skill-lint.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: skill-lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: description-length / frontmatter guard
+        run: python3 devtools/skill-lint.py

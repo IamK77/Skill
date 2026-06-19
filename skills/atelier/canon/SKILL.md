@@ -1,31 +1,19 @@
 ---
 name: canon
 description: >
-  The design-judgment spine of the atelier suite — where the visual language is
-  chosen, the surface archetype is named, and the quantified targets that all later
-  craft lenses enforce are decided. Use before any pixel is placed, before a color
-  system is built, before a type scale is chosen. The one shift: good design is NOT
-  defaults nudged until it "looks ok" — it is a few NON-DEFAULT, QUANTIFIED decisions
-  made before any pixel: the surface's point of view (derived from the product, not
-  waited for), which visual language that POV demands, which surface archetype, what the
-  surface is *for*, and what "premium" means in measurable terms for this surface and
-  this user. The agent, having no taste and no nervous system, will always pick the
-  bland default — the warm-cream-editorial-serif, the near-black-neon-accent, the
-  newsgrid-with-zero-radius — because these are the statistical attractors of its
-  training, not choices. These must be DECIDED and GATED. Triggers on "start a design",
-  "which visual language", "what style should this be", "what kind of surface is this",
-  "design brief", "make it feel premium", "before I start designing", "what archetype",
-  "design direction", "what should this look like", "I don't know where to start
-  visually", "set up the design", "design the UI", "establish a visual identity".
-  The spine to the atelier suite the way bearings is spine to surface: canon decides
-  the taste direction and quantifies it; the sibling lenses (color, type, layout,
-  form, graphics, motion — and systems, which later governs the committed tokens)
-  execute it. Installs three one-page artifacts the whole design
-  build honors — the design-language brief (visual language named, archetypes
-  chosen, the three AI defaults actively rejected), the quantified-targets sheet
-  (contrast floors, density grade, type-scale ratio, motion budget, the "premium"
-  tells made numeric), and the product-sense check (visual serves the user's real job
-  and reality's long tail, not decoration).
+  The design-judgment spine of the atelier suite — where the visual language and
+  archetype are chosen and the quantified targets all later lenses enforce are set.
+  Use before any pixel is placed — before a color system or type scale is chosen. The
+  one shift: good design is NOT defaults nudged until it "looks ok" — it is a few
+  NON-DEFAULT, QUANTIFIED decisions: the point of view (derived
+  from the product), the visual language that POV demands, the archetype, and what
+  "premium" means in measurable terms. The agent, with no taste, defaults to the bland
+  statistical mean of its training (e.g. warm-cream-editorial-serif), so these must be
+  DECIDED and GATED. Triggers on "start a design / set up the design / where to start
+  visually", "which visual language / what style / what should this look like", "what
+  kind of surface / what archetype", "design brief / design direction / visual
+  identity", "make it feel premium". The spine to atelier as bearings is to surface:
+  canon decides the direction the sibling lenses execute.
 argument-hint: "[the surface, product, or design problem to set a design direction for]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

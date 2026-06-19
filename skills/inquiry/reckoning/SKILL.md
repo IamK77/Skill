@@ -2,28 +2,18 @@
 name: reckoning
 description: >
   The results-analysis lens: turn a finished results store into settled claims,
-  mechanism evidence, and paper-grade figures — for any field where you run experiments
-  to publish (machine learning, combinatorial optimization, operations research, systems,
-  scheduling). Use when the runs are done and you are analyzing: reading the main table,
-  interpreting an ablation, checking significance, deciding whether a finding is real,
-  making figures, or writing up results. The one shift: analysis is NOT "compute a mean
-  and see who is bigger" — it is audit, attribution, and the language of evidence. You
-  audit before you read (a too-good number is a bug until proven otherwise); you prove
-  WHY the method wins with mechanism probes — predictions that are not the main result
-  itself — which are the line between a publishable paper and a strong one; and you
-  defend against the garden of forking paths, the danger the agent era amplifies, because
-  cheap experiments make unconscious cheating cheap. Triggers on "analyze the results",
-  "read the main table / the ablation", "is this result significant / real", "which is
-  better", "make the figures / plots", "interpret these numbers", "why does my method
-  work", "statistical test / effect size", "the result looks too good", "review my
-  results / claims", "write up the experiments". Installs the pre-read audit, the
-  distribution-and-slices reading with correct statistics (pseudo-replication, censoring,
-  scale, multiple comparisons), the ablation-reading traps, the four mechanism probes,
-  the failure-boundary characterization, the claim-verdict settlement with the
-  exploration/confirmation discipline, and the systematized agent red-team plus figure
-  craft that mean the analysis is DONE. The agent is the MEANS (the auditor, the probe
-  runner, the adversarial reviewer), never the oracle; you keep the judgments — what the
-  unit of analysis is, what prediction the mechanism implies, and which claims to settle how.
+  mechanism evidence, and paper-grade figures — for any field running experiments to
+  publish (ML, optimization, operations research, systems). Use when the runs are done
+  and you are analyzing the results, or stress-testing an analysis. The one shift:
+  analysis is NOT "compute a mean and see who is bigger" — it is audit, attribution, and
+  the language of evidence. You audit before you read (a too-good number is a bug until
+  proven otherwise); you prove WHY the method wins with mechanism probes; and you defend
+  against the garden of forking
+  paths, which the agent era amplifies because cheap experiments make cheating cheap.
+  Triggers on "analyze the results", "read the main table / the
+  ablation", "is this result significant / real / statistical test / effect size",
+  "which is better", "make the figures / plots", "interpret these numbers / why does my
+  method work", "the result looks too good", "review my results / write up".
 argument-hint: "[the results to analyze, or the analysis/claim/figure you're stuck on]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

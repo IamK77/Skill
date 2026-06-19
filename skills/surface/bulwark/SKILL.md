@@ -4,7 +4,7 @@ description: >
   The 1-to-N lens for a frontend system that is already alive: the enemy is no
   longer building, it is ENTROPY — boundaries eroded by one "just this once"
   cross-import at a time, and the two graphs (component tree vs data dependency)
-  drifting apart as features pile on. Use when a frontend is in maintenance/scaling,
+  drifting apart. Use when a frontend is in maintenance/scaling,
   onboarding more people, or showing rot (every change touches everything, the
   global store keeps growing, only one person dares touch the core). The one move:
   make the architecture SELF-ENFORCING, so it doesn't depend on everyone remembering
@@ -13,16 +13,7 @@ description: >
   layering", "circular dependency", "this abstraction is everywhere / should I
   delete it", "dead code / unused exports / stale feature flags", "Conway's law /
   team structure", "design system / Storybook / component library", "onboarding /
-  how long until a new hire ships". Installs boundaries machine-enforced in lint/CI
-  (import rules, the public-API module, fitness functions, CODEOWNERS) with the
-  immune-system meta-rule (every real violation becomes a new permanent rule), the
-  abstraction extract/delete/keep flow plus dead-state and stale-flag pruning,
-  Conway's-law alignment of module edges to team edges, the design system as a real
-  artifact (a living catalog, tokens as the single source, ADRs as the living why),
-  and the one external health metric that matters — how fast a newcomer ships on the
-  docs alone. There is no exit; it is a steady state. The agent adds features and
-  reaches for rewrites; you keep the call it cannot make — which boundaries are
-  load-bearing, and what the architecture must refuse to let drift.
+  how long until a new hire ships". There is no exit; it is a steady state.
 argument-hint: "[the living frontend system to keep changeable as it scales]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

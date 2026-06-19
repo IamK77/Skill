@@ -1,26 +1,20 @@
 ---
 name: pilot
 description: >
-  Navigate the surface frontend suite: given a frontend task, route to the right
-  skill — and, because the suite is a lifecycle, to the right ENTRY STAGE — or to a
-  sibling suite, or say plainly when no skill is warranted. The un-gated front door
-  to the seven surface skills (bearings, keel, wellspring, seaworthy, trials,
-  lookout, bulwark). Use when you're starting, or part-way through, frontend work
-  and aren't sure which stage fits, suspect several apply in order, or aren't sure
-  the suite is needed at all. The shift it leans on: most frontend work is NOT
-  greenfield, so the highest-value routing is naming WHERE IN THE PIPELINE TO ENTER
-  (the skeleton already runs → state architecture; it feels janky → the
-  build/unhappy-path stage; component tests break on every refactor → correctness;
-  shipping a metric → the delivery/ethics stage; the codebase is rotting as it grows
-  → the 1→N stage) rather than always starting at stage 0. Triggers on "which
-  frontend skill / where do I start", "how should I build this UI / app", "my state
-  is a mess / it's out of sync", "it feels janky / slow", "my component tests break
-  on every refactor", "is this a dark pattern / which metric should we optimize",
-  "the frontend is rotting as it grows", "route my frontend task". It also redirects
-  ACROSS suites: general code craft / architecture / testing / process / security →
-  engineering; realtime / offline / CRDT correctness → distributed; choosing a
-  library → quarry. It sequences, redirects, refuses, and disambiguates the
-  confusable stages — it never does the work itself; each stage flies its own.
+  Navigate the surface frontend suite: route a frontend task to the right skill —
+  and, because the suite is a lifecycle, to the right ENTRY STAGE — or to a sibling
+  suite, or say plainly when none is warranted. The un-gated front door to the
+  seven surface skills (bearings, keel, wellspring, seaworthy, trials, lookout,
+  bulwark). Use when starting or mid-way through frontend work, unsure which stage
+  fits or whether the suite is needed. The shift it leans on: most frontend
+  work is NOT greenfield, so the best routing names WHERE IN THE PIPELINE TO ENTER,
+  not stage 0. Triggers on "which frontend
+  skill / where do I start", "how should I build this UI / app", "my state is a mess /
+  it's out of sync", "it feels janky / slow", "my component tests break on every
+  refactor", "dark pattern / which metric", "the frontend is rotting as it
+  grows". It also redirects ACROSS suites: code craft / architecture / testing /
+  process / security → engineering; realtime / offline / CRDT → distributed; library
+  choice → quarry.
 argument-hint: "[the frontend task, goal, or confusion you want routed]"
 allowed-tools: Read Bash Skill(surface:*)
 ---

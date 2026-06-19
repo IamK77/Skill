@@ -2,31 +2,19 @@
 name: bearings
 description: >
   The before-the-first-line lens for a frontend build: fix what is expensive to
-  reverse before any sunk cost exists. Use when starting a frontend product or a
-  major feature, or stress-testing a frontend plan that jumped straight to a
-  framework. The three ruling principles: BOUNDARIES > FRAMEWORKS (the framework
-  is the most-discussed, least-durable decision — it gets swapped; the boundaries,
-  the network/trust line and the state classification, get discussed least and
-  fossilize into bedrock); ALLOCATE CAUTION BY REVERSIBILITY (a one-way door — data
-  model, rendering architecture, network boundary — earns slow human judgment; a
-  two-way door — a color, a component's internals — gets a default and is left for
-  agents to refactor); and THE SOURCE OF TRUTH LIVES IN THE USER'S MIND, not the
-  database — model the mental model first, then make the data structures serve it.
-  The one shift: frontend is the one discipline whose correctness spec lives in a
-  brain, not a document, so taste is load-bearing and cannot be outsourced — and as
-  the agent writes the code, the leverage migrates from the keyboard to that
-  membrane. Triggers on "starting a frontend project / from scratch", "which
-  framework / React or X", "how should I architect this UI", "what should the data
+  reverse before sunk cost exists. Use when starting a frontend product or major
+  feature, or stress-testing a plan that jumped straight to a framework. The three
+  ruling principles: BOUNDARIES > FRAMEWORKS (frameworks get
+  swapped; the network/trust line and state classification fossilize into bedrock);
+  ALLOCATE CAUTION BY REVERSIBILITY (one-way doors earn slow human judgment, two-way
+  doors get a default for agents); and THE SOURCE OF TRUTH LIVES IN THE USER'S MIND,
+  not the database. The one shift:
+  frontend is the one discipline whose correctness spec lives in a brain, so taste is
+  load-bearing and cannot be outsourced. Triggers on "starting
+  a frontend project / from scratch", "which framework / React or X", "how should I
+  architect this UI", "what should the data
   model be", "do we need realtime / offline / collaboration", "SSR or SPA or RSC",
   "is this design manipulative / dark pattern", "what metric should we optimize".
-  Installs five one-page artifacts the whole build honors — the noun-verb &
-  journey map with hot-path ranking, the perception contract (latency tiers that
-  become architecture constraints), the source-of-truth table with its consistency
-  model (the one-way door), the rendering-architecture decision with the platform
-  keep-or-rebuild list, and the north-star + guardrails + objective-function
-  pre-mortem. The agent does the mining and the drafting; you keep the calls it
-  cannot make — how to slice the boundaries, which consistency model to commit to,
-  what counts as "feels right", and whose interest the optimizer serves.
 argument-hint: "[the frontend product or feature to scope before building]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

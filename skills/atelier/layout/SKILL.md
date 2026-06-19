@@ -2,21 +2,16 @@
 name: layout
 description: >
   The composition lens for a frontend build — where hierarchy, grid, measure, and spatial rhythm
-  are decided, and where "looks amateur" and "won't scale to real data" are determined. Use after
-  the build works (seaworthy) and after or alongside canon's design-language gates, when
-  establishing or auditing the compositional structure of a surface. The one shift: hierarchy
-  and the grid are DECISIONS, not accidents — the page is *composed* (alignment, measure, spatial
-  rhythm), the empty/loading/edge states have a designed visual form, and the surface is built for
-  reality's long tail (overflow, missing data, huge numbers, RTL). The agent stacks boxes that
-  "work" and leaves composition, empty-states, and the long tail to chance — so composition must
-  be decided and gated. CSS mechanism (how Grid/Flexbox/positioning work) stays in surface:keel;
-  this skill owns the composition *judgment* — which grid, which hierarchy, what density, how the
-  long tail holds. Triggers on "layout / grid / composition / hierarchy", "measure / line length /
-  reading column", "spacing / rhythm / density / proximity", "empty state / blank slate / no
-  results", "loading state / skeleton / placeholder", "form layout / label / input / validation
-  visual", "overflow / truncation / long text / huge numbers", "RTL / right-to-left / direction /
-  i18n layout", "state machine / hover / focus / active / disabled", "real data / edge case / long
-  tail / production-proof layout".
+  are decided, and "looks amateur" / "won't scale to real data" are determined. Use after the
+  build works (seaworthy) and alongside canon's gates, when auditing a surface's composition. The one shift: hierarchy and the grid are DECISIONS, not
+  accidents — the page is *composed*, the empty/loading/edge states have a designed form, and the
+  surface is built for reality's long tail — the agent stacks boxes that "work" and leaves the
+  rest to chance, so it must be gated. CSS mechanism stays in surface:keel; this owns the
+  composition *judgment*. Triggers
+  on "layout / grid / composition / hierarchy / measure / line length / reading column", "spacing
+  / rhythm / density / proximity", "empty state / blank slate / loading state / skeleton /
+  placeholder", "form layout / validation visual", "overflow / truncation / long text / huge
+  numbers", "RTL / i18n layout", "state machine / hover / focus / active / disabled".
 argument-hint: "[the UI / page / component layout to compose and harden]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

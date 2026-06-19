@@ -1,29 +1,19 @@
 ---
 name: crucible
 description: >
-  The method-design lens: turn a landed research gap into a method worth writing
-  up — for any field where you run experiments to publish (machine learning,
-  combinatorial optimization, operations research, systems, scheduling). Use after
-  prospect has landed a gap, when you are designing an algorithm / model /
-  improvement and choosing among approaches, or stress-testing a method you already
-  have. The one shift: a method is NOT nursed — you don't lovingly refine one idea —
-  it is RACED TO DEATH. Cheap agent prototypes let you generate several variants and
-  run an elimination tournament against kill criteria written BEFORE the race
-  (because you fall in love with what you built), on a scaffold whose independent
-  feasibility checker traps the agent's silent bugs (a variant that "soars" is
-  usually emitting infeasible solutions); and you measure the ceiling FIRST (an
-  oracle ladder) so you know the prize and which component holds it. Triggers on
-  "design a method / algorithm / model", "how should I approach this", "which
-  variant is better", "ablation", "is my contribution novel enough", "prove a bound
-  / approximation ratio / convergence", "oracle / skyline / upper bound experiment",
-  "what's my baseline gap", "is this method real or a bug". Installs the
-  decidable-spec-as-claim-draft, the oracle ceiling ladder, the five variant
-  patterns and death-cause orthogonality, the trustworthy tournament scaffold with
-  pre-committed kills and a death log, counterexample-search-before-proof with the
-  proof-laundering guard, pre-wired ablation switches with a complexity budget, and
-  the mechanism-keyword novelty defense. The agent is the means (parallel
-  prototyper, proof-filler, adversary), never the oracle; you keep the bets — which
-  variants to race, the kill criteria, and whether a result is real.
+  The method-design lens: turn a landed gap into a method worth writing up — for any
+  field that runs experiments to publish (ML, optimization, operations research,
+  systems). Use after prospect lands a gap, when designing a method and
+  choosing among approaches, or stress-testing a method you already have. The one shift:
+  a method is NOT nursed — it is RACED TO DEATH. Cheap agent
+  prototypes let you race several variants in an elimination tournament against kill
+  criteria written BEFORE the race (you fall in love with what you built), on a scaffold
+  whose independent feasibility checker traps the agent's silent bugs (a
+  variant that "soars" is usually infeasible); and you measure the ceiling FIRST.
+  Triggers on "design a method / algorithm / model", "how should I approach this", "which
+  variant is better / ablation", "is my contribution novel enough", "prove a bound /
+  approximation ratio / convergence", "oracle / skyline / upper bound experiment",
+  "what's my baseline gap", "is this method real or a bug".
 argument-hint: "[the gap to turn into a method, or a method/variant to stress-test]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

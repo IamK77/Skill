@@ -13,15 +13,7 @@ description: >
   direction", "literature review", "survey this area", "I have no idea / I'm stuck
   for a topic", "has anyone done X", "is this novel / is my contribution enough",
   "pick baselines / benchmark", "reproduce this paper", "review whether this gap
-  holds". Installs the seven mining seams (limitation-clustering · cross-blank
-  matrix · assumption-audit · leaderboard-weakness · reproduction-arbitrage ·
-  cross-domain transplant · trend arbitrage), the adversarial falsification filter,
-  the fundability four-questions, the cheapest-kill experiment, and the three
-  deliverables that mean the review is DONE — a one-page gap statement, a core-paper
-  comparison table, and 1-2 reproduced baselines running on your machine. The agent
-  is the MEANS (the parallel miner and the adversary), never the oracle; you keep
-  three judgments — how to slice the dimensions, why a blank is blank, which gap to
-  bet on.
+  holds".
 argument-hint: "[the rough area to prospect for a gap, or the gap/idea you want stress-tested]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

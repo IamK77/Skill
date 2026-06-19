@@ -2,23 +2,21 @@
 name: holdfast
 description: >
   The distributed-correctness lens: design or audit anything that spans machines.
-  Use when the user designs or reviews RPC / microservices, retries and idempotency,
-  message queues and delivery guarantees, event ordering and cross-server timestamps,
-  replication and failover, consistency models and consensus, partitioning /
-  sharding, fault tolerance, distributed transactions and coordination — or asks
-  whether a distributed design is correct. Triggers on "is this retry safe",
-  "exactly-once", "idempotency", "microservice call chain", "ordering / timestamps
-  across servers", "is this replication safe", "split-brain", "eventual vs strong
-  consistency", "CAP / CP vs AP", "linearizability", "do we need consensus",
-  "Raft / Paxos / etcd / ZooKeeper", "how should I shard this", "partition / shard
-  key", "consistent hashing", "hot key", "rebalancing", "is this fault-tolerant",
-  "failure model", "circuit breaker / bulkhead", "graceful degradation",
-  "two-phase commit / 2PC", "saga / compensating transaction", "distributed lock",
-  "fencing token", "leader election", "should this even be distributed". The lens
-  installs the third state (a remote call can succeed, fail, OR leave you NOT
-  KNOWING which), the first law (don't distribute until you must), and the complete
-  eight-stage map: frame · communication · ordering · replication · consensus ·
-  sharding · fault-tolerance · coordination.
+  Use when the user designs or reviews RPC, queues, replication, consensus,
+  sharding, fault tolerance, or distributed transactions — or asks whether a
+  design is correct. Triggers on
+  "is this retry safe / exactly-once / idempotency",
+  "ordering / timestamps across servers",
+  "is this replication safe / split-brain",
+  "eventual vs strong consistency / CAP / CP vs AP / linearizability", "do we need
+  consensus / Raft / Paxos / etcd / ZooKeeper", "how should I shard this /
+  partition / shard key / consistent hashing / hot key / rebalancing", "is this
+  fault-tolerant / failure model / graceful degradation / circuit breaker /
+  bulkhead", "two-phase commit / 2PC / saga / compensating transaction",
+  "distributed lock / fencing token", "leader election",
+  "should this even be distributed". The one
+  shift: a remote call has a THIRD outcome — succeed, fail, OR leave you NOT
+  KNOWING which — and the first law is don't distribute until you must.
 argument-hint: "[distributed design or code to audit, or the thing you're about to distribute]"
 allowed-tools: Read Bash Edit Write
 ---

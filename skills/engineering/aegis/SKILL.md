@@ -1,20 +1,17 @@
 ---
 name: aegis
 description: >
-  Weave security through the whole lifecycle instead of bolting it on at the end:
-  set a risk-based security stance and the timeless principles (least privilege,
-  defense in depth, fail secure, zero trust), build a threat model, turn it into
-  secure design, write code that never trusts its input and never holds a secret,
-  gate SAST/DAST/SCA in CI, defend the common vulnerability classes (OWASP Top
-  10), and operate with patching and incident response — tuned for a world where
-  an agent writes insecure code by default, has no threat model, trusts its input,
-  and ships a vulnerability green. The defensive half of the security pair (the
+  Weave security through the whole lifecycle instead of bolting it on at the end,
+  across: risk-based stance and principles (least privilege, defense in depth,
+  fail secure, zero trust), threat model, secure design, input-distrusting code,
+  CI security gates (SAST/DAST/SCA), the OWASP Top 10, and operations — tuned for
+  a world where an agent writes insecure code by
+  default, trusts its input, and ships a vulnerability green. The defensive half
+  of the security pair (the
   shield); its adversarial counterpart is the `gungnir` skill (the spear). Use
-  when the user wants to make a system secure-by-design, do threat modeling,
-  handle authentication/authorization, manage secrets, prevent injection / XSS /
-  broken access control, set up SAST/DAST/dependency scanning, meet a compliance
-  or data-protection requirement, or stand up security monitoring and incident
-  response. Triggers on "is this secure", "threat model this", "secure coding",
+  when the user wants a system secure-by-design, threat modeling, auth design,
+  secrets management, to prevent injection / XSS / broken access control, set up
+  scanning, meet compliance, or stand up security monitoring. Triggers on "is this secure", "threat model this", "secure coding",
   "OWASP", "least privilege", "manage secrets", "auth/authz design", "shift-left
   security / DevSecOps", "GDPR / PII / data classification", "security review".
 argument-hint: "[system / feature / scope to secure]"

@@ -1,34 +1,19 @@
 ---
 name: envoy
 description: >
-  The writing-submission-rebuttal lens: string the argument the first five steps
-  already built into a manuscript, carry it to the right venue, defend it through
-  review, and persist up the resubmission ladder — for any field where you run
-  experiments to publish (machine learning, combinatorial optimization, operations
-  research, systems, scheduling). Use when you are writing the paper, choosing a
-  venue, drafting a rebuttal, or deciding where to resubmit after a rejection. The
-  one shift: if the prior discipline held, the paper ALREADY EXISTS IN PIECES (claims
-  = the argument, protocol = the experiments section, mechanism probes = the
-  discussion, the comparison table = related work) — writing is stringing an existing
-  argument into prose, not composing from scratch. And this is the step with the
-  SHARPEST human/agent boundary: the human keeps the story, the claim wording, the
-  contribution, the venue taste, the rebuttal judgment, and the signature; the agent
-  polishes, checks consistency, reader-tests, and (the agent era's one real change to
-  rebuttal) runs the new experiments a one-command-regeneration pipeline now makes
-  feasible inside the rebuttal window. The cardinal sin: the agent writing a sentence
-  whose evidence it never saw — every number must trace to a run id; and the venue's
-  current LLM-use policy is checked and followed, not guessed. Triggers on
-  "write the paper / write up", "intro / related work / experiments section", "make
-  the figures into a paper", "which venue / where should I submit", "write a rebuttal
-  / respond to reviewers", "the paper got rejected / where to resubmit", "camera-ready",
-  "reproduction package / anonymize". Installs the figure-first skeleton and the
-  one-sentence insight, the section templates (five-beat intro, claim-organized
-  experiments), the three red lines on agent-assisted writing, venue-fit selection and
-  deadline back-planning, the 48-hour rule and four-beat rebuttal with the now-feasible
-  "actually add the number", and the revise-before-resubmit ladder. The agent is the
-  MEANS (the polisher, the consistency checker, the reader-tester, the rebuttal-experiment
-  operator), never the author of the argument; you keep four things — taste, spec,
-  judgment, and the signature on the claims.
+  The writing-submission-rebuttal lens: string the prior steps' argument into a
+  manuscript, carry it to a venue, defend it through review, and climb the
+  resubmission ladder — for any field that runs experiments to publish (ML,
+  optimization, operations research, systems). Use when writing the
+  paper, choosing a venue, drafting a rebuttal, or deciding where to resubmit. The
+  one shift: if the prior discipline held, the paper ALREADY EXISTS IN PIECES — the
+  prior claims, protocol, and probes are its argument, experiments, and discussion — so
+  writing strings an existing argument into prose, not composing from scratch; the
+  agent polishes and checks consistency, but the human keeps the story and signature,
+  and every number must trace to a run id. Triggers on "write the paper /
+  write up", "intro / related work / experiments section", "which venue / where should
+  I submit", "write a rebuttal / respond to reviewers", "the paper got rejected / where
+  to resubmit", "camera-ready", "reproduction package / anonymize".
 argument-hint: "[the analyzed results/paper to write up, or the writing/venue/rebuttal problem you're stuck on]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---

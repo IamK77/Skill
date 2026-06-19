@@ -2,21 +2,16 @@
 name: graphics
 description: >
   The advanced visual layer for a frontend build — where icons, imagery, Canvas, WebGL, GPU,
-  and generative technique live, and where "random icon packs", "hero image that tanks LCP",
-  and "three.js because it looks cool" are decided. Use after the core visual language is set
-  (color, type, form), when establishing or auditing the graphics and generative layer, or when
-  a UI uses icons that don't match, images that shift layout, or animated surfaces that drain
-  the budget. The one shift: the DOM is the default and the budget — you drop to Canvas / SVG /
-  WebGL / GPU only where the DOM genuinely cannot go, ALWAYS with a fallback and a perf budget,
-  and icons come from ONE coherent set (matched stroke, grid, optical size). The agent reaches
-  for canvas/three.js as a reflex, mixes three icon families, lazy-loads the LCP hero, and feels
-  no wrongness — so the escape-to-GPU and the icon/imagery systems must be decided and gated.
-  Triggers on "icon / icon set / icon pack / SVG icon / icon font", "image / hero / LCP / CLS /
-  layout shift / srcset / lazy load / AVIF / WebP / blurhash / placeholder", "illustration /
-  spot illustration / empty state / art direction", "canvas / WebGL / WebGPU / three.js /
-  PixiJS / shader / GLSL / WGSL / SDF / raymarching", "GPU / generative / procedural /
-  particle / data visualization / Deck.gl", "retina / devicePixelRatio / HiDPI / blurry canvas",
-  "icon accessibility / aria-hidden / icon-only button", "duotone / photo treatment".
+  and generative technique live, and "three.js because it looks cool" gets decided. Use after
+  the core visual language is set, when auditing the graphics layer, or when a UI has mismatched
+  icons, layout-shifting images, or GPU surfaces that drain the budget. The one shift: the DOM
+  is the default and the budget — you drop to Canvas / SVG / WebGL / GPU only where the DOM
+  genuinely cannot go, always with a fallback and a budget, and icons come from ONE coherent set
+  — the agent reaches for the GPU as a reflex, mixes icon families, and lazy-loads the LCP hero,
+  feeling no wrongness, so these are gated. Triggers on "icon / icon set / SVG icon / aria-hidden",
+  "image / hero / LCP / CLS / srcset / lazy load / AVIF / WebP / blurhash / illustration", "canvas
+  / WebGL / WebGPU / three.js / shader / GLSL / SDF / raymarching / GPU / generative / procedural
+  / data visualization / retina / devicePixelRatio / blurry canvas".
 argument-hint: "[the UI / component / page where icons, imagery, or canvas/GPU rendering lives]"
 allowed-tools: Read Bash Edit Write WebSearch WebFetch
 ---
