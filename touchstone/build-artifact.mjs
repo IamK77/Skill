@@ -1,69 +1,72 @@
-// build-artifact.mjs — assemble the self-contained claude.ai JSX artifact from the SAME
-// sources the local bench uses, so the two cannot drift:
-//   engine  = core.mjs + harness.mjs (verbatim, `export ` stripped — both are import-free & browser-safe)
-//   styles  = the 5 atelier lens CSS files (verbatim, concatenated)
-//   data    = the embedded skill structure + the light (formbricks) fixture + profile (no server fetch)
-//   app     = the App component lifted verbatim from web/index.html, with ONLY the data-loading
-//             preamble repatched (dynamic import + /api fetch → inlined engine + embedded consts)
-// Run:  node build-artifact.mjs   (the local server must be up on :5178 for the fixture payload)
+// build-artifact.mjs — assemble the self-contained claude.ai JSX artifact from the bench sources.
+//
+//   node build-artifact.mjs [--skill <suite>/<name>]      (default: surface/wellspring)
+//
+// Reads straight from disk (no server needed → runs in CI). Output: artifacts/<suite>-<name>.jsx.
+//
+// CONSISTENCY: the engine (core.mjs) and styles (the 5 atelier lens files) are embedded VERBATIM, so
+// this artifact and web/index.html render identically and run the identical experiment logic. The ONE
+// transformation, applied only to the embedded DATA strings (fixture code + SKILL.md): the literal
+// `import` is rewritten to `import`. This is a DECODE-IDENTITY escape — at runtime the string is
+// byte-for-byte `import` again (the model sees the exact same review input) — but the emitted source no
+// longer contains the substring `import`, so claude.ai's regex-based dependency pre-scan does NOT
+// mistake the reviewed code's own `import ... from '@lobechat/*'` lines for real dependencies (which
+// made the artifact fail to load). The only real import in the file is React on line 1.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadSkillStructured, loadFixtures, loadProfile } from "./node-lib.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(here, "..");      // touchstone/ sits at the repo root
 const web = path.join(here, "web");
 const read = (p) => fs.readFileSync(p, "utf8");
 
-// ---- 1. engine (strip `export ` only; no imports to resolve) ----
-const stripExports = (s) => s.replace(/^export\s+/gm, "");
-const coreSrc = stripExports(read(path.join(here, "core.mjs")));
-// (harness.mjs no longer embedded — both arms use the small core.runMiniHarness loop)
+const argv = process.argv.slice(2);
+const skill = (argv[argv.indexOf("--skill") + 1] && argv.includes("--skill")) ? argv[argv.indexOf("--skill") + 1] : "surface/wellspring";
 
-// ---- 2. styles (same files index.html <link>s, in the same order) ----
+// ---- 1. engine (strip `export ` only; core.mjs is import-free & browser-safe) ----
+const coreSrc = read(path.join(here, "core.mjs")).replace(/^export\s+/gm, "");
+
+// ---- 2. styles (same files index.html <link>s, in order) ----
 const STYLES = ["tokens.css", "type.css", "layout.css", "form.css", "motion.css"]
   .map((f) => `/* ===== ${f} ===== */\n` + read(path.join(web, f)))
   .join("\n\n");
 
-// ---- 3. data: fetch the live payload, embed ALL fixtures (full parity with local — includes
-//         lobe-chat, the most on-target wellspring case: parallel accumulator → derive/single-source) ----
-const payload = await fetch("http://localhost:5178/api/fixtures?skill=surface/wellspring").then((r) => r.json());
-const fixtures = payload.fixtures || [];
-if (!fixtures.length) throw new Error("no fixtures in payload");
-// the mini-harness only puts SKILL.md in context → embed just that (drop the 128KB references)
-const skillStruct = { skillMd: (payload.skillStruct && payload.skillStruct.skillMd) || "" };
-const profile = payload.profile || {};
+// ---- 3. data: read from disk (node-lib). mini-harness only needs SKILL.md → drop the heavy refs ----
+const fixtures = loadFixtures(here, skill);
+if (!fixtures.length) throw new Error(`no fixtures under evals/${skill}/fixtures/`);
+const skillStruct = { skillMd: loadSkillStructured(repoRoot, skill).skillMd };
+const profile = loadProfile(here, skill);
+
+// the decode-identity escape (see header): only applied to embedded data, never to real code
+const neutralize = (json) => json.replace(/import/g, "\\u0069mport");
 
 // ---- 4. App: lift the babel body from index.html, repatch the data-loading preamble ----
 const html = read(path.join(web, "index.html"));
 const body = html.split('<script type="text/babel" data-presets="react">')[1].split("</script>")[0];
 
 let app = body
-  // drop the IIFE wrapper, the React global destructure, the dynamic engine imports, the DOM render
   .replace(/\(async \(\) => \{/, "")
   .replace(/const \{ useState, useEffect \} = React;\s*/, "")
   .replace(/const core = await import\("\.\/core\.mjs"\);.*\n/, "")
   .replace(/const H = await import\("\.\/harness\.mjs"\);.*\n/, "")
-  .replace(/\s*ReactDOM\.createRoot\(document\.getElementById\("root"\)\)\.render\(<App \/>\);\s*\}\)\(\);\s*$/, "\n");
-
-// repatch: fetch(/api/config)+fetch(/api/fixtures) → claude.ai mode + embedded data
-app = app.replace(
-  /useEffect\(\(\) => \{\s*fetch\("\/api\/config"\)[\s\S]*?\.catch\(\(e\) => setErr\(String\(e\.message \|\| e\)\)\);\s*\}, \[\]\);/,
-  `useEffect(() => {
+  .replace(/\s*ReactDOM\.createRoot\(document\.getElementById\("root"\)\)\.render\(<App \/>\);\s*\}\)\(\);\s*$/, "\n")
+  .replace(
+    /useEffect\(\(\) => \{\s*fetch\("\/api\/config"\)[\s\S]*?\.catch\(\(e\) => setErr\(String\(e\.message \|\| e\)\)\);\s*\}, \[\]\);/,
+    `useEffect(() => {
         setMode("claudeai");
         setSkillStruct(__SKILL_STRUCT__); setFixtures(__FIXTURES__); setProfile(__PROFILE__);
       }, []);`
-);
+  );
 
 if (app.includes("await import") || app.includes("/api/config")) throw new Error("preamble repatch failed");
 
 // ---- 5. assemble ----
-const out = `// skill-ab-experiment.jsx — self-contained claude.ai artifact.
-// GENERATED by build-artifact.mjs from the local bench sources — do not hand-edit; re-run the build.
-// Engine (core.mjs + harness.mjs) and styles (the 5 atelier lens files) are embedded VERBATIM, so
-// this artifact and web/index.html render identically and run the identical experiment logic
-// (no-skill vs skill-as-gated-workflow · consensus grading · 0–10 rubric anchored at 6). The only
-// environment difference: claude.ai uses injected credentials, and the skill + one fixture are
-// embedded here because the artifact sandbox has no server/filesystem.
+const out = `// ${skill.replace(/\//g, "-")}.jsx — self-contained claude.ai artifact for the touchstone bench.
+// GENERATED by build-artifact.mjs — do not hand-edit; edit the sources and re-run the build.
+// Engine + styles embedded verbatim; the embedded data's ES module keyword is escaped to \\u0069mport
+// (decode-identity) to dodge claude.ai's text-based dependency pre-scan — see build-artifact.mjs. Skill: ${skill}.
 import { useState, useEffect } from "react";
 
 const STYLES = ${JSON.stringify(STYLES)};
@@ -72,20 +75,27 @@ const STYLES = ${JSON.stringify(STYLES)};
 ${coreSrc}
 const core = { DEFAULT_REVIEW_SYSTEM, reviewMessages, gradeReviewMessages, falsePositiveMessages, scoreFromGrade, gradeConsensus, gradeFalsePositive, runMiniHarness, runTrial, runCell, mapPool, summarize };
 
-// ============================ embedded data ============================
-const __FIXTURES__ = ${JSON.stringify(fixtures)};
-const __SKILL_STRUCT__ = ${JSON.stringify(skillStruct)};
-const __PROFILE__ = ${JSON.stringify(profile)};
+// ============================ embedded data (ES module keyword → \\u0069mport, decode-identity) ============================
+const __FIXTURES__ = ${neutralize(JSON.stringify(fixtures))};
+const __SKILL_STRUCT__ = ${neutralize(JSON.stringify(skillStruct))};
+const __PROFILE__ = ${neutralize(JSON.stringify(profile))};
 
 // ============================ app (lifted from index.html) ============================
 ${app.trim()}
 
-export default function SkillLab() {
+export default function Touchstone() {
   return (<><style>{STYLES}</style><App /></>);
 }
 `;
 
-const outPath = path.join(here, "skill-ab-experiment.jsx");
+// safety gate: the ONLY real \`import\` left must be the React line — any other means a stray slipped
+// past the escape (string data) or sits in app/engine code, and would re-trigger the dependency scan.
+const strays = out.split('import { useState, useEffect } from "react";').join("").match(/\bimport\b/g);
+if (strays) throw new Error(`${strays.length} un-escaped \`import\` left in the artifact — would fail claude.ai's scan`);
+
+const outDir = path.join(here, "artifacts");
+fs.mkdirSync(outDir, { recursive: true });
+const outPath = path.join(outDir, skill.replace(/\//g, "-") + ".jsx");
 fs.writeFileSync(outPath, out);
 const kb = (fs.statSync(outPath).size / 1024).toFixed(0);
-console.log(`wrote ${path.relative(here, outPath)} — ${kb}KB · fixtures: ${fixtures.map((f) => f.id).join(", ")} · skillMd: ${skillStruct.skillMd.length} chars (references dropped — mini-harness uses SKILL.md only)`);
+console.log(`wrote ${path.relative(here, outPath)} — ${kb}KB · skill: ${skill} · fixtures: ${fixtures.map((f) => f.id).join(", ")} · 0 stray imports`);

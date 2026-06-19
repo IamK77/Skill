@@ -1,0 +1,58 @@
+name: touchstone-artifacts
+
+# Keeps the committed claude.ai artifacts in sync with their sources — the same way
+# release-please keeps CHANGELOG in sync. The artifacts live in the tree (touchstone/artifacts/)
+# so claude.ai can clone the repo and invoke one directly; this rebuilds them on every push that
+# touches the bench sources or a skill, and commits the result back only if it changed.
+#
+# build-artifact.mjs reads from disk (no server) and self-checks (it throws on a stray `import`
+# that would break claude.ai's dependency pre-scan), so a broken build fails the job rather than
+# committing a bad artifact.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'touchstone/core.mjs'
+      - 'touchstone/web/**'
+      - 'touchstone/build-artifact.mjs'
+      - 'touchstone/node-lib.mjs'
+      - 'touchstone/evals/**'
+      - 'skills/**'
+      - '.github/workflows/touchstone-artifacts.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: touchstone-artifacts-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Rebuild artifacts for every skill that has an eval set
+        run: |
+          shopt -s nullglob
+          for p in touchstone/evals/*/*/profile.json; do
+            skill="${p#touchstone/evals/}"; skill="${skill%/profile.json}"
+            echo "::group::build $skill"
+            node touchstone/build-artifact.mjs --skill "$skill"
+            echo "::endgroup::"
+          done
+      - name: Commit back if the artifacts changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add touchstone/artifacts
+          if git diff --cached --quiet; then
+            echo "artifacts already up to date — nothing to commit"
+          else
+            git commit -m "chore(touchstone): rebuild artifacts [skip ci]"
+            git push
+          fi

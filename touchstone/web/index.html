@@ -44,6 +44,19 @@
       return (d.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n");
     }
 
+    // Retry only rate-limit / overload responses (429 / 529 / 503) with exponential backoff + jitter.
+    // Other errors (402 balance, 401 auth, parse failures) are NOT retried — they won't fix themselves.
+    const isRateLimit = (e) => /(^|\D)(429|529|503)(\D|$)|rate.?limit|overloaded|too many requests/i.test(String((e && e.message) || e));
+    async function withRetry(fn, tries = 4, base = 800) {
+      for (let i = 0; ; i++) {
+        try { return await fn(); }
+        catch (e) {
+          if (i >= tries - 1 || !isRateLimit(e)) throw e;
+          await new Promise((res) => setTimeout(res, base * 2 ** i + Math.random() * base));
+        }
+      }
+    }
+
     // The manipulated variable: the SAME small review loop (draft → self-revise) runs on BOTH arms;
     // the only difference is whether the skill's guidance is in context.
     const ARMS = {
@@ -74,7 +87,7 @@
 
       const [arms, setArms] = useState({ base: true, skill: true });
       const [trials, setTrials] = useState(4);
-      const concurrency = 12;
+      const concurrency = mode === "claudeai" ? 8 : 12;   // claude.ai rate-limits harder; local can push 12
       const [running, setRunning] = useState(false);
       const [log, setLog] = useState([]);
       const [results, setResults] = useState([]);   // [{fixture, arm, meanFound, fpRate, n, records}]
@@ -93,7 +106,7 @@
           .catch((e) => setErr(String(e.message || e)));
       }, []);
 
-      const callModel = (role) => async (messages, opts) => {
+      const callModel = (role) => (messages, opts) => withRetry(async () => {
         if (mode === "claudeai") return callClaudeProxy(messages, { ...opts, model: claudeModel });
         const provider = { flavor, baseUrl, apiKey, model };
         const r = await fetch("/api/model", {
@@ -103,7 +116,7 @@
         const j = await r.json().catch(() => ({}));
         if (!r.ok || j.error) throw new Error(j.error || ("HTTP " + r.status));
         return j.text;
-      };
+      });
 
       const providerReady = mode === "claudeai" ? !!claudeModel
         : flavor === "openai" ? !!(baseUrl && model && apiKey) : !!(model && apiKey);
