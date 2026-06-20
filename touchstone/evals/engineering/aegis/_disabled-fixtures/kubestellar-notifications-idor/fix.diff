@@ -1,0 +1,71 @@
+commit d2a36c6ae54492e0947d5ccab519519e10552bb4
+Author: kubestellar-hive[bot] <280983584+kubestellar-hive[bot]@users.noreply.github.com>
+Date:   Sun May 17 09:32:41 2026 +0000
+
+    🐛 fix IDOR: filter GetNotificationsSince by userID in pushCatchUpSummary (#14373)
+    
+    pushCatchUpSummary streamed all users'notifications to the SSE-connected
+    user. Add GetUserNotificationsSince that filters by user_id and use it in
+    the catch-up handler. Internal batch callers (observer, scheduler) keep
+    using the unfiltered variant since they process all users in batch jobs.
+    
+    Signed-off-by: kubestellar-hive <hive-bot@kubestellar.io>
+    Co-authored-by: kubestellar-hive <hive-bot@kubestellar.io>
+    Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+
+diff --git a/pkg/api/handlers/stellar.go b/pkg/api/handlers/stellar.go
+index c209079f9..9b2ef144d 100644
+--- a/pkg/api/handlers/stellar.go
++++ b/pkg/api/handlers/stellar.go
+@@ -147,6 +147,7 @@ type StellarStore interface {
+ 
+ 	// Sprint 5
+ 	GetNotificationsSince(ctx context.Context, since time.Time) ([]store.StellarNotification, error)
++	GetUserNotificationsSince(ctx context.Context, userID string, since time.Time) ([]store.StellarNotification, error)
+ 	GetExecutionsSince(ctx context.Context, since time.Time) ([]store.StellarExecution, error)
+ 	UpsertUserLastSeen(ctx context.Context, userID string) error
+ 	GetUserLastSeen(ctx context.Context, userID string) (*time.Time, error)
+diff --git a/pkg/api/handlers/stellar_observations.go b/pkg/api/handlers/stellar_observations.go
+index 93fc11543..27fd399cd 100644
+--- a/pkg/api/handlers/stellar_observations.go
++++ b/pkg/api/handlers/stellar_observations.go
+@@ -538,7 +538,7 @@ func (h *StellarHandler) pushCatchUpSummary(ctx context.Context, w *bufio.Writer
+ 	// Give SSE stream 2 seconds to establish before pushing
+ 	time.Sleep(2 * time.Second)
+ 
+-	notifications, _ := h.store.GetNotificationsSince(ctx, since)
++	notifications, _ := h.store.GetUserNotificationsSince(ctx, userID, since)
+ 	resolvedWatches, _ := h.store.GetWatchesSince(ctx, userID, since, "resolved")
+ 	activeWatches, _ := h.store.GetActiveWatches(ctx, userID)
+ 	memories, _ := h.store.GetRecentMemoryEntries(ctx, userID, "", 5)
+diff --git a/pkg/store/sqlite_stellar_notifications.go b/pkg/store/sqlite_stellar_notifications.go
+index 3f9380610..655e85e82 100644
+--- a/pkg/store/sqlite_stellar_notifications.go
++++ b/pkg/store/sqlite_stellar_notifications.go
+@@ -185,6 +185,26 @@ func (s *SQLiteStore) GetNotificationsSince(ctx context.Context, since time.Time
+ 	return out, rows.Err()
+ }
+ 
++// GetUserNotificationsSince returns notifications for a specific user since the given time.
++// Use this instead of GetNotificationsSince when serving data to a specific user session.
++func (s *SQLiteStore) GetUserNotificationsSince(ctx context.Context, userID string, since time.Time) ([]StellarNotification, error) {
++	rows, err := s.db.QueryContext(ctx, `SELECT id, user_id, type, severity, title, body, cluster, namespace, mission_id, action_id, dedupe_key, read, created_at
++		FROM stellar_notifications WHERE user_id = ? AND created_at >= ? ORDER BY created_at ASC`, userID, since.UTC())
++	if err != nil {
++		return nil, err
++	}
++	defer rows.Close()
++	out := make([]StellarNotification, 0)
++	for rows.Next() {
++		item, scanErr := scanStellarNotificationRow(rows)
++		if scanErr != nil {
++			return nil, scanErr
++		}
++		out = append(out, *item)
++	}
++	return out, rows.Err()
++}
++
+ 
+ func (s *SQLiteStore) UnreadCount(ctx context.Context) (int, error) {
+ 	var count int
