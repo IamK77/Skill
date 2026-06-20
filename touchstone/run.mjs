@@ -14,7 +14,7 @@ import { runCell, summarize } from "./core.mjs";
 import { loadSkill, loadFixtures, loadProfile, providerConfigs, providerLabel } from "./node-lib.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(here, "..", "..", ".."); // output/ab_exp/lab -> repo root
+const repoRoot = path.resolve(here, ".."); // touchstone/ sits at the repo root
 
 const argv = process.argv.slice(2);
 const has = (f) => argv.includes(f);

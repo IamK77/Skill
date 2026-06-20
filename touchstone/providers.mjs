@@ -16,6 +16,15 @@
 const textFromAnthropic = (data) =>
   (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n");
 
+// Surface prompt-cache hits to stderr so a multi-turn run's real cost is VISIBLE and
+// verifiable (a cache read is billed ~0.1x a fresh input token). Silent if the
+// endpoint reports no cache fields. Goes to stderr so it never pollutes stdout JSON.
+function logCacheUsage(u) {
+  if (!u) return;
+  const w = u.cache_creation_input_tokens || 0, r = u.cache_read_input_tokens || 0;
+  if (w || r) console.error(`  [cache] write=${w} read=${r} in=${u.input_tokens || 0} out=${u.output_tokens || 0}`);
+}
+
 // A thinking model (DeepSeek v4-pro etc.) returns its chain-of-thought in
 // `reasoning_content` and the actual answer in `content`, both at message level.
 // We use `content`. If it is blank we look at finish_reason: "length" means the
@@ -70,9 +79,20 @@ export function makeCallModel(cfg = {}) {
         max_tokens: opts.maxTokens ?? 1500,
         messages,
       };
-      if (opts.system) body.system = opts.system;
+      // Cache the system block. In the harness this is the big, turn-stable SKILL.md;
+      // marking it cacheable means a multi-turn run reads it from cache each turn
+      // instead of re-billing the whole skill every turn — the real cost of running a
+      // skill, the way Claude Code itself caches it. Sent as a content block (Anthropic
+      // shape) so cache_control can attach. Below the model's min cacheable size it is a
+      // silent no-op, so it is safe to always set; the real Anthropic API and DeepSeek's
+      // Anthropic-compatible endpoint both accept the block form.
+      if (opts.system) {
+        body.system = [{ type: "text", text: opts.system, cache_control: { type: "ephemeral" } }];
+      }
       if (opts.temperature != null) body.temperature = opts.temperature;
-      return textFromAnthropic(await postJSON(`${root}/v1/messages`, headers, body));
+      const data = await postJSON(`${root}/v1/messages`, headers, body);
+      logCacheUsage(data.usage);
+      return textFromAnthropic(data);
     };
   }
 

@@ -17,6 +17,12 @@
 //
 // Progressive disclosure is therefore an OBSERVED, logged behavior (which refs the
 // model opened, at which turn) — not a given we engineered.
+//
+// The code under review is NOT force-fed: it is a virtual file tree (navfs.mjs) the
+// model navigates with ls / read_file / grep — so the agent must SEEK the problem, and
+// a skill's NAVIGATION value (enumerate, trace, cross-reference) can actually manifest.
+
+import { makeVirtualFS, runNavTool, parseNavCalls, proseWithoutNav } from "./navfs.mjs";
 
 // ── The checklist: a deterministic, all-manual gate machine ──────────────────────
 // wellspring's .checklist.yml has 4 phases, each a single MANUAL judgment check and
@@ -79,17 +85,17 @@ export function makeChecklist(config, onEvent = () => {}) {
 // We use text markers rather than a provider's native tool-use so the SAME loop
 // works on Anthropic, DeepSeek, vLLM, etc. with one code path — the price is a
 // little more brittleness, paid down with strict format + a re-ask on a silent turn.
-const MARKER = /\[\[\s*(read_reference|checklist)\s*:\s*([\s\S]*?)\]\]/g;
+const MARKER = /\[\[\s*(read_reference|checklist|ls|read_file|grep)\s*:?\s*([\s\S]*?)\]\]/g;
 
 export function parseToolCalls(text) {
   const calls = [], seen = new Set();
   for (const m of String(text).matchAll(MARKER)) {
     const tool = m[1];
     const rest = m[2].trim();
-    const call = tool === "read_reference"
-      ? { tool, name: rest.replace(/\.md$/, "") }
-      : (() => { const [cmd, ...args] = rest.split(/\s+/); return { tool, cmd, args }; })();
-    const key = tool === "read_reference" ? `r:${call.name}` : `c:${call.cmd}:${(call.args || []).join(" ")}`;
+    let call, key;
+    if (tool === "read_reference") { call = { tool, name: rest.replace(/\.md$/, "") }; key = `r:${call.name}`; }
+    else if (tool === "checklist") { const [cmd, ...args] = rest.split(/\s+/); call = { tool, cmd, args }; key = `c:${cmd}:${args.join(" ")}`; }
+    else { call = { tool, rest }; key = `n:${tool}:${rest}`; } // ls / read_file / grep — navigate the code
     if (seen.has(key)) continue; // a turn that repeats the same marker counts once
     seen.add(key);
     calls.push(call);
@@ -125,6 +131,9 @@ function buildSystem({ baseSystem, skillName, skillMd, references, phases }) {
     `clear, in order, before the next unlocks. ORDER IS ENFORCED HERE; the SUBSTANCE and the NAVIGATION are yours.`,
     "",
     "TOOLS — invoke by emitting a marker on its own line, EXACTLY in this form:",
+    "  [[ls]]                                   list the files of the code under review",
+    "  [[read_file: <path> [start-end]]]        read a file of the code (optionally a line range)",
+    "  [[grep: <pattern> [in <path>]]]          search the code (case-insensitive regex) — trace, cross-reference",
     "  [[read_reference: <name>]]               open one reference from the library (returns its full text)",
     "  [[checklist: check <stage> <check-id>]]  record a stage's manual check as done; its FINDING is whatever",
     "                                           you wrote in THIS turn — so write the analysis out, substantively,",
@@ -154,11 +163,13 @@ function buildSystem({ baseSystem, skillName, skillMd, references, phases }) {
   ].join("\n");
 }
 
-const buildTask = (code, domain) =>
-  `Work the skill's gated workflow on the ${domain.toUpperCase()} of the code below (a real module from a ` +
-  `production codebase). At each stage: do the stage's work in prose (opening the reference it points to if you ` +
-  `need it), record the stage's [[checklist: check …]], then [[checklist: verify …]] the gate. After the final ` +
-  `gate clears, write your consolidated review.\n\n--- CODE ---\n${code}\n--- END CODE ---`;
+const buildTask = (manifest, domain) =>
+  `Work the skill's gated workflow on the ${domain.toUpperCase()} of the code under review — a real module from a ` +
+  `production codebase. The code is NOT pasted here: it is a small file tree you must NAVIGATE with the tools ` +
+  `([[ls]], [[grep]], [[read_file]]) to actually read what you review — SEEK the problem, don't wait for it. At each ` +
+  `stage: do the stage's work in prose (navigating the code, and opening the reference it points to if you need it), ` +
+  `record the stage's [[checklist: check …]], then [[checklist: verify …]] the gate. After the final gate clears, ` +
+  `write your consolidated review.\n\nFILES UNDER REVIEW (read them with the tools):\n${manifest}`;
 
 const nudge = (cl) => {
   const cleared = cl.clearedGateNames();
@@ -178,10 +189,11 @@ export async function runHarness({
   onEvent = () => {}, maxTurns = 28, maxTokens = 8000,
 }) {
   const checklist = makeChecklist(skill.checklist, onEvent);
+  const vfs = makeVirtualFS(code);
   const sys = buildSystem({ baseSystem: system || "You are a senior engineer.", skillName, skillMd: skill.skillMd, references: skill.references, phases: checklist.phases });
-  const messages = [{ role: "user", content: buildTask(code, domain) }];
+  const messages = [{ role: "user", content: buildTask(vfs.ls(), domain) }];
   const refsOpened = [];
-  let review = "", complete = false, turn = 0, bestProse = "";
+  let review = "", complete = false, turn = 0, bestProse = "", navCalls = 0;
 
   while (turn < maxTurns) {
     turn += 1;
@@ -206,6 +218,10 @@ export async function runHarness({
         const r = readReference(skill, c.name, onEvent);
         if (r.opened) refsOpened.push({ name: r.opened, turn });
         results.push(`[[read_reference: ${c.name}]] →\n${r.text}`);
+      } else if (c.tool === "ls" || c.tool === "read_file" || c.tool === "grep") {
+        navCalls += 1;
+        onEvent({ type: "nav", tool: c.tool, turn });
+        results.push(`[[${c.tool}${c.rest ? ": " + c.rest : ""}]] →\n${runNavTool(vfs, c.tool, c.rest)}`);
       } else {
         const before = checklist.clearedGateNames().length;
         const r = checklist.run(c.cmd, c.args, c.cmd === "check" ? turnProse : "");
@@ -246,8 +262,60 @@ export async function runHarness({
     review,
     complete,
     turns: turn,
+    navCalls,                                     // how many ls/read_file/grep the agent made (its navigation)
     refsOpened,                                   // [{name, turn}] — observed progressive disclosure
     gatesCleared: checklist.clearedGateNames(),   // which stages actually cleared
     stages: checklist.phases.map((p) => p.name),
   };
+}
+
+// runNavReview — the EQUAL-OPPORTUNITY, skill-free baseline arm. Same nav tools over the
+// same virtual FS and the same turn ceiling as the skill arm — but NO skill, NO gates:
+// the agent navigates the code however it likes and DECIDES when it has seen enough, then
+// writes its review (a turn with prose and no tool markers ends it). "Equal compute" is an
+// equal ceiling + equal tools, NOT a forced floor — if this arm stops early that is its own
+// choice, so a skill-arm win can't be dismissed as "it just got more turns", yet we never
+// pad the baseline with aimless extra turns either.
+export async function runNavReview({ callModel, code, domain = "architecture", system, maxTurns = 28, maxTokens = 8000, onEvent = () => {} }) {
+  const vfs = makeVirtualFS(code);
+  const sys = [
+    system || "You are a senior engineer.",
+    "",
+    `Review the ${domain.toUpperCase()} of the code under review and report the real problems with concrete, specific fixes.`,
+    "The code is NOT pasted here — it is a small file tree you must NAVIGATE with these tools (emit a marker on its own line, exactly):",
+    "  [[ls]]                                list the files under review",
+    "  [[read_file: <path> [start-end]]]     read a file (optionally a line range)",
+    "  [[grep: <pattern> [in <path>]]]       search the code (case-insensitive regex) — trace, cross-reference",
+    "Navigate as much or as little as you judge necessary. When you have SEEN ENOUGH, stop using tools and write your FINAL",
+    "review as plain prose (NO [[...]] markers) — that ends the review. Don't pad; don't stop before you've actually read the code.",
+  ].join("\n");
+  const messages = [{ role: "user", content: `Begin your ${domain} review. The files under review (read them with the tools):\n${vfs.ls()}` }];
+  let review = "", turn = 0, navCalls = 0, bestProse = "";
+
+  while (turn < maxTurns) {
+    turn += 1;
+    onEvent({ type: "turn", turn });
+    const out = await callModel(messages, { system: sys, maxTokens, temperature: 1 });
+    messages.push({ role: "assistant", content: out });
+    const calls = parseNavCalls(out);
+    const prose = proseWithoutNav(out);
+    if (prose.length > bestProse.length) bestProse = prose;
+
+    if (calls.length === 0) {
+      if (navCalls === 0) { // don't accept a "review" of code it never opened
+        messages.push({ role: "user", content: "You haven't read any of the code yet — use [[ls]], [[grep]], and [[read_file]] to actually look at it before reviewing." });
+        continue;
+      }
+      review = out; break; // agent decided it's done
+    }
+    const results = [];
+    for (const c of calls) {
+      navCalls += 1;
+      onEvent({ type: "nav", tool: c.tool, turn });
+      results.push(`[[${c.tool}${c.rest ? ": " + c.rest : ""}]] →\n${runNavTool(vfs, c.tool, c.rest)}`);
+    }
+    messages.push({ role: "user", content: results.join("\n\n") + "\n\n(Keep navigating, or write your final review when ready.)" });
+  }
+  review = proseWithoutNav(review).trim() || bestProse;
+  return { review, turns: turn, navCalls };
 }

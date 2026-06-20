@@ -15,7 +15,7 @@ import { loadSkillStructured, loadFixtures, loadProfile, providerConfigs, provid
 import { runHarness } from "./harness.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(here, "..", "..", "..");
+const repoRoot = path.resolve(here, ".."); // touchstone/ sits at the repo root
 const argv = process.argv.slice(2);
 const val = (f, d) => { const i = argv.indexOf(f); return i >= 0 ? argv[i + 1] : d; };
 

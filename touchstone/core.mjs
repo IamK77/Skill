@@ -39,38 +39,41 @@ export function gradeReviewMessages({ code, diff, review, domain = "architecture
     content:
       "You are STRICTLY judging the quality of a code review focused on " + domain + ".\n\n" +
       "The code that was reviewed (BEFORE any change):\n--- CODE ---\n" + code + "\n--- END CODE ---\n\n" +
-      "A real maintainer later improved this code with the change below. It is your FIXED " +
-      "CALIBRATION ANCHOR — a known-good, real improvement of concrete value:\n" +
-      "--- MAINTAINER'S REFERENCE CHANGE ---\n" + diff + "\n--- END ---\n\n" +
+      "For CALIBRATION ONLY, here is ONE real improvement a maintainer later made to this code — a REFERENCE " +
+      "example proving the code genuinely has real " + domain + " problems at this level. It is NOT the only valid " +
+      "finding, NOT a checklist, NOT an answer key. The review is NOT required to match it. A review that finds " +
+      "DIFFERENT but equally-real, equally-important problems is JUST AS GOOD. Do NOT reward a review for matching " +
+      "this, nor penalize it for missing this specific one:\n" +
+      "--- ONE REFERENCE IMPROVEMENT (calibration, NOT the answer key) ---\n" + diff + "\n--- END ---\n\n" +
       "The review under judgement:\n--- REVIEW ---\n" + review + "\n--- END REVIEW ---\n\n" +
-      "Grade like an EXAM rubric: pick the band by the OBSERVABLE criteria below, not by impression. " +
-      "Unit of value: the maintainer's reference change = exactly 6 = ONE FIX-UNIT (one genuine, correct, " +
-      "concretely-actionable " + domain + " improvement to THIS code). A review may earn its fix-unit by catching " +
-      "the reference issue OR a DIFFERENT but equally-real, equally-impactful one — both count.\n\n" +
+      "Grade the review on its OVERALL MERIT as a " + domain + " review of THIS code: how many genuinely real, " +
+      "important problems does it identify, and how correct and concrete are its fixes? Pick the band by the " +
+      "OBSERVABLE criteria below, not by impression, and NOT by whether it matched the reference.\n\n" +
       "STEP 1 — diagnose (state these in `why`):\n" +
-      "  • found   — identifies a REAL problem here (reference issue, or an equal one)?  yes / partial / no\n" +
+      "  • found   — identifies at least one GENUINELY REAL, important problem in this code (the reference issue OR a different equally-real one)?  yes / partial / no\n" +
       "  • fixes   — correct & concrete (names what to change, would actually work)?  correct / mixed / incorrect / vague\n" +
-      "  • harmful — does ANY recommendation REINTRODUCE the problem the maintainer removed, revert the fix, or add a new bug?  yes / no\n" +
-      "  • extra   — genuine, correct issues BEYOND one fix-unit?  none / some / lots\n" +
+      "  • harmful — does ANY recommendation give actively WRONG advice — introduce a bug, break working behavior, or push a clearly WORSE design?  yes / no\n" +
+      "  • depth   — how much real, correct value: a single solid finding, several genuine ones, or deep/important ones?  thin / solid / rich\n" +
       "  • noise   — mostly cosmetic / stylistic / generic filler?  clean / some / mostly\n\n" +
-      "STEP 2 — pick the band:\n" +
-      "  10 = RARE. Catches THE reference issue itself PLUS >=1 more genuine issue; EVERY fix correct & concrete; ZERO incorrect or vague points; no filler — a senior applies it wholesale. If you can name any flaw, it is not a 10.\n" +
-      "   9 = catches THE reference issue + real extras, all essentially correct, but ONE small blemish (one vague fix, one minor miss, or a little filler)\n" +
-      "   8 = one full fix-unit (the reference OR an equal issue) correct AND >=1 more genuine correct issue, concrete; minor noise OK; no harm. (A thorough review that finds several real issues but isn't flawless lands HERE, not 9-10.)\n" +
-      "   7 = one full fix-unit correct + some extra real value, but notable vagueness or a minor incorrect side-point\n" +
-      "   6 = EXACTLY one fix-unit: the reference issue (or an equal one), correct & concrete; no harm, no real extra, no real noise\n" +
-      "   5 = real but LESS than a fix-unit: right issue with a vague/partial fix, or only one minor genuine issue\n" +
-      "   4 = real issues present BUT the main recommendation is wrong/impractical/wouldn't help, or a genuine point offset by an incorrect (non-harmful) one\n" +
+      "STEP 2 — pick the band by QUALITY (for calibration, the one reference improvement ON ITS OWN is a 'solid' single finding ≈ 6-7; a review can equal it with a DIFFERENT real finding, fall short, or beat it with more/deeper real ones):\n" +
+      "  10 = RARE & flawless: the most important real problem(s) with excellent, concrete, correct fixes; >=2 genuine issues; ZERO incorrect or vague points; no filler — a senior applies it wholesale. Any nameable flaw → not a 10.\n" +
+      "   9 = excellent: real, important problems with correct concrete fixes; ONE small blemish (one vague fix / minor miss / a little filler)\n" +
+      "   8 = strong & thorough: several genuine, correct, concrete " + domain + " problems; minor noise OK; no harm\n" +
+      "   7 = good: at least one solid real problem well-fixed + some extra real value, with notable vagueness or one minor incorrect side-point\n" +
+      "   6 = solid: one genuinely real, important problem identified with a correct, concrete fix; no harm; little extra\n" +
+      "   5 = partial: a real problem with a vague/partial fix, or only one minor genuine issue\n" +
+      "   4 = weak: real issues present BUT the main recommendation is wrong/impractical/wouldn't help, or a genuine point offset by an incorrect (non-harmful) one\n" +
       "   3 = one small real point buried in vague/cosmetic/incorrect suggestions\n" +
-      "   2 = cosmetic/stylistic/trivial only (naming, micro-perf), no architectural improvement; or a vague gesture with no actionable fix\n" +
+      "   2 = cosmetic/stylistic/trivial only (naming, micro-perf), no real " + domain + " improvement\n" +
       "   1 = generic boilerplate, nothing specific to this code\n" +
       "   0 = empty / no recommendations\n\n" +
       "STEP 3 — apply HARD OVERRIDES (they win over the band):\n" +
       "  • HARM: if `harmful` is yes, the score MAY NOT EXCEED 4; if the harmful rec is the review's MAIN thrust, score 0-2.\n" +
-      "  • CEILING: 9 or 10 require `found` = yes AND no incorrect points. A review that only finds a DIFFERENT issue (not the reference), however good, caps at 8. Reserve 10 for the genuinely flawless — it should be rare.\n" +
+      "  • NO REAL FINDING: if `found` = no (identifies no genuinely real problem at all), the score MAY NOT EXCEED 4.\n" +
       "  • EMPTY: no concrete recommendation at all → 0.\n" +
-      "  • LENGTH IS NOT VALUE: never reward length or point-count; only correct, concrete " + domain + " improvements count. Cosmetic/style/micro-perf earn nothing.\n" +
-      "  • CONCRETENESS: a recommendation that does not say WHAT to change is `vague` and does not count as a fix-unit.\n\n" +
+      "  • LENGTH IS NOT VALUE: never reward length or point-count; only correct, concrete " + domain + " improvements count. Cosmetic/style/micro-perf earn nothing. A long sprawling review is not better than a tight one with the same real points.\n" +
+      "  • CONCRETENESS: a recommendation that does not say WHAT to change is `vague` and does not count.\n" +
+      "  • MATCHING THE REFERENCE EARNS NO BONUS and MISSING IT IS NO PENALTY: judge real-problem-finding wherever it lands.\n\n" +
       'Return ONLY JSON: {"found": "yes"|"partial"|"no", "harmful": true|false, "score": <integer 0-10>, "why": "one sentence naming the band and any override"}.',
   }];
 }
@@ -101,14 +104,16 @@ function parseJSON(text) {
 }
 const clampScore = (s) => { const n = Math.round(Number(s)); return Number.isFinite(n) ? Math.max(0, Math.min(10, n)) : 0; };
 
-// Turn a grader reply into the final score, ENFORCING the harm override in code (not
-// just in the prompt): a review the judge flags harmful can never score above 4, even
-// if it otherwise reads well. Shared by every grade consumer so the rubric's baseline
-// is mechanical, not advisory.
+// Turn a grader reply into the final score, ENFORCING the overrides in code (not just in
+// the prompt). Shared by every grade consumer so the rubric's floor is mechanical.
+// NOTE: the maintainer's diff is now ONLY a calibration reference, never the anchor — so
+// there is NO "missed the reference → cap" rule. `found` means "found ANY genuinely-real
+// problem" (reference or a different equally-real one); finding no real problem at all,
+// or giving actively-harmful advice, is what caps the score.
 export function scoreFromGrade(g) {
   let s = clampScore(g?.score);
-  if (g?.harmful === true) s = Math.min(s, 4);   // would reintroduce the bug → never "good"
-  if (g?.found !== "yes") s = Math.min(s, 8);     // 9-10 require catching a real reference-level issue
+  if (g?.harmful === true) s = Math.min(s, 4);   // actively wrong/harmful advice → never "good"
+  if (g?.found === "no") s = Math.min(s, 4);      // identifies no genuinely-real problem → weak (NOT "missed the specific reference")
   return s;
 }
 
