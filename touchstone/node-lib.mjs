@@ -5,23 +5,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-export function loadSkill(repoRoot, skill) {
-  const dir = path.join(repoRoot, "skills", skill);
-  const mdPath = path.join(dir, "SKILL.md");
-  if (!fs.existsSync(mdPath)) throw new Error(`skill not found: ${path.relative(repoRoot, mdPath)}`);
-  let text = fs.readFileSync(mdPath, "utf8");
-  // Inline the reference library too. SKILL.md only LINKS to these; in a one-shot
-  // prompt the agent can't "open" them on demand, so we append their full text —
-  // this is what makes the prompt the WHOLE skill, not just its overview.
-  const refDir = path.join(dir, "references");
-  if (fs.existsSync(refDir)) {
-    for (const f of fs.readdirSync(refDir).filter((x) => x.endsWith(".md")).sort()) {
-      text += `\n\n\n===== references/${f} =====\n\n` + fs.readFileSync(path.join(refDir, f), "utf8");
-    }
-  }
-  return text;
-}
-
 // Structured skill load for the gated-workflow harness (harness.mjs): SKILL.md kept
 // SEPARATE from the references (so the harness can disclose them on demand, not
 // upfront) and the .checklist.yml parsed into {phases:[{name,checks:[{id,desc}]}]}.

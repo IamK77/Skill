@@ -14,7 +14,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { makeCallModel } from "./providers.mjs";
-import { loadSkill, loadSkillStructured, loadFixtures, loadProfile } from "./node-lib.mjs";
+import { loadSkillStructured, loadFixtures, loadProfile } from "./node-lib.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");   // touchstone/ lives at the repo root
@@ -59,14 +59,13 @@ const server = http.createServer(async (req, res) => {
     // ── fixtures + the real SKILL.md for a skill, handed to the browser engine ──
     if (p === "/api/fixtures") {
       const skill = u.searchParams.get("skill") || "surface/wellspring";
-      const skillText = loadSkill(repoRoot, skill);
       const skillStruct = loadSkillStructured(repoRoot, skill); // for the harness arm: SKILL.md + refs map + parsed gates
       const profile = loadProfile(here, skill);
       const fixtures = loadFixtures(here, skill).map((f) => ({
         id: f.id, repo: f.repo, pr: f.pr, file: f.file,
         fix_summary: f.fix_summary, before: f.before, after: f.after, diff: f.diff,
       }));
-      return sendJSON(res, 200, { skill, skillText, skillStruct, profile, fixtures });
+      return sendJSON(res, 200, { skill, skillStruct, profile, fixtures });
     }
 
     // ── static (web/ page, core.mjs, providers.mjs) ─────────────────────────────

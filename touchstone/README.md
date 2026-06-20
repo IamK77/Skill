@@ -148,6 +148,7 @@ Disabled fixtures live in `evals/<suite>/<name>/_disabled-fixtures/` (move back 
 | `web/index.html` | the web UI (the product surface). |
 | `web/tokens.css · type.css · layout.css · form.css · motion.css` | the design system (built with the `atelier` suite). |
 | `web/DESIGN-CANON.md · *-REPORT.md · INTERACTION.md` | the design brief, measured-contrast report, and the visual-agnostic logic spec. |
+| `web/color-build.mjs` | rebuilds + **measures** the colour tokens' contrast (WCAG + APCA); exits non-zero on a floor miss (CI-able). |
 | `build-artifact.mjs` | `--skill <suite>/<name>` → generates the self-contained claude.ai artifact into `artifacts/`. Reads from disk (no server); self-checks for stray imports. |
 | `artifacts/<suite>-<name>.jsx` | the generated claude.ai artifacts (one per skill) — kept in sync by the `touchstone-artifacts` Action; don't hand-edit. |
 | `providers.mjs · node-lib.mjs · server.mjs` | the model client, Node-only loaders, and the local server. |
