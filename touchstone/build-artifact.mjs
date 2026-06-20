@@ -25,18 +25,26 @@ const read = (p) => fs.readFileSync(p, "utf8");
 const argv = process.argv.slice(2);
 const skill = (argv[argv.indexOf("--skill") + 1] && argv.includes("--skill")) ? argv[argv.indexOf("--skill") + 1] : "surface/wellspring";
 
-// ---- 1. engine (strip `export ` only; core.mjs is import-free & browser-safe) ----
+// ---- 1. engine (strip `export `; all three are browser-safe) ----
 const coreSrc = read(path.join(here, "core.mjs")).replace(/^export\s+/gm, "");
+// the nav-harness: navfs (dependency-free) + harness (its ONLY import is navfs — stripped, since navfs is
+// inlined just above, so harness's calls resolve to those functions). Embedded verbatim so the claude.ai
+// artifact runs the SAME skill-as-gated-workflow + skill-free baseline the local bench runs.
+const navfsSrc = read(path.join(here, "navfs.mjs")).replace(/^export\s+/gm, "");
+const harnessSrc = read(path.join(here, "harness.mjs"))
+  .replace(/^import\s+\{[^}]*\}\s+from\s+"\.\/navfs\.mjs";\s*$/m, "// (navfs inlined above)")
+  .replace(/^export\s+/gm, "");
 
 // ---- 2. styles (same files index.html <link>s, in order) ----
 const STYLES = ["tokens.css", "type.css", "layout.css", "form.css", "motion.css"]
   .map((f) => `/* ===== ${f} ===== */\n` + read(path.join(web, f)))
   .join("\n\n");
 
-// ---- 3. data: read from disk (node-lib). mini-harness only needs SKILL.md → drop the heavy refs ----
+// ---- 3. data: read from disk (node-lib). The nav-harness needs the FULL skill — SKILL.md, the
+//        references map (pulled on demand at the gates), and the parsed checklist phases ----
 const fixtures = loadFixtures(here, skill);
 if (!fixtures.length) throw new Error(`no fixtures under evals/${skill}/fixtures/`);
-const skillStruct = { skillMd: loadSkillStructured(repoRoot, skill).skillMd };
+const skillStruct = loadSkillStructured(repoRoot, skill);
 const profile = loadProfile(here, skill);
 
 // the decode-identity escape (see header): only applied to embedded data, never to real code
@@ -73,7 +81,12 @@ const STYLES = ${JSON.stringify(STYLES)};
 
 // ============================ embedded engine (verbatim from core.mjs) ============================
 ${coreSrc}
-const core = { DEFAULT_REVIEW_SYSTEM, reviewMessages, gradeReviewMessages, falsePositiveMessages, scoreFromGrade, gradeConsensus, gradeFalsePositive, runMiniHarness, runTrial, runCell, mapPool, summarize };
+const core = { gradeQuality, gradeReferenceOverlap, gradeFalsePositive, mapPool, summarize };
+
+// ============================ embedded nav-harness (verbatim from navfs.mjs + harness.mjs) ============================
+${navfsSrc}
+${harnessSrc}
+const H = { runHarness, runNavReview };
 
 // ============================ embedded data (ES module keyword → \\u0069mport, decode-identity) ============================
 const __FIXTURES__ = ${neutralize(JSON.stringify(fixtures))};

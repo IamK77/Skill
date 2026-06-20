@@ -14,6 +14,8 @@ on:
     branches: [main]
     paths:
       - 'touchstone/core.mjs'
+      - 'touchstone/harness.mjs'
+      - 'touchstone/navfs.mjs'
       - 'touchstone/web/**'
       - 'touchstone/build-artifact.mjs'
       - 'touchstone/node-lib.mjs'

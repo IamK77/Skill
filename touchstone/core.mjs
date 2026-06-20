@@ -14,18 +14,11 @@
 // The review framing is PER-SKILL (see evals/<skill>/profile.json): a short `domain`
 // label ("state architecture", …) and the reviewer's system prompt. The engine below
 // is domain-agnostic — swapping the profile is what re-points it at another skill.
-export const DEFAULT_REVIEW_SYSTEM =
-  "You are a senior engineer reviewing code. Identify the real problems and give concrete, specific fixes. Be concise.";
-
-// The ONLY manipulated variable: whether the skill's text is prepended.
-export function reviewMessages({ code, skillText, domain = "architecture" }) {
-  const D = domain.toUpperCase();
-  const task = skillText
-    ? "Follow this skill methodology when reviewing:\n\n" + skillText +
-      "\n\n---\nNow review the " + D + " of this component:\n\n" + code
-    : "Review the " + D + " of this component. List the problems and concrete fixes:\n\n" + code;
-  return [{ role: "user", content: task }];
-}
+// The review prompt AND the skill-as-workflow live in harness.mjs (runHarness = the
+// skill arm; runNavReview = the skill-free baseline). core.mjs holds only the grader and
+// the run orchestration. There is intentionally NO "skill text prepended to the prompt"
+// path here: dumping SKILL.md into context was never the product — a skill RUNS as a
+// gated, navigated workflow, which is what the harness reimplements.
 
 // The grader NEVER sees the skill, nor which condition produced the review. The
 // maintainer's REAL diff is a KNOWN-GOOD REFERENCE, not the only right answer: the
@@ -96,6 +89,100 @@ export function falsePositiveMessages({ diff, review, domain = "architecture" })
   }];
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DECOMPOSED GRADER (v2) — the instrument fix.
+//
+// Why v1 (gradeReviewMessages) is noisy: it shows the grader the maintainer diff and
+// asks it to holistically pick a 0–10 band. Two coupled failures result —
+//   (1) ANCHORING LEAK: telling it in prose "the diff is calibration, not an answer
+//       key" does NOT stop a reasoning model from anchoring on it. A review sitting ON
+//       the diff's code gets rewarded; a deeper review that drifts AWAY gets tanked —
+//       inconsistently. That inconsistency IS the ±7 variance (a strong review scored
+//       8, 1, 3 on repeat).
+//   (2) HOLISTIC FRAGILITY: one wrong step in the reasoning chain collapses the whole
+//       band to 1, because the score is a single impression, not a composition.
+//
+// The fix: the quality grade NEVER sees the diff, and emits only low-variance FACTUAL
+// y/n judgments; the score is composed from them IN CODE (scoreFromQuality). A single
+// mis-call moves the score by ~1, never 8→1. The maintainer diff still has a job — but
+// in a SEPARATE call (gradeReferenceOverlap) that judges topical overlap only and does
+// NOT feed the score. So the reference is measured, not leaked into quality.
+export function gradeQualityMessages({ code, review, domain = "architecture" }) {
+  return [{
+    role: "user",
+    content:
+      "You are STRICTLY judging the quality of a code review focused on " + domain + ".\n" +
+      "You are given NO answer key. Judge the review ENTIRELY on its own merits as a " + domain +
+      " review of THIS code.\n\n" +
+      "The code that was reviewed:\n--- CODE ---\n" + code + "\n--- END CODE ---\n\n" +
+      "The review under judgement:\n--- REVIEW ---\n" + review + "\n--- END REVIEW ---\n\n" +
+      "Answer these FACTUAL questions about the review. Each is yes/no. Decide EACH on its own evidence; " +
+      "do NOT let an overall impression override a specific question.\n\n" +
+      "  grounded — Are the review's points specific to THIS code (it names actual variables / functions / " +
+      "files / lines and concrete situations here), as opposed to generic advice that could apply to any codebase?\n" +
+      "  real — Does it identify AT LEAST ONE genuinely real, important " + domain + " problem actually present in " +
+      "this code? (Real = a senior engineer would agree it is worth fixing — not cosmetic, not stylistic, not invented.)\n" +
+      "  multiple — Does it identify TWO OR MORE genuinely real, important " + domain + " problems (distinct points, " +
+      "not the same point restated)?\n" +
+      "  concrete — For the real problems it raises, are the fixes concrete — do they say specifically WHAT to change " +
+      "so an engineer could act (not 'consider refactoring')?\n" +
+      "  depth — Is at least one real problem a deep / load-bearing architectural issue (not a micro-issue like a " +
+      "single re-render or a naming nit)?\n" +
+      "  harmful — Does the review's MAIN recommendation give actively WRONG advice — something that would introduce " +
+      "a bug, break currently-working behavior, or is factually incorrect about how this code works? A large-but-valid " +
+      "refactor is NOT harmful; ambition is NOT harm. Mark yes ONLY for advice that is actually wrong or breaking.\n\n" +
+      'Return ONLY JSON: {"grounded":"yes"|"no","real":"yes"|"no","multiple":"yes"|"no","concrete":"yes"|"no",' +
+      '"depth":"yes"|"no","harmful":"yes"|"no","why":"one sentence citing the specific evidence for the borderline calls"}.',
+  }];
+}
+
+// Compose the score from the factual y/n judgments — deterministic, so the only variance
+// is in the (low-variance) judgments themselves, never in a holistic band-pick.
+//   not grounded            → 2  (generic boilerplate, not about this code)
+//   no real problem         → 3 / 4  (cosmetic only; 4 if at least concrete)
+//   one real problem        → 5 / 6  (6 if its fix is concrete — the calibration "solid single finding")
+//   several real problems   → 6 / 8  (8 if fixes are concrete)
+//   several + concrete+deep → 9
+//   harmful main thrust     → capped at 4 (wins over the band)
+export function scoreFromQuality(g) {
+  const yes = (v) => String(v ?? "").toLowerCase() === "yes";
+  if (!yes(g?.grounded)) return 2;
+  if (!yes(g?.real)) return yes(g?.concrete) ? 4 : 3;
+  let s = !yes(g?.multiple) ? (yes(g?.concrete) ? 6 : 5) : (yes(g?.concrete) ? 8 : 6);
+  if (yes(g?.multiple) && yes(g?.concrete) && yes(g?.depth)) s = 9;
+  if (yes(g?.harmful)) s = Math.min(s, 4);
+  return s;
+}
+
+// Single quality grade (no diff, no consensus). The whole point of v2 is that one grade
+// is stable; the variance test proves whether consensus is still needed at all.
+export async function gradeQuality({ callGrade, code, review, domain = "architecture", maxTokens = 8000 }) {
+  const g = await callForJSON(callGrade, gradeQualityMessages({ code, review, domain }), { maxTokens, temperature: 0 });
+  return { score: scoreFromQuality(g), judgments: g, why: g.why };
+}
+
+// SEPARATE reference-overlap probe — the maintainer diff's only remaining job. Judges
+// TOPICAL overlap only (does the review touch the same underlying problem the maintainer
+// fixed?), never quality, and does NOT feed the score. Recorded for analysis: it tells us
+// whether a skill pushes the review AWAY from the maintainer's spot toward deeper issues.
+export function referenceOverlapMessages({ diff, review, domain = "architecture" }) {
+  return [{
+    role: "user",
+    content:
+      "Below are a " + domain + " review and a SEPARATE real change a maintainer made to the same code.\n\n" +
+      "--- MAINTAINER CHANGE ---\n" + diff + "\n--- END ---\n\n" +
+      "--- REVIEW ---\n" + review + "\n--- END REVIEW ---\n\n" +
+      "For ANALYSIS ONLY (not quality): does the review address the SAME underlying problem the maintainer's change " +
+      "fixes, or a problem that clearly subsumes it? Ignore how good the review is; judge only topical overlap.\n\n" +
+      'Return ONLY JSON: {"overlap":"yes"|"partial"|"no","why":"one sentence"}.',
+  }];
+}
+
+export async function gradeReferenceOverlap({ callGrade, diff, review, domain = "architecture", maxTokens = 4000 }) {
+  const g = await callForJSON(callGrade, referenceOverlapMessages({ diff, review, domain }), { maxTokens, temperature: 0 });
+  return { overlap: g.overlap, why: g.why };
+}
+
 function parseJSON(text) {
   const clean = String(text).replace(/```json|```/g, "").trim();
   const s = clean.indexOf("{"), e = clean.lastIndexOf("}");
@@ -142,22 +229,6 @@ export async function gradeFalsePositive({ callGrade, diff, review, domain = "ar
   return { falsePositive: fp.false_positive === true, why: fp.why };
 }
 
-// A REAL but SMALL agentic loop — draft, then self-revise — run IDENTICALLY on both arms.
-// The ONLY difference between arms is whether `skillText` (the skill's guidance) sits in context,
-// so the SKILL's CONTENT is the single manipulated variable and the process is held fixed. (Not
-// the heavy gated harness; deliberately small so "with vs without skill" is a clean comparison.)
-export async function runMiniHarness({ callModel, code, skillText = null, domain = "architecture", system, maxTokens = 8000, onEvent = () => {} }) {
-  const sys = system || DEFAULT_REVIEW_SYSTEM;
-  const base = reviewMessages({ code, skillText, domain });
-  onEvent({ phase: "draft" });
-  const draft = await callModel(base, { system: sys, maxTokens, temperature: 1 });
-  onEvent({ phase: "revise" });
-  const messages = [...base, { role: "assistant", content: draft },
-    { role: "user", content: "Critique your own review: which REAL problems did you miss, and where are you flagging issues that aren't actually there? Then write your FINAL review — the real problems and concrete, specific fixes — as plain prose. Be concise." }];
-  const final = (await callModel(messages, { system: sys, maxTokens, temperature: 1 }) || "").trim();
-  return { review: final || draft, turns: 2, draft };
-}
-
 // Real models occasionally wrap the JSON in prose, omit it, or get truncated before
 // emitting it. Ask, parse, and on failure retry ONCE with a firmer nudge — so one
 // stray grader reply doesn't abort the whole run.
@@ -174,61 +245,6 @@ async function callForJSON(call, messages, opts) {
     try { return parseJSON(text); } catch (e) { lastErr = e; }
   }
   throw lastErr;
-}
-
-// One trial = one record: review the OLD code → grade against the maintainer's real
-// diff, and (optionally) review the FIXED code → false-positive check. This is the
-// independent unit of work; the web bench fans many of these out with mapPool().
-// onEvent({ phase, trial }) drives a live log; optional (the terminal ignores it).
-export async function runTrial({ callReview, callGrade, fixture, skillText, withFP, trial = 1, profile = {}, consensus = false, threshold = 2, onEvent = () => {} }) {
-  const domain = profile.domain || "architecture";
-  const system = profile.reviewSystem || DEFAULT_REVIEW_SYSTEM;
-
-  onEvent({ phase: "review", trial });
-  const review = await callReview(reviewMessages({ code: fixture.before, skillText, domain }), {
-    system, maxTokens: 16000, temperature: 1,
-  });
-  onEvent({ phase: "grade", trial });
-  let rec;
-  if (consensus) {
-    // multi-grade: grade 2×, escalate to a 3rd + median on disagreement (robust to the noisy grader)
-    const c = await gradeConsensus({ callGrade, code: fixture.before, diff: fixture.diff, review, domain, threshold });
-    const harmMajority = c.grades.filter((x) => x.harmful).length > c.grades.length / 2;
-    rec = { trial, foundScore: c.score, foundWhy: c.grades[0].why, found: c.grades[0].found, harmful: harmMajority, review,
-      gradeScores: c.scores, gradeEscalated: c.escalated };
-  } else {
-    const g = await callForJSON(callGrade, gradeReviewMessages({ code: fixture.before, diff: fixture.diff, review, domain }), {
-      maxTokens: 8000, temperature: 0,
-    });
-    rec = { trial, foundScore: scoreFromGrade(g), foundWhy: g.why, found: g.found, harmful: g.harmful === true, review };
-  }
-
-  if (withFP) {
-    // Same review task on the ALREADY-FIXED code → does it cry wolf?
-    onEvent({ phase: "fp-review", trial });
-    const cleanReview = await callReview(reviewMessages({ code: fixture.after, skillText, domain }), {
-      system, maxTokens: 16000, temperature: 1,
-    });
-    onEvent({ phase: "fp-grade", trial });
-    const fp = await callForJSON(callGrade, falsePositiveMessages({ diff: fixture.diff, review: cleanReview, domain }), {
-      maxTokens: 8000, temperature: 0,
-    });
-    rec.falsePositive = fp.false_positive === true;
-    rec.fpWhy = fp.why;
-    rec.cleanReview = cleanReview;
-  }
-  onEvent({ phase: "trial-done", trial, foundScore: rec.foundScore, falsePositive: rec.falsePositive });
-  return rec;
-}
-
-// Run one fixture under one condition for N trials, sequentially. Used by the
-// terminal runner; the web bench fans trials out concurrently via mapPool instead.
-export async function runCell({ callReview, callGrade, fixture, skillText, trials, withFP, profile, onEvent = () => {} }) {
-  const out = [];
-  for (let t = 1; t <= trials; t++) {
-    out.push(await runTrial({ callReview, callGrade, fixture, skillText, withFP, trial: t, profile, onEvent }));
-  }
-  return out;
 }
 
 // Bounded-concurrency map: at most `limit` invocations of fn in flight at once.

@@ -28,7 +28,8 @@
   <script type="text/babel" data-presets="react">
   (async () => {
     const { useState, useEffect } = React;
-    const core = await import("./core.mjs");      // the SAME engine the terminal uses
+    const core = await import("./core.mjs");      // grader + orchestration (the SAME engine the terminal uses)
+    const H = await import("./harness.mjs");      // skill-as-gated-workflow (runHarness) + skill-free baseline (runNavReview)
 
     // claude.ai mode: call the Anthropic API directly with NO key — claude.ai injects
     // authorization. (The original callClaude, inlined so the page is self-contained.)
@@ -57,11 +58,11 @@
       }
     }
 
-    // The manipulated variable: the SAME small review loop (draft → self-revise) runs on BOTH arms;
-    // the only difference is whether the skill's guidance is in context.
+    // The two arms differ in ONE thing: whether the skill RUNS as a gated, navigated workflow, or not.
+    // Both navigate the SAME code with the SAME tools and the SAME turn ceiling — the skill is the only variable.
     const ARMS = {
-      base:  { label: "no skill",   blurb: "the small review loop (draft → self-revise), no skill in context" },
-      skill: { label: "with skill", blurb: "the same loop, with the skill's guidance in context — the only difference" },
+      base:  { label: "no skill",   blurb: "navigates the code freely with the same tools, no skill — stops when it has seen enough" },
+      skill: { label: "with skill", blurb: "runs the skill as a gated workflow: ordered stages, gates, references pulled on demand" },
     };
     const ARM_ORDER = ["base", "skill"];
     const clamp = (s) => { const n = Math.round(Number(s)); return Number.isFinite(n) ? Math.max(0, Math.min(10, n)) : 0; };
@@ -86,7 +87,8 @@
       const [claudeModel, setClaudeModel] = useState("claude-sonnet-4-6");
 
       const [arms, setArms] = useState({ base: true, skill: true });
-      const [trials, setTrials] = useState(4);
+      const [trials, setTrials] = useState(2);             // each trial is a multi-turn agent loop now — start low
+      const [withFP, setWithFP] = useState(false);         // false-positive control DOUBLES the run (a 2nd full loop on fixed code) — off by default
       const concurrency = mode === "claudeai" ? 8 : 12;   // claude.ai rate-limits harder; local can push 12
       const [running, setRunning] = useState(false);
       const [log, setLog] = useState([]);
@@ -121,7 +123,7 @@
       const providerReady = mode === "claudeai" ? !!claudeModel
         : flavor === "openai" ? !!(baseUrl && model && apiKey) : !!(model && apiKey);
       const selected = ARM_ORDER.filter((a) => arms[a]);
-      const skillReady = !arms.skill || !!(skillStruct && skillStruct.skillMd);
+      const skillReady = !arms.skill || !!(skillStruct && skillStruct.skillMd && skillStruct.checklist);
       const configReady = providerReady && selected.length >= 1 && skillReady;
       const toggleArm = (a) => setArms((s) => ({ ...s, [a]: !s[a] }));
 
@@ -145,23 +147,27 @@
           await core.mapPool(units, concurrency, async (u) => {
             const tag = `[${u.fx.id}] ${u.arm} · t${u.t}`;
             try {
-              // SAME small loop on BOTH arms — the ONLY difference is whether the skill is in context.
-              const skillText = u.arm === "skill" ? ((skillStruct && skillStruct.skillMd) || null) : null;
-              const mh = await core.runMiniHarness({
-                callModel: callReview, code: u.fx.before, skillText, domain, system, maxTokens: 8000,
-                onEvent: (e) => push(`${tag} · ${e.phase}`),
-              });
-              const c = await core.gradeConsensus({ callGrade, code: u.fx.before, diff: u.fx.diff, review: mh.review, domain });
-              const harmMajority = c.grades.filter((x) => x.harmful).length > c.grades.length / 2;
-              const rec = { trial: u.t, foundScore: c.score, foundWhy: c.grades[0].why, harmful: harmMajority, review: mh.review,
-                gradeScores: c.scores, gradeEscalated: c.escalated, turns: mh.turns };
-              // false-positive control: SAME loop on the already-fixed code → does it cry wolf?
-              const mhFP = await core.runMiniHarness({
-                callModel: callReview, code: u.fx.after, skillText, domain, system, maxTokens: 8000,
-                onEvent: (e) => push(`${tag} · fp ${e.phase}`),
-              });
-              const fpg = await core.gradeFalsePositive({ callGrade, diff: u.fx.diff, review: mhFP.review, domain });
-              rec.falsePositive = fpg.falsePositive; rec.fpWhy = fpg.why; rec.cleanReview = mhFP.review;
+              // skill arm = run the skill as a gated, NAVIGATED workflow; base arm = navigate the code freely, NO skill.
+              // Both get the same nav tools, same turn ceiling — the skill is the only manipulated variable.
+              const runArm = (code, fp) => u.arm === "skill"
+                ? H.runHarness({ callModel: callReview, skill: skillStruct, code, domain, system, skillName: skill, maxTurns: 28, maxTokens: 8000,
+                    onEvent: (e) => push(`${tag}${fp} · ${e.type || e.phase || ""}${e.turn ? " t" + e.turn : ""}${e.name ? " " + e.name : ""}`) })
+                : H.runNavReview({ callModel: callReview, code, domain, system, maxTurns: 28, maxTokens: 8000,
+                    onEvent: (e) => push(`${tag}${fp} · ${e.type || e.phase || ""}${e.turn ? " t" + e.turn : ""}`) });
+              const r = await runArm(u.fx.before, "");
+              // grade quality (v2: decomposed factual y/n → code-composed score; the grader NEVER sees the diff)
+              const g = await core.gradeQuality({ callGrade, code: u.fx.before, review: r.review, domain });
+              // reference overlap — recorded for analysis, NOT scored (the diff's only remaining job)
+              const ov = await core.gradeReferenceOverlap({ callGrade, diff: u.fx.diff, review: r.review, domain }).catch(() => ({ overlap: "—" }));
+              const rec = { trial: u.t, foundScore: g.score, foundWhy: g.why, harmful: g.judgments && g.judgments.harmful === "yes", review: r.review,
+                judgments: g.judgments, overlap: ov.overlap, turns: r.turns, navCalls: r.navCalls,
+                gatesCleared: r.gatesCleared || [], refsOpened: (r.refsOpened || []).map((x) => x.name), complete: r.complete };
+              if (withFP) {
+                // false-positive control: SAME instrument on the already-fixed code → does it cry wolf?
+                const rFP = await runArm(u.fx.after, " fp");
+                const fpg = await core.gradeFalsePositive({ callGrade, diff: u.fx.diff, review: rFP.review, domain });
+                rec.falsePositive = fpg.falsePositive; rec.fpWhy = fpg.why; rec.cleanReview = rFP.review;
+              }
               done.push({ fixture: u.fx.id, arm: u.arm, record: rec });
               recompute();
             } catch (e) {
@@ -208,11 +214,11 @@
                 Does <span className="mono">{skill.split("/").pop()}</span> change the review?
               </h1>
               <p className="lead">
-                Both arms run the <b>same small review loop</b> — a draft, then a self-revision pass — on the same code,
-                same model, same blind grader (it never sees the skill). The <b>one variable</b> is whether the skill's
-                guidance is in context. The grader scores the review 0–10, crediting the maintainer's real fix <b>or any
-                equal-or-better genuine improvement</b>; the maintainer's diff is the known-good anchor (= 6), not the
-                only right answer.
+                Both arms <b>navigate the same code</b> with the same tools (<span className="mono">ls / grep / read_file</span>),
+                same model, same turn ceiling, same blind grader. The <b>one variable</b>: whether the skill <b>runs</b> — as a
+                gated workflow with ordered stages and references pulled on demand — or not. The grader scores each review 0–10
+                <b>on its own merits</b> — it never sees the skill, nor the maintainer's diff — judging the real, concrete
+                problems found, not whether the review matched any answer key.
               </p>
             </div>
           </section>
@@ -325,6 +331,13 @@
                     style={{ inlineSize: "5rem" }}
                     onChange={(e) => setTrials(Math.max(1, Math.min(8, +e.target.value || 1)))} />
                 </label>
+                <label className="arm-row" style={{ flex: "0 0 auto" }}>
+                  <span className="arm-head">
+                    <input type="checkbox" checked={withFP} disabled={running} onChange={() => setWithFP((v) => !v)} />
+                    false-positive control
+                  </span>
+                  <span className="arm-blurb">re-runs each arm on the already-fixed code — DOUBLES the cost</span>
+                </label>
                 <button className="btn-run" onClick={run} disabled={running || !fixtures.length || !configReady}>
                   {running ? "Running…" : "Run experiment"}
                 </button>
@@ -333,8 +346,8 @@
                 {mode == null ? "detecting environment…" : mode === "local"
                   ? `${flavor}${model ? " / " + model : ""}${providerReady ? "" : "  — fill the provider above"}`
                   : `claude.ai / ${claudeModel}`}
-                {"   ·   "}{fixtures.length} fixture × {selected.length} mode × {trials} = {fixtures.length * selected.length * trials} trials
-                {"  "}· each arm: 2-pass loop ×2 (before+after FP) + consensus grading 2–3 calls/trial, ≤{concurrency} at once
+                {"   ·   "}{fixtures.length} fixture × {selected.length} mode × {trials} = {fixtures.length * selected.length * trials} runs{withFP ? " ×2 (＋FP)" : ""}
+                {"  "}· each run is a multi-turn agent loop (≤28 turns) + 2 grader calls, ≤{concurrency} at once
               </p>
             </div>
           </section>
@@ -359,7 +372,7 @@
           {/* ── result (the delta is the focal element) ── */}
           {haveResults && (
             <div className="result-panel">
-              <div className="eyebrow">Result · review-quality 0–10 (6 = the maintainer's change)</div>
+              <div className="eyebrow">Result · review-quality 0–10 (graded blind on intrinsic merit)</div>
               {delta != null && (
                 <div className="delta-row">
                   <div className="delta" data-sign={delta < 0 ? "neg" : "pos"}>
@@ -407,7 +420,9 @@
                       <details className="trial" key={i}>
                         <summary>
                           <span className="mono">t{rec.trial}: <b>{rec.foundScore}/10</b></span>
-                          {rec.gradeScores ? <span className="caption mono">{"  "}· graded {rec.gradeScores.join("/")}{rec.gradeEscalated ? " →3" : ""}</span> : null}
+                          {rec.judgments ? <span className="caption mono">{"  "}· {["grounded","real","multiple","concrete","depth","harmful"].map((f) => `${f[0]}=${rec.judgments[f] || "?"}`).join(" ")}</span> : null}
+                          {typeof rec.turns === "number" ? <span className="caption mono">{"  "}· {rec.turns}t/{rec.navCalls}nav{(rec.gatesCleared && rec.gatesCleared.length) ? " · gates " + rec.gatesCleared.length : ""}{(rec.refsOpened && rec.refsOpened.length) ? " · refs " + rec.refsOpened.length : ""}</span> : null}
+                          {rec.overlap ? <span className="caption">{"  "}· ref-overlap {rec.overlap}</span> : null}
                           {rec.foundWhy ? <span className="caption"> — {rec.foundWhy}</span> : ""}
                           {("falsePositive" in rec) ? <span className="caption">{` · false-pos ${rec.falsePositive ? "YES" : "no"}${rec.fpWhy ? " — " + rec.fpWhy : ""}`}</span> : ""}
                         </summary>
@@ -437,10 +452,11 @@
           {/* ── read-honestly footer (first-class persuasion content, not fine print) ── */}
           <div className="footer">
             <b>Read honestly:</b> one fixture is one data point and N is small — a signal, not a proof.
-            The grader credits <i>any</i> genuinely-better recommendation, not only the maintainer's exact change (fairer, but more
-            subjective). The <span className="mono">workflow</span> arm is a faithful <i>reimplementation</i> of running a
-            skill as a gated agent (text-marker tools, deterministic gates) — not literally Claude Code — and it costs ~5–13× the
-            calls. Code is not executed: this measures the review's advice, not whether a rewrite compiles.
+            The grader scores each review blind on its own merits — it sees neither the skill nor the maintainer's diff — so it
+            credits real, concrete problems wherever they land, not a match to one answer key (fairer, but more subjective).
+            Both arms are a faithful <i>reimplementation</i> of an agent reviewing code by navigating it with tools; the skill
+            arm adds the gated workflow (ordered stages, gates, on-demand references) — not literally Claude Code. Code is not
+            executed: this measures the review's advice, not whether a rewrite compiles.
           </div>
         </div>
       );

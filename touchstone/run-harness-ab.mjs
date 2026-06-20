@@ -1,16 +1,18 @@
 #!/usr/bin/env node
-// run-harness-ab.mjs — the GATED-WORKFLOW A/B.
+// run-harness-ab.mjs — the GATED-WORKFLOW A/B (the headless twin of the web bench).
 //
-// The question the content-injection mini-harness could NOT answer: does running a
-// skill as its REAL, multi-turn gated checklist workflow beat NOT having the skill —
-// with compute held equal so a win isn't just "more turns to think"?
+// The question: does running a skill as its REAL, multi-turn gated checklist workflow beat NOT
+// having the skill — with compute held equal (same nav tools, same turn ceiling) so a win isn't
+// just "more turns to think"?
 //
 //   • skill arm   = runHarness (harness.mjs): the model works the skill's gated stages
 //                   in order, pulling references on demand, one stage per turn, then
 //                   writes the consolidated review.
-//   • baseline    = runUnstructured (core.mjs): the SAME number of model turns K
-//                   (measured from the skill arm), UNSTRUCTURED self-refinement, NO skill.
-//   • grade       = gradeConsensus against the maintainer's real diff (anchor = 6).
+//   • baseline    = runNavReview (harness.mjs): the SAME nav tools and turn ceiling, but
+//                   NO skill — the agent navigates freely and stops when it judges the
+//                   review done (agent-paced, NOT a forced turn count).
+//   • grade       = gradeQuality (v2): decomposed factual y/n → code-composed score, BLIND to the
+//                   diff (so it can't anchor on the maintainer's spot); ref-overlap recorded separately.
 //
 // So both arms cost ~K model calls; the only difference is the skill (its content AND
 // its gated structure). This measures the skill the way it actually runs.
@@ -30,7 +32,7 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { makeCallModel } from "./providers.mjs";
 import { runHarness, runNavReview } from "./harness.mjs";
-import { gradeConsensus, gradeFalsePositive } from "./core.mjs";
+import { gradeQuality, gradeReferenceOverlap, gradeFalsePositive } from "./core.mjs";
 import { loadSkillStructured, loadFixtures, loadProfile, providerConfigs, providerLabel } from "./node-lib.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -83,9 +85,12 @@ for (let t = 1; t <= TRIALS; t++) {
   const bl = await runNavReview({ callModel, code: fx.before, domain, system, maxTurns: MAXTURNS, maxTokens: MAXTOK });
   tick(`    → ${bl.turns} turns, ${bl.navCalls} nav-calls (agent decided when done)`);
 
-  tick(`  trial ${t}: grading both (consensus)…`);
-  const gSkill = await gradeConsensus({ callGrade, code: fx.before, diff: fx.diff, review: sk.review, domain });
-  const gBase = await gradeConsensus({ callGrade, code: fx.before, diff: fx.diff, review: bl.review, domain });
+  tick(`  trial ${t}: grading both (v2 quality — decomposed factual y/n, blind to the diff)…`);
+  const gSkill = await gradeQuality({ callGrade, code: fx.before, review: sk.review, domain });
+  const gBase = await gradeQuality({ callGrade, code: fx.before, review: bl.review, domain });
+  // reference overlap — recorded for analysis, NOT scored (does the skill push the review off the maintainer's spot?)
+  const ovSkill = await gradeReferenceOverlap({ callGrade, diff: fx.diff, review: sk.review, domain }).catch(() => ({ overlap: "—" }));
+  const ovBase = await gradeReferenceOverlap({ callGrade, diff: fx.diff, review: bl.review, domain }).catch(() => ({ overlap: "—" }));
 
   let fpSkill = null, fpBase = null;
   if (WITH_FP) {
@@ -98,14 +103,15 @@ for (let t = 1; t <= TRIALS; t++) {
 
   rows.push({
     trial: t, skill: gSkill.score, base: gBase.score,
-    skillScores: gSkill.scores, baseScores: gBase.scores,
+    skillJudgments: gSkill.judgments, baseJudgments: gBase.judgments,
+    skillOverlap: ovSkill.overlap, baseOverlap: ovBase.overlap,
     skillTurns: K, skillNav: sk.navCalls, baseTurns: bl.turns, baseNav: bl.navCalls,
     gatesCleared: sk.gatesCleared, refsOpened: sk.refsOpened, complete: sk.complete,
     fpSkill, fpBase, skillReview: sk.review, baseReview: bl.review,
   });
   const d = gSkill.score - gBase.score;
   console.log(`  t${t}: skill ${gSkill.score.toFixed(1)}/10  vs  baseline ${gBase.score.toFixed(1)}/10   (Δ ${(d >= 0 ? "+" : "") + d.toFixed(1)})`);
-  console.log(`        compute — skill: ${K} turns / ${sk.navCalls} nav · gates ${sk.gatesCleared.length}/${skill.checklist.phases.length}   |   baseline: ${bl.turns} turns / ${bl.navCalls} nav`);
+  console.log(`        compute — skill: ${K} turns / ${sk.navCalls} nav · gates ${sk.gatesCleared.length}/${skill.checklist.phases.length} · ref-overlap ${ovSkill.overlap}   |   baseline: ${bl.turns} turns / ${bl.navCalls} nav · ref-overlap ${ovBase.overlap}`);
 }
 
 const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;

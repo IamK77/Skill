@@ -1,5 +1,6 @@
-// node-lib.mjs — the Node-only bits shared by run.mjs (terminal) and server.mjs
-// (web). Reads files and env; never imported by the browser (core.mjs stays pure).
+// node-lib.mjs — the Node-only bits shared by the CLIs (run-harness-ab, harness-smoke,
+// grader-variance-test, build-artifact) and server.mjs (web). Reads files and env; never
+// imported by the browser (core.mjs / harness.mjs / navfs.mjs stay pure).
 
 import * as fs from "node:fs";
 import * as path from "node:path";

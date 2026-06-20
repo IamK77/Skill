@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // harness-smoke.mjs — run ONE gated-workflow review through harness.mjs and print
 // the observed behavior, so we can see the loop actually work (gates clearing in
-// order, the model CHOOSING which references to open, the findings) before wiring it
-// into the engine + the web/jsx surfaces. Provider from env, like run.mjs:
+// order, the model CHOOSING which references to open, the findings) — the same engine
+// the web bench + claude.ai artifact now run. Provider from env:
 //
 //   LAB_FLAVOR=openai LAB_BASE_URL=https://api.deepseek.com/v1 \
 //   LAB_API_KEY=sk-... LAB_MODEL=deepseek-v4-pro \
