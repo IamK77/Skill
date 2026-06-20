@@ -135,8 +135,14 @@ function gradeQualityMessages({ code, review, domain = "architecture" }) {
       "not the same point restated)?\n" +
       "  concrete — For the real problems it raises, are the fixes concrete — do they say specifically WHAT to change " +
       "so an engineer could act (not 'consider refactoring')?\n" +
-      "  depth — Is at least one real problem a deep / load-bearing architectural issue (not a micro-issue like a " +
-      "single re-render or a naming nit)?\n" +
+      "  depth — Does at least one real problem reflect genuine ARCHITECTURAL insight into " + domain + "? For " +
+      "state management that means reasoning about: single source of truth (derive-don't-store; no parallel copies " +
+      "of one fact), who OWNS each piece of state, making illegal states unrepresentable (a union instead of " +
+      "scattered booleans), or the shape of the state machine. A review that is competent but consists MAINLY of " +
+      "re-render / performance / over-subscription / memoization tweaks, defensive null-guards, or naming / " +
+      "idempotency nits is NOT depth — however many such points it lists. Naming the right symbol for the WRONG " +
+      "reason (e.g. flagging a derived value only as a memoization concern, missing that it is a duplicated source " +
+      "of truth) does NOT count as depth.\n" +
       "  harmful — Does the review's MAIN recommendation give actively WRONG advice — something that would introduce " +
       "a bug, break currently-working behavior, or is factually incorrect about how this code works? A large-but-valid " +
       "refactor is NOT harmful; ambition is NOT harm. Mark yes ONLY for advice that is actually wrong or breaking.\n\n" +
@@ -147,19 +153,35 @@ function gradeQualityMessages({ code, review, domain = "architecture" }) {
 
 // Compose the score from the factual y/n judgments — deterministic, so the only variance
 // is in the (low-variance) judgments themselves, never in a holistic band-pick.
+//
+// DEPTH IS THE SPINE. An Opus panel re-grading two saved reviews split skill 7.6 / base 4.5
+// while deepseek (old rules) split them base 8.7 / skill 8.1 — the SIGN flipped. The whole gap
+// was the depth dimension (Opus 4/4 vs 0/4); deepseek rubber-stamped a pure re-render/perf
+// review as "deep". Replaying the saved judgments through a depth-gated composition gave 7.1/7.1
+// (a TIE) — proving the composition alone can't fix it, the depth QUESTION had to be sharpened
+// too (see gradeQualityMessages). With both fixed, a correct depth call drives the band:
 //   not grounded            → 2  (generic boilerplate, not about this code)
 //   no real problem         → 3 / 4  (cosmetic only; 4 if at least concrete)
-//   one real problem        → 5 / 6  (6 if its fix is concrete — the calibration "solid single finding")
-//   several real problems   → 6 / 8  (8 if fixes are concrete)
-//   several + concrete+deep → 9
-//   harmful main thrust     → capped at 4 (wins over the band)
+//   real but NOT deep        → 4 / 5  (competent perf/guard review; 5 if it raises several) — capped mid
+//   deep                     → 5, +1 if several, +2 if concrete  → up to 8 (the only path to the 7+ band)
+//   harmful main thrust     → graduated −3 penalty (NOT a hard cap). The k=10 validation showed
+//                             a hard cap (min(s,4)) turned a 30/70-UNSTABLE harm judgment into a
+//                             9↔4 cliff — the whole skill-review variance. A graduated penalty lets
+//                             an ambiguous harm call wobble the score by 3, not 5, while a genuinely
+//                             harmful review (stable harm=yes) still loses real ground.
 function scoreFromQuality(g) {
   const yes = (v) => String(v ?? "").toLowerCase() === "yes";
-  if (!yes(g?.grounded)) return 2;
-  if (!yes(g?.real)) return yes(g?.concrete) ? 4 : 3;
-  let s = !yes(g?.multiple) ? (yes(g?.concrete) ? 6 : 5) : (yes(g?.concrete) ? 8 : 6);
-  if (yes(g?.multiple) && yes(g?.concrete) && yes(g?.depth)) s = 9;
-  if (yes(g?.harmful)) s = Math.min(s, 4);
+  if (!yes(g?.grounded)) return 2;                      // generic, not about this code
+  if (!yes(g?.real)) return yes(g?.concrete) ? 4 : 3;   // nothing real to fix
+  let s;
+  if (!yes(g?.depth)) {
+    s = yes(g?.multiple) ? 5 : 4;          // correct but shallow (perf/guards) — caps mid
+  } else {
+    s = 5;                                  // genuine architectural insight unlocks the 7+ band
+    if (yes(g?.multiple)) s += 1;           // breadth on top of depth
+    if (yes(g?.concrete)) s += 2;           // actionable depth → 8
+  }
+  if (yes(g?.harmful)) s = Math.max(0, s - 3);
   return s;
 }
 
