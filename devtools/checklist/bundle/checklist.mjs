@@ -17,7 +17,11 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 var __commonJS = (cb, mod) => function __require2() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  try {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  } catch (e) {
+    throw mod = 0, e;
+  }
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -36,9 +40,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/commander/lib/error.js
+// node_modules/commander/lib/error.js
 var require_error = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/commander/lib/error.js"(exports2) {
+  "node_modules/commander/lib/error.js"(exports2) {
     var CommanderError2 = class extends Error {
       /**
        * Constructs the CommanderError class
@@ -71,9 +75,9 @@ var require_error = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/commander/lib/argument.js
+// node_modules/commander/lib/argument.js
 var require_argument = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/commander/lib/argument.js"(exports2) {
+  "node_modules/commander/lib/argument.js"(exports2) {
     var { InvalidArgumentError: InvalidArgumentError2 } = require_error();
     var Argument2 = class {
       /**
@@ -199,9 +203,9 @@ var require_argument = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/commander/lib/help.js
+// node_modules/commander/lib/help.js
 var require_help = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/commander/lib/help.js"(exports2) {
+  "node_modules/commander/lib/help.js"(exports2) {
     var { humanReadableArgName } = require_argument();
     var Help2 = class {
       constructor() {
@@ -801,9 +805,9 @@ ${itemIndentStr}`);
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/commander/lib/option.js
+// node_modules/commander/lib/option.js
 var require_option = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/commander/lib/option.js"(exports2) {
+  "node_modules/commander/lib/option.js"(exports2) {
     var { InvalidArgumentError: InvalidArgumentError2 } = require_error();
     var Option2 = class {
       /**
@@ -1114,38 +1118,38 @@ var require_option = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/commander/lib/suggestSimilar.js
+// node_modules/commander/lib/suggestSimilar.js
 var require_suggestSimilar = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/commander/lib/suggestSimilar.js"(exports2) {
+  "node_modules/commander/lib/suggestSimilar.js"(exports2) {
     var maxDistance = 3;
     function editDistance(a, b) {
       if (Math.abs(a.length - b.length) > maxDistance)
         return Math.max(a.length, b.length);
       const d = [];
-      for (let i = 0; i <= a.length; i++) {
-        d[i] = [i];
+      for (let i2 = 0; i2 <= a.length; i2++) {
+        d[i2] = [i2];
       }
       for (let j = 0; j <= b.length; j++) {
         d[0][j] = j;
       }
       for (let j = 1; j <= b.length; j++) {
-        for (let i = 1; i <= a.length; i++) {
+        for (let i2 = 1; i2 <= a.length; i2++) {
           let cost = 1;
-          if (a[i - 1] === b[j - 1]) {
+          if (a[i2 - 1] === b[j - 1]) {
             cost = 0;
           } else {
             cost = 1;
           }
-          d[i][j] = Math.min(
-            d[i - 1][j] + 1,
+          d[i2][j] = Math.min(
+            d[i2 - 1][j] + 1,
             // deletion
-            d[i][j - 1] + 1,
+            d[i2][j - 1] + 1,
             // insertion
-            d[i - 1][j - 1] + cost
+            d[i2 - 1][j - 1] + cost
             // substitution
           );
-          if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
-            d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+          if (i2 > 1 && j > 1 && a[i2 - 1] === b[j - 2] && a[i2 - 2] === b[j - 1]) {
+            d[i2][j] = Math.min(d[i2][j], d[i2 - 2][j - 2] + 1);
           }
         }
       }
@@ -1194,9 +1198,9 @@ var require_suggestSimilar = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/commander/lib/command.js
+// node_modules/commander/lib/command.js
 var require_command = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/commander/lib/command.js"(exports2) {
+  "node_modules/commander/lib/command.js"(exports2) {
     var EventEmitter = __require("node:events").EventEmitter;
     var childProcess = __require("node:child_process");
     var path17 = __require("node:path");
@@ -2370,8 +2374,8 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @private
        */
       _checkNumberOfArguments() {
-        this.registeredArguments.forEach((arg, i) => {
-          if (arg.required && this.args[i] == null) {
+        this.registeredArguments.forEach((arg, i2) => {
+          if (arg.required && this.args[i2] == null) {
             this.missingArgument(arg.name());
           }
         });
@@ -2669,13 +2673,13 @@ Expecting one of '${allowedValues.join("', '")}'`);
         };
         let activeVariadicOption = null;
         let activeGroup = null;
-        let i = 0;
-        while (i < args.length || activeGroup) {
-          const arg = activeGroup ?? args[i++];
+        let i2 = 0;
+        while (i2 < args.length || activeGroup) {
+          const arg = activeGroup ?? args[i2++];
           activeGroup = null;
           if (arg === "--") {
             if (dest === unknown) dest.push(arg);
-            dest.push(...args.slice(i));
+            dest.push(...args.slice(i2));
             break;
           }
           if (activeVariadicOption && (!maybeOption(arg) || negativeNumberArg(arg))) {
@@ -2687,13 +2691,13 @@ Expecting one of '${allowedValues.join("', '")}'`);
             const option = this._findOption(arg);
             if (option) {
               if (option.required) {
-                const value = args[i++];
+                const value = args[i2++];
                 if (value === void 0) this.optionMissingArgument(option);
                 this.emit(`option:${option.name()}`, value);
               } else if (option.optional) {
                 let value = null;
-                if (i < args.length && (!maybeOption(args[i]) || negativeNumberArg(args[i]))) {
-                  value = args[i++];
+                if (i2 < args.length && (!maybeOption(args[i2]) || negativeNumberArg(args[i2]))) {
+                  value = args[i2++];
                 }
                 this.emit(`option:${option.name()}`, value);
               } else {
@@ -2729,18 +2733,18 @@ Expecting one of '${allowedValues.join("', '")}'`);
           if ((this._enablePositionalOptions || this._passThroughOptions) && operands.length === 0 && unknown.length === 0) {
             if (this._findCommand(arg)) {
               operands.push(arg);
-              unknown.push(...args.slice(i));
+              unknown.push(...args.slice(i2));
               break;
             } else if (this._getHelpCommand() && arg === this._getHelpCommand().name()) {
-              operands.push(arg, ...args.slice(i));
+              operands.push(arg, ...args.slice(i2));
               break;
             } else if (this._defaultCommandName) {
-              unknown.push(arg, ...args.slice(i));
+              unknown.push(arg, ...args.slice(i2));
               break;
             }
           }
           if (this._passThroughOptions) {
-            dest.push(arg, ...args.slice(i));
+            dest.push(arg, ...args.slice(i2));
             break;
           }
           dest.push(arg);
@@ -2756,8 +2760,8 @@ Expecting one of '${allowedValues.join("', '")}'`);
         if (this._storeOptionsAsProperties) {
           const result = {};
           const len = this.options.length;
-          for (let i = 0; i < len; i++) {
-            const key = this.options[i].attributeName();
+          for (let i2 = 0; i2 < len; i2++) {
+            const key = this.options[i2].attributeName();
             result[key] = key === this._versionOptionName ? this._version : this[key];
           }
           return result;
@@ -3440,9 +3444,9 @@ Expecting one of '${allowedValues.join("', '")}'`);
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/commander/index.js
+// node_modules/commander/index.js
 var require_commander = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/commander/index.js"(exports2) {
+  "node_modules/commander/index.js"(exports2) {
     var { Argument: Argument2 } = require_argument();
     var { Command: Command2 } = require_command();
     var { CommanderError: CommanderError2, InvalidArgumentError: InvalidArgumentError2 } = require_error();
@@ -3462,9 +3466,9 @@ var require_commander = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/kind-of/index.js
+// node_modules/kind-of/index.js
 var require_kind_of = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/kind-of/index.js"(exports2, module2) {
+  "node_modules/kind-of/index.js"(exports2, module2) {
     var toString2 = Object.prototype.toString;
     module2.exports = function kindOf(val) {
       if (val === void 0) return "undefined";
@@ -3583,9 +3587,9 @@ var require_kind_of = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/is-extendable/index.js
+// node_modules/is-extendable/index.js
 var require_is_extendable = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/is-extendable/index.js"(exports2, module2) {
+  "node_modules/is-extendable/index.js"(exports2, module2) {
     "use strict";
     module2.exports = function isExtendable(val) {
       return typeof val !== "undefined" && val !== null && (typeof val === "object" || typeof val === "function");
@@ -3593,9 +3597,9 @@ var require_is_extendable = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/extend-shallow/index.js
+// node_modules/extend-shallow/index.js
 var require_extend_shallow = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/extend-shallow/index.js"(exports2, module2) {
+  "node_modules/extend-shallow/index.js"(exports2, module2) {
     "use strict";
     var isObject2 = require_is_extendable();
     module2.exports = function extend3(o) {
@@ -3603,8 +3607,8 @@ var require_extend_shallow = __commonJS({
         o = {};
       }
       var len = arguments.length;
-      for (var i = 1; i < len; i++) {
-        var obj = arguments[i];
+      for (var i2 = 1; i2 < len; i2++) {
+        var obj = arguments[i2];
         if (isObject2(obj)) {
           assign(o, obj);
         }
@@ -3624,9 +3628,9 @@ var require_extend_shallow = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/section-matter/index.js
+// node_modules/section-matter/index.js
 var require_section_matter = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/section-matter/index.js"(exports2, module2) {
+  "node_modules/section-matter/index.js"(exports2, module2) {
     "use strict";
     var typeOf = require_kind_of();
     var extend3 = require_extend_shallow();
@@ -3659,12 +3663,12 @@ var require_section_matter = __commonJS({
           stack = [];
         }
       }
-      for (var i = 0; i < lines.length; i++) {
-        var line = lines[i];
+      for (var i2 = 0; i2 < lines.length; i2++) {
+        var line = lines[i2];
         var len = stack.length;
         var ln = line.trim();
         if (isDelimiter(ln, delim)) {
-          if (ln.length === 3 && i !== 0) {
+          if (ln.length === 3 && i2 !== 0) {
             if (len === 0 || len === 2) {
               content.push(line);
               continue;
@@ -3731,9 +3735,9 @@ var require_section_matter = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/common.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/common.js
 var require_common = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/common.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/common.js"(exports2, module2) {
     "use strict";
     function isNothing2(subject) {
       return typeof subject === "undefined" || subject === null;
@@ -3776,9 +3780,9 @@ var require_common = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/exception.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/exception.js
 var require_exception = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/exception.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/exception.js"(exports2, module2) {
     "use strict";
     function YAMLException(reason, mark) {
       Error.call(this);
@@ -3806,9 +3810,9 @@ var require_exception = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/mark.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/mark.js
 var require_mark = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/mark.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/mark.js"(exports2, module2) {
     "use strict";
     var common2 = require_common();
     function Mark(name, buffer, position, line, column) {
@@ -3864,9 +3868,9 @@ var require_mark = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type.js
 var require_type = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type.js"(exports2, module2) {
     "use strict";
     var YAMLException = require_exception();
     var TYPE_CONSTRUCTOR_OPTIONS2 = [
@@ -3923,9 +3927,9 @@ var require_type = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema.js
 var require_schema = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema.js"(exports2, module2) {
     "use strict";
     var common2 = require_common();
     var YAMLException = require_exception();
@@ -4011,9 +4015,9 @@ var require_schema = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/str.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/str.js
 var require_str = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/str.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/str.js"(exports2, module2) {
     "use strict";
     var Type = require_type();
     module2.exports = new Type("tag:yaml.org,2002:str", {
@@ -4025,9 +4029,9 @@ var require_str = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/seq.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/seq.js
 var require_seq = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/seq.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/seq.js"(exports2, module2) {
     "use strict";
     var Type = require_type();
     module2.exports = new Type("tag:yaml.org,2002:seq", {
@@ -4039,9 +4043,9 @@ var require_seq = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/map.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/map.js
 var require_map = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/map.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/map.js"(exports2, module2) {
     "use strict";
     var Type = require_type();
     module2.exports = new Type("tag:yaml.org,2002:map", {
@@ -4053,9 +4057,9 @@ var require_map = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/failsafe.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/failsafe.js
 var require_failsafe = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/failsafe.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/failsafe.js"(exports2, module2) {
     "use strict";
     var Schema = require_schema();
     module2.exports = new Schema({
@@ -4068,9 +4072,9 @@ var require_failsafe = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/null.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/null.js
 var require_null = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/null.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/null.js"(exports2, module2) {
     "use strict";
     var Type = require_type();
     function resolveYamlNull2(data) {
@@ -4108,9 +4112,9 @@ var require_null = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/bool.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/bool.js
 var require_bool = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/bool.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/bool.js"(exports2, module2) {
     "use strict";
     var Type = require_type();
     function resolveYamlBoolean2(data) {
@@ -4145,9 +4149,9 @@ var require_bool = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/int.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/int.js
 var require_int = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/int.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/int.js"(exports2, module2) {
     "use strict";
     var common2 = require_common();
     var Type = require_type();
@@ -4278,9 +4282,9 @@ var require_int = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/float.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/float.js
 var require_float = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/float.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/float.js"(exports2, module2) {
     "use strict";
     var common2 = require_common();
     var Type = require_type();
@@ -4373,9 +4377,9 @@ var require_float = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/json.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/json.js
 var require_json = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/json.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/json.js"(exports2, module2) {
     "use strict";
     var Schema = require_schema();
     module2.exports = new Schema({
@@ -4392,9 +4396,9 @@ var require_json = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/core.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/core.js
 var require_core = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/core.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/core.js"(exports2, module2) {
     "use strict";
     var Schema = require_schema();
     module2.exports = new Schema({
@@ -4405,9 +4409,9 @@ var require_core = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/timestamp.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/timestamp.js
 var require_timestamp = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/timestamp.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/timestamp.js"(exports2, module2) {
     "use strict";
     var Type = require_type();
     var YAML_DATE_REGEXP2 = new RegExp(
@@ -4466,9 +4470,9 @@ var require_timestamp = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/merge.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/merge.js
 var require_merge = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/merge.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/merge.js"(exports2, module2) {
     "use strict";
     var Type = require_type();
     function resolveYamlMerge2(data) {
@@ -4481,9 +4485,9 @@ var require_merge = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/binary.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/binary.js
 var require_binary = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/binary.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/binary.js"(exports2, module2) {
     "use strict";
     var NodeBuffer;
     try {
@@ -4574,9 +4578,9 @@ var require_binary = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/omap.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/omap.js
 var require_omap = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/omap.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/omap.js"(exports2, module2) {
     "use strict";
     var Type = require_type();
     var _hasOwnProperty2 = Object.prototype.hasOwnProperty;
@@ -4611,9 +4615,9 @@ var require_omap = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/pairs.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/pairs.js
 var require_pairs = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/pairs.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/pairs.js"(exports2, module2) {
     "use strict";
     var Type = require_type();
     var _toString2 = Object.prototype.toString;
@@ -4649,9 +4653,9 @@ var require_pairs = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/set.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/set.js
 var require_set = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/set.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/set.js"(exports2, module2) {
     "use strict";
     var Type = require_type();
     var _hasOwnProperty2 = Object.prototype.hasOwnProperty;
@@ -4676,9 +4680,9 @@ var require_set = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/default_safe.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/default_safe.js
 var require_default_safe = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/default_safe.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/default_safe.js"(exports2, module2) {
     "use strict";
     var Schema = require_schema();
     module2.exports = new Schema({
@@ -4699,9 +4703,9 @@ var require_default_safe = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/js/undefined.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/js/undefined.js
 var require_undefined = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/js/undefined.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/js/undefined.js"(exports2, module2) {
     "use strict";
     var Type = require_type();
     function resolveJavascriptUndefined() {
@@ -4726,9 +4730,9 @@ var require_undefined = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/js/regexp.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/js/regexp.js
 var require_regexp = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/js/regexp.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/js/regexp.js"(exports2, module2) {
     "use strict";
     var Type = require_type();
     function resolveJavascriptRegExp(data) {
@@ -4770,9 +4774,9 @@ var require_regexp = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/js/function.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/js/function.js
 var require_function = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/js/function.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/type/js/function.js"(exports2, module2) {
     "use strict";
     var esprima;
     try {
@@ -4825,9 +4829,9 @@ var require_function = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/default_full.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/default_full.js
 var require_default_full = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/default_full.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/schema/default_full.js"(exports2, module2) {
     "use strict";
     var Schema = require_schema();
     module2.exports = Schema.DEFAULT = new Schema({
@@ -4843,9 +4847,9 @@ var require_default_full = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/loader.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/loader.js
 var require_loader = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/loader.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/loader.js"(exports2, module2) {
     "use strict";
     var common2 = require_common();
     var YAMLException = require_exception();
@@ -4935,11 +4939,11 @@ var require_loader = __commonJS({
     }
     var simpleEscapeCheck2 = new Array(256);
     var simpleEscapeMap2 = new Array(256);
-    for (i = 0; i < 256; i++) {
-      simpleEscapeCheck2[i] = simpleEscapeSequence2(i) ? 1 : 0;
-      simpleEscapeMap2[i] = simpleEscapeSequence2(i);
+    for (i2 = 0; i2 < 256; i2++) {
+      simpleEscapeCheck2[i2] = simpleEscapeSequence2(i2) ? 1 : 0;
+      simpleEscapeMap2[i2] = simpleEscapeSequence2(i2);
     }
-    var i;
+    var i2;
     function State2(input, options2) {
       this.input = input;
       this.filename = options2["filename"] || null;
@@ -5962,9 +5966,9 @@ var require_loader = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/dumper.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/dumper.js
 var require_dumper = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/dumper.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml/dumper.js"(exports2, module2) {
     "use strict";
     var common2 = require_common();
     var YAMLException = require_exception();
@@ -6139,7 +6143,7 @@ var require_dumper = __commonJS({
     var STYLE_FOLDED2 = 4;
     var STYLE_DOUBLE2 = 5;
     function chooseScalarStyle2(string, singleLineOnly, indentPerLevel, lineWidth, testAmbiguousType) {
-      var i;
+      var i2;
       var char, prev_char;
       var hasLineBreak = false;
       var hasFoldableLine = false;
@@ -6147,31 +6151,31 @@ var require_dumper = __commonJS({
       var previousLineBreak = -1;
       var plain = isPlainSafeFirst2(string.charCodeAt(0)) && !isWhitespace2(string.charCodeAt(string.length - 1));
       if (singleLineOnly) {
-        for (i = 0; i < string.length; i++) {
-          char = string.charCodeAt(i);
+        for (i2 = 0; i2 < string.length; i2++) {
+          char = string.charCodeAt(i2);
           if (!isPrintable2(char)) {
             return STYLE_DOUBLE2;
           }
-          prev_char = i > 0 ? string.charCodeAt(i - 1) : null;
+          prev_char = i2 > 0 ? string.charCodeAt(i2 - 1) : null;
           plain = plain && isPlainSafe2(char, prev_char);
         }
       } else {
-        for (i = 0; i < string.length; i++) {
-          char = string.charCodeAt(i);
+        for (i2 = 0; i2 < string.length; i2++) {
+          char = string.charCodeAt(i2);
           if (char === CHAR_LINE_FEED2) {
             hasLineBreak = true;
             if (shouldTrackWidth) {
               hasFoldableLine = hasFoldableLine || // Foldable line = too long, and not more-indented.
-              i - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ";
-              previousLineBreak = i;
+              i2 - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ";
+              previousLineBreak = i2;
             }
           } else if (!isPrintable2(char)) {
             return STYLE_DOUBLE2;
           }
-          prev_char = i > 0 ? string.charCodeAt(i - 1) : null;
+          prev_char = i2 > 0 ? string.charCodeAt(i2 - 1) : null;
           plain = plain && isPlainSafe2(char, prev_char);
         }
-        hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ");
+        hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i2 - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ");
       }
       if (!hasLineBreak && !hasFoldableLine) {
         return plain && !testAmbiguousType(string) ? STYLE_PLAIN2 : STYLE_SINGLE2;
@@ -6267,18 +6271,18 @@ var require_dumper = __commonJS({
       var result = "";
       var char, nextChar;
       var escapeSeq;
-      for (var i = 0; i < string.length; i++) {
-        char = string.charCodeAt(i);
+      for (var i2 = 0; i2 < string.length; i2++) {
+        char = string.charCodeAt(i2);
         if (char >= 55296 && char <= 56319) {
-          nextChar = string.charCodeAt(i + 1);
+          nextChar = string.charCodeAt(i2 + 1);
           if (nextChar >= 56320 && nextChar <= 57343) {
             result += encodeHex2((char - 55296) * 1024 + nextChar - 56320 + 65536);
-            i++;
+            i2++;
             continue;
           }
         }
         escapeSeq = ESCAPE_SEQUENCES2[char];
-        result += !escapeSeq && isPrintable2(char) ? string[i] : escapeSeq || encodeHex2(char);
+        result += !escapeSeq && isPrintable2(char) ? string[i2] : escapeSeq || encodeHex2(char);
       }
       return result;
     }
@@ -6510,9 +6514,9 @@ var require_dumper = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml.js
+// node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml.js
 var require_js_yaml = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/lib/js-yaml.js"(exports2, module2) {
     "use strict";
     var loader2 = require_loader();
     var dumper2 = require_dumper();
@@ -6545,18 +6549,18 @@ var require_js_yaml = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/index.js
+// node_modules/gray-matter/node_modules/js-yaml/index.js
 var require_js_yaml2 = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/node_modules/js-yaml/index.js"(exports2, module2) {
+  "node_modules/gray-matter/node_modules/js-yaml/index.js"(exports2, module2) {
     "use strict";
     var yaml2 = require_js_yaml();
     module2.exports = yaml2;
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/lib/engines.js
+// node_modules/gray-matter/lib/engines.js
 var require_engines = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/lib/engines.js"(exports, module) {
+  "node_modules/gray-matter/lib/engines.js"(exports, module) {
     "use strict";
     var yaml = require_js_yaml2();
     var engines = exports = module.exports;
@@ -6592,9 +6596,9 @@ var require_engines = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/strip-bom-string/index.js
+// node_modules/strip-bom-string/index.js
 var require_strip_bom_string = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/strip-bom-string/index.js"(exports2, module2) {
+  "node_modules/strip-bom-string/index.js"(exports2, module2) {
     "use strict";
     module2.exports = function(str3) {
       if (typeof str3 === "string" && str3.charAt(0) === "\uFEFF") {
@@ -6605,9 +6609,9 @@ var require_strip_bom_string = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/lib/utils.js
+// node_modules/gray-matter/lib/utils.js
 var require_utils = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/lib/utils.js"(exports2) {
+  "node_modules/gray-matter/lib/utils.js"(exports2) {
     "use strict";
     var stripBom = require_strip_bom_string();
     var typeOf = require_kind_of();
@@ -6645,9 +6649,9 @@ var require_utils = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/lib/defaults.js
+// node_modules/gray-matter/lib/defaults.js
 var require_defaults = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/lib/defaults.js"(exports2, module2) {
+  "node_modules/gray-matter/lib/defaults.js"(exports2, module2) {
     "use strict";
     var engines2 = require_engines();
     var utils = require_utils();
@@ -6664,9 +6668,9 @@ var require_defaults = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/lib/engine.js
+// node_modules/gray-matter/lib/engine.js
 var require_engine = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/lib/engine.js"(exports2, module2) {
+  "node_modules/gray-matter/lib/engine.js"(exports2, module2) {
     "use strict";
     module2.exports = function(name, options2) {
       let engine = options2.engines[name] || options2.engines[aliase(name)];
@@ -6698,9 +6702,9 @@ var require_engine = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/lib/stringify.js
+// node_modules/gray-matter/lib/stringify.js
 var require_stringify = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/lib/stringify.js"(exports2, module2) {
+  "node_modules/gray-matter/lib/stringify.js"(exports2, module2) {
     "use strict";
     var typeOf = require_kind_of();
     var getEngine = require_engine();
@@ -6751,9 +6755,9 @@ var require_stringify = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/lib/excerpt.js
+// node_modules/gray-matter/lib/excerpt.js
 var require_excerpt = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/lib/excerpt.js"(exports2, module2) {
+  "node_modules/gray-matter/lib/excerpt.js"(exports2, module2) {
     "use strict";
     var defaults = require_defaults();
     module2.exports = function(file, options2) {
@@ -6778,9 +6782,9 @@ var require_excerpt = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/lib/to-file.js
+// node_modules/gray-matter/lib/to-file.js
 var require_to_file = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/lib/to-file.js"(exports2, module2) {
+  "node_modules/gray-matter/lib/to-file.js"(exports2, module2) {
     "use strict";
     var typeOf = require_kind_of();
     var stringify = require_stringify();
@@ -6812,9 +6816,9 @@ var require_to_file = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/lib/parse.js
+// node_modules/gray-matter/lib/parse.js
 var require_parse = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/lib/parse.js"(exports2, module2) {
+  "node_modules/gray-matter/lib/parse.js"(exports2, module2) {
     "use strict";
     var getEngine = require_engine();
     var defaults = require_defaults();
@@ -6829,9 +6833,9 @@ var require_parse = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/index.js
+// node_modules/gray-matter/index.js
 var require_gray_matter = __commonJS({
-  "../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/gray-matter/index.js"(exports2, module2) {
+  "node_modules/gray-matter/index.js"(exports2, module2) {
     "use strict";
     var fs16 = __require("fs");
     var sections = require_section_matter();
@@ -6945,7 +6949,7 @@ var require_gray_matter = __commonJS({
   }
 });
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/commander/esm.mjs
+// node_modules/commander/esm.mjs
 var import_index = __toESM(require_commander(), 1);
 var {
   program,
@@ -6974,7 +6978,7 @@ import * as path12 from "node:path";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-// ../../../../../Users/yinfeng/dev/Skill/devtools/checklist/node_modules/js-yaml/dist/js-yaml.mjs
+// node_modules/js-yaml/dist/js-yaml.mjs
 function isNothing(subject) {
   return typeof subject === "undefined" || subject === null;
 }
@@ -7092,33 +7096,33 @@ function makeSnippet(mark, options2) {
     }
   }
   if (foundLineNo < 0) foundLineNo = lineStarts.length - 1;
-  var result = "", i, line;
+  var result = "", i2, line;
   var lineNoLength = Math.min(mark.line + options2.linesAfter, lineEnds.length).toString().length;
   var maxLineLength = options2.maxLength - (options2.indent + lineNoLength + 3);
-  for (i = 1; i <= options2.linesBefore; i++) {
-    if (foundLineNo - i < 0) break;
+  for (i2 = 1; i2 <= options2.linesBefore; i2++) {
+    if (foundLineNo - i2 < 0) break;
     line = getLine(
       mark.buffer,
-      lineStarts[foundLineNo - i],
-      lineEnds[foundLineNo - i],
-      mark.position - (lineStarts[foundLineNo] - lineStarts[foundLineNo - i]),
+      lineStarts[foundLineNo - i2],
+      lineEnds[foundLineNo - i2],
+      mark.position - (lineStarts[foundLineNo] - lineStarts[foundLineNo - i2]),
       maxLineLength
     );
-    result = common.repeat(" ", options2.indent) + padStart((mark.line - i + 1).toString(), lineNoLength) + " | " + line.str + "\n" + result;
+    result = common.repeat(" ", options2.indent) + padStart((mark.line - i2 + 1).toString(), lineNoLength) + " | " + line.str + "\n" + result;
   }
   line = getLine(mark.buffer, lineStarts[foundLineNo], lineEnds[foundLineNo], mark.position, maxLineLength);
   result += common.repeat(" ", options2.indent) + padStart((mark.line + 1).toString(), lineNoLength) + " | " + line.str + "\n";
   result += common.repeat("-", options2.indent + lineNoLength + 3 + line.pos) + "^\n";
-  for (i = 1; i <= options2.linesAfter; i++) {
-    if (foundLineNo + i >= lineEnds.length) break;
+  for (i2 = 1; i2 <= options2.linesAfter; i2++) {
+    if (foundLineNo + i2 >= lineEnds.length) break;
     line = getLine(
       mark.buffer,
-      lineStarts[foundLineNo + i],
-      lineEnds[foundLineNo + i],
-      mark.position - (lineStarts[foundLineNo] - lineStarts[foundLineNo + i]),
+      lineStarts[foundLineNo + i2],
+      lineEnds[foundLineNo + i2],
+      mark.position - (lineStarts[foundLineNo] - lineStarts[foundLineNo + i2]),
       maxLineLength
     );
-    result += common.repeat(" ", options2.indent) + padStart((mark.line + i + 1).toString(), lineNoLength) + " | " + line.str + "\n";
+    result += common.repeat(" ", options2.indent) + padStart((mark.line + i2 + 1).toString(), lineNoLength) + " | " + line.str + "\n";
   }
   return result.replace(/\n$/, "");
 }
@@ -9123,7 +9127,7 @@ var STYLE_LITERAL = 3;
 var STYLE_FOLDED = 4;
 var STYLE_DOUBLE = 5;
 function chooseScalarStyle(string, singleLineOnly, indentPerLevel, lineWidth, testAmbiguousType, quotingType, forceQuotes, inblock) {
-  var i;
+  var i2;
   var char = 0;
   var prevChar = null;
   var hasLineBreak = false;
@@ -9132,8 +9136,8 @@ function chooseScalarStyle(string, singleLineOnly, indentPerLevel, lineWidth, te
   var previousLineBreak = -1;
   var plain = isPlainSafeFirst(codePointAt(string, 0)) && isPlainSafeLast(codePointAt(string, string.length - 1));
   if (singleLineOnly || forceQuotes) {
-    for (i = 0; i < string.length; char >= 65536 ? i += 2 : i++) {
-      char = codePointAt(string, i);
+    for (i2 = 0; i2 < string.length; char >= 65536 ? i2 += 2 : i2++) {
+      char = codePointAt(string, i2);
       if (!isPrintable(char)) {
         return STYLE_DOUBLE;
       }
@@ -9141,14 +9145,14 @@ function chooseScalarStyle(string, singleLineOnly, indentPerLevel, lineWidth, te
       prevChar = char;
     }
   } else {
-    for (i = 0; i < string.length; char >= 65536 ? i += 2 : i++) {
-      char = codePointAt(string, i);
+    for (i2 = 0; i2 < string.length; char >= 65536 ? i2 += 2 : i2++) {
+      char = codePointAt(string, i2);
       if (char === CHAR_LINE_FEED) {
         hasLineBreak = true;
         if (shouldTrackWidth) {
           hasFoldableLine = hasFoldableLine || // Foldable line = too long, and not more-indented.
-          i - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ";
-          previousLineBreak = i;
+          i2 - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ";
+          previousLineBreak = i2;
         }
       } else if (!isPrintable(char)) {
         return STYLE_DOUBLE;
@@ -9156,7 +9160,7 @@ function chooseScalarStyle(string, singleLineOnly, indentPerLevel, lineWidth, te
       plain = plain && isPlainSafe(char, prevChar, inblock);
       prevChar = char;
     }
-    hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ");
+    hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i2 - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ");
   }
   if (!hasLineBreak && !hasFoldableLine) {
     if (plain && !forceQuotes && !testAmbiguousType(string)) {
@@ -9269,12 +9273,12 @@ function escapeString(string) {
   var result = "";
   var char = 0;
   var escapeSeq;
-  for (var i = 0; i < string.length; char >= 65536 ? i += 2 : i++) {
-    char = codePointAt(string, i);
+  for (var i2 = 0; i2 < string.length; char >= 65536 ? i2 += 2 : i2++) {
+    char = codePointAt(string, i2);
     escapeSeq = ESCAPE_SEQUENCES[char];
     if (!escapeSeq && isPrintable(char)) {
-      result += string[i];
-      if (char >= 65536) result += string[i + 1];
+      result += string[i2];
+      if (char >= 65536) result += string[i2 + 1];
     } else {
       result += escapeSeq || encodeHex(char);
     }
@@ -9580,13 +9584,13 @@ function loadChecklist(dir) {
   if (!Array.isArray(data.phases)) {
     throw new Error(`${CONFIG_FILE} missing "phases" array`);
   }
-  const phases = data.phases.map((p, i) => {
+  const phases = data.phases.map((p, i2) => {
     if (!p || typeof p !== "object" || Array.isArray(p)) {
-      throw new Error(`Phase ${i}: entry must be a mapping with "name" and "checks"`);
+      throw new Error(`Phase ${i2}: entry must be a mapping with "name" and "checks"`);
     }
     const phase = p;
     if (!phase.name || typeof phase.name !== "string") {
-      throw new Error(`Phase ${i}: missing "name" field`);
+      throw new Error(`Phase ${i2}: missing "name" field`);
     }
     if (!Array.isArray(phase.checks)) {
       throw new Error(`Phase "${phase.name}": missing "checks" array`);
@@ -9787,14 +9791,14 @@ function padDots(left, right, width = 50) {
 }
 function formatInit(config, cleared) {
   const total = config.phases.length;
-  const phaseList = config.phases.map((p, i) => `  ${i}: ${p.name} (${p.checks.length} checks)`).join("\n");
+  const phaseList = config.phases.map((p, i2) => `  ${i2}: ${p.name} (${p.checks.length} checks)`).join("\n");
   const header = cleared ? `checklist ready, ${total} phases (previous state cleared)` : `checklist ready, ${total} phases`;
   return `${header}
 ${phaseList}`;
 }
 function formatOverview(config, state) {
   let currentPhase = -1;
-  const lines = config.phases.map((phase, i) => {
+  const lines = config.phases.map((phase, i2) => {
     const ids = phase.checks.map((c) => c.id);
     const complete = isPhaseComplete(state, phase.name, ids);
     const { done, total } = phaseProgress(state, phase.name, ids);
@@ -9803,12 +9807,12 @@ function formatOverview(config, state) {
       status = "[x] passed";
     } else if (done > 0) {
       status = `[ ] ${done}/${total}`;
-      if (currentPhase === -1) currentPhase = i;
+      if (currentPhase === -1) currentPhase = i2;
     } else {
       status = "[ ] pending";
-      if (currentPhase === -1) currentPhase = i;
+      if (currentPhase === -1) currentPhase = i2;
     }
-    return `PHASE ${i}: ${phase.name.toUpperCase().padEnd(20)} ${status}`;
+    return `PHASE ${i2}: ${phase.name.toUpperCase().padEnd(20)} ${status}`;
   });
   const allDone = config.phases.every(
     (phase) => isPhaseComplete(state, phase.name, phase.checks.map((c) => c.id))
@@ -9822,10 +9826,10 @@ function formatOverview(config, state) {
 }
 function formatPhaseShow(result, state, totalPhases) {
   const header = `PHASE ${result.phaseIndex}: ${result.phaseName.toUpperCase()}`;
-  const items = result.checks.map((c, i) => {
+  const items = result.checks.map((c, i2) => {
     const checked = isItemChecked(state, result.phaseName, c.item.id);
     const mark = checked ? "[x]" : "[ ]";
-    const num = `${i + 1}.`;
+    const num = `${i2 + 1}.`;
     const line = `${num} ${mark} ${padDots(c.item.id, c.item.description)}`;
     if (checked) {
       return line;
@@ -9854,8 +9858,8 @@ function formatPhaseShow(result, state, totalPhases) {
 }
 function formatVerifyResult(result, state, totalPhases) {
   const header = `PHASE ${result.phaseIndex}: ${result.phaseName.toUpperCase()}`;
-  const items = result.checks.map((c, i) => {
-    const num = `${i + 1}.`;
+  const items = result.checks.map((c, i2) => {
+    const num = `${i2 + 1}.`;
     if (c.kind === "manual") {
       const checked = isItemChecked(state, result.phaseName, c.item.id);
       if (checked) {
@@ -9898,7 +9902,7 @@ function formatGateFailure(failedPhase, failedIndex) {
   return `gate blocked: PHASE ${failedIndex} (${failedPhase}) incomplete`;
 }
 function formatPhases(config) {
-  return config.phases.map((p, i) => `${i}: ${p.name} (${p.checks.length} checks)`).join("\n");
+  return config.phases.map((p, i2) => `${i2}: ${p.name} (${p.checks.length} checks)`).join("\n");
 }
 var STATUS_MARK = { pass: "[x]", fail: "[FAIL]", error: "[ERROR]" };
 function formatReport(events, config) {
@@ -9928,11 +9932,11 @@ function formatReport(events, config) {
 }
 function buildStateJson(config, state) {
   let currentPhase = null;
-  const phases = config.phases.map((phase, i) => {
+  const phases = config.phases.map((phase, i2) => {
     const ids = phase.checks.map((c) => c.id);
     const complete = isPhaseComplete(state, phase.name, ids);
     const { done, total } = phaseProgress(state, phase.name, ids);
-    if (!complete && currentPhase === null) currentPhase = i;
+    if (!complete && currentPhase === null) currentPhase = i2;
     const checks = phase.checks.map((c) => {
       const rec = getItemResult(state, phase.name, c.id);
       return {
@@ -9945,7 +9949,7 @@ function buildStateJson(config, state) {
         ...rec?.evidence !== void 0 ? { evidence: rec.evidence } : {}
       };
     });
-    return { index: i, name: phase.name, complete, done, total, checks };
+    return { index: i2, name: phase.name, complete, done, total, checks };
   });
   const allComplete = phases.every((p) => p.complete);
   return { phases, allComplete, currentPhase: allComplete ? null : currentPhase };
@@ -10118,17 +10122,17 @@ async function noSecretsCheck(targetPath) {
   }
   const lines = fs6.readFileSync(filePath, "utf-8").split("\n");
   const findings = [];
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+  for (let i2 = 0; i2 < lines.length; i2++) {
+    const line = lines[i2];
     for (const pattern of TOKEN_PATTERNS) {
       if (pattern.re.test(line)) {
-        findings.push(`L${i + 1}: ${pattern.name}`);
+        findings.push(`L${i2 + 1}: ${pattern.name}`);
       }
     }
     for (const pattern of ASSIGNMENT_PATTERNS) {
       const m = pattern.re.exec(line);
       if (m && !isPlaceholder(m[1])) {
-        findings.push(`L${i + 1}: ${pattern.name}`);
+        findings.push(`L${i2 + 1}: ${pattern.name}`);
       }
     }
   }
@@ -10244,29 +10248,29 @@ var UndefinedVarError = class extends Error {
 };
 function interpolate(template, vars) {
   let out = "";
-  let i = 0;
-  while (i < template.length) {
-    const ch = template[i];
-    if (ch === "$" && template[i + 1] === "$") {
+  let i2 = 0;
+  while (i2 < template.length) {
+    const ch = template[i2];
+    if (ch === "$" && template[i2 + 1] === "$") {
       out += "$";
-      i += 2;
+      i2 += 2;
       continue;
     }
-    if (ch === "$" && template[i + 1] === "{") {
-      const close = template.indexOf("}", i + 2);
-      const name = close === -1 ? "" : template.slice(i + 2, close);
+    if (ch === "$" && template[i2 + 1] === "{") {
+      const close = template.indexOf("}", i2 + 2);
+      const name = close === -1 ? "" : template.slice(i2 + 2, close);
       if (close !== -1 && /^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) {
         const value = Object.prototype.hasOwnProperty.call(vars, name) ? vars[name] : process.env[name];
         if (value === void 0) {
           throw new UndefinedVarError(name);
         }
         out += value;
-        i = close + 1;
+        i2 = close + 1;
         continue;
       }
     }
     out += ch;
-    i += 1;
+    i2 += 1;
   }
   return out;
 }
@@ -10484,14 +10488,14 @@ async function runPhase(phase, phaseIndex, cwd, targetPath, vars = {}) {
   };
 }
 function gatePriorPhases(config, targetPhaseIndex, state) {
-  for (let i = 0; i < targetPhaseIndex; i++) {
-    const phase = config.phases[i];
+  for (let i2 = 0; i2 < targetPhaseIndex; i2++) {
+    const phase = config.phases[i2];
     const ids = phase.checks.map((c) => c.id);
     if (!isPhaseComplete(state, phase.name, ids)) {
       return {
         passed: false,
         failedPhase: phase.name,
-        failedPhaseIndex: i
+        failedPhaseIndex: i2
       };
     }
   }
@@ -10867,13 +10871,13 @@ function lintChecklistSchema(ymlPath, diags) {
   }
   const phases = [];
   const seenPhaseNames = /* @__PURE__ */ new Map();
-  obj.phases.forEach((p, i) => {
+  obj.phases.forEach((p, i2) => {
     if (!p || typeof p !== "object" || Array.isArray(p)) {
       diags.push({
         file: ymlPath,
         severity: "error",
         rule: "schema/phase-not-a-mapping",
-        message: `phase ${i}: entry is not a mapping (a bare "- " or "- null" list item?)`,
+        message: `phase ${i2}: entry is not a mapping (a bare "- " or "- null" list item?)`,
         fix: "give the entry a `name:` and a `checks:` list"
       });
       return;
@@ -10885,7 +10889,7 @@ function lintChecklistSchema(ymlPath, diags) {
         file: ymlPath,
         severity: "error",
         rule: "schema/phase-missing-name",
-        message: `phase ${i}: missing a non-empty string "name"`,
+        message: `phase ${i2}: missing a non-empty string "name"`,
         fix: "add a `name:` to this phase"
       });
     } else {
@@ -10897,14 +10901,14 @@ function lintChecklistSchema(ymlPath, diags) {
           file: ymlPath,
           severity: "error",
           rule: "schema/duplicate-phase-name",
-          message: `phase ${i}: duplicate phase name "${name}" (collides with "${prior}", names are compared case-insensitively)`,
+          message: `phase ${i2}: duplicate phase name "${name}" (collides with "${prior}", names are compared case-insensitively)`,
           fix: "rename one of the phases \u2014 phases are addressed by name, so a duplicate makes one unreachable"
         });
       } else {
         seenPhaseNames.set(key, name);
       }
     }
-    const phaseLabel = hasName ? `"${phase.name}"` : `${i}`;
+    const phaseLabel = hasName ? `"${phase.name}"` : `${i2}`;
     if (!Array.isArray(phase.checks)) {
       diags.push({
         file: ymlPath,
@@ -11227,7 +11231,7 @@ function lintCommand(pathArg, options2) {
 }
 
 // src/index.ts
-var bundledVersion = true ? "0.4.0" : "";
+var bundledVersion = true ? "0.4.1" : "";
 var version = bundledVersion || JSON.parse(readFileSync13(join6(__dirname, "..", "package.json"), "utf8")).version;
 var program2 = new Command().name("checklist").description("Flight checklist CLI for Claude Code skills").version(version);
 var DIR_OPT = ["-d, --dir <dir>", "Directory containing .checklist.yml"];
