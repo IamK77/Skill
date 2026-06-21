@@ -19,6 +19,18 @@ import { loadSkillStructured, loadFixtures, loadProfile } from "./node-lib.mjs";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");   // touchstone/ lives at the repo root
 
+// Resolve a request path to a file inside `root`, or null if it would escape. Exported so the
+// containment guard can be unit-tested in isolation — the escape it must prevent (a sibling-dir
+// prefix like /../touchstone-evil/secret) is otherwise buried in the request handler below.
+export function resolveStaticPath(root, urlPath) {
+  const rel = urlPath === "/" ? "web/index.html" : urlPath.replace(/^\/+/, "");
+  const file = path.resolve(root, rel);
+  // Compare against `root + sep` (or exact `root`), NOT a bare startsWith(root): the latter also
+  // matches a SIBLING dir whose name begins with root (…/touchstone vs …/touchstone-evil).
+  if (file !== root && !file.startsWith(root + path.sep)) return null;
+  return file;
+}
+
 const argv = process.argv.slice(2);
 const PORT = Number(process.env.LAB_PORT || (argv.includes("--port") ? argv[argv.indexOf("--port") + 1] : 5178));
 
@@ -69,9 +81,8 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ── static (web/ page, core.mjs, providers.mjs) ─────────────────────────────
-    const rel = p === "/" ? "web/index.html" : p.replace(/^\/+/, "");
-    const file = path.resolve(here, rel);
-    if (!file.startsWith(here)) return send(res, 403, "forbidden");
+    const file = resolveStaticPath(here, p);
+    if (!file) return send(res, 403, "forbidden");
     if (fs.existsSync(file) && fs.statSync(file).isFile()) {
       return send(res, 200, fs.readFileSync(file), MIME[path.extname(file)] || "application/octet-stream");
     }
@@ -81,7 +92,11 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`\n  skill-lab  →  http://localhost:${PORT}`);
-  console.log("  configure the provider inside the page (or it auto-uses claude.ai's credentials there)\n");
-});
+// Start only when run directly (`node server.mjs`), not when imported — so a test can pull in
+// resolveStaticPath without booting the HTTP server and leaving the port bound.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  server.listen(PORT, () => {
+    console.log(`\n  skill-lab  →  http://localhost:${PORT}`);
+    console.log("  configure the provider inside the page (or it auto-uses claude.ai's credentials there)\n");
+  });
+}
