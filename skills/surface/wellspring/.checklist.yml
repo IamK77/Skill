@@ -11,7 +11,7 @@ phases:
   - name: source
     checks:
       - id: source-of-truth-minimized
-        description: "The DUPLICATE-FACT AUDIT run — for each piece of state, 'is this same fact stored anywhere else?'; if yes, one copy made derived (computed from the other) or deleted, because the same fact stored twice is a sync bug waiting to fire (items + selectedItemId = fine, two facts; items + filteredItems = bug, the second is derived; server user copied to local userName = bug). The ONE legitimate copy named as what it is — a FORM is a deliberate, explicitly-committed FORK of the server truth into a local editable draft, written back at an explicit commit point — which dissolves most 'where does form state go?' confusion. The source of truth is kept minimal and everything else derived"
+        description: "DUPLICATE-FACT LEDGER produced (full technique in STAGE 1), not a bare verdict: every displayed value and stored field traced to its writer-sites; any fact written in two-or-more places, or preferred from storage when it is also derivable, flagged with the redundant copy named for deletion; the source kept minimal and everything else derived; the ONE legitimate copy named — a FORM, an explicitly-committed fork of the truth. A summary like 'no duplicates / architecture sound / thermometer healthy' WITHOUT the per-fact enumeration does NOT clear this gate"
 
   - name: machine
     checks:

@@ -43,6 +43,8 @@ The audit is the operational form of the principle. It is the second half of STA
 
 Write down every meaningful piece of state in the slice. The discipline is to list it as *facts the system knows*, not as the variables that happen to hold them — because the whole point of the audit is to catch the case where **one fact wears two variables**. "The list of products," "which product the user has selected," "what the user has typed in the search box" are three facts. "The filtered list" is *not* a fourth fact — it is the first three composed — and listing it as a variable is exactly the error the next step exposes.
 
+**Start the list from what the user sees.** The most reliable entry point is the rendered surface: every number, count, status, label, and total on screen is a fact the system is asserting — write those down first, then trace each back to the state it is read from or computed from. A displayed value that *more than one* source could produce (a stored field **or** a derivation) is already the duplicate, caught from the outside in. Starting instead from "the state in the slice" biases you toward the code you happened to be reading and lets a displayed value with a hidden second source slip past — which is exactly how a buried stored-derivative survives an audit that only walked the code path already in view.
+
 ### Step 2 — for each fact, ask "is this same fact stored anywhere else?"
 
 Walk the list and, for each entry, ask the single audit question:
@@ -50,6 +52,11 @@ Walk the list and, for each entry, ask the single audit question:
 > **Is this same fact stored anywhere else — in another variable, another bucket, another component, the server *and* a local copy?**
 
 This is a *fact-identity* question, not a *value-equality* question. Two variables that happen to hold the same value right now are not necessarily a duplicate; two variables that are *the same fact* are, even when their values momentarily differ (in fact, the moment their values differ is the bug firing). The probe that disambiguates: **if fact A changed, would fact B have to change in lockstep to stay correct?** If yes, B is not independent — it is a copy or a derivative of A, and storing both is the contract you will break.
+
+**Do not "ask" from memory — enumerate by search.** The question is answered by *finding every site that writes the fact*, not by recalling whether you have happened to see a second copy. For each fact, search the code for every place that **assigns** it — its setter, every `updateX` / `setX`, every reducer case, every handler that writes it — not just where it is read; the duplicate is precisely the writer you did not have in view. Two shapes make it explicit:
+
+- **Two or more independent writers of the same fact** — the same total / flag / id assigned from more than one place is a fact with more than one author, and they will drift. (A running total accumulated by two different event handlers is the canonical case.)
+- **A read of the shape `hasStored(x) ? x : derive(x)`** — a consumer that *prefers a stored copy* and only *derives* as a fallback is holding one fact twice. The `derive(x)` branch is proof the value is derivable, which makes the stored/preferred branch the redundant copy: delete it and always derive. This one hides in plain sight — the clean `derive` function sitting next to it reads as "good," when it is in fact the evidence that the stored copy must die.
 
 ### Step 3 — when the answer is yes, decide which copy dies
 
@@ -114,8 +121,10 @@ This is why the discipline cannot be left to taste and **must be gated** at `sou
 - The agent **reaches for `useEffect` to sync state into state** — the canonical tell, and a grep-able one. It does not see a `useEffect` that copies one piece of state into another as a *smell*; it sees it as *wiring*.
 - The agent **mints local mirrors of server fields** — pulling `user.name` into a `userName` for "convenience," signing a sync contract against a cache it does not control.
 - The agent **cannot tell a form from a drift** — it will copy server state locally with no explicit commit point and call it a form, and it will store a derivative and call it state, because the *name* (form vs derivative) is a judgment about intent, and intent is precisely what the agent has no felt access to.
+- The agent **blesses a path on the strength of a nearby clean derive function** — it sees a `calculateX()` / pure-compute helper and concludes "derived, single-source, clean," without checking whether a *stored* copy of the same fact is written elsewhere and *preferred* over that derivation. The clean derive is not reassurance; it is proof the value is derivable, which makes any stored copy a deletion target.
+- The agent **pronounces the slice healthy before running the enumeration** — "well-architected," "no stored derivatives," "the store is small" — as an overall impression rather than the bottom line of a per-fact writer search, and that early impression then anchors a confirmation bias that suppresses the dig.
 
-The gate forces the duplicate-fact audit to be *run and written down* while removing a duplicate is still a one-line change — before the slice ships and the drift becomes a production bug found far from its cause. The final-check phrasing is the audit's verdict: **no fact is stored twice** (the one exception being a form, a named and committed fork), and the source of truth is minimal with everything else derived.
+The gate forces the duplicate-fact audit to be *run and written down* while removing a duplicate is still a one-line change — before the slice ships and the drift becomes a production bug found far from its cause. The posture it enforces is **assume a stored derivative is hiding until the per-fact writer search says otherwise**: a "looks clean" verdict that is not itself the *output* of that enumeration is the confirmation bias this stage exists to break, not an audit. The final-check phrasing is the audit's verdict: **no fact is stored twice** (the one exception being a form, a named and committed fork), and the source of truth is minimal with everything else derived.
 
 ---
 
