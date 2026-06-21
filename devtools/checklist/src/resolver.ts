@@ -6,13 +6,29 @@ import type { ChecklistState } from './state.js';
 import { isPhaseComplete } from './state.js';
 import { runCheck } from './runner.js';
 
-// Single, cwd-independent record of the active checklist dir. `init` writes it
-// (its dir comes from the harness-expanded ${CLAUDE_SKILL_DIR}, so it is
-// reliable), and every later command resolves it no matter which directory they
-// run from — so the skill never has to pass --dir, and there is no cwd-coupled
-// pointer that a stale copy could shadow. Location is overridable via
-// CHECKLIST_HOME (used to sandbox tests).
+// cwd-independent record of the active checklist dir. `init` writes it, and every
+// later command resolves it no matter which directory they run from — so the skill
+// never has to pass --dir, and there is no cwd-coupled pointer a stale copy could
+// shadow. The pointer DIR is overridable via CHECKLIST_HOME (used to sandbox tests).
+//
+// The pointer is keyed PER SESSION, not machine-global: the filename carries a
+// stable session id, so two concurrent runs (different terminals / agent sessions)
+// each get their OWN pointer file and cannot stomp each other's active dir. Before
+// this, a single shared `~/.config/checklist/active` meant one session's `init`
+// (or a bare `reset`/self-heal) silently repointed every other session — flagless
+// commands in the victim then resolved to the WRONG skill.
 const CONFIG_FILE = '.checklist.yml';
+
+// A filesystem-safe per-session tag, or '' when no session id is available. Claude
+// Code exposes CLAUDE_CODE_SESSION_ID (a UUID, identical across every shell of one
+// session); CHECKLIST_SESSION_ID overrides it (tests / non-Claude harnesses). With
+// neither set — a human at a plain terminal — the tag is empty and the pointer
+// falls back to the legacy shared `active` file, so standalone use is unchanged.
+function sessionTag(): string {
+  const raw = (process.env.CHECKLIST_SESSION_ID || process.env.CLAUDE_CODE_SESSION_ID || '').trim();
+  // Never let a session id escape into a path: keep only safe chars, bound length.
+  return raw.replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 64);
+}
 
 function activePointerPath(): string {
   const dir =
@@ -20,7 +36,8 @@ function activePointerPath(): string {
     (process.env.XDG_CONFIG_HOME
       ? path.join(process.env.XDG_CONFIG_HOME, 'checklist')
       : path.join(os.homedir(), '.config', 'checklist'));
-  return path.join(dir, 'active');
+  const tag = sessionTag();
+  return path.join(dir, tag ? `active.${tag}` : 'active');
 }
 
 export function resolveDir(explicit?: string): string {

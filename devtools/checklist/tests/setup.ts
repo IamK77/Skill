@@ -18,3 +18,12 @@ delete process.env.XDG_STATE_HOME;
 // either from the host environment cannot perturb resolution in tests.
 delete process.env.CHECKLIST_DIR;
 delete process.env.CLAUDE_SKILL_DIR;
+
+// The active pointer is now keyed per session (resolver.sessionTag): the FILENAME
+// is `active.<id>` when a session id is present. These leak in from the host (a real
+// Claude Code run sets CLAUDE_CODE_SESSION_ID), which would shift the pointer file
+// out from under the existing tests' `active` helper. Clear both so the default
+// filename is the legacy `active`; the per-session suite sets CHECKLIST_SESSION_ID
+// explicitly to exercise the keyed path.
+delete process.env.CHECKLIST_SESSION_ID;
+delete process.env.CLAUDE_CODE_SESSION_ID;
