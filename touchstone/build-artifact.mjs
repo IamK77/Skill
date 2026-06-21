@@ -81,7 +81,7 @@ const STYLES = ${JSON.stringify(STYLES)};
 
 // ============================ embedded engine (verbatim from core.mjs) ============================
 ${coreSrc}
-const core = { gradeQuality, gradeReferenceOverlap, gradeFalsePositive, mapPool, summarize };
+const core = { gradeQuality, gradeReferenceOverlap, gradeFalsePositive, gradeCatch, combineScore, isDegenerate, mapPool, summarize };
 
 // ============================ embedded nav-harness (verbatim from navfs.mjs + harness.mjs) ============================
 ${navfsSrc}

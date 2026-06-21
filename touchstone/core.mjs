@@ -107,7 +107,7 @@ export function falsePositiveMessages({ diff, review, domain = "architecture" })
 // mis-call moves the score by ~1, never 8→1. The maintainer diff still has a job — but
 // in a SEPARATE call (gradeReferenceOverlap) that judges topical overlap only and does
 // NOT feed the score. So the reference is measured, not leaked into quality.
-export function gradeQualityMessages({ code, review, domain = "architecture" }) {
+export function gradeQualityMessages({ code, review, domain = "architecture", depthCriteria = "" }) {
   return [{
     role: "user",
     content:
@@ -126,14 +126,11 @@ export function gradeQualityMessages({ code, review, domain = "architecture" }) 
       "not the same point restated)?\n" +
       "  concrete — For the real problems it raises, are the fixes concrete — do they say specifically WHAT to change " +
       "so an engineer could act (not 'consider refactoring')?\n" +
-      "  depth — Does at least one real problem reflect genuine ARCHITECTURAL insight into " + domain + "? For " +
-      "state management that means reasoning about: single source of truth (derive-don't-store; no parallel copies " +
-      "of one fact), who OWNS each piece of state, making illegal states unrepresentable (a union instead of " +
-      "scattered booleans), or the shape of the state machine. A review that is competent but consists MAINLY of " +
-      "re-render / performance / over-subscription / memoization tweaks, defensive null-guards, or naming / " +
-      "idempotency nits is NOT depth — however many such points it lists. Naming the right symbol for the WRONG " +
-      "reason (e.g. flagging a derived value only as a memoization concern, missing that it is a duplicated source " +
-      "of truth) does NOT count as depth.\n" +
+      "  depth — Does at least one real problem reflect genuine, load-bearing insight into the HARD core of " + domain +
+      "? " + (depthCriteria || ("Genuine " + domain + " insight — the structural / load-bearing problems, not surface nits.")) +
+      " A review that is competent but consists MAINLY of superficial, cosmetic, or peripheral nits is NOT depth — " +
+      "however many such points it lists. Naming the right symbol for the WRONG reason (engaging the correct code for " +
+      "the wrong cause) does NOT count as depth.\n" +
       "  harmful — Does the review's MAIN recommendation give actively WRONG advice — something that would introduce " +
       "a bug, break currently-working behavior, or is factually incorrect about how this code works? A large-but-valid " +
       "refactor is NOT harmful; ambition is NOT harm. Mark yes ONLY for advice that is actually wrong or breaking.\n\n" +
@@ -176,11 +173,24 @@ export function scoreFromQuality(g) {
   return s;
 }
 
-// Single quality grade (no diff, no consensus). The whole point of v2 is that one grade
-// is stable; the variance test proves whether consensus is still needed at all.
-export async function gradeQuality({ callGrade, code, review, domain = "architecture", maxTokens = 8000 }) {
-  const g = await callForJSON(callGrade, gradeQualityMessages({ code, review, domain }), { maxTokens, temperature: 0 });
-  return { score: scoreFromQuality(g), judgments: g, why: g.why };
+// Quality grade with CONSENSUS — the diff-blind score that now feeds combineScore. A single
+// temp-0 deepseek draw still wobbles (a smoke run flipped `grounded` to no on a clearly-grounded
+// review → q2 → composed 0), and since quality flows straight into the composed score, one flip
+// poisons the cell. So mirror gradeConsensus: grade TWICE and mean; if the two scores differ by
+// more than `threshold`, grade a THIRD and take the MEDIAN (rejects the outlier). The returned
+// judgments/why are from the run nearest the consensus score (representative for the harm flag etc.).
+export async function gradeQuality({ callGrade, code, review, domain = "architecture", depthCriteria = "", threshold = 2, maxTokens = 8000 }) {
+  const one = async () => {
+    const g = await callForJSON(callGrade, gradeQualityMessages({ code, review, domain, depthCriteria }), { maxTokens, temperature: 0 });
+    return { score: scoreFromQuality(g), judgments: g, why: g.why };
+  };
+  const runs = [await one(), await one()];
+  const escalated = Math.abs(runs[0].score - runs[1].score) > threshold;
+  if (escalated) runs.push(await one());
+  const sorted = runs.map((r) => r.score).sort((a, b) => a - b);
+  const score = escalated ? sorted[1] : (sorted[0] + sorted[1]) / 2; // median of 3, else mean of 2
+  const rep = [...runs].sort((a, b) => Math.abs(a.score - score) - Math.abs(b.score - score))[0];
+  return { score, judgments: rep.judgments, why: rep.why, scores: runs.map((r) => r.score), escalated };
 }
 
 // SEPARATE reference-overlap probe — the maintainer diff's only remaining job. Judges
@@ -203,6 +213,162 @@ export function referenceOverlapMessages({ diff, review, domain = "architecture"
 export async function gradeReferenceOverlap({ callGrade, diff, review, domain = "architecture", maxTokens = 4000 }) {
   const g = await callForJSON(callGrade, referenceOverlapMessages({ diff, review, domain }), { maxTokens, temperature: 0 });
   return { overlap: g.overlap, why: g.why };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CATCH GRADE — the direction-aware "did the review get the planted bug RIGHT" probe.
+//
+// Why this exists (findings F1/F2): the diff-blind quality grader scores box-checking,
+// not correctness. In the last run all 4 baseline reviews scored 8 while MISSING the
+// planted bug, and 2 of them recommended the EXACT INVERSION of the maintainer's fix —
+// one inverted review scored 8. gradeReferenceOverlap is recorded-not-scored AND
+// direction-blind: it marks an inverted review "yes" (same topic, opposite advice).
+//
+// This grade is DELIBERATELY answer-key-aware (it sees the maintainer's fix + the
+// fixture's catch_key), so it is a SEPARATE call that NEVER touches gradeQuality (C2:
+// the quality grader stays blind). Its output is composed with quality IN CODE
+// (combineScore), never folded into the quality prompt.
+//
+// It is direction-aware (F2): the verdict is one of
+//   correct  — diagnoses the planted problem AND its recommended fix points the SAME
+//              direction as the maintainer's (or a strict superset that subsumes it)
+//   partial  — touches the planted problem but the fix is vague / incomplete / only
+//              half-right (names the symptom, not the corrected design)
+//   inverted — diagnoses the area but recommends the OPPOSITE of the correct fix
+//              (entrenches the bug / would make a maintainer revert) — WORSE than a miss
+//   miss     — does not engage the planted problem at all
+//
+// GENERALITY (C1): the bug's SHAPE is NOT in this prompt. The grader logic only knows
+// the abstract notions "the maintainer's actual change" (fix.diff, already per-fixture)
+// and an OPTIONAL per-fixture `catch_key` { problem, correct_direction, inverted_direction }
+// — plain English the fixture author writes once, the same three fields for ANY planted
+// bug (a derive-don't-store bug, an IDOR, a race). No "usageMetrics" / "derive" / "draft
+// release" string lives in core.mjs. If catch_key is absent the grader falls back to
+// inferring direction from the diff alone (coarser, still direction-aware).
+//
+// ANTI-BUZZWORD (C3): the prompt requires the catch be GROUNDED — the review must name
+// the actual code (the real symbol/handler/path) and reason about THIS code's mechanism.
+// A review that merely chants the right slogan ("single source of truth", "add an authz
+// check") without locating it in this code is `grounded:false` → combineScore refuses to
+// award the catch (treated as no-better-than-miss). So a keyword can't earn the signal.
+export function catchMessages({ diff, review, domain = "architecture", catchKey = null }) {
+  const key = catchKey && (catchKey.problem || catchKey.correct_direction)
+    ? "The planted problem, in the fixture author's words (NOT a script to match verbatim — the review may " +
+      "use different language for the SAME underlying problem and fix):\n" +
+      (catchKey.problem ? "  • PROBLEM: " + catchKey.problem + "\n" : "") +
+      (catchKey.correct_direction ? "  • A CORRECT fix points this way: " + catchKey.correct_direction + "\n" : "") +
+      (catchKey.inverted_direction ? "  • The INVERSION (entrenches/worsens the bug) looks like: " + catchKey.inverted_direction + "\n" : "") +
+      "\n"
+    : "";
+  return [{
+    role: "user",
+    content:
+      "You are checking whether a " + domain + " review correctly DIAGNOSED a specific known problem in the code, " +
+      "and whether its recommended fix points the RIGHT direction.\n\n" +
+      "Here is the REAL change a maintainer later made to fix that problem (the ground-truth direction of the fix):\n" +
+      "--- MAINTAINER FIX ---\n" + diff + "\n--- END ---\n\n" +
+      key +
+      "--- REVIEW UNDER CHECK ---\n" + review + "\n--- END REVIEW ---\n\n" +
+      "Decide TWO things:\n\n" +
+      "1) grounded — Does the review actually LOCATE this problem in THIS code: does it name the real symbol / " +
+      "function / handler / path involved and reason about how THIS code behaves? A review that only chants the " +
+      "right slogan (e.g. names the general principle) WITHOUT pointing at the actual code is NOT grounded. " +
+      "yes / no.\n\n" +
+      "2) verdict — comparing the review's MAIN recommendation about this problem to the maintainer's fix DIRECTION:\n" +
+      "   • correct  — it diagnoses this problem AND its fix points the SAME way as the maintainer's (or a broader " +
+      "change that clearly SUBSUMES it). Different wording is fine; same direction is what matters.\n" +
+      "   • partial  — it touches this problem but the fix is vague, incomplete, or only half-right (notes the " +
+      "symptom, doesn't arrive at the corrected design).\n" +
+      "   • inverted — it engages this area but recommends the OPPOSITE of the correct fix: advice that would " +
+      "entrench or worsen the very problem, such that applying it then applying the maintainer's fix would be " +
+      "contradictory. This is WORSE than not mentioning it.\n" +
+      "   • miss     — it does not engage this problem at all.\n\n" +
+      "Judge ONLY this one planted problem. Other findings in the review are irrelevant here.\n\n" +
+      'Return ONLY JSON: {"grounded":"yes"|"no","verdict":"correct"|"partial"|"inverted"|"miss","why":"one sentence citing the review\'s actual words"}.',
+  }];
+}
+
+export async function gradeCatch({ callGrade, diff, review, domain = "architecture", catchKey = null, maxTokens = 4000, k = 2 }) {
+  const SEV = { inverted: 0, miss: 1, partial: 2, correct: 3 };   // bad → good; used to pick the MEDIAN if 3 differ
+  const one = async () => {
+    const g = await callForJSON(callGrade, catchMessages({ diff, review, domain, catchKey }), { maxTokens, temperature: 0 });
+    const grounded = String(g.grounded ?? "").toLowerCase() === "yes";
+    let verdict = String(g.verdict ?? "miss").toLowerCase();
+    if (!["correct", "partial", "inverted", "miss"].includes(verdict)) verdict = "miss";
+    // ANTI-BUZZWORD (C3): an ungrounded "catch" is a slogan, not a diagnosis — demote any
+    // positive/active verdict to a miss. (An ungrounded INVERTED claim is also just noise → miss.)
+    if (!grounded && verdict !== "miss") verdict = "miss";
+    return { verdict, grounded, why: g.why };
+  };
+  // CONSENSUS — catch is the DOMINANT lever on the composed score, so do not trust one temp-0 draw.
+  // Grade twice; if the verdicts agree, take it; if they disagree, escalate to a third and take the
+  // MODE (the median by severity when all three differ). Mirrors gradeConsensus for the quality band.
+  const runs = [await one()];
+  if (k > 1) runs.push(await one());
+  let chosen;
+  if (runs.length < 2 || runs[0].verdict === runs[1].verdict) {
+    chosen = runs[runs.length - 1];
+  } else {
+    runs.push(await one());
+    const counts = {};
+    for (const r of runs) counts[r.verdict] = (counts[r.verdict] || 0) + 1;
+    const top = Math.max(...Object.values(counts));
+    const modal = Object.keys(counts).filter((v) => counts[v] === top);
+    const verdict = modal.length === 1
+      ? modal[0]
+      : runs.map((r) => r.verdict).sort((a, b) => SEV[a] - SEV[b])[1]; // 3 distinct → median severity
+    chosen = runs.find((r) => r.verdict === verdict) || runs[0];
+  }
+  return { verdict: chosen.verdict, grounded: chosen.grounded, why: chosen.why, runs: runs.map((r) => r.verdict) };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DEGENERATE-OUTPUT DETECTOR (F5). One skill review came back EMPTY (28 chars) after
+// over-navigation, scored 2, and dragged the mean. The bench must DETECT this and
+// flag+exclude it (logged + counted, never silently averaged — C4), not treat a
+// non-review as a data point. Generic: no fixture/bug knowledge, just "is this a review
+// at all". `complete=false` (the run hit the turn cap without finishing) is also degenerate.
+export function isDegenerate(review, { minChars = 120, complete = true } = {}) {
+  const text = String(review || "").trim();
+  if (complete === false) return { degenerate: true, reason: "incomplete: hit turn cap without finishing" };
+  if (text.length < minChars) return { degenerate: true, reason: `too short (${text.length} chars < ${minChars})` };
+  return { degenerate: false, reason: null };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPOSE the final 0–10 from the diff-BLIND quality score and the answer-key-aware
+// catch verdict — IN CODE, so the quality grader stays blind (C2) yet getting the
+// planted bug right/wrong moves the score (F1/F2).
+//
+// Quality measures "is this a good review of this code on its own merits"; catch
+// measures "did it get the ONE thing we know is wrong right". The instrument's whole
+// defect was that a box-checking review that MISSES the bug, or INVERTS it, banked the
+// quality 8. So catch is an additive correctness signal layered on quality:
+//
+//   correct  → +1, but ONLY if quality is already grounded/real (q>=4). A correct catch on an
+//                    UNGROUNDED review (q 2-3) gets NO lift — so buzzwords cannot launder a bad
+//                    review into a "solid" score (C3). No unconditional floor.
+//   partial  → −1  (a half-catch of the one known-important problem is mild evidence of over-rating)
+//   miss     → −3  (a polished review that missed the known-important problem is over-rated —
+//                    the F1/F4 holistic-vs-dimensional gap, in code)
+//   inverted → −4  (worse than a miss, F2: actively wrong on the main known issue — a single
+//                    graduated penalty, no extra ceiling, so it can't double-dip q5→1)
+//
+// MAGNITUDES were TUNED by replaying the saved reviews against the Opus blind panel (n=7, directional):
+// +1/−1/−3/−4 tracked the panel's holistic scores at meanAbsErr 0.50 (vs 1.21 for the first-cut
+// +2/0/−2/−4, which over-rated by ~1). Revisit as more fixtures/trials accumulate. Bounded so one
+// catch mis-call moves the score ≤4 (inverted) / ≤3 (others); a correct↔miss swing is 4 pts. Clamps 0–10.
+// GENERALITY: these are verdict→adjustment rules, identical for every fixture; the per-fixture
+// part is only WHICH verdict the catch grade returns.
+export function combineScore(quality, catch_) {
+  const q = Math.max(0, Math.min(10, Number(quality) || 0));
+  const v = catch_?.verdict || "miss";
+  let s = q;
+  if (v === "correct") s = q >= 4 ? q + 1 : q;   // lift ONLY a grounded/real review (q>=4); NO unconditional floor
+  else if (v === "partial") s = q - 1;
+  else if (v === "miss") s = q - 3;
+  else if (v === "inverted") s = q - 4;            // single graduated penalty; NO extra ceiling (was double-dipping)
+  return Math.max(0, Math.min(10, s));
 }
 
 function parseJSON(text) {
@@ -290,4 +456,67 @@ export function summarize(records) {
   const fpRows = records.filter((r) => "falsePositive" in r);
   const fpRate = fpRows.length ? fpRows.filter((r) => r.falsePositive).length / fpRows.length : null;
   return { meanFound, fpRate, n: records.length };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STATISTICS (F6) — a bare mean delta over n=4, 1 fixture is not evidence. These are
+// the shared, fixture-AGNOSTIC stat primitives the A/B summary and the calibration
+// mode both use. They take arrays of numbers; they know nothing about this bug.
+export const mean = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : NaN);
+export function stdev(xs) {                       // SAMPLE sd (n-1); the spread WITHIN an arm
+  const n = xs.length;
+  if (n < 2) return 0;
+  const m = mean(xs);
+  return Math.sqrt(xs.reduce((a, b) => a + (b - m) ** 2, 0) / (n - 1));
+}
+
+// WITHIN-RUN PAIRED comparison (F6). The skill and baseline arms are run in the SAME
+// trial on the SAME fixture under the SAME compute cap — they are NATURALLY PAIRED, so
+// the unit of evidence is the per-trial DIFFERENCE (skill−base), which cancels the
+// shared per-fixture / per-run difficulty that made the baseline arm jump 4.75→7.25
+// across runs and the cross-run delta unreliable. We report:
+//   • the paired mean delta and its SD/standard-error,
+//   • a bootstrap CI on the paired delta (no normality assumption — n is tiny and the
+//     score is a discrete 0–10 ladder, so a t-interval would be a lie; resampling the
+//     observed pairs is honest about how little we have),
+//   • the win rate (fraction of pairs where skill strictly beat base) — a sign test
+//     that survives the score being ordinal rather than interval.
+// Pure of any fixture specifics: feed it pairs from one fixture or pooled across many.
+export function pairedSummary(pairs, { iters = 10000, ci = 0.95, seed = 1 } = {}) {
+  const clean = pairs.filter((p) => Number.isFinite(p.skill) && Number.isFinite(p.base));
+  const n = clean.length;
+  const diffs = clean.map((p) => p.skill - p.base);
+  const meanDelta = mean(diffs);
+  const sd = stdev(diffs);
+  const se = n ? sd / Math.sqrt(n) : NaN;
+  const wins = diffs.filter((d) => d > 0).length;
+  const ties = diffs.filter((d) => d === 0).length;
+  const losses = diffs.filter((d) => d < 0).length;
+  // deterministic bootstrap (mulberry32) so a CI is reproducible across runs/CI.
+  let s = seed >>> 0;
+  const rng = () => { s |= 0; s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  let lo = NaN, hi = NaN, crossesZero = true;
+  if (n >= 2) {
+    const boots = new Array(iters);
+    for (let b = 0; b < iters; b++) {
+      let acc = 0;
+      for (let i = 0; i < n; i++) acc += diffs[(rng() * n) | 0];
+      boots[b] = acc / n;
+    }
+    boots.sort((a, b) => a - b);
+    const a = (1 - ci) / 2;
+    lo = boots[Math.floor(a * iters)];
+    hi = boots[Math.min(iters - 1, Math.floor((1 - a) * iters))];
+    crossesZero = lo <= 0 && hi >= 0;        // CI spans 0 ⇒ delta not distinguishable from noise
+  }
+  return {
+    n, meanDelta, sd, se,
+    skillMean: mean(clean.map((p) => p.skill)),
+    baseMean: mean(clean.map((p) => p.base)),
+    skillSd: stdev(clean.map((p) => p.skill)),
+    baseSd: stdev(clean.map((p) => p.base)),
+    wins, ties, losses,
+    winRate: n ? wins / n : NaN,
+    ci, ciLo: lo, ciHi: hi, crossesZero,
+  };
 }

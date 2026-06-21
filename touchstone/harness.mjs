@@ -290,7 +290,7 @@ export async function runNavReview({ callModel, code, domain = "architecture", s
     "review as plain prose (NO [[...]] markers) — that ends the review. Don't pad; don't stop before you've actually read the code.",
   ].join("\n");
   const messages = [{ role: "user", content: `Begin your ${domain} review. The files under review (read them with the tools):\n${vfs.ls()}` }];
-  let review = "", turn = 0, navCalls = 0, bestProse = "";
+  let review = "", turn = 0, navCalls = 0, bestProse = "", complete = false;
 
   while (turn < maxTurns) {
     turn += 1;
@@ -306,7 +306,7 @@ export async function runNavReview({ callModel, code, domain = "architecture", s
         messages.push({ role: "user", content: "You haven't read any of the code yet — use [[ls]], [[grep]], and [[read_file]] to actually look at it before reviewing." });
         continue;
       }
-      review = out; break; // agent decided it's done
+      review = out; complete = true; break; // agent decided on its own it's done (vs running out the turn cap)
     }
     const results = [];
     for (const c of calls) {
@@ -317,5 +317,7 @@ export async function runNavReview({ callModel, code, domain = "architecture", s
     messages.push({ role: "user", content: results.join("\n\n") + "\n\n(Keep navigating, or write your final review when ready.)" });
   }
   review = proseWithoutNav(review).trim() || bestProse;
-  return { review, turns: turn, navCalls };
+  // complete = the agent stopped on its own and wrote a review; false = it ran out the turn cap
+  // mid-navigation and got truncated (treated as degenerate, mirroring the skill arm).
+  return { review, turns: turn, navCalls, complete };
 }

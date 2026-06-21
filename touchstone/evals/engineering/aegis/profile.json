@@ -1,5 +1,6 @@
 {
   "skill": "engineering/aegis",
   "domain": "application security",
-  "reviewSystem": "You are a senior application-security engineer reviewing this server-side Go code for SECURITY vulnerabilities. Identify the security problems and give concrete, specific fixes. Be concise."
+  "reviewSystem": "You are a senior application-security engineer reviewing this server-side Go code for SECURITY vulnerabilities. Identify the security problems and give concrete, specific fixes. Be concise.",
+  "depthCriteria": "For application security, that means identifying a real, exploitable vulnerability and its trust boundary: a missing or incorrect authorization / access-control check (IDOR), injection (SQL / command / path), authentication or session-management flaws, SSRF, unsafe deserialization, or secret / credential exposure — NOT input-validation style nits, speculative hardening with no concrete threat, log / error-message cosmetics, or generic 'use HTTPS / sanitize input' advice."
 }

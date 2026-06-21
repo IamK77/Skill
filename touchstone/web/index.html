@@ -156,10 +156,13 @@
                     onEvent: (e) => push(`${tag}${fp} · ${e.type || e.phase || ""}${e.turn ? " t" + e.turn : ""}`) });
               const r = await runArm(u.fx.before, "");
               // grade quality (v2: decomposed factual y/n → code-composed score; the grader NEVER sees the diff)
-              const g = await core.gradeQuality({ callGrade, code: u.fx.before, review: r.review, domain });
+              const g = await core.gradeQuality({ callGrade, code: u.fx.before, review: r.review, domain, depthCriteria: profile.depthCriteria });
+              // catch (F1/F2): SEPARATE, direction-aware, answer-key-aware grade — composed with quality IN CODE.
+              const cat = await core.gradeCatch({ callGrade, diff: u.fx.diff, review: r.review, domain, catchKey: u.fx.catch_key || null }).catch(() => ({ verdict: "miss", grounded: false }));
+              const finalScore = core.combineScore(g.score, cat);
               // reference overlap — recorded for analysis, NOT scored (the diff's only remaining job)
               const ov = await core.gradeReferenceOverlap({ callGrade, diff: u.fx.diff, review: r.review, domain }).catch(() => ({ overlap: "—" }));
-              const rec = { trial: u.t, foundScore: g.score, foundWhy: g.why, harmful: g.judgments && g.judgments.harmful === "yes", review: r.review,
+              const rec = { trial: u.t, foundScore: finalScore, quality: g.score, catch: cat.verdict, catchGrounded: cat.grounded, foundWhy: g.why, harmful: g.judgments && g.judgments.harmful === "yes", review: r.review,
                 judgments: g.judgments, overlap: ov.overlap, turns: r.turns, navCalls: r.navCalls,
                 gatesCleared: r.gatesCleared || [], refsOpened: (r.refsOpened || []).map((x) => x.name), complete: r.complete };
               if (withFP) {
@@ -168,8 +171,13 @@
                 const fpg = await core.gradeFalsePositive({ callGrade, diff: u.fx.diff, review: rFP.review, domain });
                 rec.falsePositive = fpg.falsePositive; rec.fpWhy = fpg.why; rec.cleanReview = rFP.review;
               }
-              done.push({ fixture: u.fx.id, arm: u.arm, record: rec });
-              recompute();
+              // F5/C4: same degenerate exclusion as the CLI — never silently average an empty/truncated review.
+              if (core.isDegenerate(r.review, { minChars: 200, complete: r.complete }).degenerate) {
+                push(`${tag} · ⚠ DEGENERATE (${(r.review || "").trim().length}c) — excluded from mean`);
+              } else {
+                done.push({ fixture: u.fx.id, arm: u.arm, record: rec });
+                recompute();
+              }
             } catch (e) {
               push(`${tag} · SKIPPED — ${String(e.message || e)}`);
             }

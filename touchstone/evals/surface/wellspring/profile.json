@@ -1,5 +1,6 @@
 {
   "skill": "surface/wellspring",
   "domain": "state architecture",
-  "reviewSystem": "You are a senior frontend engineer reviewing a React component's STATE ARCHITECTURE. Identify the state-management problems and give concrete, specific fixes. Be concise."
+  "reviewSystem": "You are a senior frontend engineer reviewing a React component's STATE ARCHITECTURE. Identify the state-management problems and give concrete, specific fixes. Be concise.",
+  "depthCriteria": "For state architecture, that means reasoning about: single source of truth (derive-don't-store; no parallel copies of one fact), who OWNS each piece of state, making illegal states unrepresentable (a union instead of scattered booleans), or the shape of the state machine — NOT re-render / performance / over-subscription / memoization tweaks, defensive null-guards, or naming / idempotency nits."
 }
