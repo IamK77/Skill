@@ -80,8 +80,16 @@ export function runNavTool(vfs, tool, rest) {
     return vfs.read(m[1], m[2] ? +m[2] : undefined, m[3] ? +m[3] : undefined);
   }
   if (tool === "grep") {
-    const m = String(rest).trim().match(/^(.*?)(?:\s+in\s+(\S+))?$/);
-    return vfs.grep((m && m[1] || rest).trim(), m && m[2]);
+    const raw = String(rest).trim();
+    const m = raw.match(/^(.*?)(?:\s+in\s+(\S+))?$/);
+    let pattern = (m && m[1] || raw).trim();
+    let scope = m && m[2];
+    // Disambiguate "X in Y": a trailing "in <token>" is a PATH SCOPE only when <token> names a
+    // real file here; otherwise the agent meant the literal phrase (e.g. "logged in yet"), so
+    // search the whole string. Without this, any pattern ending in "in <word>" silently mis-scopes
+    // to an empty result — a wrong "no matches" the agent can't see through.
+    if (scope && !vfs.files.some((f) => f.path.includes(scope))) { pattern = raw; scope = undefined; }
+    return vfs.grep(pattern, scope);
   }
   return null;
 }
