@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.1](https://github.com/IamK77/Skill/compare/v0.4.0...v0.4.1) (2026-06-21)
+
+
+### Features
+
+* **checklist:** add 'checklist lint' — yml schema + SKILL.md parity gate ([b65ebf9](https://github.com/IamK77/Skill/commit/b65ebf9a246d2e906a520a370d71e469d14c9301))
+* **checklist:** evidence-required checks, run journal, report & show --json ([8d0ab99](https://github.com/IamK77/Skill/commit/8d0ab992053e7076de307d9bf7560169d0d5370a))
+* **checklist:** parameterize verify rules via init --var and ${var} interpolation ([32d82ec](https://github.com/IamK77/Skill/commit/32d82ec75c2f5661db7d31571be7a486bb2eff91))
+
+
+### Bug Fixes
+
+* **checklist:** key the active pointer per session so concurrent runs don't clobber ([120d566](https://github.com/IamK77/Skill/commit/120d566c769a4271df6080eecc807913e1119609))
+
 ## [0.4.0](https://github.com/IamK77/Skill/compare/v0.3.0...v0.4.0) (2026-06-18)
 
 
