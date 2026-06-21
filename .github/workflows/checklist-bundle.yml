@@ -1,0 +1,51 @@
+name: checklist-bundle
+
+# Keeps the committed self-carry bundle (devtools/checklist/bundle/checklist.mjs) in sync with its
+# source — the same way touchstone-artifacts keeps the claude.ai artifacts in sync. The bundle is
+# committed (so a clone / the shipped plugin carries the gate with no install and no node_modules);
+# a hand-edited source would otherwise leave a STALE bundle that silently runs an old gate. This
+# rebuilds it on every push that touches the checklist source and commits the result back only if
+# it changed. esbuild (a dev dep) inlines commander/gray-matter/js-yaml; a broken build fails the
+# job rather than committing a bad bundle.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'devtools/checklist/src/**'
+      - 'devtools/checklist/scripts/bundle.mjs'
+      - 'devtools/checklist/package.json'
+      - 'devtools/checklist/package-lock.json'
+      - '.github/workflows/checklist-bundle.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: checklist-bundle-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Rebuild the self-carry bundle from source
+        run: |
+          cd devtools/checklist
+          npm ci
+          npm run bundle
+      - name: Commit back if the bundle changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add devtools/checklist/bundle/checklist.mjs
+          if git diff --cached --quiet; then
+            echo "bundle already up to date — nothing to commit"
+          else
+            git commit -m "chore(checklist): rebuild self-carry bundle [skip ci]"
+            git push
+          fi
