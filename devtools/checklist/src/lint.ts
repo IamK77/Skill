@@ -355,6 +355,17 @@ interface SkillCommand {
 const CHECK_RE = /\bchecklist\s+check\s+([^\s`]+)\s+([^\s`]+)/g;
 const VERIFY_RE = /\bchecklist\s+verify\s+([^\s`]+)/g;
 
+// A captured phase/item token may carry trailing sentence or markdown punctuation
+// when a command is written in prose ("...check charter motivation." or wrapped in
+// "(…)"), because the token pattern stops only at whitespace/backtick. Phase names
+// and check ids are kebab-case ([a-z0-9-]) and never end in punctuation, so trimming
+// a trailing run of .,;:!?)]}> recovers the real token and avoids a spurious
+// parity/unknown-* false positive — without suppressing a genuine typo, which is
+// still wrong after trimming (assay finding C).
+function trimToken(token: string): string {
+  return token.replace(/[.,;:!?)\]}>]+$/, '');
+}
+
 function extractSkillCommands(text: string): SkillCommand[] {
   const commands: SkillCommand[] = [];
   const lines = text.split('\n');
@@ -365,12 +376,12 @@ function extractSkillCommands(text: string): SkillCommand[] {
     // Reset lastIndex defensively — these regexes are module-level + /g.
     CHECK_RE.lastIndex = 0;
     while ((m = CHECK_RE.exec(line)) !== null) {
-      commands.push({ kind: 'check', phase: m[1], itemId: m[2], line: lineNo });
+      commands.push({ kind: 'check', phase: trimToken(m[1]), itemId: trimToken(m[2]), line: lineNo });
     }
 
     VERIFY_RE.lastIndex = 0;
     while ((m = VERIFY_RE.exec(line)) !== null) {
-      commands.push({ kind: 'verify', phase: m[1], line: lineNo });
+      commands.push({ kind: 'verify', phase: trimToken(m[1]), line: lineNo });
     }
   });
   return commands;
