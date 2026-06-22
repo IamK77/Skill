@@ -9918,12 +9918,13 @@ function formatReport(events, config) {
   }
   lines.push("| time (UTC) | event | phase | check | status | evidence / detail |");
   lines.push("| --- | --- | --- | --- | --- | --- |");
+  const cell = (s) => s.replace(/\|/g, "\\|").replace(/\n/g, " ");
   for (const e of events) {
     const mark = STATUS_MARK[e.status] ?? e.status;
-    const phase = e.kind === "reset" ? "\u2014" : `${e.phaseIndex} (${e.phaseName})`;
-    const check = e.kind === "reset" ? "\u2014" : e.itemId;
-    const detail = (e.evidence ?? e.message ?? "").replace(/\|/g, "\\|").replace(/\n/g, " ");
-    lines.push(`| ${e.ts} | ${e.kind} | ${phase} | ${check} | ${mark} | ${detail} |`);
+    const phase = e.kind === "reset" ? "\u2014" : `${e.phaseIndex} (${cell(e.phaseName)})`;
+    const check = e.kind === "reset" ? "\u2014" : cell(e.itemId);
+    const detail = cell(e.evidence ?? e.message ?? "");
+    lines.push(`| ${cell(e.ts)} | ${e.kind} | ${phase} | ${check} | ${mark} | ${detail} |`);
   }
   lines.push("");
   lines.push("> The journal proves what was recorded and when; manual checks are still");
