@@ -64,9 +64,17 @@ export function interpolate(template: string, vars: VerifyVars): string {
       const close = template.indexOf('}', i + 2);
       const name = close === -1 ? '' : template.slice(i + 2, close);
       if (close !== -1 && /^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) {
+        // Read the env fallback as an OWN property only. A bare `process.env[name]`
+        // resolves INHERITED Object.prototype members for prototype-key names
+        // (`__proto__`, `constructor`, `toString`, …) — each is `!== undefined`, so
+        // the guard below was bypassed and the object/function was stringified into
+        // the command. A prototype key is not a real environment variable, so it
+        // must hit the undefined-variable error like any other unset name (assay R3).
         const value = Object.prototype.hasOwnProperty.call(vars, name)
           ? vars[name]
-          : process.env[name];
+          : Object.prototype.hasOwnProperty.call(process.env, name)
+            ? process.env[name]
+            : undefined;
         if (value === undefined) {
           throw new UndefinedVarError(name);
         }

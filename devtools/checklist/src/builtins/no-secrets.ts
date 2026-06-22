@@ -24,7 +24,19 @@ const ASSIGNMENT_PATTERNS: Array<{ name: string; re: RegExp }> = [
 const PLACEHOLDER_RE = /^(?:[<{].*[>}]|\.{3,}|x{3,}|your[_-]|my[_-]|changeme|placeholder|replace|example|todo|\$\{|env\.|process\.env)/i;
 
 function isPlaceholder(value: string): boolean {
-  return PLACEHOLDER_RE.test(value) || /^[A-Z][A-Z0-9_]+$/.test(value); // ALL_CAPS_PLACEHOLDER
+  if (PLACEHOLDER_RE.test(value)) return true;
+  // ALL_CAPS_PLACEHOLDER — a YOUR_TOKEN / ALL_CAPS_VALUE style doc placeholder.
+  // The old blanket /^[A-Z][A-Z0-9_]+$/ also swallowed a whole class of REAL
+  // all-caps secrets (base32 tokens, upper-hex, some cloud secrets), so a committed
+  // secret of that shape passed the scan silently (assay R2). Keep the exemption
+  // only for values that actually look word-like: a WORD_WORD form (carries an
+  // underscore) or a plain CAPS word (no digits). A high-entropy all-caps value
+  // that MIXES letters and digits with NO separating underscore is token-shaped,
+  // not a placeholder, and is no longer exempted.
+  if (/^[A-Z][A-Z0-9_]*$/.test(value)) {
+    return value.includes('_') || !/[0-9]/.test(value);
+  }
+  return false;
 }
 
 export async function noSecretsCheck(targetPath: string): Promise<CheckResult> {

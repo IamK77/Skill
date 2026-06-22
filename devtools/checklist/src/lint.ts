@@ -277,6 +277,32 @@ function lintChecklistSchema(ymlPath: string, diags: LintDiagnostic[]): SchemaPa
         }
       }
 
+      // evidence (optional) mirrors loader.ts: the only legal value is the literal
+      // "required", and it may never co-exist with a `verify` rule (a mechanical
+      // check is cleared by `checklist verify`, never by `check --evidence`, so the
+      // combination is unsatisfiable). lint must reject both, or it certifies a
+      // .checklist.yml that loadChecklist throws on at runtime — a false "OK" from
+      // the authoring gate. (assay R1: lint must be a superset of loader validation.)
+      if (check.evidence !== undefined) {
+        if (check.evidence !== 'required') {
+          diags.push({
+            file: ymlPath,
+            severity: 'error',
+            rule: 'schema/evidence-invalid-value',
+            message: `phase ${phaseLabel}, check ${checkLabel}: "evidence" may only be the string "required", got ${describeType(check.evidence)}`,
+            fix: 'use `evidence: required` for a manual check that must cite a basis, or remove the key',
+          });
+        } else if (check.verify !== undefined) {
+          diags.push({
+            file: ymlPath,
+            severity: 'error',
+            rule: 'schema/evidence-with-verify',
+            message: `phase ${phaseLabel}, check ${checkLabel}: "evidence: required" is for manual checks, but this check also has a "verify" rule (it is mechanical, cleared by \`checklist verify\`) — the combination can never be satisfied`,
+            fix: 'remove `evidence: required` (mechanical checks need no manual cite), or remove the `verify` rule to make it a manual check',
+          });
+        }
+      }
+
       if (hasId) {
         const id = check.id as string;
         if (seenIds.has(id)) {
