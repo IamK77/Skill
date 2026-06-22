@@ -195,15 +195,21 @@ export function formatReport(events: JournalEvent[], config?: ChecklistConfig): 
   lines.push('| time (UTC) | event | phase | check | status | evidence / detail |');
   lines.push('| --- | --- | --- | --- | --- | --- |');
 
+  // Sanitize EVERY dynamic cell, not just the detail: a `|` injects an extra
+  // column and a newline splits the row, so a phase name or check id (both
+  // unconstrained strings in .checklist.yml) containing either would break the
+  // markdown table. Escape the pipe and flatten newlines uniformly.
+  const cell = (s: string): string => s.replace(/\|/g, '\\|').replace(/\n/g, ' ');
+
   for (const e of events) {
     const mark = STATUS_MARK[e.status] ?? e.status;
-    const phase = e.kind === 'reset' ? '—' : `${e.phaseIndex} (${e.phaseName})`;
-    const check = e.kind === 'reset' ? '—' : e.itemId;
+    const phase = e.kind === 'reset' ? '—' : `${e.phaseIndex} (${cell(e.phaseName)})`;
+    const check = e.kind === 'reset' ? '—' : cell(e.itemId);
     // The evidence string is what an `evidence: required` check was based on;
     // otherwise fall back to the recorded message (the runner output, or
     // "confirmed" for a bare manual check).
-    const detail = (e.evidence ?? e.message ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
-    lines.push(`| ${e.ts} | ${e.kind} | ${phase} | ${check} | ${mark} | ${detail} |`);
+    const detail = cell(e.evidence ?? e.message ?? '');
+    lines.push(`| ${cell(e.ts)} | ${e.kind} | ${phase} | ${check} | ${mark} | ${detail} |`);
   }
 
   lines.push('');
