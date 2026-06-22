@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.2](https://github.com/IamK77/Skill/compare/v0.4.1...v0.4.2) (2026-06-22)
+
+
+### Bug Fixes
+
+* **checklist:** close three latent defects found by assay round 2 ([b249e43](https://github.com/IamK77/Skill/commit/b249e4374088fd9b661ef8d53d72e05e0a534572))
+* **checklist:** close two more latent defects found by assay round 2 ([8241824](https://github.com/IamK77/Skill/commit/82418246f4021e8f53209c4a5fc4ae552d308237))
+* **checklist:** escape every dynamic cell in the report table, not just detail ([9275296](https://github.com/IamK77/Skill/commit/9275296542cc0141f87656583652d33e7b2e6a0e))
+
 ## [0.4.1](https://github.com/IamK77/Skill/compare/v0.4.0...v0.4.1) (2026-06-21)
 
 
