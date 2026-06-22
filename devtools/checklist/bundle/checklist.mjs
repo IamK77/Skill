@@ -10113,7 +10113,11 @@ var ASSIGNMENT_PATTERNS = [
 ];
 var PLACEHOLDER_RE = /^(?:[<{].*[>}]|\.{3,}|x{3,}|your[_-]|my[_-]|changeme|placeholder|replace|example|todo|\$\{|env\.|process\.env)/i;
 function isPlaceholder(value) {
-  return PLACEHOLDER_RE.test(value) || /^[A-Z][A-Z0-9_]+$/.test(value);
+  if (PLACEHOLDER_RE.test(value)) return true;
+  if (/^[A-Z][A-Z0-9_]*$/.test(value)) {
+    return value.includes("_") || !/[0-9]/.test(value);
+  }
+  return false;
 }
 async function noSecretsCheck(targetPath) {
   const filePath = path6.resolve(targetPath, "SKILL.md");
@@ -10205,7 +10209,8 @@ async function lineCountCheck(targetPath) {
     return { status: "fail", message: "SKILL.md not found" };
   }
   const content = fs9.readFileSync(filePath, "utf-8");
-  const count = content.split("\n").length;
+  const text = content.endsWith("\n") ? content.slice(0, -1) : content;
+  const count = text.split("\n").length;
   if (count > MAX_LINES) {
     return { status: "fail", message: `${count} lines, exceeds ${MAX_LINES} limit` };
   }
@@ -10260,7 +10265,7 @@ function interpolate(template, vars) {
       const close = template.indexOf("}", i2 + 2);
       const name = close === -1 ? "" : template.slice(i2 + 2, close);
       if (close !== -1 && /^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) {
-        const value = Object.prototype.hasOwnProperty.call(vars, name) ? vars[name] : process.env[name];
+        const value = Object.prototype.hasOwnProperty.call(vars, name) ? vars[name] : Object.prototype.hasOwnProperty.call(process.env, name) ? process.env[name] : void 0;
         if (value === void 0) {
           throw new UndefinedVarError(name);
         }
@@ -10993,6 +10998,25 @@ function lintChecklistSchema(ymlPath, diags) {
           }
         }
       }
+      if (check.evidence !== void 0) {
+        if (check.evidence !== "required") {
+          diags.push({
+            file: ymlPath,
+            severity: "error",
+            rule: "schema/evidence-invalid-value",
+            message: `phase ${phaseLabel}, check ${checkLabel}: "evidence" may only be the string "required", got ${describeType(check.evidence)}`,
+            fix: "use `evidence: required` for a manual check that must cite a basis, or remove the key"
+          });
+        } else if (check.verify !== void 0) {
+          diags.push({
+            file: ymlPath,
+            severity: "error",
+            rule: "schema/evidence-with-verify",
+            message: `phase ${phaseLabel}, check ${checkLabel}: "evidence: required" is for manual checks, but this check also has a "verify" rule (it is mechanical, cleared by \`checklist verify\`) \u2014 the combination can never be satisfied`,
+            fix: "remove `evidence: required` (mechanical checks need no manual cite), or remove the `verify` rule to make it a manual check"
+          });
+        }
+      }
       if (hasId) {
         const id = check.id;
         if (seenIds.has(id)) {
@@ -11025,6 +11049,9 @@ function truncate(s, n) {
 }
 var CHECK_RE = /\bchecklist\s+check\s+([^\s`]+)\s+([^\s`]+)/g;
 var VERIFY_RE = /\bchecklist\s+verify\s+([^\s`]+)/g;
+function trimToken(token) {
+  return token.replace(/[.,;:!?)\]}>]+$/, "");
+}
 function extractSkillCommands(text) {
   const commands = [];
   const lines = text.split("\n");
@@ -11033,11 +11060,11 @@ function extractSkillCommands(text) {
     let m;
     CHECK_RE.lastIndex = 0;
     while ((m = CHECK_RE.exec(line)) !== null) {
-      commands.push({ kind: "check", phase: m[1], itemId: m[2], line: lineNo });
+      commands.push({ kind: "check", phase: trimToken(m[1]), itemId: trimToken(m[2]), line: lineNo });
     }
     VERIFY_RE.lastIndex = 0;
     while ((m = VERIFY_RE.exec(line)) !== null) {
-      commands.push({ kind: "verify", phase: m[1], line: lineNo });
+      commands.push({ kind: "verify", phase: trimToken(m[1]), line: lineNo });
     }
   });
   return commands;
