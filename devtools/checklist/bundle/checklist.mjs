@@ -9566,6 +9566,7 @@ var safeDump = renamed("safeDump", "dump");
 
 // src/loader.ts
 var CONFIG_FILE = ".checklist.yml";
+var MAX_TIMEOUT_SECONDS = 1800;
 function loadChecklist(dir) {
   const filePath = path.resolve(dir, CONFIG_FILE);
   if (!fs.existsSync(filePath)) {
@@ -9624,11 +9625,26 @@ function loadChecklist(dir) {
         }
         evidenceRequired = true;
       }
+      const timeout = check.timeout;
+      let timeoutMs;
+      if (timeout !== void 0) {
+        if (verify === void 0) {
+          throw new Error(`Phase "${phase.name}", check "${check.id}": "timeout" applies only to a mechanical check; this check has no "verify" rule`);
+        }
+        if (typeof timeout !== "number" || !Number.isFinite(timeout) || timeout <= 0) {
+          throw new Error(`Phase "${phase.name}", check "${check.id}": "timeout" must be a positive number of seconds`);
+        }
+        if (timeout > MAX_TIMEOUT_SECONDS) {
+          throw new Error(`Phase "${phase.name}", check "${check.id}": "timeout" of ${timeout}s exceeds the ${MAX_TIMEOUT_SECONDS}s ceiling (a gate sensor must not run unbounded)`);
+        }
+        timeoutMs = Math.round(timeout * 1e3);
+      }
       return {
         id: check.id,
         description: check.description,
         verify,
-        evidenceRequired
+        evidenceRequired,
+        timeoutMs
       };
     });
     const seenIds = /* @__PURE__ */ new Set();
@@ -10237,7 +10253,7 @@ function listBuiltins() {
 }
 
 // src/runner.ts
-var EXEC_TIMEOUT = 1e4;
+var DEFAULT_EXEC_TIMEOUT = 1e4;
 var BASH = "/bin/bash";
 var PREFIX_MAP = {
   "builtin:": "builtin",
@@ -10297,11 +10313,11 @@ function failureFromExec(e) {
   const detail = (err.stderr || err.message || "command failed").trim();
   return { status: "fail", message: detail };
 }
-async function runShell(command, cwd) {
+async function runShell(command, cwd, timeoutMs) {
   try {
     const stdout = execSync(command, {
       cwd,
-      timeout: EXEC_TIMEOUT,
+      timeout: timeoutMs,
       encoding: "utf-8",
       shell: BASH,
       stdio: ["pipe", "pipe", "pipe"]
@@ -10311,11 +10327,11 @@ async function runShell(command, cwd) {
     return failureFromExec(e);
   }
 }
-async function runScriptFile(scriptPath, cwd) {
+async function runScriptFile(scriptPath, cwd, timeoutMs) {
   try {
     const stdout = execFileSync(BASH, [scriptPath], {
       cwd,
-      timeout: EXEC_TIMEOUT,
+      timeout: timeoutMs,
       encoding: "utf-8",
       stdio: ["pipe", "pipe", "pipe"]
     }).trim();
@@ -10332,8 +10348,8 @@ async function runBuiltin(name, targetPath) {
   }
   return handler(targetPath);
 }
-async function runScript(scriptPath, cwd, explicit) {
-  const base = path10.resolve(cwd);
+async function runScript(scriptPath, containmentBase, execCwd, explicit, timeoutMs) {
+  const base = path10.resolve(containmentBase);
   const resolved = path10.resolve(base, scriptPath);
   const rel = path10.relative(base, resolved);
   if (rel === ".." || rel.startsWith(".." + path10.sep) || path10.isAbsolute(rel)) {
@@ -10355,13 +10371,14 @@ async function runScript(scriptPath, cwd, explicit) {
       message: `script path escapes the checklist dir via symlink: "${scriptPath}" (resolves to "${realResolved}")`
     };
   }
-  return runScriptFile(realResolved, cwd);
+  return runScriptFile(realResolved, execCwd, timeoutMs);
 }
 async function runCheck(item, cwd, targetPath, vars = {}) {
   if (!item.verify) {
     return { item, kind: "manual" };
   }
   const { kind, value, explicit } = classifyVerify(item.verify);
+  const timeoutMs = item.timeoutMs ?? DEFAULT_EXEC_TIMEOUT;
   let result;
   try {
     switch (kind) {
@@ -10370,11 +10387,11 @@ async function runCheck(item, cwd, targetPath, vars = {}) {
         break;
       case "script": {
         const scriptPath = interpolate(value, vars);
-        result = await runScript(scriptPath, cwd, explicit);
+        result = await runScript(scriptPath, cwd, targetPath, explicit, timeoutMs);
         break;
       }
       case "shell":
-        result = await runShell(interpolate(value, vars), cwd);
+        result = await runShell(interpolate(value, vars), targetPath, timeoutMs);
         break;
     }
   } catch (e) {
@@ -11015,6 +11032,33 @@ function lintChecklistSchema(ymlPath, diags) {
             rule: "schema/evidence-with-verify",
             message: `phase ${phaseLabel}, check ${checkLabel}: "evidence: required" is for manual checks, but this check also has a "verify" rule (it is mechanical, cleared by \`checklist verify\`) \u2014 the combination can never be satisfied`,
             fix: "remove `evidence: required` (mechanical checks need no manual cite), or remove the `verify` rule to make it a manual check"
+          });
+        }
+      }
+      if (check.timeout !== void 0) {
+        if (check.verify === void 0) {
+          diags.push({
+            file: ymlPath,
+            severity: "error",
+            rule: "schema/timeout-without-verify",
+            message: `phase ${phaseLabel}, check ${checkLabel}: "timeout" applies only to a mechanical check, but this check has no "verify" rule`,
+            fix: "add a `verify:` rule (a real sensor), or remove the `timeout` key"
+          });
+        } else if (typeof check.timeout !== "number" || !Number.isFinite(check.timeout) || check.timeout <= 0) {
+          diags.push({
+            file: ymlPath,
+            severity: "error",
+            rule: "schema/timeout-not-positive",
+            message: `phase ${phaseLabel}, check ${checkLabel}: "timeout" must be a positive number of seconds, got ${describeType(check.timeout)}`,
+            fix: "set `timeout:` to a positive number, e.g. `timeout: 600`"
+          });
+        } else if (check.timeout > 1800) {
+          diags.push({
+            file: ymlPath,
+            severity: "error",
+            rule: "schema/timeout-too-large",
+            message: `phase ${phaseLabel}, check ${checkLabel}: "timeout" of ${check.timeout}s exceeds the 1800s ceiling (a gate sensor must not run unbounded)`,
+            fix: "lower `timeout:` to 1800 seconds or less"
           });
         }
       }
