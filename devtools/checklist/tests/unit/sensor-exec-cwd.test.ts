@@ -93,4 +93,26 @@ describe('sensor execution targets the project, not the skill dir', () => {
     expect(result.result!.status).toBe('pass');
     expect(result.result!.message).toContain('done');
   });
+
+  // ── per-check timeout on a SCRIPT sensor (the shell path is covered above; the
+  //    script path through runScriptFile was not) ──
+  it('honours timeoutMs for a script: sensor too (short budget fails a slow script)', async () => {
+    // The script FILE lives in the skill dir (containment base); a 200ms budget
+    // cuts off its 1s sleep. Pins that timeoutMs reaches runScriptFile, not only
+    // runShell.
+    const script = path.join(skillDir, 'slow.sh');
+    fs.writeFileSync(script, '#!/bin/bash\nsleep 1\necho done\n', 'utf-8');
+    fs.chmodSync(script, 0o755);
+    const result = await runCheck(item('script:./slow.sh', { timeoutMs: 200 }), skillDir, projectDir);
+    expect(result.result!.status).toBe('fail');
+  });
+
+  it('a script: sensor PASSES under a generous timeoutMs', async () => {
+    const script = path.join(skillDir, 'quick.sh');
+    fs.writeFileSync(script, '#!/bin/bash\nsleep 0.1\necho quick-done\n', 'utf-8');
+    fs.chmodSync(script, 0o755);
+    const result = await runCheck(item('script:./quick.sh', { timeoutMs: 5000 }), skillDir, projectDir);
+    expect(result.result!.status).toBe('pass');
+    expect(result.result!.message).toContain('quick-done');
+  });
 });
