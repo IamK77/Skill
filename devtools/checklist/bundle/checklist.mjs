@@ -11303,7 +11303,7 @@ function lintCommand(pathArg, options2) {
 }
 
 // src/index.ts
-var bundledVersion = true ? "0.4.2" : "";
+var bundledVersion = true ? "0.4.3" : "";
 var version = bundledVersion || JSON.parse(readFileSync13(join6(__dirname, "..", "package.json"), "utf8")).version;
 var program2 = new Command().name("checklist").description("Flight checklist CLI for Claude Code skills").version(version);
 var DIR_OPT = ["-d, --dir <dir>", "Directory containing .checklist.yml"];
