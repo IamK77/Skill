@@ -5,7 +5,8 @@ description: >
   skill(s) in the right order — or say plainly when no skill is warranted.
   The dispatcher / front door for the ten engineering skills (groundwork,
   load-bearing, gauge, assay, flightline, stationkeeping, husbandry, plumb,
-  aegis, gungnir). Use when you don't know which skill fits, suspect several
+  aegis, gungnir) plus lite, the one-pass flow for small projects. Use when
+  you don't know which skill fits, suspect several
   apply in sequence, want a plan for a piece of engineering work, or aren't
   sure a skill is needed at all. Triggers on "which skill should I use",
   "where do I start", "what's the right process for X", "help me plan this
@@ -103,6 +104,7 @@ A starting map; the depth and the edge cases are in [references/suite-map.md](re
 
 | The user says… | Route to |
 |---|---|
+| "write me a script / small CLI / quick tool / prototype" (small thing, end-to-end) | **lite** — the whole lifecycle in one lean pass; escalate a stage to its full skill if it turns high-stakes |
 | "add a feature / build X / what should this do" (vague goal) | **groundwork** first (pin the need), then the chain |
 | "design the architecture / monolith or microservices / data model / API" | **load-bearing** |
 | "what stack / which database / which framework" | **load-bearing** (tech selection) |

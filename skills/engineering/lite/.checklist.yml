@@ -1,0 +1,43 @@
+# Flight checklist for the lite skill — 6 lean stages, hard GATEs.
+# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>).
+# The STAGE 0-5 headings in SKILL.md (Frame, Shape, Build, Prove, Harden, Ship)
+# map one-to-one, in order, to the phase entries below. One light pass of each
+# engineering discipline — escalate a stage to its full skill when stakes rise.
+phases:
+  - name: frame
+    checks:
+      - id: need-and-scope
+        description: "Real need named (not the literal ask); 2–5 Must-haves each with a one-line done-test; out-of-scope written down; confirmed with the user (or, design-only, against the written spec, with high-blast unknowns parked as named open questions)"
+
+  - name: shape
+    checks:
+      - id: design-decided
+        description: "Smallest viable structure + stack chosen; the few boundaries/contracts named (inputs, outputs, error shape); core data model sketched; the one or two expensive-to-reverse decisions flagged and thought through"
+
+  - name: build
+    checks:
+      - id: built-clean
+        description: "Must-haves implemented (nothing out of scope); small single-purpose functions with honest names; every untrusted input validated/typed at its boundary; failures loud and legible (no swallowed errors); no obvious smells; no secrets in source"
+
+  - name: prove
+    checks:
+      - id: tests-meaningful
+        description: "Risky parts (core logic, boundaries, error paths) tested, each with a real oracle (the correct answer from a spec/worked example, not whatever the code returns today); at least one test proven to go RED on a deliberate break, so the green has teeth"
+      # Independent-verification SENSOR (not self-certified): the gate runs the
+      # project's real test command and clears only on exit 0. Drive it with
+      # `TEST_CMD="<cmd>" checklist verify prove` (or capture at init via
+      # `--var TEST_CMD="<cmd>"`). Runs in the project, not the skill dir.
+      - id: tests-green
+        description: The full suite passes (no regressions) — verified by actually running ${TEST_CMD}, not self-certified
+        verify: "shell:${TEST_CMD}"
+        timeout: 900
+
+  - name: harden
+    checks:
+      - id: security-floor
+        description: "Security floor walked once: authn/authz on every entry point that needs it; untrusted input validated and encoded on output (parameterized SQL, escaped HTML/shell); least privilege on tokens/DB/files; no secrets in repo or logs; known-vulnerable dependencies updated. Escalate to aegis/gungnir if money, PII, or untrusted users are in play"
+
+  - name: ship
+    checks:
+      - id: shippable
+        description: "Committed in small message-bearing commits with secrets git-ignored and a run-it README line; CI runs the test suite on push; one documented command to deploy and one to roll back; minimal logging/health to tell if it works; deferred debt and residual risk written down for whoever inherits it"
