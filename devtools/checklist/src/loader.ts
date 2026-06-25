@@ -5,6 +5,11 @@ import type { ChecklistConfig, Phase, CheckItem } from './types.js';
 
 const CONFIG_FILE = '.checklist.yml';
 
+// Ceiling for a per-check sensor `timeout` (seconds). Generous enough for a real
+// project's full test suite / build / scan, but bounded so a gate sensor can
+// never hang the agent indefinitely. 30 minutes.
+const MAX_TIMEOUT_SECONDS = 1800;
+
 export function loadChecklist(dir: string): ChecklistConfig {
   const filePath = path.resolve(dir, CONFIG_FILE);
 
@@ -90,11 +95,33 @@ export function loadChecklist(dir: string): ChecklistConfig {
         }
         evidenceRequired = true;
       }
+      // Per-item sensor timeout in SECONDS. Only meaningful for a mechanical
+      // shell:/script: sensor that runs a real command (a builtin is fast and
+      // in-process; a manual check runs nothing). Validated at the parse
+      // boundary with the same refuse-to-load posture as everything above: it
+      // must be a positive, finite number within a sane ceiling, and it cannot
+      // ride on a check that has no `verify` rule (there would be nothing to
+      // time — silently ignoring it would hide a config mistake).
+      const timeout = check.timeout;
+      let timeoutMs: number | undefined;
+      if (timeout !== undefined) {
+        if (verify === undefined) {
+          throw new Error(`Phase "${phase.name}", check "${check.id}": "timeout" applies only to a mechanical check; this check has no "verify" rule`);
+        }
+        if (typeof timeout !== 'number' || !Number.isFinite(timeout) || timeout <= 0) {
+          throw new Error(`Phase "${phase.name}", check "${check.id}": "timeout" must be a positive number of seconds`);
+        }
+        if (timeout > MAX_TIMEOUT_SECONDS) {
+          throw new Error(`Phase "${phase.name}", check "${check.id}": "timeout" of ${timeout}s exceeds the ${MAX_TIMEOUT_SECONDS}s ceiling (a gate sensor must not run unbounded)`);
+        }
+        timeoutMs = Math.round(timeout * 1000);
+      }
       return {
         id: check.id,
         description: check.description,
         verify,
         evidenceRequired,
+        timeoutMs,
       };
     });
 

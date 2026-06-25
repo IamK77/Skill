@@ -6,7 +6,10 @@ import type { CheckItem, CheckItemResult, CheckResult } from './types.js';
 
 type VerifyKind = 'shell' | 'builtin' | 'script';
 
-const EXEC_TIMEOUT = 10_000;
+// Default sensor timeout when a check does not set its own `timeout:`. Tuned for
+// the fast in-process builtins and trivial shell probes; a real test/build/scan
+// sensor overrides it per-check (loader caps the override at 30 min).
+const DEFAULT_EXEC_TIMEOUT = 10_000;
 const BASH = '/bin/bash';
 
 const PREFIX_MAP: Record<string, VerifyKind> = {
@@ -110,11 +113,11 @@ function failureFromExec(e: unknown): CheckResult {
   return { status: 'fail', message: detail };
 }
 
-async function runShell(command: string, cwd: string): Promise<CheckResult> {
+async function runShell(command: string, cwd: string, timeoutMs: number): Promise<CheckResult> {
   try {
     const stdout = execSync(command, {
       cwd,
-      timeout: EXEC_TIMEOUT,
+      timeout: timeoutMs,
       encoding: 'utf-8',
       shell: BASH,
       stdio: ['pipe', 'pipe', 'pipe'],
@@ -129,11 +132,11 @@ async function runShell(command: string, cwd: string): Promise<CheckResult> {
 // element to bash — NOT interpolated into a shell command string — so paths
 // containing spaces or shell metacharacters are executed verbatim instead of
 // being word-split or interpreted.
-async function runScriptFile(scriptPath: string, cwd: string): Promise<CheckResult> {
+async function runScriptFile(scriptPath: string, cwd: string, timeoutMs: number): Promise<CheckResult> {
   try {
     const stdout = execFileSync(BASH, [scriptPath], {
       cwd,
-      timeout: EXEC_TIMEOUT,
+      timeout: timeoutMs,
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'pipe'],
     }).trim();
@@ -152,14 +155,23 @@ async function runBuiltin(name: string, targetPath: string): Promise<CheckResult
   return handler(targetPath);
 }
 
-async function runScript(scriptPath: string, cwd: string, explicit: boolean): Promise<CheckResult> {
-  const base = path.resolve(cwd);
+async function runScript(
+  scriptPath: string,
+  containmentBase: string,
+  execCwd: string,
+  explicit: boolean,
+  timeoutMs: number,
+): Promise<CheckResult> {
+  const base = path.resolve(containmentBase);
   const resolved = path.resolve(base, scriptPath);
   const rel = path.relative(base, resolved);
-  // Containment: the script must live inside the checklist dir. Absolute paths
-  // are fine as long as they resolve within `base`; escapes (`..`, other roots)
-  // are rejected to prevent a malicious .checklist.yml from executing arbitrary
-  // files elsewhere on disk.
+  // Containment: the script FILE must live inside the checklist (skill) dir.
+  // Absolute paths are fine as long as they resolve within `base`; escapes
+  // (`..`, other roots) are rejected to prevent a malicious .checklist.yml from
+  // executing arbitrary files elsewhere on disk. NB: containment is anchored to
+  // the skill dir (where the vetted script ships), but the script EXECUTES with
+  // `execCwd` = the project under review — a trusted sensor operating on the
+  // untrusted project, not on its own install dir.
   if (rel === '..' || rel.startsWith('..' + path.sep) || path.isAbsolute(rel)) {
     return {
       status: 'error',
@@ -187,7 +199,7 @@ async function runScript(scriptPath: string, cwd: string, explicit: boolean): Pr
     };
   }
 
-  return runScriptFile(realResolved, cwd);
+  return runScriptFile(realResolved, execCwd, timeoutMs);
 }
 
 export async function runCheck(
@@ -201,6 +213,10 @@ export async function runCheck(
   }
 
   const { kind, value, explicit } = classifyVerify(item.verify);
+  // A real sensor (run the suite, build, scan) runs against the PROJECT and may
+  // need minutes; builtins/manual checks ignore this. `cwd` is the skill dir
+  // (script containment base); `targetPath` is the project the sensor inspects.
+  const timeoutMs = item.timeoutMs ?? DEFAULT_EXEC_TIMEOUT;
   let result: CheckResult;
 
   try {
@@ -214,11 +230,11 @@ export async function runCheck(
         // can supply part of a script path, but the vetted real path is still
         // what gets executed, so an interpolated value cannot escape the dir.
         const scriptPath = interpolate(value, vars);
-        result = await runScript(scriptPath, cwd, explicit);
+        result = await runScript(scriptPath, cwd, targetPath, explicit, timeoutMs);
         break;
       }
       case 'shell':
-        result = await runShell(interpolate(value, vars), cwd);
+        result = await runShell(interpolate(value, vars), targetPath, timeoutMs);
         break;
     }
   } catch (e) {

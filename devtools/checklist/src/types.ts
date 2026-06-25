@@ -8,6 +8,13 @@ export interface CheckItem {
   // file:line, a command-output snippet, an artifact path) rather than a bare
   // "confirmed" — it does NOT verify the evidence is real, only that one exists.
   evidenceRequired?: boolean;
+  // Per-item override for how long a mechanical (shell:/script:) sensor may run,
+  // in milliseconds. Set by the loader from `timeout: <seconds>` in the
+  // .checklist.yml. Absent means the runner's default (10s). It exists because a
+  // real independent-verification sensor — running a project's actual test
+  // suite, build, or scan — routinely needs minutes, far past the 10s default
+  // tuned for the fast in-process builtins. Ignored by builtin/manual checks.
+  timeoutMs?: number;
 }
 
 export interface Phase {
