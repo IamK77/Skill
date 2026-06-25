@@ -31,6 +31,13 @@ phases:
         description: "Security testing automated into the pipeline as BLOCKING gates run every commit — SAST (static source analysis), DAST (dynamic scan of the running app), and SCA (dependency/supply-chain scanning), plus fuzzing where input handling is critical — because a vulnerability is invisible to a functional test and a green-optimizing agent never seeks it; advisory scans an agent can ignore are not gates"
       - id: vuln-classes-defended
         description: "The OWASP Top 10 walked as a verification checklist (OWASP ASVS is the standard form): for each class, the defense confirmed to EXIST and be TESTED; and the adversarial half explicitly handed to the gungnir skill — automated scanning finds known patterns but does not chain small flaws into a real exploit or abuse business logic, so penetration testing (gungnir) is required to actually prove the system; scanning is necessary, not sufficient"
+      # Independent-verification SENSOR for the SCA half of security-testing-gated:
+      # the dependency/supply-chain scan actually exits 0 on the project. The
+      # SAST/DAST-gated and OWASP-walked judgment stays manual above.
+      - id: dependency-scan-clean
+        description: The dependency/supply-chain scan runs clean on the project — verified by actually running ${SCA_CMD} (e.g. npm audit --audit-level=high / pip-audit / cargo audit / osv-scanner), not self-certified
+        verify: "shell:${SCA_CMD}"
+        timeout: 300
 
   - name: operate
     checks:

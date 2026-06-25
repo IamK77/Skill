@@ -79,7 +79,7 @@ Open **[references/feedback-sources.md](references/feedback-sources.md)** and th
 
 ### GATE — clear before STAGE 2
 1. `checklist check static static-layer`
-2. `checklist verify static`
+2. `TYPECHECK_CMD="<your strict type-check command>" checklist verify static` — `static-checker-green` is a **sensor**, not a self-certified check: `verify` runs `${TYPECHECK_CMD}` (e.g. `tsc --noEmit`, `mypy --strict`, `pyright`) in the project and clears only if it exits 0. A green you only claim does not count.
 
 ---
 
