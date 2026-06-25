@@ -131,10 +131,9 @@ Write the cases and run them. Build determinism in **by construction** — injec
 **Don't write the agent's default bad test.** As you write, steer clear of the degenerate patterns in [references/agent-test-smells.md](references/agent-test-smells.md): a test with no real assertion, a wall of mocks that stays green while the real integration is broken, a test bound to *how* the code works rather than *what* it does, and the copy-pasted near-duplicate a parameterized case should replace. Each test fails for exactly one real reason and reads as documentation.
 
 ### GATE — clear before BITE
-1. `checklist check build tests-green`
-2. `checklist check build hermetic-and-deterministic`
-3. `checklist check build language-norms-applied`
-4. `checklist verify build`
+1. `checklist check build hermetic-and-deterministic`
+2. `checklist check build language-norms-applied`
+3. `TEST_CMD="<the project's full test command>" checklist verify build` — `tests-green` is a **sensor**, not a self-certified check: `verify` runs `${TEST_CMD}` in the project and the gate clears only if the suite actually exits 0. (`checklist check build tests-green` is rejected — a mechanical check is cleared by `verify`, never by hand.) If the suite is red, the gate stays shut; fix the tests or the code, do not route around it.
 
 ---
 

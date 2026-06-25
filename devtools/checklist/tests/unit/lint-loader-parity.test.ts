@@ -93,6 +93,38 @@ const loaderRejected: Array<[string, string]> = [
         evidence: true
 `,
   ],
+  [
+    'timeout on a manual check (no verify rule to time)',
+    `phases:
+  - name: p
+    checks:
+      - id: c1
+        description: d
+        timeout: 60
+`,
+  ],
+  [
+    'timeout that is not a positive number (zero)',
+    `phases:
+  - name: p
+    checks:
+      - id: c1
+        description: d
+        verify: shell:true
+        timeout: 0
+`,
+  ],
+  [
+    'timeout above the 1800s ceiling',
+    `phases:
+  - name: p
+    checks:
+      - id: c1
+        description: d
+        verify: shell:true
+        timeout: 3600
+`,
+  ],
 ];
 
 describe('lint is a superset of the loader: every loader-rejected config lints as error', () => {
@@ -127,6 +159,19 @@ describe('lint does not regress on configs the loader ACCEPTS (no new false posi
       - id: c1
         description: d
         verify: shell:true
+`);
+    expect(loaderThrows()).toBe(false);
+    expect(lintErrorRules()).toEqual([]);
+  });
+
+  it('a mechanical check with a valid timeout loads and lints clean', () => {
+    write(`phases:
+  - name: p
+    checks:
+      - id: c1
+        description: d
+        verify: shell:true
+        timeout: 600
 `);
     expect(loaderThrows()).toBe(false);
     expect(lintErrorRules()).toEqual([]);

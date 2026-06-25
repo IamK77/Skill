@@ -87,7 +87,7 @@ Open **[references/code-style.md](references/code-style.md)**. Consistent style 
 
 ### GATE — clear before STAGE 3
 1. `checklist check code-style format-and-lint-enforced`
-2. `checklist verify code-style`
+2. `LINT_CMD="<your format+lint command>" checklist verify code-style` — `lint-green` is a **sensor**: `verify` runs `${LINT_CMD}` (e.g. `eslint .`, `ruff check`, `gofmt -l`) in the project and clears only if it exits 0.
 
 ---
 

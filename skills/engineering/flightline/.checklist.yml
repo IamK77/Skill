@@ -19,6 +19,13 @@ phases:
     checks:
       - id: format-and-lint-enforced
         description: "Formatter + linter run automatically at pre-commit and in CI (not by goodwill); format is delegated to the machine so human review attention is reserved for logic, and the linter is treated as the first automated reviewer of agent output (unused vars, unhandled promises, type errors); the team picks one ruleset and stops debating it"
+      # Independent-verification SENSOR for the mechanical half: the formatter/
+      # linter actually exits 0 on the project NOW. The "wired into CI/pre-commit"
+      # judgment stays manual above.
+      - id: lint-green
+        description: The formatter/linter runs clean on the project — verified by actually running ${LINT_CMD} (e.g. eslint . / ruff check / gofmt -l), not self-certified
+        verify: "shell:${LINT_CMD}"
+        timeout: 300
 
   - name: code-review
     checks:

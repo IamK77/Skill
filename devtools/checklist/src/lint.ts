@@ -303,6 +303,39 @@ function lintChecklistSchema(ymlPath: string, diags: LintDiagnostic[]): SchemaPa
         }
       }
 
+      // timeout (optional) mirrors loader.ts: a positive, finite number of
+      // seconds within the 1800s ceiling, and ONLY on a mechanical check (one
+      // with a `verify` rule) — there is nothing to time on a manual check. lint
+      // must reject every shape loadChecklist throws on, or the authoring gate
+      // certifies a file that crashes at runtime (assay R1: lint ⊇ loader).
+      if (check.timeout !== undefined) {
+        if (check.verify === undefined) {
+          diags.push({
+            file: ymlPath,
+            severity: 'error',
+            rule: 'schema/timeout-without-verify',
+            message: `phase ${phaseLabel}, check ${checkLabel}: "timeout" applies only to a mechanical check, but this check has no "verify" rule`,
+            fix: 'add a `verify:` rule (a real sensor), or remove the `timeout` key',
+          });
+        } else if (typeof check.timeout !== 'number' || !Number.isFinite(check.timeout) || check.timeout <= 0) {
+          diags.push({
+            file: ymlPath,
+            severity: 'error',
+            rule: 'schema/timeout-not-positive',
+            message: `phase ${phaseLabel}, check ${checkLabel}: "timeout" must be a positive number of seconds, got ${describeType(check.timeout)}`,
+            fix: 'set `timeout:` to a positive number, e.g. `timeout: 600`',
+          });
+        } else if (check.timeout > 1800) {
+          diags.push({
+            file: ymlPath,
+            severity: 'error',
+            rule: 'schema/timeout-too-large',
+            message: `phase ${phaseLabel}, check ${checkLabel}: "timeout" of ${check.timeout}s exceeds the 1800s ceiling (a gate sensor must not run unbounded)`,
+            fix: 'lower `timeout:` to 1800 seconds or less',
+          });
+        }
+      }
+
       if (hasId) {
         const id = check.id as string;
         if (seenIds.has(id)) {

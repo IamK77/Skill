@@ -12,6 +12,13 @@ phases:
     checks:
       - id: static-layer
         description: "The static checker runs in strict mode AND is gated (pyright/mypy/tsc strict); data is modeled as typed records not untyped bags (dict[str,Any]/any); failure modes are put in signatures (errors-as-values where it pays) rather than an untyped throw the checker can't see; closed unions are matched exhaustively (checker errors on a missing case) and non-null is narrowed before use"
+      # Independent-verification SENSOR for the mechanical half of static-layer:
+      # the strict checker actually exits 0 on the project. The design judgment
+      # (typed records, errors-as-values, exhaustive unions) stays manual above.
+      - id: static-checker-green
+        description: The strict static checker runs clean on the project — verified by actually running ${TYPECHECK_CMD} (e.g. tsc --noEmit / mypy --strict / pyright), not self-certified
+        verify: "shell:${TYPECHECK_CMD}"
+        timeout: 300
 
   - name: boundary
     checks:

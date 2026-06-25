@@ -124,7 +124,7 @@ Open **[references/security-testing-and-gates.md](references/security-testing-an
 ### GATE — clear before OPERATE
 1. `checklist check verify security-testing-gated`
 2. `checklist check verify vuln-classes-defended`
-3. `checklist verify verify`
+3. `SCA_CMD="<your dependency/supply-chain scan>" checklist verify verify` — `dependency-scan-clean` is a **sensor**: `verify` runs `${SCA_CMD}` (e.g. `npm audit --audit-level=high`, `pip-audit`, `cargo audit`) in the project and clears only if it exits 0.
 
 ---
 

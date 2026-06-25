@@ -34,8 +34,16 @@ phases:
 
   - name: build
     checks:
+      # Independent-verification SENSOR (not a self-certified manual check): the
+      # gate runs the project's real test command and only clears if it exits 0.
+      # Supply the command at the BUILD gate — `TEST_CMD="<cmd>" checklist verify
+      # build` — or capture it at init: `checklist init … --var TEST_CMD="<cmd>"`.
+      # The command runs in the project (the dir you invoked the skill from), not
+      # the skill's install dir; timeout is generous for a full suite.
       - id: tests-green
-        description: Tests written and the full suite passes (no regressions)
+        description: Tests written and the full suite passes (no regressions) — verified by actually running ${TEST_CMD}, not self-certified
+        verify: "shell:${TEST_CMD}"
+        timeout: 900
       - id: hermetic-and-deterministic
         description: "Tests are hermetic and deterministic: time / randomness / concurrency / iteration order / I-O controlled; no order dependence"
       - id: language-norms-applied
