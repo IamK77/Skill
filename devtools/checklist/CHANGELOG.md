@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.3](https://github.com/IamK77/Skill/compare/v0.4.2...v0.4.3) (2026-06-25)
+
+
+### Features
+
+* **checklist:** independent-verification sensors (project-rooted exec + per-check timeout) ([3fef00d](https://github.com/IamK77/Skill/commit/3fef00dbe81881117bc208564bdf9cacfa610f10))
+* **checklist:** sensors run in the project with a per-check timeout ([1bb657a](https://github.com/IamK77/Skill/commit/1bb657ac0635fb4ff1fe84b7b1e46f90fd45b559))
+
 ## [0.4.2](https://github.com/IamK77/Skill/compare/v0.4.1...v0.4.2) (2026-06-22)
 
 
