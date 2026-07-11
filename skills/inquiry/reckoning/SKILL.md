@@ -58,6 +58,7 @@ Open **[references/why-audit-not-celebrate.md](references/why-audit-not-celebrat
 
 - **Run the mechanical pre-read audit — hand it to the agent.** Before reading who won: is task completion 100%; are failures **concentrated** in some method × instance cell (concentration is itself a finding); is every row's version tag consistent across the table; do the key magnitudes match exploration and the pilot. Skipping this and celebrating — then finding during writing that a column came from a silent bug — is the most classic tragedy of a research career.
 - **Treat every surprising number as a bug first.** A too-good result, an outlier, anything surprising: the **first hypothesis is an implementation error, an infeasible solution that slipped the check, or a mis-specified instance** — *not* a genius result. Only after a number survives that suspicion is it allowed to be exciting. (This is the analysis-side echo of forge's independent feasibility checker.)
+- **Lab hardening — count from the ledger, not the filesystem.** With inquiry-lab wired (see the `lab` skill), the pre-read audit starts at the server: `audit_list` replays every submission, lease, heartbeat and completion with actor and causal parent; failed observations are undeletable; and sealing evidence later will refuse any expected-run gap or version mixing — so "task completion 100%" is checked against the lab's accounting, not a directory listing.
 
 ### GATE — clear before DISTRIBUTION
 1. `checklist check audit count-before-read`
