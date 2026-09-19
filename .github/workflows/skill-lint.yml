@@ -1,24 +1,15 @@
 name: skill-lint
 
-# Repo-wide frontmatter guard for EVERY skill in EVERY suite: enforces the
-# platform's hard limit — an Agent Skill's `description` must be <= 1024 chars,
-# or the loader silently truncates it and breaks skill discovery. Suite-agnostic
-# (atelier.yml owns atelier's gate-integrity checks); this one only guards the
-# limit so an over-long description can never land on main unnoticed again.
-
+# Shared type-aware contract plus real YAML/command parity across all suites.
 on:
   push:
     branches: [main]
-    paths: ['skills/**', 'devtools/skill-lint.py', '.github/workflows/skill-lint.yml']
+    paths: ['.claude-plugin/**', 'skills/**', 'devtools/skill*', 'devtools/test_skill_lint.py', 'devtools/checklist/**', '.github/workflows/skill-lint.yml']
   pull_request:
-    paths: ['skills/**', 'devtools/skill-lint.py', '.github/workflows/skill-lint.yml']
+    paths: ['.claude-plugin/**', 'skills/**', 'devtools/skill*', 'devtools/test_skill_lint.py', 'devtools/checklist/**', '.github/workflows/skill-lint.yml']
 
 permissions:
   contents: read
-
-concurrency:
-  group: skill-lint-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   lint:
@@ -28,5 +19,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-      - name: description-length / frontmatter guard
-        run: python3 devtools/skill-lint.py
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - run: python3 devtools/skill-lint.py
+      - run: python3 -m unittest discover -s devtools -p 'test_skill_lint.py'
+      - run: npm ci
+        working-directory: devtools/checklist
+      - run: npm run build
+        working-directory: devtools/checklist
+      - run: node devtools/checklist/dist/index.js lint skills --strict

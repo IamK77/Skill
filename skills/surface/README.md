@@ -1,21 +1,29 @@
-# The surface suite
+# surface
 
-Where the other suites are deliberately domain-agnostic, the **surface** suite is the first vertical: building a modern **frontend** from 0 to 1. It exists because frontend is the one discipline whose "correct" is not checked against a document — its benchmark is a human nervous system (16ms is a fusion threshold, 100ms is "I touched it directly"), so **taste is load-bearing and cannot be outsourced**, and as the agent writes the code the leverage migrates from the keyboard to the membrane between machine and mind: *which boundary, whose source of truth, what causal story forms in the user's head, and whose interest the optimizer serves.* Eight gated lenses run the build lifecycle, each handing the next a concrete artifact, with three principles threaded through all of them — **boundaries > frameworks**, **allocate caution by reversibility** (one-way vs two-way doors), and **the source of truth lives in the user's mind, not the database**. An un-gated navigator, **pilot**, sits in front of the eight and routes a task to the right *entry stage* — most frontend work isn't greenfield — or out to a sibling suite when the real need is general engineering, distributed correctness, or library choice.
+Frontend architecture and visual exploration alongside SOPs for a walking skeleton, robust interactions, tests, observation, and maintenance.
 
-| Skill | Lifecycle role | Stages |
-|-------|----------------|:------:|
-| [**`pilot`**](pilot/SKILL.md) | Navigator (un-gated front door) — route a frontend task to the right entry stage, or to a sibling suite | — |
-| [**`bearings`**](bearings/SKILL.md) | Before the first line — model the mind, fix the one-way doors, write the perception contract, set the objective function | 5 |
-| [**`keel`**](keel/SKILL.md) | Walking skeleton — pierce every integration seam with one real-but-trivial slice, with a contract that can't drift | 4 |
-| [**`wellspring`**](wellspring/SKILL.md) | State architecture (the heart) — classify state, minimize the source of truth, model the implicit machine | 4 |
-| [**`seaworthy`**](seaworthy/SKILL.md) | Build, unhappy-path-first — the four states are the product; illusion-maintenance, accessibility, a perf budget | 4 |
-| [**`livery`**](livery/SKILL.md) | Visual craft — give the surface a coherent visual language: color, type, depth, motion committed as a tokenized system, not hand-picked values | 4 |
-| [**`trials`**](trials/SKILL.md) | Correctness — test behavior not structure (the testing trophy), mock only the network | 4 |
-| [**`lookout`**](lookout/SKILL.md) | Delivery & observability — RUM as psychophysics, plus the pre-launch objective-function ethics gate | 4 |
-| [**`bulwark`**](bulwark/SKILL.md) | 1→N — fight entropy by making the architecture self-enforcing; a steady state | 5 |
+3 heuristic, 5 sop, 1 router.
 
-Greenfield walks the eight front to back; real work usually enters mid-stream (a running app with a state swamp → start at `wellspring`), which is what `pilot` is for. Each gated skill is a directory — `SKILL.md` + `references/` + `.checklist.yml`; `pilot` is un-gated.
+## Choose the form of help
 
----
+**SOP** means a selected outcome, steps, branches, artifacts, and explicit completion. It uses the run-based checklist CLI. **Heuristic** means associations, perspectives, analogies, and possibilities; it has no checklist and no obligation to converge. **Router** is an auxiliary entrypoint that helps choose either form, or recommends a direct answer. Reference essays and probes support these skills; they are not additional skill categories.
 
-Invoke any skill with `/surface:<name>` (drop the prefix if installed standalone). Gates are held by the [`checklist` CLI](../../README.md#checklist) — without it a skill degrades to prose. ← back to [all five suites](../../README.md).
+## Skills
+
+| Skill | Kind | Purpose |
+| --- | --- | --- |
+| [bearings](bearings/SKILL.md) | heuristic | Explore frontend architecture by reframing journeys, ownership, and the experience of time. |
+| [bulwark](bulwark/SKILL.md) | sop | Maintain frontend module boundaries and reusable design artifacts with demonstrable checks. |
+| [keel](keel/SKILL.md) | sop | Build a walking skeleton for one selected frontend journey across real integration seams. |
+| [livery](livery/SKILL.md) | heuristic | Explore coherent visual directions across colour, type, space, form, imagery, and motion. |
+| [lookout](lookout/SKILL.md) | sop | Establish delivery observation and decision-linked frontend telemetry for a chosen release. |
+| [pilot](pilot/SKILL.md) | router | Route surface work to an execution SOP, a creative heuristic, or a direct answer. |
+| [seaworthy](seaworthy/SKILL.md) | sop | Harden a selected frontend journey across async states, recovery, accessibility, and performance constraints. |
+| [trials](trials/SKILL.md) | sop | Build frontend regression tests that observe real user behaviour and survive implementation refactors. |
+| [wellspring](wellspring/SKILL.md) | heuristic | Generate alternatives for frontend state and interaction models using ownership, time, and representation shifts. |
+
+## Use
+
+Install this suite as the `surface@skill` plugin from the repository marketplace, or copy an individual skill directory into your host’s skills directory. Preserve its references, LICENSE, and NOTICE. See the [repository setup](../../README.md) and [CLI guide](../../devtools/checklist/README.md).
+
+Do not run the whole table as a pipeline. Begin where the actual question begins. When exploration yields a direction the human wants to execute, carry that decision and its assumptions into the relevant SOP. Reading a skill never resets existing work.

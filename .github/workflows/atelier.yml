@@ -1,8 +1,8 @@
 name: atelier
 
-# Structural / gate-integrity lint for the atelier suite: guards that every gated skill's
-# SKILL.md and .checklist.yml agree (gate <-> checklist), and that frontmatter / copyright /
-# LICENSE / NOTICE / reference house-style hold. The thing no per-probe test can catch.
+# Type-aware authoring checks for atelier: heuristics stay ungated; the systems
+# SOP carries an explicit lifecycle. Full YAML/command parity runs in skill-lint;
+# behavioural probe tests remain in probe.yml.
 
 on:
   push:

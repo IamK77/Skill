@@ -1,51 +1,36 @@
-# atelier — the design-craft suite
+# atelier
 
-> An *atelier* is a workshop where a craft is practised to a standard. This suite is the visual-design
-> half of building an interface: where `surface` decides *what is true* (boundaries, state, the four
-> states), `atelier` decides *what it looks and feels like* — and makes that a **system**, not a pile of
-> hand-picked values.
+Seven creative visual lenses, one design-system implementation SOP, and a router. Design probes remain optional measuring instruments, not taste certificates.
 
-**The governing fact:** a polished interface is values *derived from a small system*; an amateur one is
-values picked one at a time. The same hex typed in nineteen places, a font-size nudged until it "looks
-right", a shadow invented per component — each is defensible alone, and their sum is the incoherence the
-eye reads as "cheap" without being able to name it. And the benchmark is not a document — it is a **human
-nervous system** (16ms is a fusion threshold, 100ms is "I caused that"), so **taste is load-bearing and
-cannot be outsourced.** The agent emits plausible-but-incoherent values and feels no wrongness; so each
-layer of the system is a taste decision the human makes at a **GATE**, and the system enforces it after.
+7 heuristic, 1 router, 1 sop.
 
-## The eight lenses
+## Choose the form of help
 
-`canon` sets the system; the other seven each own one layer of it. Most design work is not greenfield —
-enter at the layer that's wrong (the [pilot](pilot/) navigator routes you).
+**SOP** means a selected outcome, steps, branches, artifacts, and explicit completion. It uses the run-based checklist CLI. **Heuristic** means associations, perspectives, analogies, and possibilities; it has no checklist and no obligation to converge. **Router** is an auxiliary entrypoint that helps choose either form, or recommends a direct answer. Reference essays and probes support these skills; they are not additional skill categories.
 
-| Lens | Owns |
-|---|---|
-| **[pilot](pilot/)** | *(un-gated navigator)* routes a design task to the right entry lens — or out to a sibling suite |
-| **[canon](canon/)** | the design-judgment spine — which visual language, which surface archetype, the quantified targets, product-sense fit |
-| **[color](color/)** | a perceptual oklch palette as tokens — neutral ramp, semantic roles, dark as a re-tuned ramp, contrast at design time, colorblind-safe data-viz |
-| **[type](type/)** | a modular type scale + a spacing scale on one rhythm, the optical tells, and text that survives every language (BiDi/RTL, CJK, locale) |
-| **[layout](layout/)** | composition as a decision — grid & hierarchy, measure & rhythm, designed empty/error states, robustness for reality's long tail |
-| **[form](form/)** | depth from one light model — layered shadows + a tokenized elevation scale, concentric radii, gradient/texture with a job and without banding |
-| **[graphics](graphics/)** | DOM-first; Canvas/WebGL/GPU only where the DOM can't go (with a fallback); one icon system; a coherent imagery system |
-| **[motion](motion/)** | every animation with a purpose and real physics — spring vs easing, gesture arbitration, a true reduced-motion path, compositor-only at 60fps |
-| **[systems](systems/)** | the design system as one source of truth — tokens that don't drift across the CSS↔JS boundary, a living component library, a no-drift handoff |
+## Skills
 
-## Relationship to `surface`
+| Skill | Kind | Purpose |
+| --- | --- | --- |
+| [canon](canon/SKILL.md) | heuristic | Generate visual points of view and unexpected design languages from a product’s tensions and meaning. |
+| [color](color/SKILL.md) | heuristic | Explore palette ideas through perception, material associations, temperature, and semantic relationships. |
+| [form](form/SKILL.md) | heuristic | Explore shape, depth, light, texture, and material metaphors for an interface. |
+| [graphics](graphics/SKILL.md) | heuristic | Invent imagery, iconography, illustration, and generative visual languages. |
+| [layout](layout/SKILL.md) | heuristic | Invent spatial compositions through attention, rhythm, and alternative information metaphors. |
+| [motion](motion/SKILL.md) | heuristic | Explore motion as rhythm, continuity, character, and narrative. |
+| [pilot](pilot/SKILL.md) | router | Route atelier work to an execution SOP, a creative heuristic, or a direct answer. |
+| [systems](systems/SKILL.md) | sop | Turn a selected visual direction into versioned tokens, reusable components, and an inspectable handoff. |
+| [type](type/SKILL.md) | heuristic | Explore typographic voices, rhythm, and multilingual expression. |
 
-`atelier` owns the *look and feel*; `surface` owns the *frontend engineering*. The seam is **judgment vs
-mechanism**: how CSS Grid / the cascade actually work is `surface:keel`; the composition *judgment* is
-`atelier:layout`. *What* to build and the user's mental model is `surface:bearings`; *which visual language*
-is `atelier:canon`. Enforcing the design system at 1→N is `surface:bulwark`; building the system artifact is
-`atelier:systems`. `surface:pilot` and `atelier:pilot` route across the seam.
+## Use
 
-## Gates
+Install this suite as the `atelier@skill` plugin from the repository marketplace, or copy an individual skill directory into your host’s skills directory. Preserve its references, LICENSE, and NOTICE. See the [repository setup](../../README.md) and [CLI guide](../../devtools/checklist/README.md).
 
-Every lens except `pilot` is a multi-stage flow whose **GATE**s are enforced by the `checklist` CLI, which
-installs separately:
+Do not run the whole table as a pipeline. Begin where the actual question begins. When exploration yields a direction the human wants to execute, carry that decision and its assumptions into the relevant SOP. Reading a skill never resets existing work.
 
-```bash
-npm i -g @iamk77/skill-checklist
-```
+## Optional probes
 
-Without it the gates silently no-op and a lens degrades to prose. Installs every skill under the `/atelier:`
-prefix.
+- [Canon probe](canon/probes/README.md): inspect declared default-pattern indicators.
+- [Colour coherence probe](color/probes/README.md): inspect declared colour relationships.
+
+A probe reports observations within its coverage; it cannot decide originality or aesthetic quality. Probe implementation and tests are retained.

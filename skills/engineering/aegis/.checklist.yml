@@ -1,47 +1,30 @@
-# Flight checklist for the aegis skill — 6 stages, hard GATEs.
-# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
-# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
-# stages in order: frame -> model -> design -> build -> verify -> operate.
 phases:
-  - name: frame
+  - name: "scope"
     checks:
-      - id: security-stance-set
-        description: "Defense sized to risk (够用就好): crown jewels named and data classified (sensitive/PII/regulated), exposure and threat sized, and the timeless principles set as the standard every later stage applies — least privilege, defense in depth, fail secure, minimize attack surface, no security through obscurity, zero trust; the CIA goal (confidentiality/integrity/availability) and the governing fact internalized that security is RISK MANAGEMENT not a quest for the absolute (assume the attacker knows the system and any single layer can fail); SETUP vs AUDIT mode chosen; and when auditing software you OPERATE but did not AUTHOR, each gap split into deployment-owned (config/secrets/exposure/host — you can fix) vs product-owned (code/architecture — only upgrade, configure around, or report upstream), with the findings that SURVIVE a correctly-hardened deployment surfaced as the product's own — the high-value finding a purely adversarial pass buries among config gaps"
-
-  - name: model
+      - id: "boundary"
+        description: "Threat model identifies assets, entry points, and trust boundaries"
+        evidence: "required"
+      - id: "permission"
+        description: "Test scope and allowed actions are recorded"
+        evidence: "required"
+  - name: "defend"
     checks:
-      - id: threat-model-built
-        description: "A threat model built — 'who would attack this, from where, and what do they want?' — using STRIDE (spoofing/tampering/repudiation/information-disclosure/DoS/elevation-of-privilege) over the data flow, with trust boundaries (where data crosses from less- to more-trusted) and the attack surface (every exposed endpoint/port/input/dependency) marked on the architecture, and threats ranked by risk; the highest-leverage cheapest security investment, and the thing an agent never does unasked because it has no attacker in its head"
-
-  - name: design
-    checks:
-      - id: defenses-and-trust-boundaries
-        description: "The threat model turned into DESIGN decisions (architectural weaknesses can't be patched in later): authentication/authorization designed with a vetted framework and authorization enforced SERVER-SIDE on every request (never by hiding a UI control); the trust boundaries enforced and defense-in-depth layered (no single control is the whole defense, each layer assumed breachable); fail-secure (errors default to DENY); attack surface minimized; and crypto/core security primitives NEVER invented — public audited algorithms/libraries only, because the attacker is assumed to know the design (no security through obscurity)"
-
-  - name: build
-    checks:
-      - id: input-never-trusted
-        description: "Code written on the assumption that NO external input is trusted — every input validated at the boundary before use — and the common vulnerability classes (OWASP Top 10) defended by construction: parameterized queries/prepared statements for injection (never concatenate input into SQL/commands), output encoding for XSS, server-side authorization checks for broken access control, CSRF tokens + SameSite cookies, TLS in transit and encryption at rest for sensitive data, and safe configuration (no default passwords / exposed debug endpoints / public buckets)"
-      - id: secrets-and-least-privilege
-        description: "Secrets kept out of code AND logs — injected from a secrets manager/vault, never hard-coded, and never written to telemetry (no password/PII in logs); least privilege in the wiring — every component, query, and credential granted only the access it needs, from deny-all — countering the agent's reflex to hard-code a key or widen a permission to *:* to clear an error"
-
-  - name: verify
-    checks:
-      - id: security-testing-gated
-        description: "Security testing automated into the pipeline as BLOCKING gates run every commit — SAST (static source analysis), DAST (dynamic scan of the running app), and SCA (dependency/supply-chain scanning), plus fuzzing where input handling is critical — because a vulnerability is invisible to a functional test and a green-optimizing agent never seeks it; advisory scans an agent can ignore are not gates"
-      - id: vuln-classes-defended
-        description: "The OWASP Top 10 walked as a verification checklist (OWASP ASVS is the standard form): for each class, the defense confirmed to EXIST and be TESTED; and the adversarial half explicitly handed to the gungnir skill — automated scanning finds known patterns but does not chain small flaws into a real exploit or abuse business logic, so penetration testing (gungnir) is required to actually prove the system; scanning is necessary, not sufficient"
-      # Independent-verification SENSOR for the SCA half of security-testing-gated:
-      # the dependency/supply-chain scan actually exits 0 on the project. The
-      # SAST/DAST-gated and OWASP-walked judgment stays manual above.
-      - id: dependency-scan-clean
-        description: The dependency/supply-chain scan runs clean on the project — verified by actually running ${SCA_CMD} (e.g. npm audit --audit-level=high / pip-audit / cargo audit / osv-scanner), not self-certified
+      - id: "findings"
+        description: "Each finding has a reachable path, impact, and reproducible evidence"
+        evidence: "required"
+      - id: "repairs"
+        description: "Changes and regression results are recorded, with unresolved findings explicit"
+        evidence: "required"
+      - id: "dependency-scan-clean"
+        description: "Result of the agreed SCA_CMD command against the target project"
         verify: "shell:${SCA_CMD}"
         timeout: 300
-
-  - name: operate
+        allow-na: true
+  - name: "handoff"
     checks:
-      - id: runtime-defense-and-patching
-        description: "Runtime security in place — the security slice of stationkeeping's observability: detect/alert on attacks and anomalies, log security events, keep audited least-privilege access controls; and vulnerabilities patched CONTINUOUSLY — disclosed CVEs tracked and vulnerable dependencies upgraded promptly (husbandry's don't-drift-to-EOL in security form: an unpatched known vulnerability is a standing breach) — because security is never done; new vulns are disclosed daily and every change can open a hole"
-      - id: incident-response-ready
-        description: "A security incident-response plan exists and is rehearsed — a known way to detect → contain → eradicate → recover → learn from a breach — run BLAMELESS like every incident in this suite so failures surface fast instead of hiding; security treated as a continuous practice with a real response capability, not a one-time pre-launch checkpoint"
+      - id: "risk"
+        description: "Residual risks and validation limits are explicit"
+        evidence: "required"
+      - id: "report"
+        description: "Review report links findings, changes, and test artifacts"
+        evidence: "required"

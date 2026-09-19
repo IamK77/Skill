@@ -1,18 +1,26 @@
-# The inquiry suite
+# inquiry
 
-Where the engineering and distributed suites are about *building* software, the **inquiry** suite is about *doing computational research* — the work of going from a vague area to published results in any field where you run experiments to publish (machine learning, combinatorial optimization, operations research, systems, scheduling). It updates human-era research practice for a world where the agent does the searching, reading, reproducing, drafting, and defending — and therefore fools you by default, optimizing for output that *looks* like a result. Six skills form the complete pipeline over all six research steps, each handing the next a concrete artifact: **prospect** (find and prove the gap) → **crucible** (design the method) → **ledger** (design the experiments) → **forge** (run the experiments) → **reckoning** (analyze the results) → **envoy** (write it up, submit, and defend). Across all six the human keeps four things — taste, spec, judgment, and the signature on the claims — and everything else is discipline and the agent.
+Creative research questions and mechanisms, followed—when a direction is chosen—by reproducible planning, execution, analysis, and communication.
 
-| Skill | Role | Stages |
-|-------|------|:------:|
-| [**`prospect`**](prospect/SKILL.md) | Research-gap prospecting — bound the ground, mine candidate gaps in parallel, attack & rank, kill cheaply, land the gap | 6 |
-| [**`crucible`**](crucible/SKILL.md) | Method design — decidable spec, oracle ceiling, race death-orthogonal variants in a feasibility-checked tournament, deepen with theory / ablation / novelty | 7 |
-| [**`ledger`**](ledger/SKILL.md) | Experiment design — claim-evidence matrix, exploration/confirmation firewall, instances & fair baselines, statistics, ablation & sensitivity, frozen protocol | 7 |
-| [**`forge`**](forge/SKILL.md) | Experiment run — harden the method to research-standard code, per-run provenance, idempotent pipeline with a read-only operator agent, version-tag integrity, one-command regeneration | 6 |
-| [**`reckoning`**](reckoning/SKILL.md) | Results analysis — audit before reading, distribution & slices with honest statistics, ablation traps, mechanism probes, failure boundary, claim verdicts, systematized red-team | 7 |
-| [**`envoy`**](envoy/SKILL.md) | Writing, submission & rebuttal — figure-first skeleton, claim-organized sections, the three agent red-lines (every number to a run id), venue-fit submission, the four-beat rebuttal, the revise-before-resubmit ladder | 6 |
+2 heuristic, 4 sop.
 
-The pipeline is a chain: each skill hands the next a concrete artifact, and when the paper lands the research is finished and the next one begins again at `prospect`.
+## Choose the form of help
 
----
+**SOP** means a selected outcome, steps, branches, artifacts, and explicit completion. It uses the run-based checklist CLI. **Heuristic** means associations, perspectives, analogies, and possibilities; it has no checklist and no obligation to converge. **Router** is an auxiliary entrypoint that helps choose either form, or recommends a direct answer. Reference essays and probes support these skills; they are not additional skill categories.
 
-Invoke any skill with `/inquiry:<name>` (drop the prefix if installed standalone). Gates are held by the [`checklist` CLI](../../README.md#checklist) — without it a skill degrades to prose. ← back to [all five suites](../../README.md).
+## Skills
+
+| Skill | Kind | Purpose |
+| --- | --- | --- |
+| [crucible](crucible/SKILL.md) | heuristic | Invent and reshape research mechanisms through analogy, inversion, and recombination. |
+| [envoy](envoy/SKILL.md) | sop | Turn a validated research record into a clear manuscript or response. |
+| [forge](forge/SKILL.md) | sop | Execute a defined research experiment with traceable inputs, configurations, runs, and outputs. |
+| [ledger](ledger/SKILL.md) | sop | Write a reproducible experimental plan for a chosen research question. |
+| [prospect](prospect/SKILL.md) | heuristic | Find research possibilities by connecting tensions, absences, and neighbouring fields. |
+| [reckoning](reckoning/SKILL.md) | sop | Analyse research results against the recorded plan, inspect failure patterns, and bound the claims. |
+
+## Use
+
+Install this suite as the `inquiry@skill` plugin from the repository marketplace, or copy an individual skill directory into your host’s skills directory. Preserve its references, LICENSE, and NOTICE. See the [repository setup](../../README.md) and [CLI guide](../../devtools/checklist/README.md).
+
+Do not run the whole table as a pipeline. Begin where the actual question begins. When exploration yields a direction the human wants to execute, carry that decision and its assumptions into the relevant SOP. Reading a skill never resets existing work.

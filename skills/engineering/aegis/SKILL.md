@@ -1,21 +1,9 @@
 ---
 name: aegis
-description: >
-  Weave security through the whole lifecycle instead of bolting it on at the end,
-  across: risk-based stance and principles (least privilege, defense in depth,
-  fail secure, zero trust), threat model, secure design, input-distrusting code,
-  CI security gates (SAST/DAST/SCA), the OWASP Top 10, and operations — tuned for
-  a world where an agent writes insecure code by
-  default, trusts its input, and ships a vulnerability green. The defensive half
-  of the security pair (the
-  shield); its adversarial counterpart is the `gungnir` skill (the spear). Use
-  when the user wants a system secure-by-design, threat modeling, auth design,
-  secrets management, to prevent injection / XSS / broken access control, set up
-  scanning, meet compliance, or stand up security monitoring. Triggers on "is this secure", "threat model this", "secure coding",
-  "OWASP", "least privilege", "manage secrets", "auth/authz design", "shift-left
-  security / DevSecOps", "GDPR / PII / data classification", "security review".
+description: "Run a scoped defensive security review and remediation workflow. Produce a threat model, reproducible findings, tested changes, and residual-risk handoff."
 argument-hint: "[system / feature / scope to secure]"
-allowed-tools: Read Bash Edit Write
+metadata:
+  kind: sop
 ---
 
 <!--
@@ -25,140 +13,85 @@ See ./LICENSE and ./NOTICE · https://www.apache.org/licenses/LICENSE-2.0
 
 # aegis
 
-!`checklist init ${CLAUDE_SKILL_DIR} --force`
+Run a scoped defensive security review and remediation workflow. Produce a threat model, reproducible findings, tested changes, and residual-risk handoff.
 
-Security is not the last check before launch; it is **a line that runs through every part of the lifecycle.** Treating it as something you add once the features work — *bolt-on security* — fails almost by construction, because the most damaging weaknesses live in architecture and design, where they cannot be patched in afterward, only rebuilt. The correct posture is the one this whole suite keeps returning to: **shift security left** (the DevSecOps idea), the same "catch it early, surface it cheap" instinct as quality-left and red-means-stop. This skill is the **shield** — the discipline of building a system secure-by-design — across six gated stages, and it will not advance past a **GATE** until the `checklist` tool clears it. Its adversarial counterpart, the **spear** that attacks what this builds to prove it holds, is the `gungnir` skill.
+## Inputs
 
-Security is where the agent era is most dangerous, because a vulnerability is the worst possible fit for how an agent works:
-- **The agent writes insecure code by default.** Its training distribution is full of vulnerable patterns — string-concatenated SQL, `eval`, weak or homemade crypto, hard-coded keys — and it reproduces them, because insecure code *works perfectly* until someone attacks it.
-- **A vulnerability passes every green test.** It is the *absence of an attack so far*, not a failure — so it sails through every functional test and every green dashboard, and a green-optimizing agent ships it believing the job is done. Security is the ultimate "green ≠ correct."
-- **The agent has no threat model and trusts its input.** It does not spontaneously ask "who would attack this, and how"; it writes the happy path and treats input as friendly, which *is* injection and XSS.
-- **The agent invents crypto/auth and over-grants to make it work.** It will happily generate a custom authentication scheme or widen a permission to `*:*` to clear an error, feeling none of the risk.
+Target repository or design; assets and trust boundaries; authorised test scope; deployment context. Establish the real dependency-scan command before running it.
 
-So the rule that governs this skill: **security must be woven in and enforced at every stage, never trusted to instinct** — because the most prolific contributor is an agent whose every default is the insecure one, and whose green light certifies nothing about whether the system can be attacked. The aim is not absolute security (which is impossible and infinitely costly) but **risk management**: identify what is most worth protecting and most likely to be attacked, and concentrate the defense there.
+## Run record
 
-**Discipline:** finish every GATE before the next stage. GATEs are hard — never skip, batch past, or self-certify a stage you have not done. The `checklist` tool enforces the order; let it. Commands address stages by **name**.
+Use checklist 0.5 or newer for this SOP. Reading or reloading the skill must not reset work. For a new task, run `checklist init "${CLAUDE_SKILL_DIR}" --new --path "/absolute/project"`; retain its returned ID as `RUN`. For existing work, use `checklist resume "$RUN"`, then `checklist show --run "$RUN"`. Outside Claude, replace the skill-directory variable with this directory’s actual path.
 
-**Read [references/agent-era-shifts.md](references/agent-era-shifts.md) first** — it is the heart: what each security practice becomes once the code is written by something with no threat model, no felt risk, and a relentless pull toward whatever turns the light green. If `$ARGUMENTS` is a throwaway with no sensitive data and no exposure, this machinery is overkill — say so. The leanest *sufficient* defense for the system's real risk is the goal, not maximum ceremony.
+Commands below record work after it is done. Replace evidence placeholders with concise artifact locations and observations. Manual confirmations are not independent proof; a sensor pass covers only the command and inputs it observed. `verify` does not close a stage; `advance` checks that its required readings are fulfilled. Use `report --run "$RUN"` for the retained history.
 
-**Speak the user's language, or the risk gets accepted blind.** This skill makes the user own real trade-offs only they can price: what data is sensitive, what an outage or breach costs, which compliance regime applies, how much defense a risk earns. Read their fluency and gloss a term on first use (threat model, STRIDE, least privilege, defense in depth, SAST/DAST/SCA, CIA, zero trust). A user who signs off on "this residual risk is acceptable" in words they never parsed has not accepted it — and the FRAME, MODEL, and OPERATE judgments this skill leans on them for are then hollow.
+Before starting, inspect the project and bind `SCA_CMD` to its real trusted command with `--var 'SCA_CMD=<actual command>'`. Do not use an echo/no-op to produce a green result. `checklist resume "$RUN" --var 'SCA_CMD=<new command>'` changes the binding and invalidates earlier readings; commands and output are stored locally, so do not bind secrets.
 
-## The reference library
+## Procedure
 
-The depth lives in `references/`. Open each when a stage sends you there — not all upfront. Eight references back the six stages:
+### scope
 
-- **[references/decision-tree.md](references/decision-tree.md)** — the engine. Sizing the defense to risk (crown jewels × threat × exposure), the STRIDE threat-model router, the build-vs-buy call for anything security-critical (never invent crypto), the OWASP class → defense map, and the escalation ladder. Open it at the start.
-- [references/agent-era-shifts.md](references/agent-era-shifts.md) — the must-be-told reference: how each security practice changes when an agent writes the code. Load at the start, re-check at every gate.
-- [references/principles-and-stance.md](references/principles-and-stance.md) — the timeless principles (least privilege, defense in depth, fail secure, minimize attack surface, no security through obscurity, zero trust), the CIA triad, crown-jewel / data classification, and security as risk management.
-- [references/threat-modeling.md](references/threat-modeling.md) — STRIDE, trust boundaries, attack-surface enumeration, data-flow diagrams, and ranking by risk — the cheapest, highest-leverage security investment.
-- [references/secure-design.md](references/secure-design.md) — authentication and authorization models, enforcing trust boundaries, layering defense in depth, failing secure, secure defaults, and the never-invent-crypto rule.
-- [references/secure-coding.md](references/secure-coding.md) — never trust input (validate at the boundary), parameterized queries, output encoding, the OWASP Top 10 vulnerability → defense catalog, secrets out of code, and least-privilege wiring.
-- [references/security-testing-and-gates.md](references/security-testing-and-gates.md) — SAST / DAST / SCA / fuzzing automated as blocking CI gates, the OWASP ASVS verification checklist, and the hand-off to the `gungnir` skill for adversarial penetration testing.
-- [references/operate-and-respond.md](references/operate-and-respond.md) — runtime defense, security monitoring and detection, patching and CVE/vulnerability management, secret rotation, and security incident response — because security is never *done*.
+Map entry points, sensitive assets, identities, and trust boundaries. Agree which systems and test actions are in scope; a local review does not authorise production probing.
 
----
+Record these artifacts after doing the work:
 
-## STAGE 0 — Frame (set the stance, size the defense to the risk)
+- Threat model identifies assets, entry points, and trust boundaries.
+  `checklist check scope boundary --run "$RUN" --evidence "<artifact and observation>"`
+- Test scope and allowed actions are recorded.
+  `checklist check scope permission --run "$RUN" --evidence "<artifact and observation>"`
 
-Security investment must match what is at stake — *够用就好*; a system holding payment data and PII earns threat modeling, hard auth, and security gates, a static brochure site does not. Open **[references/decision-tree.md](references/decision-tree.md)** and **[references/principles-and-stance.md](references/principles-and-stance.md)**: name the **crown jewels** (the data and capabilities most worth protecting — classify what is sensitive/PII/regulated), size the exposure and threat, and set the defense to that. Internalize the **CIA** goal (Confidentiality, Integrity, Availability) and the timeless principles you will apply at every later stage — **least privilege, defense in depth, fail secure, minimize attack surface, no security through obscurity, zero trust** — and the governing fact: **security is risk management, not a quest for the absolute.** Assume the attacker knows your system completely and that any single layer can fail.
+When this stage is fulfilled: `checklist advance scope --run "$RUN"`.
 
-**Decide the mode: SETUP or AUDIT.** **SETUP**: build security in from the start as you design and code. **AUDIT / security review** (the common case — an existing system): assess each control capability by capability with evidence (is there a threat model? is input validated? are secrets in a manager? are the gates running?), and fix the gaps — never reporting a control sound because it is *named* rather than *enforced*.
+### defend
 
-**Name who owns the fix — especially when you operate software you did not author** (an OSS product, a vendored service, a dependency you deploy). Split every gap into two kinds: the ones the **deployment** owns — config, secrets, network exposure, host — which *you* can close, and the ones the **product** owns — its code and architecture — which you can only configure around, upgrade, or report upstream. The most important finding is the one that **survives a correctly-hardened deployment**: it is the product's, no operator can close it, and it is exactly the one a purely adversarial pass buries among the config gaps. The decision tree routes this question (the deployment-vs-product axis) so it is not left to chance. The mirror image, for SETUP of something *others* will deploy: the same axis says make the safe configuration the **default**, because a protection you leave to the operator is one you have not actually shipped.
+Follow the highest-impact abuse paths into actual code. Reproduce safely, repair the responsible boundary, and retain a regression. Run the project dependency scanner; distinguish a negative finding from an unavailable scanner.
 
-### GATE — clear before MODEL
-1. `checklist check frame security-stance-set`
-2. `checklist verify frame`
+Record these artifacts after doing the work:
 
----
+- Each finding has a reachable path, impact, and reproducible evidence.
+  `checklist check defend findings --run "$RUN" --evidence "<artifact and observation>"`
+- Changes and regression results are recorded, with unresolved findings explicit.
+  `checklist check defend repairs --run "$RUN" --evidence "<artifact and observation>"`
 
-## STAGE 1 — Model (think like an attacker, on paper, early)
+Run the bound sensor: `checklist verify defend --run "$RUN"`. A failed or unavailable command is not a successful review.
+Only if the check genuinely does not apply: `checklist na defend dependency-scan-clean --run "$RUN" --reason "<scope reason>"`. N/A stays distinct from pass.
 
-Open **[references/threat-modeling.md](references/threat-modeling.md)**. Threat modeling is the single highest-leverage, cheapest security investment, and the thing an agent will never do unasked: systematically ask **"who would attack this, from where, and what do they want?"** Use **STRIDE** (Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege) over the system's data-flow, mark the **trust boundaries** (where data crosses from less-trusted to more-trusted) and the **attack surface** (every exposed endpoint, port, input, and dependency) right on the architecture diagram, and rank the threats by risk so the defense lands where it matters. This is where the `load-bearing` skill's trust boundaries and the `groundwork` skill's security NFRs become a concrete map of what to defend.
+When this stage is fulfilled: `checklist advance defend --run "$RUN"`.
 
-### GATE — clear before DESIGN
-1. `checklist check model threat-model-built`
-2. `checklist verify model`
+### handoff
 
----
+Separate fixed, mitigated, unverified, and accepted risks. Name an owner and next action for each remaining material issue; do not turn scanner success into a blanket security claim.
 
-## STAGE 2 — Design (build the defenses into the structure)
+Record these artifacts after doing the work:
 
-Open **[references/secure-design.md](references/secure-design.md)**. Turn the threat model into design decisions, because the worst weaknesses are architectural and cannot be patched in later:
+- Residual risks and validation limits are explicit.
+  `checklist check handoff risk --run "$RUN" --evidence "<artifact and observation>"`
+- Review report links findings, changes, and test artifacts.
+  `checklist check handoff report --run "$RUN" --evidence "<artifact and observation>"`
 
-- **Authentication and authorization, designed not improvised** — use a vetted framework; enforce authorization **server-side on every request**, never by hiding a button.
-- **Enforce the trust boundaries** the model drew, and layer **defense in depth** so no single control is the whole defense — assume each layer can be breached.
-- **Fail secure** — on error, default to *deny*, not allow (an auth service that is down must refuse access, not wave it through).
-- **Minimize the attack surface** — expose the fewest endpoints, ports, and features; turn off and delete what you don't use.
-- **Never invent crypto or core security primitives.** Assume the attacker knows your design (no security through obscurity), so security must hold anyway — which is exactly why you use public, audited algorithms and libraries, never a homemade scheme the agent was happy to generate.
+When this stage is fulfilled: `checklist advance handoff --run "$RUN"`.
 
-### GATE — clear before BUILD
-1. `checklist check design defenses-and-trust-boundaries`
-2. `checklist verify design`
+## Branches
 
----
+For design-only work, produce attack scenarios and proposed controls rather than claiming fixes. A dependency scan may be N/A only with a recorded scope reason. Exploitation outside the agreed scope requires fresh permission.
 
-## STAGE 3 — Build (code that never trusts input and never holds a secret)
+If an input or permission is missing, name the blocker and leave the relevant item pending. A changed requirement may need a new run; an accepted checklist edit uses `resume "$RUN" --refresh` and requires fresh readings. To abandon work, use `checklist reset --run "$RUN" --reason "<reason>"`; history is retained.
 
-Open **[references/secure-coding.md](references/secure-coding.md)**. Secure coding rests on one assumption applied everywhere: **never trust user input** — every external input is validated at the boundary before use.
+## Completion
 
-- **Defend the common vulnerability classes by construction** ([the OWASP Top 10 catalog](references/secure-coding.md)): **parameterized queries / prepared statements** for injection (never concatenate input into SQL or a command), **output encoding** for XSS, **server-side authorization checks** for broken access control, CSRF tokens + `SameSite` cookies, encryption in transit (TLS) and at rest for sensitive data, and safe configuration (no default passwords, no exposed debug endpoints, no public buckets).
-- **Secrets never live in code or logs.** Inject them from a secrets manager / vault (the `flightline` skill blocks them at commit time; this stage keeps them out of the running code and the telemetry — never log a password or PII).
-- **Least privilege in the wiring** — every component, query, and credential gets only the access it needs.
+A review report with a bounded conclusion; remediation evidence where changes were requested. Gungnir can investigate a selected authorised attack path separately.
 
-### GATE — clear before VERIFY
-1. `checklist check build input-never-trusted`
-2. `checklist check build secrets-and-least-privilege`
-3. `checklist verify build`
+After all required work and stage closures is recorded, use `checklist done --run "$RUN"`. This archives the result without deleting its history; it does not authorise any external action.
 
----
+## Reference shelf
 
-## STAGE 4 — Verify (automate the security gates; defend the known classes)
+Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
 
-Open **[references/security-testing-and-gates.md](references/security-testing-and-gates.md)**. Security testing must be automated into the pipeline and run every commit — because a vulnerability is invisible to a functional test and a green-optimizing agent will never seek it out.
-
-- **Gate SAST, DAST, and SCA, blocking** — static analysis of the source, dynamic scanning of the running app, and dependency/supply-chain scanning (the `flightline` skill runs the pipeline; this defines what it must enforce). Add **fuzzing** where input handling is critical. Advisory scans an agent can ignore are not gates.
-- **Walk the OWASP Top 10 as a verification checklist** (OWASP ASVS is the standard form): for each class, confirm the defense exists *and* is tested.
-- **Hand the adversarial half to `gungnir`.** Automated scanning finds *known patterns*; it does not chain small flaws into a real exploit or abuse business logic. That creative, adversarial attack — penetration testing — is the `gungnir` skill's job, and it is where a system is truly proven. Scanning is necessary; it is not sufficient.
-
-### GATE — clear before OPERATE
-1. `checklist check verify security-testing-gated`
-2. `checklist check verify vuln-classes-defended`
-3. `SCA_CMD="<your dependency/supply-chain scan>" checklist verify verify` — `dependency-scan-clean` is a **sensor**: `verify` runs `${SCA_CMD}` (e.g. `npm audit --audit-level=high`, `pip-audit`, `cargo audit`) in the project and clears only if it exits 0.
-
----
-
-## STAGE 5 — Operate (defend, patch, and respond — security is never done)
-
-Open **[references/operate-and-respond.md](references/operate-and-respond.md)**. New vulnerabilities are disclosed every day and every change can open a new hole, so security is a *continuous* practice, not a one-time checkpoint.
-
-- **Runtime defense and security monitoring** — the security slice of the `stationkeeping` skill's observability: detect and alert on attacks and anomalies, log security events, and keep least-privilege access controls with auditing.
-- **Patch and track vulnerabilities continuously** — follow disclosed CVEs and upgrade vulnerable dependencies promptly (the `husbandry` skill's "don't drift to EOL," in its security form: an unpatched known vulnerability is a standing breach).
-- **Have a security incident-response plan** — a known, rehearsed way to respond to a breach (detect → contain → eradicate → recover → learn), run **blameless** like every incident in this suite so problems surface fast instead of hiding.
-
-### FINAL GATE
-1. `checklist check operate runtime-defense-and-patching`
-2. `checklist check operate incident-response-ready`
-3. `checklist verify operate`
-4. `checklist show` — confirm all six stages passed.
-5. `checklist done` — clear this run's state.
-
----
-
-## The thread through all of it
-
-aegis is the **shield**, and it is cross-cutting by nature: the security line runs through every sibling — security NFRs in `groundwork`, trust boundaries in `load-bearing`, SAST/secret-scan/SCA gates in `flightline`, security testing in `assay`, runtime defense and patching in `stationkeeping` and `husbandry`, and the legible, hard-to-fake signal of `gauge`. aegis owns that line and pulls the threads together; it does not replace the siblings' mechanics, it directs them toward defense. And it is one half of a pair: a shield is only proven against a spear, so what aegis builds, the **`gungnir`** skill attacks — the sharpest spear against the hardest shield. For an agent the lever is the same as everywhere in the suite: every one of its defaults is the insecure one and a vulnerability ships green, so security must be **woven in and gated**, not trusted to an instinct it does not have.
-
-## Anti-patterns (use as a pre-flight checklist)
-
-- **Bolt-on security** — added after the features; the architectural holes can't be patched in. Weave it through from STAGE 0.
-- **Trusting user input** — the root of injection and XSS; validate every external input at the boundary.
-- **Inventing your own crypto / auth** — assume the attacker knows your design; use public, audited primitives.
-- **Security through obscurity** — "they won't find it" is not a control; assume full knowledge of the system.
-- **Secrets in code or logs** — inject from a manager; never hard-code a key or log a password/PII.
-- **Over-broad permissions** — the agent widens to `*:*` to stop an error; grant least privilege from deny-all.
-- **Default / unreviewed configuration** — default passwords, debug endpoints, public buckets; secure defaults, reviewed.
-- **Unpatched known vulnerabilities** — a disclosed CVE left in a dependency is a standing breach; patch continuously.
-- **Green ≠ secure** — a vulnerability passes every functional test; gate SAST/DAST/SCA and have `gungnir` attack it.
-- **Chasing absolute security** — impossible and infinitely costly; manage risk — defend the crown jewels first.
-- **Skipping a GATE** — the user's judgment on what to protect and what risk to accept can change the whole plan.
+- [agent era shifts](references/agent-era-shifts.md)
+- [decision tree](references/decision-tree.md)
+- [operate and respond](references/operate-and-respond.md)
+- [principles and stance](references/principles-and-stance.md)
+- [secure coding](references/secure-coding.md)
+- [secure design](references/secure-design.md)
+- [security testing and gates](references/security-testing-and-gates.md)
+- [threat modeling](references/threat-modeling.md)

@@ -1,23 +1,31 @@
-# The engineering suite
+# engineering
 
-Ten skills covering the engineering lifecycle, its security, and the craft of the code itself. The lifecycle runs **groundwork → load-bearing → flightline → assay → stationkeeping → husbandry**, with **gauge** (feedback), the **aegis** / **gungnir** security pair (shield & spear), and **plumb** (code craft) cross-cutting. A separate un-gated navigator, **pilot**, sits in front of them all: tell it your task and it routes you to the right skill(s) in the right order — or says plainly when no skill is needed.
+Execution SOPs for requirements, verification, maintenance, security, and operations; creative lenses for architecture and code representations.
 
-| Skill | Lifecycle role | Stages |
-|-------|----------------|:------:|
-| [**`pilot`**](pilot/SKILL.md) | Navigator (un-gated front door) — routes a task to the right skill(s), or says none is needed | — |
-| [**`groundwork`**](groundwork/SKILL.md) | Requirements — pin down what to build before building it | 5 |
-| [**`load-bearing`**](load-bearing/SKILL.md) | Architecture — style, stack, boundaries, contracts, data model | 6 |
-| [**`flightline`**](flightline/SKILL.md) | Engineering process — version control, review, CI/CD, dependencies | 6 |
-| [**`assay`**](assay/SKILL.md) | Testing — what to test, how, and proving the suite can fail | 8 |
-| [**`stationkeeping`**](stationkeeping/SKILL.md) | Operations — deploy & release, observability, monitoring, SLOs & incidents, capacity, DR | 7 |
-| [**`husbandry`**](husbandry/SKILL.md) | Maintenance & evolution — debt, refactoring, defects, versioning, dependencies, legacy, retirement | 6 |
-| [**`gauge`**](gauge/SKILL.md) | Feedback surface (cross-cutting) — strict types, boundary validation, legible failures | 5 |
-| [**`aegis`**](aegis/SKILL.md) | Security (cross-cutting, the shield) — threat modeling, secure design & coding, SAST/DAST/SCA, OWASP defenses | 6 |
-| [**`gungnir`**](gungnir/SKILL.md) | Adversarial validation (the spear) — authorized pentest: scope, recon, exploit, chain, fix & re-test | 6 |
-| [**`plumb`**](plumb/SKILL.md) | Code craft (cross-cutting, the plumb line) — naming, functions, abstraction, trust-chains, smells, testability | 6 |
+8 sop, 2 heuristic, 1 router.
 
-Each skill is a directory — `SKILL.md` (its full doc, linked above) + a `references/` library + a `.checklist.yml` gate definition. The navigator `pilot` is un-gated, so it carries no `.checklist.yml`.
+## Choose the form of help
 
----
+**SOP** means a selected outcome, steps, branches, artifacts, and explicit completion. It uses the run-based checklist CLI. **Heuristic** means associations, perspectives, analogies, and possibilities; it has no checklist and no obligation to converge. **Router** is an auxiliary entrypoint that helps choose either form, or recommends a direct answer. Reference essays and probes support these skills; they are not additional skill categories.
 
-Invoke any skill with `/engineering:<name>` (drop the prefix if installed standalone). Gates are held by the [`checklist` CLI](../../README.md#checklist) — without it a skill degrades to prose. ← back to [all five suites](../../README.md).
+## Skills
+
+| Skill | Kind | Purpose |
+| --- | --- | --- |
+| [aegis](aegis/SKILL.md) | sop | Run a scoped defensive security review and remediation workflow. |
+| [assay](assay/SKILL.md) | sop | Build regression tests around observable behaviour and demonstrate that they detect the fault. |
+| [flightline](flightline/SKILL.md) | sop | Prepare a reviewable, reproducible change and delivery pipeline. |
+| [gauge](gauge/SKILL.md) | sop | Install or tune useful static feedback for a codebase and verify that it catches representative mistakes. |
+| [groundwork](groundwork/SKILL.md) | sop | Turn a request into an agreed, testable task definition. |
+| [gungnir](gungnir/SKILL.md) | sop | Investigate a specifically authorised security hypothesis with minimal, reproducible evidence. |
+| [husbandry](husbandry/SKILL.md) | sop | Perform evidence-led maintenance and refactoring while preserving required behaviour. |
+| [load-bearing](load-bearing/SKILL.md) | heuristic | Explore alternative software architectures through boundaries, reversibility, and borrowed models. |
+| [pilot](pilot/SKILL.md) | router | Route engineering work to an execution SOP, a creative heuristic, or a direct answer. |
+| [plumb](plumb/SKILL.md) | heuristic | Generate alternative representations, APIs, and algorithms by changing the way a problem is described. |
+| [stationkeeping](stationkeeping/SKILL.md) | sop | Prepare and execute an explicitly authorised operational change with observability, rollback, and post-change checks. |
+
+## Use
+
+Install this suite as the `engineering@skill` plugin from the repository marketplace, or copy an individual skill directory into your host’s skills directory. Preserve its references, LICENSE, and NOTICE. See the [repository setup](../../README.md) and [CLI guide](../../devtools/checklist/README.md).
+
+Do not run the whole table as a pipeline. Begin where the actual question begins. When exploration yields a direction the human wants to execute, carry that decision and its assumptions into the relevant SOP. Reading a skill never resets existing work.

@@ -1,38 +1,30 @@
-# Flight checklist for the gauge skill — 5 stages, hard GATEs.
-# SKILL.md addresses stages by NAME (checklist verify <name> / check <name> <id>),
-# so the 0-based index never surfaces. STAGE N headings in SKILL.md map to these
-# stages in order: frame -> static -> boundary -> behavior-runtime -> trustworthy.
 phases:
-  - name: frame
+  - name: "baseline"
     checks:
-      - id: failure-modes-and-bar
-        description: "The ways this code can fail are enumerated (wrong shape, bad external data, wrong behavior, runtime fault, production-only) and weighted by blast radius; the target is a clear-feedback source per mode (fast / local / attributed / deterministic / trustworthy / un-fakeable); strictness matched to risk (够用就好) so high-blast-radius paths get rich instrumentation and trivial code is not gold-plated into noise"
-
-  - name: static
+      - id: "baseline"
+        description: "Current configuration and diagnostic baseline are recorded"
+        evidence: "required"
+      - id: "goal"
+        description: "Target error classes and acceptable adoption scope are named"
+        evidence: "required"
+  - name: "configure"
     checks:
-      - id: static-layer
-        description: "The static checker runs in strict mode AND is gated (pyright/mypy/tsc strict); data is modeled as typed records not untyped bags (dict[str,Any]/any); failure modes are put in signatures (errors-as-values where it pays) rather than an untyped throw the checker can't see; closed unions are matched exhaustively (checker errors on a missing case) and non-null is narrowed before use"
-      # Independent-verification SENSOR for the mechanical half of static-layer:
-      # the strict checker actually exits 0 on the project. The design judgment
-      # (typed records, errors-as-values, exhaustive unions) stays manual above.
-      - id: static-checker-green
-        description: The strict static checker runs clean on the project — verified by actually running ${TYPECHECK_CMD} (e.g. tsc --noEmit / mypy --strict / pyright), not self-certified
+      - id: "sensitivity"
+        description: "A representative mistake was detected and the probe restored"
+        evidence: "required"
+      - id: "exceptions"
+        description: "New suppressions or exclusions have explicit reasons"
+        evidence: "required"
+      - id: "static-checker-green"
+        description: "Result of the agreed TYPECHECK_CMD command against the target project"
         verify: "shell:${TYPECHECK_CMD}"
         timeout: 300
-
-  - name: boundary
+        allow-na: true
+  - name: "handoff"
     checks:
-      - id: boundaries-validated
-        description: "Every edge where real or untyped data enters (external input, network, files, untyped libraries) VALIDATES rather than asserts — incoming data is parsed into a typed model at the boundary (pydantic/zod) so a bad shape fails there, attributed, not three layers in; Any/any is contained to thin adapter modules at those edges and converted immediately, never flowed inward"
-
-  - name: behavior-runtime
-    checks:
-      - id: behavior-and-runtime-legible
-        description: "Behavioral failure modes have a test that fails clearly (one behavior, one reason to fail, expected-vs-actual message — design depth deferred to assay); runtime faults fail loud/local/attributed via structured errors that name the cause at the site, not a generic exception re-raised far away; production-only failures have observability hooks (structured logs, traces, correlation IDs — operating them deferred to stationkeeping)"
-
-  - name: trustworthy
-    checks:
-      - id: ungameable-green
-        description: "Every feedback source is gated in CI and pre-commit, and the escape hatches an agent uses to flip a signal green are banned or justification-gated: unjustified Any/cast/# type: ignore / as any / @ts-ignore, deleted assertions, widened timeouts, retries masking flakes. A green light the agent can manufacture is not a gate"
-      - id: absence-is-a-signal
-        description: "'Not checked' is made visible so silence is not mistaken for safety: the checker reports unknown/Any types, coverage is read as a map of untested paths, mutation testing exposes assertion-free tests. A subtler silence is hunted too: TWIN PREDICATES that encode the SAME knowledge in opposite directions — a whitelist (status in {…}) in one place, a blacklist (status not in {…}) in another — agree today and diverge SILENTLY the moment a state is added (the blacklist fails silent by admitting the new state, the whitelist fails safe by excluding it), a logic error both the checker and the suite stay green over; duplicated predicates are diffed and collapsed to ONE NAMED SET both sites consume, and the whitelist form is preferred so extension fails loud. The honest ceiling is accepted (gradual != sound, green != proof) and the residual gap is made visible rather than left silent"
+      - id: "workflow"
+        description: "Reproducible invocation and integration location are documented"
+        evidence: "required"
+      - id: "ceiling"
+        description: "Static guarantees and unchecked runtime behaviour are distinguished"
+        evidence: "required"

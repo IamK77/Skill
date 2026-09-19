@@ -1,27 +1,10 @@
 name: touchstone-artifacts
 
-# Keeps the committed claude.ai artifacts in sync with their sources — the same way
-# release-please keeps CHANGELOG in sync. The artifacts live in the tree (touchstone/artifacts/)
-# so claude.ai can clone the repo and invoke one directly; this rebuilds them on every push that
-# touches the bench sources or a skill, and commits the result back only if it changed.
-#
-# build-artifact.mjs reads from disk (no server) and self-checks (it throws on a stray `import`
-# that would break claude.ai's dependency pre-scan), so a broken build fails the job rather than
-# committing a bad artifact.
-
+# Retained for explicit historical maintenance only. The A/B platform is no
+# longer an active development focus; ordinary skill changes must not trigger
+# artifact rebuilding or automatic push-back. No platform files are deleted.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'touchstone/core.mjs'
-      - 'touchstone/harness.mjs'
-      - 'touchstone/navfs.mjs'
-      - 'touchstone/web/**'
-      - 'touchstone/build-artifact.mjs'
-      - 'touchstone/node-lib.mjs'
-      - 'touchstone/evals/**'
-      - 'skills/**'
-      - '.github/workflows/touchstone-artifacts.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write

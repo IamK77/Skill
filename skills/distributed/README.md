@@ -1,13 +1,21 @@
-# The distributed suite
+# distributed
 
-Where the engineering suite is general software practice, the **distributed** suite is for systems that span machines — where partial failure, an unreliable asynchronous network, and the absence of a global clock make "correct" genuinely hard.
+A creative lens for causality, coordination, partial knowledge, and alternative distributed designs.
 
-| Skill | Role | Stages |
-|-------|------|:------:|
-| [**`holdfast`**](holdfast/SKILL.md) | Distributed correctness — partial failure, communication, ordering, replication, consensus, sharding, fault tolerance, coordination | 8 |
+1 heuristic.
 
-`holdfast`'s one idea is **the third state**: a remote call can succeed, fail, *or leave you not knowing which*, and single-machine code has no branch for "I don't know" — which is where most distributed bugs live. Its eight stages are eight faces of one problem: frame · communication · ordering · replication · consensus · sharding · fault tolerance · coordination.
+## Choose the form of help
 
----
+**SOP** means a selected outcome, steps, branches, artifacts, and explicit completion. It uses the run-based checklist CLI. **Heuristic** means associations, perspectives, analogies, and possibilities; it has no checklist and no obligation to converge. **Router** is an auxiliary entrypoint that helps choose either form, or recommends a direct answer. Reference essays and probes support these skills; they are not additional skill categories.
 
-Invoke with `/distributed:holdfast` (drop the prefix if installed standalone). Gates are held by the [`checklist` CLI](../../README.md#checklist) — without it a skill degrades to prose. ← back to [all five suites](../../README.md).
+## Skills
+
+| Skill | Kind | Purpose |
+| --- | --- | --- |
+| [holdfast](holdfast/SKILL.md) | heuristic | Imagine alternative coordination and replication designs through causality, partial knowledge, and failure stories. |
+
+## Use
+
+Install this suite as the `distributed@skill` plugin from the repository marketplace, or copy an individual skill directory into your host’s skills directory. Preserve its references, LICENSE, and NOTICE. See the [repository setup](../../README.md) and [CLI guide](../../devtools/checklist/README.md).
+
+Do not run the whole table as a pipeline. Begin where the actual question begins. When exploration yields a direction the human wants to execute, carry that decision and its assumptions into the relevant SOP. Reading a skill never resets existing work.

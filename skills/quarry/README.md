@@ -1,14 +1,22 @@
-# The quarry suite
+# quarry
 
-Where the other suites build and study software, the **quarry** suite is about finding and judging *other people's* — getting from a need, or idle curiosity, to a repository worth trusting, without the usual ritual of searching by keyword and believing the star count. Two skills: one finds, one judges. Both turn on the same shift, which is what the agent changed. It can run forty searches or check fifty repos while you blink, but it trusts the signals cheapest to fake — a high star count, a fluent README — which in 2026 is exactly what an abandoned project or an AI-generated star-farm wears. So the agent does the legwork and you keep the two things it can't: the taste to know what's worth opening, and the calibration of what a verdict means for your risk.
+Bounded software discovery and evidence-based project assessment. The quarry touchstone skill is independent of the inactive root experiment platform.
 
-| Skill | Role | Stages |
-|-------|------|:------:|
-| [**`forage`**](forage/SKILL.md) | Discovery — find candidates worth your time, by target or by serendipity, captured cheaply with provenance | 5 |
-| [**`touchstone`**](touchstone/SKILL.md) | Evaluation — scan the dashboards not the code, weight the un-gameable signals over the gameable, score three axes, calibrate to your use | 6 |
+2 sop.
 
-`forage` hands its shortlist to `touchstone`; `touchstone` hands deep-dive survivors to the engineering suite.
+## Choose the form of help
 
----
+**SOP** means a selected outcome, steps, branches, artifacts, and explicit completion. It uses the run-based checklist CLI. **Heuristic** means associations, perspectives, analogies, and possibilities; it has no checklist and no obligation to converge. **Router** is an auxiliary entrypoint that helps choose either form, or recommends a direct answer. Reference essays and probes support these skills; they are not additional skill categories.
 
-Invoke any skill with `/quarry:<name>` (drop the prefix if installed standalone). Gates are held by the [`checklist` CLI](../../README.md#checklist) — without it a skill degrades to prose. ← back to [all five suites](../../README.md).
+## Skills
+
+| Skill | Kind | Purpose |
+| --- | --- | --- |
+| [forage](forage/SKILL.md) | sop | Find and capture a bounded shortlist of software projects for a concrete need. |
+| [touchstone](touchstone/SKILL.md) | sop | Evaluate a specific software project for a stated use using source, maintenance, compatibility, and trial evidence. |
+
+## Use
+
+Install this suite as the `quarry@skill` plugin from the repository marketplace, or copy an individual skill directory into your host’s skills directory. Preserve its references, LICENSE, and NOTICE. See the [repository setup](../../README.md) and [CLI guide](../../devtools/checklist/README.md).
+
+Do not run the whole table as a pipeline. Begin where the actual question begins. When exploration yields a direction the human wants to execute, carry that decision and its assumptions into the relevant SOP. Reading a skill never resets existing work.
