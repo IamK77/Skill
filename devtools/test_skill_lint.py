@@ -31,6 +31,17 @@ class SkillContract(unittest.TestCase):
                 if '  kind: ' + kind + '\n' in p.read_text(): counts[kind] += 1
         self.assertEqual(counts, {'sop': 20, 'heuristic': 15, 'router': 3})
 
+    def test_complete_reference_catalog_remains_linked_and_typed(self):
+        counts = {'sop': 0, 'heuristic': 0, 'router': 0}
+        for entry in (ROOT / 'skills').glob('*/*/SKILL.md'):
+            text = entry.read_text()
+            kind = next(k for k in counts if '  kind: ' + k + '\n' in text)
+            for reference in (entry.parent / 'references').glob('*.md'):
+                counts[kind] += 1
+                relative = str(reference.relative_to(entry.parent))
+                self.assertIn('](' + relative + ')', text, str(reference))
+        self.assertEqual(counts, {'sop': 114, 'heuristic': 80, 'router': 4})
+
     def test_marketplace_registers_exactly_the_shipped_catalog(self):
         data = json.loads((ROOT / '.claude-plugin/marketplace.json').read_text())
         paths = [ROOT / skill / 'SKILL.md' for plugin in data['plugins'] for skill in plugin['skills']]
@@ -56,6 +67,37 @@ class SkillContract(unittest.TestCase):
                 if mutation == 'missing-link': text += '\n[missing](references/missing.md)\n'
                 p.write_text(text)
                 self.assertTrue(lint_skill(p), mutation)
+
+    def test_reference_regressions_are_not_hidden_behind_a_clean_entrypoint(self):
+        cases = [
+            ('## STAGE 0 — compulsory\n', 'hidden stage'),
+            ('## GATE — clear before proceeding\n', 'hidden stage'),
+            ('It clears exactly one gate — threat-model-built.\n', 'hidden stage'),
+            ('This stage backs two checks.\n', 'hidden stage'),
+            ('Run `checklist init . --force` every time.\n', 'destructive initialization'),
+            ('The agent feels no wrongness.\n', 'model-psychology'),
+            ('WCAG is the legal floor.\n', 'universal legal'),
+            ('[missing](missing.md)\n', 'missing linked resource'),
+            ('[bad anchor](#does-not-exist)\n', 'missing linked anchor'),
+        ]
+        for body, expected in cases:
+            with self.subTest(expected=expected), tempfile.TemporaryDirectory() as d:
+                p = self.make(Path(d)); refs = p.parent / 'references'; refs.mkdir()
+                (refs / 'note.md').write_text('# Technique\n\n' + body)
+                issues = lint_skill(p)
+                self.assertTrue(any(expected in e for e in issues), issues)
+
+    def test_reference_techniques_and_examples_are_not_prohibited(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = self.make(Path(d)); refs = p.parent / 'references'; refs.mkdir()
+            (refs / 'note.md').write_text('# Technique\n\n## Same heading\nAn authorisation gate must reject invalid credentials.\n\n## Same heading\n[second](#same-heading-1)\n[entry](../SKILL.md#starting-point)\n\n```markdown\n[illustration](not-a-real-file.md)\n## STAGE 0 — quoted obsolete example\n```\n')
+            self.assertEqual(lint_skill(p), [])
+
+    def test_literal_links_and_fence_info_are_not_rendered_links(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = self.make(Path(d)); refs = p.parent / 'references'; refs.mkdir()
+            (refs / 'note.md').write_text('# Technique\n\nA literal `[example](missing.md)` is source text.\n\n```markdown\n```not-a-closing-fence\n[also literal](also-missing.md)\n```\n')
+            self.assertEqual(lint_skill(p), [])
 
     def test_missing_sop_definition_and_creative_example_are_caught(self):
         with tempfile.TemporaryDirectory() as d:

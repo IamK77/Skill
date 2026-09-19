@@ -80,9 +80,9 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [distribution and statistics](references/distribution-and-statistics.md)
-- [forking garden and redteam](references/forking-garden-and-redteam.md)
-- [mechanism probes](references/mechanism-probes.md)
-- [why audit not celebrate](references/why-audit-not-celebrate.md)
+- [Inspect the population behind an aggregate](references/distribution-and-statistics.md)
+- [Expose analytic choices and alternative explanations](references/forking-garden-and-redteam.md)
+- [Test an explanation rather than only an outcome](references/mechanism-probes.md)
+- [Write the narrow conclusion supported by the record](references/why-audit-not-celebrate.md)

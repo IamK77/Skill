@@ -47,9 +47,9 @@ For a selected interaction, seaworthy or trials can check interruption, keyboard
 
 ## Optional references
 
-Read selectively when a thread needs technique or depth. The reference essays contain stronger conventions and older workflow language; use them as material to question, not as mandatory stages or creative constraints.
+Read selectively when a thread needs another perspective or a concrete technique. The notes supply possibilities, examples, and limits; none is a prerequisite or a requirement to close the exploration.
 
-- [gesture arbitration](references/gesture-arbitration.md)
-- [motion purpose and physics](references/motion-purpose-and-physics.md)
-- [reduced motion and performance](references/reduced-motion-and-performance.md)
-- [the feel css deep water](references/the-feel-css-deep-water.md)
+- [Give ambiguous gestures an explicit meaning](references/gesture-arbitration.md)
+- [Timing models as expressive tools](references/motion-purpose-and-physics.md)
+- [Preserve information when motion changes](references/reduced-motion-and-performance.md)
+- [Coordinate timing without decorating every event](references/the-feel-css-deep-water.md)

@@ -80,10 +80,10 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [delivery and instruments](references/delivery-and-instruments.md)
-- [ethics gate](references/ethics-gate.md)
-- [performance engineering](references/performance-engineering.md)
-- [telemetry discipline](references/telemetry-discipline.md)
-- [the membrane](references/the-membrane.md)
+- [Prepare observations for an authorised frontend delivery](references/delivery-and-instruments.md)
+- [Make telemetry and delivery constraints concrete](references/ethics-gate.md)
+- [Measure a relevant frontend performance problem](references/performance-engineering.md)
+- [Validate event meaning before interpreting a graph](references/telemetry-discipline.md)
+- [Observation that informs a release decision](references/the-membrane.md)

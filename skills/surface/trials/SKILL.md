@@ -80,9 +80,9 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [behavior not structure](references/behavior-not-structure.md)
-- [mocking and pruning](references/mocking-and-pruning.md)
-- [test levels](references/test-levels.md)
-- [the membrane](references/the-membrane.md)
+- [Assert the experience the contract promises](references/behavior-not-structure.md)
+- [Keep frontend doubles and fixtures honest](references/mocking-and-pruning.md)
+- [Use the cheapest level that observes the real failure](references/test-levels.md)
+- [Choose tests around observable risk](references/the-membrane.md)

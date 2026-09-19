@@ -56,9 +56,9 @@ After all required work is recorded, use `checklist done --run "$RUN"`. This arc
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [sift and capture](references/sift-and-capture.md)
-- [the seams and syntax](references/the-seams-and-syntax.md)
-- [the wandering surfaces](references/the-wandering-surfaces.md)
-- [why mine and wander](references/why-mine-and-wander.md)
+- [Capture a shortlist with evidence and uncertainty](references/sift-and-capture.md)
+- [Search around the actual missing capability](references/the-seams-and-syntax.md)
+- [Follow useful leads across different discovery surfaces](references/the-wandering-surfaces.md)
+- [Discovery before commitment](references/why-mine-and-wander.md)

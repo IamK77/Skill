@@ -47,8 +47,8 @@ If the direction becomes a component family, systems can name and implement its 
 
 ## Optional references
 
-Read selectively when a thread needs technique or depth. The reference essays contain stronger conventions and older workflow language; use them as material to question, not as mandatory stages or creative constraints.
+Read selectively when a thread needs another perspective or a concrete technique. The notes supply possibilities, examples, and limits; none is a prerequisite or a requirement to close the exploration.
 
-- [gradient and texture](references/gradient-and-texture.md)
-- [one light model and elevation](references/one-light-model-and-elevation.md)
-- [radii and shape](references/radii-and-shape.md)
+- [Constructing a material relationship](references/gradient-and-texture.md)
+- [Edges, shadows, and separation](references/one-light-model-and-elevation.md)
+- [A family of shapes and intentional exceptions](references/radii-and-shape.md)

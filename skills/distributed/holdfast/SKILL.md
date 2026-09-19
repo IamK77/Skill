@@ -47,13 +47,13 @@ If one promise is selected, write its failure examples in groundwork and exercis
 
 ## Optional references
 
-Read selectively when a thread needs technique or depth. The reference essays contain stronger conventions and older workflow language; use them as material to question, not as mandatory stages or creative constraints.
+Read selectively when a thread needs another perspective or a concrete technique. The notes supply possibilities, examples, and limits; none is a prerequisite or a requirement to close the exploration.
 
-- [communication](references/communication.md)
-- [consistency and consensus](references/consistency-and-consensus.md)
-- [fault tolerance](references/fault-tolerance.md)
-- [replication](references/replication.md)
-- [sharding](references/sharding.md)
-- [the three enemies](references/the-three-enemies.md)
-- [time and causality](references/time-and-causality.md)
-- [transactions and coordination](references/transactions-and-coordination.md)
+- [Messages as promises about information](references/communication.md)
+- [Agreement has a scope and a model](references/consistency-and-consensus.md)
+- [Recovery without assuming a total failure](references/fault-tolerance.md)
+- [Copies, authority, and reconciliation](references/replication.md)
+- [Partitions that follow a relationship](references/sharding.md)
+- [Partial failure, delay, and incomplete knowledge](references/the-three-enemies.md)
+- [Which meaning of time does the operation need?](references/time-and-causality.md)
+- [Different useful promises around an operation](references/transactions-and-coordination.md)

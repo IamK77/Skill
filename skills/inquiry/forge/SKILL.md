@@ -80,9 +80,9 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [harden and provenance](references/harden-and-provenance.md)
-- [pipeline and integrity](references/pipeline-and-integrity.md)
-- [regeneration and repro](references/regeneration-and-repro.md)
-- [why operator not developer](references/why-operator-not-developer.md)
+- [Preserve the identity and failures of a research run](references/harden-and-provenance.md)
+- [Validate the path from input data to reported metric](references/pipeline-and-integrity.md)
+- [Regenerate a result from retained artifacts](references/regeneration-and-repro.md)
+- [Execute a plan without hiding methodological changes](references/why-operator-not-developer.md)

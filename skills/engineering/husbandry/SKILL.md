@@ -80,13 +80,13 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [agent era shifts](references/agent-era-shifts.md)
-- [decision tree](references/decision-tree.md)
-- [defect management](references/defect-management.md)
-- [knowledge legacy and retirement](references/knowledge-legacy-and-retirement.md)
-- [maintenance types and stance](references/maintenance-types-and-stance.md)
-- [refactoring](references/refactoring.md)
-- [technical debt](references/technical-debt.md)
-- [versioning and dependencies](references/versioning-and-dependencies.md)
+- [Maintenance decisions grounded in change cost](references/agent-era-shifts.md)
+- [Choose a maintenance change for an observed cost](references/decision-tree.md)
+- [From a reported symptom to a retained regression](references/defect-management.md)
+- [Retire obsolete paths without losing necessary knowledge](references/knowledge-legacy-and-retirement.md)
+- [Name the kind of change and its preserved contract](references/maintenance-types-and-stance.md)
+- [Preserve behaviour while changing structure](references/refactoring.md)
+- [Make a maintenance tradeoff inspectable](references/technical-debt.md)
+- [Maintain compatibility through a dependency or API change](references/versioning-and-dependencies.md)

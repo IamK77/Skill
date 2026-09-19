@@ -74,15 +74,15 @@ If an input or permission is missing, name the blocker and leave the relevant it
 
 ## Completion
 
-A use-specific, evidence-linked recommendation and a reversible next step. This skill remains supported independently of the inactive root touchstone experiment platform.
+A use-specific, evidence-linked recommendation and a reversible next step. This skill remains supported independently of the retired root touchstone experiment platform.
 
 After all required work and stage closures is recorded, use `checklist done --run "$RUN"`. This archives the result without deleting its history; it does not authorise any external action.
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [scoring and verdict](references/scoring-and-verdict.md)
-- [signal weighting and slop](references/signal-weighting-and-slop.md)
-- [the dashboard sweep](references/the-dashboard-sweep.md)
-- [why the gameable signals lie](references/why-the-gameable-signals-lie.md)
+- [Make a use-specific adoption recommendation](references/scoring-and-verdict.md)
+- [Weight observations by their connection to the decision](references/signal-weighting-and-slop.md)
+- [Inspect maintenance and compatibility where they matter](references/the-dashboard-sweep.md)
+- [Treat popularity and polish as leads, not verdicts](references/why-the-gameable-signals-lie.md)

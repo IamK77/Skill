@@ -85,11 +85,11 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [agent feedback shifts](references/agent-feedback-shifts.md)
-- [decision tree](references/decision-tree.md)
-- [feedback sources](references/feedback-sources.md)
-- [honest ceiling](references/honest-ceiling.md)
-- [python recipe](references/python-recipe.md)
-- [typescript recipe](references/typescript-recipe.md)
+- [Designing a useful feedback loop](references/agent-feedback-shifts.md)
+- [Choose a feedback source for a specific mistake](references/decision-tree.md)
+- [Combine observations without confusing their scope](references/feedback-sources.md)
+- [State what a static check actually establishes](references/honest-ceiling.md)
+- [A Python feedback loop that fits the project](references/python-recipe.md)
+- [A TypeScript feedback loop that reaches consumers](references/typescript-recipe.md)

@@ -81,13 +81,13 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [agent era shifts](references/agent-era-shifts.md)
-- [chaining and impact](references/chaining-and-impact.md)
-- [decision tree](references/decision-tree.md)
-- [exploitation by class](references/exploitation-by-class.md)
-- [recon and enumeration](references/recon-and-enumeration.md)
-- [report fix retest](references/report-fix-retest.md)
-- [scope and authorization](references/scope-and-authorization.md)
-- [tools and practice](references/tools-and-practice.md)
+- [From security hypothesis to bounded finding](references/agent-era-shifts.md)
+- [Separate a demonstrated link from a hypothetical chain](references/chaining-and-impact.md)
+- [Choose a bounded security investigation](references/decision-tree.md)
+- [Demonstrate the violated boundary, not a category label](references/exploitation-by-class.md)
+- [Map the authorised attack surface](references/recon-and-enumeration.md)
+- [Produce a reproducible finding and verify its repair](references/report-fix-retest.md)
+- [Record the authority and limits of a test](references/scope-and-authorization.md)
+- [Use tools as bounded instruments](references/tools-and-practice.md)

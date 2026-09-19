@@ -47,11 +47,11 @@ Keel can build one selected journey end to end. Wellspring explores state repres
 
 ## Optional references
 
-Read selectively when a thread needs technique or depth. The reference essays contain stronger conventions and older workflow language; use them as material to question, not as mandatory stages or creative constraints.
+Read selectively when a thread needs another perspective or a concrete technique. The notes supply possibilities, examples, and limits; none is a prerequisite or a requirement to close the exploration.
 
-- [decision tree](references/decision-tree.md)
-- [objective function](references/objective-function.md)
-- [perception contract](references/perception-contract.md)
-- [product sense and judgment](references/product-sense-and-judgment.md)
-- [source of truth and consistency](references/source-of-truth-and-consistency.md)
-- [the membrane](references/the-membrane.md)
+- [Navigate by the experience being proposed](references/decision-tree.md)
+- [Different meanings of better](references/objective-function.md)
+- [What does the surface promise during uncertainty?](references/perception-contract.md)
+- [Use context without inventing the requirement](references/product-sense-and-judgment.md)
+- [Authorship and continuity in a frontend](references/source-of-truth-and-consistency.md)
+- [Different stories for the same frontend](references/the-membrane.md)

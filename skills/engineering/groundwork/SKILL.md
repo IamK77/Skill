@@ -80,11 +80,11 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [agent blind spots](references/agent-blind-spots.md)
-- [analysis](references/analysis.md)
-- [decision tree](references/decision-tree.md)
-- [elicitation](references/elicitation.md)
-- [specification](references/specification.md)
-- [validation and management](references/validation-and-management.md)
+- [Requirements that are easy to leave implicit](references/agent-blind-spots.md)
+- [Separate the desired outcome from proposed implementation](references/analysis.md)
+- [Ask only what changes the work](references/decision-tree.md)
+- [Elicit examples and constraints from actual work](references/elicitation.md)
+- [Write a task definition someone can verify](references/specification.md)
+- [Keep agreement and later changes attributable](references/validation-and-management.md)

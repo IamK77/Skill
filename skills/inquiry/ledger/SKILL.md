@@ -80,9 +80,9 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [ablation sensitivity budget](references/ablation-sensitivity-budget.md)
-- [instances and baselines](references/instances-and-baselines.md)
-- [matrix and firewall](references/matrix-and-firewall.md)
-- [metrics and statistics](references/metrics-and-statistics.md)
+- [Design informative comparisons within a real budget](references/ablation-sensitivity-budget.md)
+- [Choose data and baselines for the stated population](references/instances-and-baselines.md)
+- [Connect a chosen claim to planned evidence](references/matrix-and-firewall.md)
+- [Specify what will be measured and compared](references/metrics-and-statistics.md)

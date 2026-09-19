@@ -81,13 +81,13 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [agent era shifts](references/agent-era-shifts.md)
-- [capacity and continuity](references/capacity-and-continuity.md)
-- [decision tree](references/decision-tree.md)
-- [environments and config](references/environments-and-config.md)
-- [monitoring and alerting](references/monitoring-and-alerting.md)
-- [observability](references/observability.md)
-- [release and rollback](references/release-and-rollback.md)
-- [reliability and incident](references/reliability-and-incident.md)
+- [Operating with an observable rollback boundary](references/agent-era-shifts.md)
+- [Measure a limit and exercise a recovery path](references/capacity-and-continuity.md)
+- [Select an operational procedure from the actual risk](references/decision-tree.md)
+- [Change the intended environment and configuration](references/environments-and-config.md)
+- [Alerts with an owner and a useful response](references/monitoring-and-alerting.md)
+- [Follow one operation through its consequences](references/observability.md)
+- [A bounded release with a feasible reversal](references/release-and-rollback.md)
+- [Restore useful service and leave an honest incident record](references/reliability-and-incident.md)

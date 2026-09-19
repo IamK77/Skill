@@ -72,7 +72,7 @@ The CLI constrains **its own state transitions**. It cannot stop an agent from r
 
 Active work here is the skills, checklist CLI, authoring checks, and design probes. The root A/B experiment platform has been removed from the tracked tree; its source and artifacts remain in [Git history](docs/retired-ab.md). The supported [`quarry:touchstone`](skills/quarry/touchstone/SKILL.md) repository-assessment skill remains available.
 
-Historical reference essays remain available for techniques and context. They do not add mandatory gates to current entrypoints. See [AUTHORING.md](AUTHORING.md) for the current contract.
+The reference library follows the same split as the entrypoints: SOP method cards and creative lenses with optional technique notes. The full migration rewrote 194 references and retained 4 already-current routing notes; it does not leave a hidden legacy workflow behind. See [AUTHORING.md](AUTHORING.md) and the [migration record](docs/reference-migration.md).
 
 ## Development checks
 

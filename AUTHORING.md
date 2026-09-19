@@ -9,7 +9,7 @@ The two substantive forms are **execution SOP** and **creative heuristic**. A ro
 name: focused-name
 description: "When this skill is useful and what kind of help it provides."
 metadata:
-  kind: sop # or heuristic; router only for navigation
+  kind: sop
 ---
 ```
 
@@ -17,7 +17,7 @@ Keep the description within the repository's 1024-character compatibility budget
 
 Do not execute shell initialization while loading the skill, preapprove broad Bash, or imply that a file grants permissions. Explicitly user-started, high-impact workflows can declare `disable-model-invocation: true`; that is a host invocation control, not an authorisation or sandbox mechanism.
 
-Link to selective references instead of making every invocation read the entire library. Current entrypoints define the workflow; older reference essays are context, not extra mandatory gates. Prefer precise local examples to universal commandments.
+Link to selective references instead of making every invocation read the entire library. The reference itself must match the parent skill's role: a bounded technique for an SOP, or a perspective and optional elaboration for a heuristic. Do not retain contradictory legacy instructions behind a disclaimer. Current entrypoints define completion; references do not introduce hidden stages. Prefer precise local examples to universal commandments.
 
 ## SOP template
 
@@ -68,6 +68,6 @@ python3 -m unittest discover -s devtools -p 'test_skill_lint.py'
 node devtools/checklist/bundle/checklist.mjs lint skills --strict
 ```
 
-Structural lint checks the declared form, resource links, lifecycle markers, and absence of heuristic gates. CLI lint validates actual YAML and command parity. These checks do not judge whether an analogy is interesting or a procedure is wise; that still requires reading the skill and trying it on a real task.
+Structural lint checks entrypoints and every reference: declared form, resource links and heading anchors, lifecycle markers, and known obsolete gates or unsupported model-psychology claims. CLI lint validates actual YAML and command parity. The guards are deliberately limited; they do not judge whether an analogy is interesting, a procedure is wise, or every technical statement is true. That still requires editorial review and use on a real task.
 
 CLI logic changes need regression tests; demonstrate that the test detects the target fault. Source and committed bundle must pass the same run-contract cases. Probe changes retain their own behavioural tests. The root A/B experiment platform is not the required development path for skills.

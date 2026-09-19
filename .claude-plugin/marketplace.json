@@ -53,7 +53,7 @@
     },
     {
       "name": "quarry",
-      "description": "Two SOPs: forage captures a bounded, dated shortlist; touchstone evaluates a selected project for a stated use through source, maintenance, compatibility, and trial evidence. The touchstone skill is independent of the inactive root A/B experiment platform.",
+      "description": "Two SOPs: forage captures a bounded, dated shortlist; touchstone evaluates a selected project for a stated use through source, maintenance, compatibility, and trial evidence. The touchstone skill is independent of the retired root A/B experiment platform.",
       "source": "./",
       "strict": false,
       "skills": [

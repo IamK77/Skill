@@ -47,9 +47,9 @@ A selected direction can become tokens in systems. Actual font loading, fallback
 
 ## Optional references
 
-Read selectively when a thread needs technique or depth. The reference essays contain stronger conventions and older workflow language; use them as material to question, not as mandatory stages or creative constraints.
+Read selectively when a thread needs another perspective or a concrete technique. The notes supply possibilities, examples, and limits; none is a prerequisite or a requirement to close the exploration.
 
-- [internationalized text](references/internationalized-text.md)
-- [spacing scale](references/spacing-scale.md)
-- [the optical tells](references/the-optical-tells.md)
-- [type scale and rhythm](references/type-scale-and-rhythm.md)
+- [A typographic voice across different text](references/internationalized-text.md)
+- [Reusable spacing with room for meaning](references/spacing-scale.md)
+- [Features that support actual reading](references/the-optical-tells.md)
+- [Hierarchy and cadence before a ratio](references/type-scale-and-rhythm.md)

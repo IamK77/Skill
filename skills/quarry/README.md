@@ -1,6 +1,6 @@
 # quarry
 
-Bounded software discovery and evidence-based project assessment. The quarry touchstone skill is independent of the inactive root experiment platform.
+Bounded software discovery and evidence-based project assessment. The quarry touchstone skill is independent of the retired root experiment platform.
 
 2 sop.
 

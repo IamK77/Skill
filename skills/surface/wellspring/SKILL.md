@@ -47,11 +47,11 @@ When a model is selected, keel implements the path and trials protects its visib
 
 ## Optional references
 
-Read selectively when a thread needs technique or depth. The reference essays contain stronger conventions and older workflow language; use them as material to question, not as mandatory stages or creative constraints.
+Read selectively when a thread needs another perspective or a concrete technique. The notes supply possibilities, examples, and limits; none is a prerequisite or a requirement to close the exploration.
 
-- [classification tree](references/classification-tree.md)
-- [data flow and component api](references/data-flow-and-component-api.md)
-- [server state and data layer](references/server-state-and-data-layer.md)
-- [source of truth](references/source-of-truth.md)
-- [state machines](references/state-machines.md)
-- [the membrane](references/the-membrane.md)
+- [Several homes for a value](references/classification-tree.md)
+- [Channels, composition, and component relationships](references/data-flow-and-component-api.md)
+- [Observation, freshness, and a local proposal](references/server-state-and-data-layer.md)
+- [Copies with different meanings](references/source-of-truth.md)
+- [Interactions as stories with explicit transitions](references/state-machines.md)
+- [State as ownership and memory](references/the-membrane.md)

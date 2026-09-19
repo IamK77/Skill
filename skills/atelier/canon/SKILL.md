@@ -47,11 +47,11 @@ Other atelier lenses can develop an interesting thread without running all lense
 
 ## Optional references
 
-Read selectively when a thread needs technique or depth. The reference essays contain stronger conventions and older workflow language; use them as material to question, not as mandatory stages or creative constraints.
+Read selectively when a thread needs another perspective or a concrete technique. The notes supply possibilities, examples, and limits; none is a prerequisite or a requirement to close the exploration.
 
-- [ai default attractors](references/ai-default-attractors.md)
-- [non default and quantified](references/non-default-and-quantified.md)
-- [product sense](references/product-sense.md)
-- [surface archetypes](references/surface-archetypes.md)
+- [Familiar visual patterns as creative prompts](references/ai-default-attractors.md)
+- [From a visual premise to an experiment](references/non-default-and-quantified.md)
+- [Changing the activity a surface makes possible](references/product-sense.md)
+- [Archetypes as borrowing grounds](references/surface-archetypes.md)
 
 [Probe usage and limits](probes/README.md). Probes remain optional and do not create a creative checklist run.

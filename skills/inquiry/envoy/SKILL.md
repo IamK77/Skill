@@ -81,9 +81,9 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [agent and the three redlines](references/agent-and-the-three-redlines.md)
-- [skeleton and sections](references/skeleton-and-sections.md)
-- [submit rebut persist](references/submit-rebut-persist.md)
-- [why the paper already exists](references/why-the-paper-already-exists.md)
+- [Claim, citation, and authorship integrity](references/agent-and-the-three-redlines.md)
+- [Organise a manuscript around supported claims](references/skeleton-and-sections.md)
+- [Prepare an attributable submission or response](references/submit-rebut-persist.md)
+- [Build communication from the research record](references/why-the-paper-already-exists.md)

@@ -47,13 +47,13 @@ If a direction is chosen, groundwork can turn it into acceptance examples; assay
 
 ## Optional references
 
-Read selectively when a thread needs technique or depth. The reference essays contain stronger conventions and older workflow language; use them as material to question, not as mandatory stages or creative constraints.
+Read selectively when a thread needs another perspective or a concrete technique. The notes supply possibilities, examples, and limits; none is a prerequisite or a requirement to close the exploration.
 
-- [adr and evolution](references/adr-and-evolution.md)
-- [agent era shifts](references/agent-era-shifts.md)
-- [architecture styles](references/architecture-styles.md)
-- [boundaries and contracts](references/boundaries-and-contracts.md)
-- [data design](references/data-design.md)
-- [decision tree](references/decision-tree.md)
-- [nfr realization](references/nfr-realization.md)
-- [tech selection](references/tech-selection.md)
+- [Record a decision without erasing its alternatives](references/adr-and-evolution.md)
+- [Architecture as a distribution of future choices](references/agent-era-shifts.md)
+- [Names as descriptions, not rankings](references/architecture-styles.md)
+- [Control what collaborators need to know](references/boundaries-and-contracts.md)
+- [Represent questions and histories deliberately](references/data-design.md)
+- [Questions that expose architectural forks](references/decision-tree.md)
+- [Translate a quality into an observable promise](references/nfr-realization.md)
+- [Compare commitments and reversible experiments](references/tech-selection.md)

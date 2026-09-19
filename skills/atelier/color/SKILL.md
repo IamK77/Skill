@@ -47,12 +47,12 @@ Use the coherence probe on a rendered candidate if useful. It measures declared 
 
 ## Optional references
 
-Read selectively when a thread needs technique or depth. The reference essays contain stronger conventions and older workflow language; use them as material to question, not as mandatory stages or creative constraints.
+Read selectively when a thread needs another perspective or a concrete technique. The notes supply possibilities, examples, and limits; none is a prerequisite or a requirement to close the exploration.
 
-- [color spaces and neutrals](references/color-spaces-and-neutrals.md)
-- [contrast and bw](references/contrast-and-bw.md)
-- [dark theme engineering](references/dark-theme-engineering.md)
-- [data viz color](references/data-viz-color.md)
-- [oklch palette recipes](references/oklch-palette-recipes.md)
+- [Working with colour coordinates](references/color-spaces-and-neutrals.md)
+- [Contrast, endpoints, and useful distinctions](references/contrast-and-bw.md)
+- [A dark theme as a separate mapping](references/dark-theme-engineering.md)
+- [Colour that matches the data relationship](references/data-viz-color.md)
+- [Palette recipes as experiments](references/oklch-palette-recipes.md)
 
 [Probe usage and limits](probes/README.md). Probes remain optional and do not create a creative checklist run.

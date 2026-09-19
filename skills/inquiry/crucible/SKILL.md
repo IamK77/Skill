@@ -47,9 +47,9 @@ If an idea is chosen for a test, ledger specifies the comparison; forge executes
 
 ## Optional references
 
-Read selectively when a thread needs technique or depth. The reference essays contain stronger conventions and older workflow language; use them as material to question, not as mandatory stages or creative constraints.
+Read selectively when a thread needs another perspective or a concrete technique. The notes supply possibilities, examples, and limits; none is a prerequisite or a requirement to close the exploration.
 
-- [ablation and novelty](references/ablation-and-novelty.md)
-- [spec and ceiling](references/spec-and-ceiling.md)
-- [theory](references/theory.md)
-- [variants and tournament](references/variants-and-tournament.md)
+- [Removing pieces to discover what an idea means](references/ablation-and-novelty.md)
+- [A mechanism sketch and its possible limits](references/spec-and-ceiling.md)
+- [Theory as a source of mechanisms and questions](references/theory.md)
+- [Variants as different causal stories](references/variants-and-tournament.md)

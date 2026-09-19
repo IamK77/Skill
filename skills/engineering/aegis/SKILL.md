@@ -85,13 +85,13 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [agent era shifts](references/agent-era-shifts.md)
-- [decision tree](references/decision-tree.md)
-- [operate and respond](references/operate-and-respond.md)
-- [principles and stance](references/principles-and-stance.md)
-- [secure coding](references/secure-coding.md)
-- [secure design](references/secure-design.md)
-- [security testing and gates](references/security-testing-and-gates.md)
-- [threat modeling](references/threat-modeling.md)
+- [Security review choices](references/agent-era-shifts.md)
+- [Selecting a defensive review](references/decision-tree.md)
+- [Security response and operational follow-through](references/operate-and-respond.md)
+- [Trust boundaries and bounded security claims](references/principles-and-stance.md)
+- [Handling untrusted representations](references/secure-coding.md)
+- [Designing the responsible control boundary](references/secure-design.md)
+- [Choosing security checks by their observations](references/security-testing-and-gates.md)
+- [A threat model tied to an actual boundary](references/threat-modeling.md)

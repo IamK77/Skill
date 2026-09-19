@@ -47,9 +47,9 @@ Keel can implement a chosen journey; seaworthy handles its operational states. O
 
 ## Optional references
 
-Read selectively when a thread needs technique or depth. The reference essays contain stronger conventions and older workflow language; use them as material to question, not as mandatory stages or creative constraints.
+Read selectively when a thread needs another perspective or a concrete technique. The notes supply possibilities, examples, and limits; none is a prerequisite or a requirement to close the exploration.
 
-- [application states and form visuals](references/application-states-and-form-visuals.md)
-- [designing for the long tail](references/designing-for-the-long-tail.md)
-- [grid and hierarchy](references/grid-and-hierarchy.md)
-- [measure and rhythm](references/measure-and-rhythm.md)
+- [Compose around incomplete and changing work](references/application-states-and-form-visuals.md)
+- [Let difficult content shape the composition](references/designing-for-the-long-tail.md)
+- [Structure attention, not only alignment](references/grid-and-hierarchy.md)
+- [Cadence through space and density](references/measure-and-rhythm.md)

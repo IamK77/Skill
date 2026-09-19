@@ -35,7 +35,7 @@ Definition refreshes, changed bindings, and upstream re-verification invalidate 
 5. For heuristics, remove the checklist entirely. Replace mandatory inspection stages with generative perspectives, analogies, and a worked shift. Do not rename a diagnostic checklist “creative”.
 6. Update routing and validate with both the Python authoring lint and the CLI schema/parity lint.
 
-The repository's 38 entrypoints have been migrated. Existing reference essays and probe implementations are retained as optional resources; they do not impose additional stages. Three intentionally user-started workflows (`gungnir`, `stationkeeping`, and `envoy`) declare `disable-model-invocation: true`; host permission prompts remain separate.
+The repository's 38 entrypoints and reference library have been migrated. Of 198 references, 194 were rewritten as scoped method cards or creative/technique notes; four already-current routing notes remain. Probe implementations are retained as optional instruments. References do not impose additional stages. Three intentionally user-started workflows (`gungnir`, `stationkeeping`, and `envoy`) declare `disable-model-invocation: true`; host permission prompts remain separate.
 
 ## Recovery and limits
 

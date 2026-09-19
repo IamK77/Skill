@@ -85,12 +85,12 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [agent era shifts](references/agent-era-shifts.md)
-- [ci cd](references/ci-cd.md)
-- [code style](references/code-style.md)
-- [decision tree](references/decision-tree.md)
-- [dependencies and reproducibility](references/dependencies-and-reproducibility.md)
-- [review practice](references/review-practice.md)
-- [version control](references/version-control.md)
+- [A reproducible path from change to delivery](references/agent-era-shifts.md)
+- [A reproducible delivery pipeline](references/ci-cd.md)
+- [Keep style feedback useful and local](references/code-style.md)
+- [Size delivery preparation to the task](references/decision-tree.md)
+- [Reproduce the dependency graph you intend to ship](references/dependencies-and-reproducibility.md)
+- [Review the intended behaviour and its evidence](references/review-practice.md)
+- [Record focused work without losing existing changes](references/version-control.md)

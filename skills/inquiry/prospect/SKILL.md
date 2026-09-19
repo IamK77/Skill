@@ -47,9 +47,9 @@ Crucible can elaborate a promising mechanism. Ledger is appropriate only when th
 
 ## Optional references
 
-Read selectively when a thread needs technique or depth. The reference essays contain stronger conventions and older workflow language; use them as material to question, not as mandatory stages or creative constraints.
+Read selectively when a thread needs another perspective or a concrete technique. The notes supply possibilities, examples, and limits; none is a prerequisite or a requirement to close the exploration.
 
-- [falsify and rank](references/falsify-and-rank.md)
-- [seven seams](references/seven-seams.md)
-- [table and reproduction](references/table-and-reproduction.md)
-- [why mine not read](references/why-mine-not-read.md)
+- [Contrast questions without prematurely closing them](references/falsify-and-rank.md)
+- [Places where new questions can emerge](references/seven-seams.md)
+- [A literature map that can generate questions](references/table-and-reproduction.md)
+- [Reading for friction and possibility](references/why-mine-not-read.md)

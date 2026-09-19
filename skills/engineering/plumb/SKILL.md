@@ -47,13 +47,13 @@ Once an interface or representation is selected, assay can retain the tiny count
 
 ## Optional references
 
-Read selectively when a thread needs technique or depth. The reference essays contain stronger conventions and older workflow language; use them as material to question, not as mandatory stages or creative constraints.
+Read selectively when a thread needs another perspective or a concrete technique. The notes supply possibilities, examples, and limits; none is a prerequisite or a requirement to close the exploration.
 
-- [abstraction and design](references/abstraction-and-design.md)
-- [agent era shifts](references/agent-era-shifts.md)
-- [craft stance](references/craft-stance.md)
-- [decision tree](references/decision-tree.md)
-- [functions and flow](references/functions-and-flow.md)
-- [naming](references/naming.md)
-- [smells and trust chains](references/smells-and-trust-chains.md)
-- [testability and disposition](references/testability-and-disposition.md)
+- [Share a relation rather than merely lines](references/abstraction-and-design.md)
+- [Representations that change the problem](references/agent-era-shifts.md)
+- [Clarity through a concrete boundary](references/craft-stance.md)
+- [Choose a small representation experiment](references/decision-tree.md)
+- [Expose transformations, decisions, and effects](references/functions-and-flow.md)
+- [Use words to distinguish concepts](references/naming.md)
+- [Follow an assumption across representations](references/smells-and-trust-chains.md)
+- [Let a small observable example inform the design](references/testability-and-disposition.md)

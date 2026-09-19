@@ -84,15 +84,15 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [agent test smells](references/agent-test-smells.md)
-- [coverage and mutation](references/coverage-and-mutation.md)
-- [decision tree](references/decision-tree.md)
-- [determinism and flakiness](references/determinism-and-flakiness.md)
-- [evidence catalogue](references/evidence-catalogue.md)
-- [language norms](references/language-norms.md)
-- [parallel execution](references/parallel-execution.md)
-- [probe construction](references/probe-construction.md)
-- [property based](references/property-based.md)
-- [test doubles](references/test-doubles.md)
+- [Tests that observe the wrong thing](references/agent-test-smells.md)
+- [Coverage, fault sensitivity, and gaps](references/coverage-and-mutation.md)
+- [Choosing a test around a risk](references/decision-tree.md)
+- [Making failures reproducible](references/determinism-and-flakiness.md)
+- [An inspectable verification record](references/evidence-catalogue.md)
+- [Fit tests to the repository's language and conventions](references/language-norms.md)
+- [Independent tests and shared resources](references/parallel-execution.md)
+- [Construct a probe for one behavioural claim](references/probe-construction.md)
+- [Properties and generated cases](references/property-based.md)
+- [Substitute boundaries without replacing the subject](references/test-doubles.md)

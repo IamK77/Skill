@@ -80,11 +80,11 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [accessibility and performance](references/accessibility-and-performance.md)
-- [accessibility deep](references/accessibility-deep.md)
-- [forms states and offline](references/forms-states-and-offline.md)
-- [four states](references/four-states.md)
-- [illusion maintenance](references/illusion-maintenance.md)
-- [the membrane](references/the-membrane.md)
+- [Check the selected journey under its actual constraints](references/accessibility-and-performance.md)
+- [Follow meaning and interaction beyond appearance](references/accessibility-deep.md)
+- [Preserve user intent across form and connectivity states](references/forms-states-and-offline.md)
+- [Model the states that matter to the actual task](references/four-states.md)
+- [Make asynchronous behaviour match the promise](references/illusion-maintenance.md)
+- [Robustness around a selected journey](references/the-membrane.md)

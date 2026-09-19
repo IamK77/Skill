@@ -47,13 +47,13 @@ Use an atelier lens for a promising dimension, or systems when the human wants a
 
 ## Optional references
 
-Read selectively when a thread needs technique or depth. The reference essays contain stronger conventions and older workflow language; use them as material to question, not as mandatory stages or creative constraints.
+Read selectively when a thread needs another perspective or a concrete technique. The notes supply possibilities, examples, and limits; none is a prerequisite or a requirement to close the exploration.
 
-- [color and light](references/color-and-light.md)
-- [css and tokens](references/css-and-tokens.md)
-- [depth form texture](references/depth-form-texture.md)
-- [icons and imagery](references/icons-and-imagery.md)
-- [motion and feel](references/motion-and-feel.md)
-- [the membrane](references/the-membrane.md)
-- [tokens across css and js](references/tokens-across-css-and-js.md)
-- [type](references/type.md)
+- [Colour and light as a shared visual premise](references/color-and-light.md)
+- [Translate a selected relationship into reusable implementation](references/css-and-tokens.md)
+- [Material as a compositional choice](references/depth-form-texture.md)
+- [A visual grammar rather than a collection of assets](references/icons-and-imagery.md)
+- [Character through timing and continuity](references/motion-and-feel.md)
+- [A visual voice across several dimensions](references/the-membrane.md)
+- [Shared meaning across different rendering media](references/tokens-across-css-and-js.md)
+- [Typography as a relationship with the reader](references/type.md)

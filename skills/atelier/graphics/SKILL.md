@@ -47,9 +47,9 @@ Once a direction is wanted, choose the least complex suitable renderer and provi
 
 ## Optional references
 
-Read selectively when a thread needs technique or depth. The reference essays contain stronger conventions and older workflow language; use them as material to question, not as mandatory stages or creative constraints.
+Read selectively when a thread needs another perspective or a concrete technique. The notes supply possibilities, examples, and limits; none is a prerequisite or a requirement to close the exploration.
 
-- [canvas webgl gpu](references/canvas-webgl-gpu.md)
-- [dom vs canvas vs webgl and fallback](references/dom-vs-canvas-vs-webgl-and-fallback.md)
-- [icon system](references/icon-system.md)
-- [imagery and illustration](references/imagery-and-illustration.md)
+- [Develop a visual process before a renderer](references/canvas-webgl-gpu.md)
+- [Choose a medium for the relationship](references/dom-vs-canvas-vs-webgl-and-fallback.md)
+- [Marks, labels, and a coherent family](references/icon-system.md)
+- [A visual family from a construction process](references/imagery-and-illustration.md)

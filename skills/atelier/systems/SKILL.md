@@ -80,8 +80,8 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [design to code handoff](references/design-to-code-handoff.md)
-- [the living component library](references/the-living-component-library.md)
-- [token architecture one source](references/token-architecture-one-source.md)
+- [Hand off a selected visual direction as inspectable artifacts](references/design-to-code-handoff.md)
+- [Examples that exercise real reusable components](references/the-living-component-library.md)
+- [Semantic tokens with explicit ownership](references/token-architecture-one-source.md)

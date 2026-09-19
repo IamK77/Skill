@@ -80,10 +80,10 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [contracts that cant drift](references/contracts-that-cant-drift.md)
-- [css layout and space](references/css-layout-and-space.md)
-- [seam checklist](references/seam-checklist.md)
-- [skeleton acceptance](references/skeleton-acceptance.md)
-- [the membrane](references/the-membrane.md)
+- [Keep the client/server seam inspectable](references/contracts-that-cant-drift.md)
+- [Implement the chosen spatial relationship](references/css-layout-and-space.md)
+- [Trace one thin journey across its seams](references/seam-checklist.md)
+- [Accept the thin slice at its stated boundary](references/skeleton-acceptance.md)
+- [A thin slice through real integration seams](references/the-membrane.md)

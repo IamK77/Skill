@@ -80,11 +80,11 @@ After all required work and stage closures is recorded, use `checklist done --ru
 
 ## Reference shelf
 
-Open only the techniques relevant to the current step. Older essays are background, not extra required gates; this entrypoint defines the workflow.
+Open the technique relevant to the current step. These notes provide concrete methods and examples, not additional phases; this entrypoint defines the run's completion conditions.
 
-- [conway and design system](references/conway-and-design-system.md)
-- [enforce boundaries](references/enforce-boundaries.md)
-- [frontend dx](references/frontend-dx.md)
-- [frontend security](references/frontend-security.md)
-- [prune](references/prune.md)
-- [the membrane](references/the-membrane.md)
+- [Align component ownership with actual consumers](references/conway-and-design-system.md)
+- [Retain a check for a meaningful module boundary](references/enforce-boundaries.md)
+- [Improve a measured contributor feedback loop](references/frontend-dx.md)
+- [Protect frontend-facing boundaries without trusting the surface alone](references/frontend-security.md)
+- [Remove unused or superseded frontend structure safely](references/prune.md)
+- [Maintainable boundaries and consumers](references/the-membrane.md)

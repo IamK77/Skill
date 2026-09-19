@@ -44,4 +44,4 @@ Use `livery` for a coherent visual direction and atelier lenses for a specific v
 
 [Suite map](references/suite-map.md).
 
-[Optional handoffs](references/lifecycle-handbook.md).
+[Optional handoffs, not a pipeline](references/lifecycle-handbook.md).
