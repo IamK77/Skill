@@ -83,7 +83,7 @@ describe('sensor execution targets the project, not the skill dir', () => {
     // sleep 1 completes well under the 10s default — so if it fails, the 200ms
     // per-check override is what cut it off. Pins item.timeoutMs is wired through.
     const result = await runCheck(item('shell:sleep 1', { timeoutMs: 200 }), skillDir, projectDir);
-    expect(result.result!.status).toBe('fail');
+    expect(result.result!.status).toBe('error'); // timeout is an execution error, not a negative finding
     expect(result.result!.message.length).toBeGreaterThan(0);
   });
 
@@ -104,7 +104,7 @@ describe('sensor execution targets the project, not the skill dir', () => {
     fs.writeFileSync(script, '#!/bin/bash\nsleep 1\necho done\n', 'utf-8');
     fs.chmodSync(script, 0o755);
     const result = await runCheck(item('script:./slow.sh', { timeoutMs: 200 }), skillDir, projectDir);
-    expect(result.result!.status).toBe('fail');
+    expect(result.result!.status).toBe('error'); // timeout is an execution error, not a negative finding
   });
 
   it('a script: sensor PASSES under a generous timeoutMs', async () => {

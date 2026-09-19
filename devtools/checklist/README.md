@@ -1,167 +1,149 @@
 # checklist
 
-A CLI that gates a Claude Code skill's phases. A stage cannot open until every check in every prior stage is recorded as passing. It exists so an agent running a multi-stage skill cannot skip ahead or self-certify a stage it did not actually do.
+Run records for execution SOPs. Node 20+, TypeScript, commander. This working tree implements the **0.5 interface / state schema 2**; publication is a separate release action.
 
-Package name `@iamk77/skill-checklist` (current version: see [CHANGELOG](https://github.com/IamK77/Skill/blob/main/devtools/checklist/CHANGELOG.md)). TypeScript, commander-based.
+This CLI records confirmations and sensor observations, then checks whether a phase can close. It does not prove the truth of a manual statement, grant authority, constrain access to skill prose, or sandbox commands. Creative heuristic skills do not use it.
 
-## What it does
+## Run locally
 
-`checklist` reads a `.checklist.yml` file from a skill directory. That file is an ordered list of `phases`; each phase has `checks`, and each check has an `id`, a `description`, and an optional `verify` rule. The CLI tracks a pass/fail result per check, per skill directory, in a state file, and enforces sequential gating: before it will let you `verify` or `check` a phase, every check in every earlier phase must already be recorded as `pass`.
-
-The gate floor is strict about what "done" means. An item counts toward a phase only when its current recorded result is `pass` — not merely that a row for it exists. A stored `fail`/`error`, or a check that was green on an earlier run and has since regressed, does not satisfy the gate. A failing re-`verify` overwrites the stale pass, so the gate always reflects current state rather than the best state ever seen.
-
-There are two ways a check gets a result:
-
-- A check with **no** `verify` rule is a manual, human-judgment item. It is cleared by `checklist check <phase> <item-id>`, which records `pass` with the message `confirmed`.
-- A check **with** a `verify` rule is mechanical. It is run (and recorded) by `checklist verify <phase>`. Trying to `check` a mechanical item is rejected with an error pointing you at `verify`.
-
-## Install
+The committed bundle is self-contained; it can be copied outside the repository and run without `node_modules`:
 
 ```sh
-npm install -g @iamk77/skill-checklist
+node /path/to/Skill/devtools/checklist/bundle/checklist.mjs --help
 ```
 
-This puts the `checklist` command on `PATH`. To run it without a global install:
+Or build the source:
 
 ```sh
-npx @iamk77/skill-checklist show
+cd devtools/checklist
+npm ci
+npm run build
+node dist/index.js --help
 ```
 
-The published package ships a compiled `dist/` build, and `bin/checklist.js` runs it through Node directly (`require('../dist/index.js')`) — no `tsx` and no compile step at install time. Its only runtime dependencies are `commander`, `gray-matter`, and `js-yaml`.
+In examples, `checklist` means the matching CLI on PATH or the `node .../checklist.mjs` invocation. Check `--version`: older published/global 0.4 commands are not compatible with the new SOPs. Do not assume a new npm release exists because source has changed.
 
-Requires Node >= 20 (the `commander` dependency declares `>=20`).
-
-### From source
-
-To run it from a clone instead:
+## Lifecycle
 
 ```sh
-git clone https://github.com/IamK77/Skill.git
-cd Skill/devtools/checklist
-npm install      # dev deps: typescript, vitest, tsx
-npm run build    # compile src/ -> dist/
-npm link         # put `checklist` on PATH
+checklist init /path/to/skill --new --path /path/to/project --json
+# Copy the returned id into RUN. init does not change your shell environment.
+RUN='<returned-run-id>'
+checklist show --run "$RUN"
+checklist check scope goal --run "$RUN" --evidence 'brief.md:12 — accepted example'
+checklist advance scope --run "$RUN"
+checklist verify exercise --run "$RUN"
+# Record the actual remaining manual items, then close the phase.
+checklist advance exercise --run "$RUN"
+checklist done --run "$RUN"
 ```
 
-`npm run dev` (`tsc --watch`) keeps `dist/` current while you edit `src/`. The version is read from `package.json` at runtime (single source of truth), and releases are automated from Conventional Commits — see [RELEASING.md](https://github.com/IamK77/Skill/blob/main/devtools/checklist/RELEASING.md).
+Those phase/item names are illustrative; `show` displays the definition for the selected skill. A sensor exit 0 is **not** a phase completion event. `advance` refuses missing manual confirmations, pending sensors, failures, errors, stale readings, or required N/A reasons.
 
-In normal use you never pass any flags. The skill calls `checklist init ${CLAUDE_SKILL_DIR} --force`, and later commands resolve the directory from `$CLAUDE_SKILL_DIR` or the active pointer (see How directories are resolved).
-
-## Commands
-
-All commands accept the same two flags: `-d, --dir <dir>` (the directory containing `.checklist.yml`) and `-p, --path <path>` (the target directory for builtin checks; defaults to the resolved `--dir`).
-
-| Command | What it does |
+| Command | Contract |
 | --- | --- |
-| `init [dir] [--force]` | Load `.checklist.yml`, clear any existing state, write the active pointer, print a ready summary. Without `--force` it refuses if a state file already exists. The directory may be given positionally or via `--dir`; a conflicting pair is rejected. |
-| `show [phase]` | Print the checklist overview, or — with a phase argument — that one phase with its recorded readings. |
-| `verify <phase>` | Gate all prior phases, then batch-run that phase's mechanical (`verify`-rule) checks and record their current results. Exits non-zero if any mechanical check fails. |
-| `check <phase> <item-id>` | Manually confirm one human-judgment item (records `pass`). Errors if the item has a `verify` rule (that item belongs to `verify`) or if a prior phase is not complete. |
-| `phases` | List all phases. |
-| `reset` (alias `done`) | End-of-run cleanup: clear this skill's state file and drop the active pointer when it points here. Refuses if the resolved directory has no `.checklist.yml`, so a bare `reset` can't delete an unrelated project's state. |
+| `init [dir] --new [--path project] [--var NAME=value]` | Create a distinct run and freeze canonical skill/project paths. Project defaults to the creation cwd. No old state is erased or imported. |
+| `init --resume ID` / `resume ID` | Continue that active run without clearing its records. |
+| `resume ID --refresh` | Accept a changed definition and invalidate prior readings/closures. |
+| `resume ID --var NAME=value` | Change captured command bindings; changed values invalidate prior readings/closures. |
+| `runs [--json]` | List active, completed, and abandoned run IDs and targets. |
+| `show [phase] --run ID [--json]` | Read recorded state only. A supplied phase is validated; the overview is still shown for context. Never executes sensors. |
+| `phases --run ID` | Show the selected run's phases and recorded state. |
+| `check phase item --run ID [--evidence text]` | Record a manual confirmation. Reject mechanical items and missing required evidence. |
+| `na phase item --run ID --reason text` | Record not-applicable only if that item declares `allow-na: true`. Never represented as a pass. |
+| `verify phase --run ID` | Run that phase's mechanical checks, except explicitly N/A items. Exit nonzero on failure/error. Manual pending items can remain; no phase is closed implicitly. |
+| `advance [phase] --run ID` | Close the named or next open phase only when it is fulfilled and earlier phases are closed. |
+| `done --run ID` | Complete a fulfilled run, requiring explicit phase closure for phased definitions. Retain all history and artifacts. |
+| `reset --run ID --reason text` | Abandon an active run without deleting its history. |
+| `report --run ID [--json]` | Read a run's event history, including archived runs; never execute sensors. |
+| `unlock --run ID` | Remove a stale lock only after the recorded owner process is confirmed absent. |
+| `lint [path] [--strict] [--json]` | Validate checklist schema and skill command parity; `--strict` also fails on warnings. |
 
-Both `verify` and `check` apply the prior-phase gate before doing anything else. `verify` additionally records results; `check` records a single confirmation.
+Readings have `pass`, `fail`, `error`, `na`, or `stale`; absence is pending. Each records its source (`confirmation`, `sensor`, or `na`) and time. `show --json` includes phases, missing items, run status, revision, next action, and events. Changed/unavailable definitions are exposed as stale in an active run's view without writing state.
 
-### A worked example
+A new confirmation or verification reopens that phase and invalidates downstream readings/closures. Sensor readings are persisted as stale **before** execution, so an interrupted rerun cannot leave an old pass usable. To reconsider an N/A sensor, use an explicit refresh and obtain new readings; ordinary `verify` respects the recorded N/A.
 
-Given a checklist whose first two phases are `charter` (one check, `motivation-identified`) and `survey` (one check, `surface-mapped`):
+## Selection, recovery, and storage
 
-```sh
-$ checklist init /path/to/skill --force      # load config, clear state, set active pointer
+Use `--run ID` or `CHECKLIST_RUN_ID`. Otherwise selection is allowed only when the supplied `--session`, `CHECKLIST_SESSION_ID`, `CLAUDE_SESSION_ID`, or `CLAUDE_CODE_SESSION_ID` identifies **exactly one active run**. Multiple candidates are an error. There is no global latest-run guess and no lookup by skill/project pair.
 
-$ checklist check survey surface-mapped       # rejected: charter not complete yet
-gate blocked: PHASE 0 (charter) incomplete     # (exits non-zero)
+`--dir` and `--path` on selected-run commands are assertions: a conflicting path is refused rather than rebinding the run. `resume ID` works from another cwd. Skill-directory environment variables are creation defaults only, not selected-run targets.
 
-$ checklist check charter motivation-identified
-# records charter/motivation-identified = pass
+Records live under `$CHECKLIST_STATE_HOME/v2/runs/<id>/`, or `$XDG_STATE_HOME/checklist/v2/runs/<id>/`, or `~/.local/state/checklist/v2/runs/<id>/`:
 
-$ checklist verify charter                     # gate passes; charter has no mechanical checks
-$ checklist check survey surface-mapped        # now allowed; charter is complete
-# records survey/surface-mapped = pass
+- `run.json`: definition snapshot/hash, fixed target, bindings, readings, closures, and event history in one atomically replaced record.
+- `outputs/<id>.json`: sensor artifact with rule, result, run/item identity, target, and execution trace.
+- `lock/owner.json`: exclusive transaction owner while a command mutates the run.
 
-$ checklist show                               # review all phases and readings
-$ checklist done                               # clear state + active pointer
-```
+Run directories are created with mode 0700 and new record/artifact files with 0600. Commands and output can contain private data; these modes are not encryption. Do not bind secrets or collect unnecessary sensitive output. History is local, mutable by its owner, and **not tamper-proof**.
 
-The second line shows the core guarantee: an agent cannot record `survey` before `charter`'s checks are all `pass`.
+The run lock covers prerequisite checks, execution, and commit—not just the final rename. Contention fails visibly. Different runs can proceed independently. It is intended for local filesystems and local processes; shared cross-host state is unsupported. No lock is stolen on a timer. On normal interruption the active sensor process group is stopped; a forcibly killed CLI cannot run cleanup. Inspect the process and run, then `unlock` only after its owner exited and rerun interrupted sensors. A malformed/ownerless lock or interrupted recovery directory requires human inspection, not blind deletion. A reused PID is treated conservatively as alive.
 
-## How directories are resolved
+Atomic rename prevents a partially written JSON record becoming current; it is not a power-loss durability guarantee. Failure to save an artifact or state is a command failure, not a successful reading. Old `0.4` files remain untouched; see [MIGRATION.md](MIGRATION.md).
 
-Most commands need no `--dir` because the directory is resolved in this order:
+## Definition schema
 
-1. an explicit `--dir`
-2. `$CHECKLIST_DIR`
-3. `$CLAUDE_SKILL_DIR` (a running skill always knows its own dir; the harness sets this)
-4. the global **active pointer** file
-5. the current working directory
-
-The active pointer is a single file written by `init` and removed by `reset`/`done`. Its location is `$CHECKLIST_HOME` if set, else `$XDG_CONFIG_HOME/checklist/active`, else `~/.config/checklist/active`. Because `init` writes the pointer from the harness-expanded `${CLAUDE_SKILL_DIR}`, every later command finds the right directory with no flags and regardless of the current working directory.
-
-The pointer self-heals, but conservatively: it is removed and the resolver falls through to cwd only when its target is *definitely* gone (a `statSync` of `<target>/.checklist.yml` returns `ENOENT`/`ENOTDIR`). Any other error — `EACCES`, `EIO`, `ELOOP`, an NFS stall — is treated as "can't tell," and a valid pointer is never deleted over a transient read failure.
-
-`--path` (the target directory for builtin checks) defaults to the resolved `--dir`.
-
-## verify rules
-
-A check's `verify:` value can take one of three forms. The kind is taken from an explicit prefix; without a prefix it is auto-classified (a first token containing `/` or ending in `.sh`/`.bash`/`.ts`/`.js`/`.py` is treated as a script, otherwise as a shell command).
-
-- **`builtin:<name>`** — an in-process check. The available builtins are: `frontmatter`, `name-format`, `description-present`, `description-length`, `no-secrets`, `file-refs`, `has-checklist`, `line-count`. An unknown name returns an error listing the valid ones. A builtin that crashes (e.g. on a `SKILL.md` whose frontmatter is not even parseable YAML) is recorded as that one check's `error` result, prefixed with the check id — it does not abort the rest of the batch.
-- **`shell:<cmd>`** — run a shell command (via `/bin/bash`). Non-zero exit is a fail; its stderr/message is the recorded detail. Default timeout is 10s — raise it per check with `timeout: <seconds>` (below) for a real test/build/scan sensor.
-- **`script:<path>`** — run a script that must live **inside** the checklist directory. The path is checked twice for containment: lexically, and again against the real (symlink-resolved) paths before execution. Paths that escape the directory via `..`, another root, or a symlink are rejected with an error rather than run. The vetted path is executed with `/bin/bash <path>` (passed as an argument, not interpolated into a shell string), so directories with spaces or shell metacharacters in their names are fine.
-
-**Where a sensor runs.** A `shell:`/`script:` rule executes with its working directory set to the **project under review** (the `--path` target, defaulting to the directory you invoked the skill from) — *not* the skill's install dir. So `verify: shell:npm test` runs the project's suite, not anything next to `SKILL.md`. (Script *files* are still required to live inside the skill dir for containment; they just execute against the project.) This is what makes a check an independent verifier of real work — running the actual tests, build, or scan — instead of trusting a self-certified "done". The agent supplies the project-specific command through a `${VAR}` placeholder filled by `--var` or the environment — e.g. `TEST_CMD="npm test" checklist verify build`.
-
-**Per-check `timeout:`.** A check may set `timeout: <seconds>` (a positive number, ceiling 1800s) to override the 10s default for that one sensor — a full test suite or build needs minutes. It applies only to a mechanical (`verify`-rule) check; the loader and `checklist lint` reject it on a manual check, on a non-positive value, or on one over the ceiling.
-
-A check with no `verify:` is a manual item, cleared by `checklist check`. A `verify:` that is present but not a string (e.g. an indentation mistake that turns the rule into a nested mapping) is a config error — the file refuses to load rather than silently demoting a mechanical check to a manual one.
-
-**Platform note:** `shell:` and `script:` rules require a POSIX shell at `/bin/bash` (macOS, Linux). On Windows, run the CLI under WSL if your checklist uses them — checklists with only manual checks and `builtin:` rules work anywhere Node runs.
-
-Most shipped skills' checklists use only manual checks, so for them `verify` does no mechanical work — its job is purely to apply the prior-phase gate. The exception, and the reference example, is **`engineering/assay`**: its `build` phase clears `tests-green` with a real sensor — `verify: shell:${TEST_CMD}` (timeout 900s) — so the testing skill cannot mark "the suite passes" without the suite actually passing in the project. Wire a sensor into any check whose claim is mechanically checkable (tests green, build clean, no secrets, lint clean); leave genuinely human-judgment checks manual.
-
-## .checklist.yml format
-
-Top-level `phases:` is an ordered, non-empty list. Each phase has a `name` and a non-empty `checks:` list. Each check has an `id` (unique within its phase) and a `description`, plus an optional `verify`, an optional `evidence: required` (manual checks only), and an optional `timeout: <seconds>` (mechanical checks only). The loader rejects, with a located error: a missing `phases` array, an empty `phases` array, a phase without a `name` or `checks`, an empty `checks:` array (it would be vacuously gate-complete), a check without an `id` or `description`, duplicate `id`s within a phase, duplicate phase names (compared case-insensitively, since phases are addressed by name), a `verify` that is not a string, a `timeout` that is non-numeric/non-positive/over 1800s or set on a check with no `verify`, and a list entry that is not a mapping (e.g. a dangling `- `).
+Use phases when their closure is a meaningful dependency:
 
 ```yaml
 phases:
-  - name: charter
+  - name: scope
     checks:
-      - id: motivation-identified
-        description: Testing motivation classified and confirmed with the user
-        # no verify: -> manual item, cleared by `checklist check charter motivation-identified`
-
-  - name: build
+      - id: goal
+        description: Agreed outcome and acceptance example
+        evidence: required
+  - name: exercise
     checks:
-      - id: tests-green
-        description: Tests written and the full suite passes
-        verify: shell:npm test          # mechanical, run by `checklist verify build`
-      - id: skill-shape
-        description: SKILL.md frontmatter is well-formed
-        verify: builtin:frontmatter
+      - id: tests
+        description: Relevant project tests
+        verify: "shell:${TEST_CMD}"
+        timeout: 900
+      - id: review
+        description: Review observations recorded
+        evidence: required
+      - id: deployment
+        description: Deployment checks, when deployment is in scope
+        allow-na: true
 ```
 
-A phase is addressed by `name` (case-insensitive) or by 0-based index. An index argument must be all digits — anything else (`1abc`, `1.9`, a stray space) is looked up as a name and errors if no phase has that name, so a typo can never silently land on the wrong phase. Skills typically address stages by name only, so the index never surfaces.
+For independent short checks, avoid artificial stage ceremony:
 
-## State and files
+```yaml
+checks:
+  - id: source
+    description: Primary source and access date recorded
+    evidence: required
+  - id: fit
+    description: Fit to the stated need assessed
+    evidence: required
+```
 
-`checklist` writes two things, and **neither lives inside the skill directory** — the skill dir is treated as read-only (under a plugin install it is a package-managed directory whose fate on update is uncertain):
+Flat checks use phase name `main` for commands. `done` may complete a fulfilled flat list without `advance`. Do not specify both `checks` and `phases`. Names/IDs must be unique within their applicable scope. Empty verification rules or commands, nonboolean `allow-na`, and evidence requirements on mechanical items are rejected.
 
-- the **per-run state file**, under an XDG state directory. Its location is `$CHECKLIST_STATE_HOME` if set, else `$XDG_STATE_HOME/checklist`, else `~/.local/state/checklist`. Within that directory the file is keyed per **(skill, target)** pair — its name is the skill's basename plus a sha256 of the resolved `skill\0target` tuple (`<skill-basename>.<hash>.json`). Two references to the same dirs (with/without a trailing slash, relative vs absolute) resolve to one file; a different `--path` target gets its own file. So two concurrent runs of the same skill against different targets keep independent state and cannot stomp each other. The records are keyed per **phase NAME** (case-folded), then per check id (`{ checked: { "<phaseName>": { "<itemId>": { status, message } } } }`). Keying by name (not numeric index) means reordering phases in the `.checklist.yml` never mis-attaches an old pass to whatever check now sits at the old index. A corrupt or malformed state file is reported with a hint to run `checklist init --force`. Writes are atomic (temp file in the same directory + rename), and `check`/`verify` merge their new records into whatever is on disk at save time, so concurrent invocations don't overwrite each other's results.
-- the global `active` pointer file (location described above).
+## Sensors and bindings
 
-`init --force` clears the (skill, target) state file; `reset`/`done` clears the (skill, target) state file for the target it resolves (`--path`, else the skill dir) and drops the active pointer when it points at this directory.
+- `builtin:name`: an in-process structural check. Available names: `frontmatter`, `name-format`, `description-present`, `description-length`, `no-secrets`, `file-refs`, `has-checklist`, `line-count`. They inspect the target project, not the skill definition unless that is the chosen target.
+- `shell:command`: `/bin/bash -c`, with the fixed project as cwd.
+- `script:path`: a bash script contained in the skill directory, checked lexically and through symlinks; executes with the project as cwd. This is path containment, **not a sandbox**: a trusted script or shell command can access anything the process can access.
 
-**Migration note (breaking):** earlier versions wrote `.checklist.state.json` *inside* the skill directory. That location is no longer read, written, or deleted by any command — an existing in-skill-dir `.checklist.state.json` is abandoned (its recorded progress does not carry over). `init` prints a one-line stderr note when it spots one; the file is safe to delete.
+Use explicit prefixes; the loader retains historical bare-rule classification, while authoring lint requires explicit kinds. Timeout defaults to 10 seconds; `timeout` is a positive number of seconds, at most 1800. Normal exit 0 means pass; normal nonzero exit means fail; spawn errors, signals, timeout, and output overflow are execution errors. stdout and stderr are retained separately, bounded to 1 MiB of input bytes per stream; overflow stops the process group and is flagged. A cut UTF-8 sequence may decode to a replacement character. Summary messages are shortened; consult the artifact for captured output.
 
-## Run the tests
+Subprocess traces record effective command, cwd, start time, duration, exit code, signal, timeout and truncation flags. Builtin or pre-execution errors have timing/location metadata but no subprocess exit trace.
+
+`${NAME}` placeholders bind from explicit `--var` first, then matching environment values **at creation**. Missing bindings are errors at verification, even if a later process has that environment variable. `$$` escapes a dollar for the shell. Binding contents are trusted shell text, not quoted arguments or a secret store. The rest of the command environment (PATH, tools, files, shell `$NAME` expansions) is not frozen.
+
+Definition-file changes and explicit binding changes invalidate prior readings. The CLI does **not** automatically hash the entire project, dependencies, or scripts invoked by a shell command; rerun sensors after relevant inputs change. A recorded observation is from a particular time, not a perpetual guarantee.
+
+Four shipped SOPs bind real project commands: assay `TEST_CMD`, aegis `SCA_CMD`, flightline `LINT_CMD`, and gauge `TYPECHECK_CMD`. Determine those commands from the project. Never replace a missing tool with `echo success` or `true`.
+
+## Develop and verify
 
 ```sh
-npm test
+npm ci
+npm test                  # builds dist, then runs tests
+npm run bundle            # intentional regeneration
+npm run bundle:check      # compare in memory; no rewriting
+node dist/index.js lint ../../skills --strict
 ```
 
-Runs the vitest suite. The current run is 482 tests passing (none skipped — the probe suites for the once-deferred defects are fixed and un-skipped), across unit and integration files covering the loader, resolver, runner containment, state semantics, state relocation, the gate, the builtins, and the command surface.
-
-## License
-
-Apache-2.0, Copyright 2026 IamK77. See `LICENSE` and `NOTICE` (shipped with the package; also at the repository root).
+The run-contract integration suite exercises compiled source and a relocated committed bundle with identical cases. It intentionally does not repair a stale bundle before testing. CI checks freshness before merge rather than pushing a generated update afterward. Pure and legacy helper regression tests remain separately named; the shipping run contract is tested through the real CLI entrypoints.

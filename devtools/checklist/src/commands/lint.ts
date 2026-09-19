@@ -1,7 +1,6 @@
 import * as path from 'node:path';
 import { lintTree } from '../lint.js';
 import { formatLintReport } from '../formatter.js';
-import { resolveDir } from '../resolver.js';
 
 // `checklist lint [path]` validates skill checklists as a CI / authoring gate,
 // rather than at gate-runtime. It:
@@ -16,10 +15,9 @@ export function lintCommand(
   pathArg?: string,
   options?: { dir?: string; path?: string; strict?: boolean; json?: boolean },
 ): void {
-  // A lint target is a path to scan, not the active-checklist dir. Prefer the
-  // positional arg, then --dir, then the resolver (so a bare `checklist lint`
-  // inside a skill dir lints that skill); fall back to cwd.
-  const target = pathArg || options?.dir || resolveDir(options?.dir);
+  // Authoring lint is independent of both run selection and legacy active
+  // pointers. In particular, read-only lint must never repair an old pointer.
+  const target = pathArg || options?.dir || process.cwd();
 
   try {
     const result = lintTree(path.resolve(target));

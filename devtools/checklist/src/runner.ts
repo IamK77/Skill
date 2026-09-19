@@ -1,8 +1,10 @@
-import { execFileSync, execSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { getBuiltin, listBuiltins } from './builtins/index.js';
-import type { CheckItem, CheckItemResult, CheckResult } from './types.js';
+import type { CheckItem, CheckItemResult, CheckResult, SensorTrace } from './types.js';
+
+export type TraceSink = (trace: SensorTrace) => void;
 
 type VerifyKind = 'shell' | 'builtin' | 'script';
 
@@ -107,43 +109,55 @@ function classifyVerify(verify: string): Classification {
   return { kind: 'shell', value: verify, explicit: false };
 }
 
-function failureFromExec(e: unknown): CheckResult {
-  const err = e as { stderr?: string; message?: string };
-  const detail = (err.stderr || err.message || 'command failed').trim();
-  return { status: 'fail', message: detail };
+async function execute(args: string[], command: string, cwd: string, timeoutMs: number, sink?: TraceSink): Promise<CheckResult> {
+  const startedAt = new Date().toISOString();
+  const start = performance.now();
+  return new Promise((resolve, reject) => {
+    const child = spawn(BASH, args, { cwd, detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] });
+    let truncated = false, timedOut = false, spawnError = '';
+    const stdoutChunks: Buffer[] = [], stderrChunks: Buffer[] = [];
+    let stdoutBytes = 0, stderrBytes = 0;
+    const limit = 1024 * 1024;
+    const kill = () => {
+      if (child.pid) {
+        try { process.kill(process.platform === 'win32' ? child.pid : -child.pid, 'SIGKILL'); }
+        catch { /* process already exited */ }
+      }
+    };
+    const timer = setTimeout(() => { timedOut = true; kill(); }, timeoutMs);
+    const append = (chunks: Buffer[], bytes: number, chunk: Buffer) => {
+      if (bytes + chunk.length > limit) { truncated = true; kill(); }
+      chunks.push(chunk.subarray(0, Math.max(0, limit - bytes)));
+      return Math.min(limit, bytes + chunk.length);
+    };
+    child.stdout.on('data', chunk => { stdoutBytes = append(stdoutChunks, stdoutBytes, chunk); });
+    child.stderr.on('data', chunk => { stderrBytes = append(stderrChunks, stderrBytes, chunk); });
+    // On a normal terminal interruption, stop the sensor group too. SIGKILL of
+    // this CLI cannot be caught; its persisted pending reading still stays stale.
+    const interrupt = (signal: NodeJS.Signals) => { kill(); process.exit(signal === 'SIGINT' ? 130 : 143); };
+    process.once('SIGINT', interrupt); process.once('SIGTERM', interrupt);
+    child.on('error', error => { spawnError = error.message; });
+    child.on('close', (exitCode, signal) => {
+      clearTimeout(timer);
+      process.removeListener('SIGINT', interrupt); process.removeListener('SIGTERM', interrupt);
+      const stdout = Buffer.concat(stdoutChunks).toString('utf8');
+      const stderr = Buffer.concat(stderrChunks).toString('utf8');
+      const summary = (text: string) => text.trim().slice(0, 4096);
+      const trace: SensorTrace = { command, cwd, startedAt, durationMs: Math.round(performance.now() - start), exitCode, signal, timedOut, truncated, stdout, stderr };
+      try { sink?.(trace); } catch (e) { reject(e); return; }
+      if (spawnError || timedOut || truncated || signal) {
+        resolve({ status: 'error', message: spawnError || (timedOut ? `sensor timed out after ${timeoutMs}ms (SIGKILL)` : truncated ? 'sensor output exceeded 1 MiB limit per stream' : `sensor terminated by ${signal}`) });
+      } else if (exitCode === 0) resolve({ status: 'pass', message: summary(stdout) || 'OK' });
+      else resolve({ status: 'fail', message: summary(stderr) || `command failed: exit ${exitCode}` });
+    });
+  });
 }
-
-async function runShell(command: string, cwd: string, timeoutMs: number): Promise<CheckResult> {
-  try {
-    const stdout = execSync(command, {
-      cwd,
-      timeout: timeoutMs,
-      encoding: 'utf-8',
-      shell: BASH,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    }).trim();
-    return { status: 'pass', message: stdout || 'OK' };
-  } catch (e) {
-    return failureFromExec(e);
-  }
+async function runShell(command: string, cwd: string, timeoutMs: number, sink?: TraceSink): Promise<CheckResult> {
+  if (!command.trim()) return { status: 'error', message: 'empty shell command' };
+  return execute(['-c', command], command, cwd, timeoutMs, sink);
 }
-
-// Execute a (containment-vetted) script file. The path is passed as an argv
-// element to bash — NOT interpolated into a shell command string — so paths
-// containing spaces or shell metacharacters are executed verbatim instead of
-// being word-split or interpreted.
-async function runScriptFile(scriptPath: string, cwd: string, timeoutMs: number): Promise<CheckResult> {
-  try {
-    const stdout = execFileSync(BASH, [scriptPath], {
-      cwd,
-      timeout: timeoutMs,
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-    }).trim();
-    return { status: 'pass', message: stdout || 'OK' };
-  } catch (e) {
-    return failureFromExec(e);
-  }
+async function runScriptFile(scriptPath: string, cwd: string, timeoutMs: number, sink?: TraceSink): Promise<CheckResult> {
+  return execute([scriptPath], `${BASH} ${JSON.stringify(scriptPath)}`, cwd, timeoutMs, sink);
 }
 
 async function runBuiltin(name: string, targetPath: string): Promise<CheckResult> {
@@ -161,6 +175,7 @@ async function runScript(
   execCwd: string,
   explicit: boolean,
   timeoutMs: number,
+  sink?: TraceSink,
 ): Promise<CheckResult> {
   const base = path.resolve(containmentBase);
   const resolved = path.resolve(base, scriptPath);
@@ -199,7 +214,7 @@ async function runScript(
     };
   }
 
-  return runScriptFile(realResolved, execCwd, timeoutMs);
+  return runScriptFile(realResolved, execCwd, timeoutMs, sink);
 }
 
 export async function runCheck(
@@ -207,8 +222,9 @@ export async function runCheck(
   cwd: string,
   targetPath: string,
   vars: VerifyVars = {},
+  sink?: TraceSink,
 ): Promise<CheckItemResult> {
-  if (!item.verify) {
+  if (item.verify === undefined) {
     return { item, kind: 'manual' };
   }
 
@@ -230,11 +246,11 @@ export async function runCheck(
         // can supply part of a script path, but the vetted real path is still
         // what gets executed, so an interpolated value cannot escape the dir.
         const scriptPath = interpolate(value, vars);
-        result = await runScript(scriptPath, cwd, targetPath, explicit, timeoutMs);
+        result = await runScript(scriptPath, cwd, targetPath, explicit, timeoutMs, sink);
         break;
       }
       case 'shell':
-        result = await runShell(interpolate(value, vars), targetPath, timeoutMs);
+        result = await runShell(interpolate(value, vars), targetPath, timeoutMs, sink);
         break;
     }
   } catch (e) {

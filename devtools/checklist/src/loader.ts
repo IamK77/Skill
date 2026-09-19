@@ -23,13 +23,24 @@ export function loadChecklist(dir: string): ChecklistConfig {
     throw new Error(`${CONFIG_FILE} not found in ${dir}${skillHint}`);
   }
 
-  const raw = fs.readFileSync(filePath, 'utf-8');
+  return parseChecklist(fs.readFileSync(filePath, 'utf-8'));
+}
+
+/** Parse the exact bytes a caller snapshots/hashes; do not reread during binding. */
+export function parseChecklist(raw: string): ChecklistConfig {
   const data = yaml.load(raw) as Record<string, unknown>;
 
   if (!data || typeof data !== 'object') {
     throw new Error(`${CONFIG_FILE} is empty or not a valid YAML object`);
   }
 
+  if (data.checks !== undefined && data.phases !== undefined) {
+    throw new Error(`${CONFIG_FILE}: cannot specify both checks and phases`);
+  }
+  if (data.checks !== undefined) {
+    if (!Array.isArray(data.checks)) throw new Error(`${CONFIG_FILE}: checks must be an array`);
+    data.phases = [{ name: 'main', checks: data.checks }];
+  }
   if (!Array.isArray(data.phases)) {
     throw new Error(`${CONFIG_FILE} missing "phases" array`);
   }
@@ -74,6 +85,12 @@ export function loadChecklist(dir: string): ChecklistConfig {
       const verify = check.verify;
       if (verify !== undefined && typeof verify !== 'string') {
         throw new Error(`Phase "${phase.name}", check "${check.id}": "verify" must be a string`);
+      }
+      if (typeof verify === 'string' && (!verify.trim() || /^(shell|script|builtin):\s*$/.test(verify.trim()))) {
+        throw new Error(`Phase "${phase.name}", check "${check.id}": verify must have a non-empty rule and command`);
+      }
+      if (check['allow-na'] !== undefined && typeof check['allow-na'] !== 'boolean') {
+        throw new Error(`Phase "${phase.name}", check "${check.id}": allow-na must be a boolean`);
       }
       // Per-item opt-in for required evidence. The only accepted value is the
       // literal string "required" (mirroring `evidence: required` in the docs).
@@ -122,6 +139,7 @@ export function loadChecklist(dir: string): ChecklistConfig {
         verify,
         evidenceRequired,
         timeoutMs,
+        ...(check['allow-na'] === true ? { allowNa: true } : {}),
       };
     });
 
@@ -152,5 +170,5 @@ export function loadChecklist(dir: string): ChecklistConfig {
     seenPhaseNames.add(key);
   }
 
-  return { phases };
+  return { phases, ...(data.checks !== undefined ? { flat: true } : {}) };
 }

@@ -1,3 +1,5 @@
+// Legacy 0.4 adapter, retained for compatibility regression tests only.
+// Not registered by the shipping CLI. Run-based behaviour lives in workflow.ts.
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { clearState, stateFilePath, journalDir } from '../state.js';

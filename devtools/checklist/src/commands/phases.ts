@@ -1,3 +1,5 @@
+// Legacy 0.4 adapter, retained for compatibility regression tests only.
+// Not registered by the shipping CLI. Run-based behaviour lives in workflow.ts.
 import { loadChecklist } from '../loader.js';
 import { formatPhases } from '../formatter.js';
 import { resolveDir } from '../resolver.js';

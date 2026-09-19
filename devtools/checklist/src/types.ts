@@ -2,6 +2,7 @@ export interface CheckItem {
   id: string;
   description: string;
   verify?: string;
+  allowNa?: boolean;
   // Per-item opt-in: when true, a manual `check` MUST be accompanied by an
   // `--evidence` string. Set by the loader from `evidence: required` in the
   // .checklist.yml. It forces the agent to cite something specific (a
@@ -23,7 +24,21 @@ export interface Phase {
 }
 
 export interface ChecklistConfig {
+  flat?: boolean;
   phases: Phase[];
+}
+
+export interface SensorTrace {
+  command: string;
+  cwd: string;
+  startedAt: string;
+  durationMs: number;
+  exitCode: number | null;
+  signal: string | null;
+  timedOut: boolean;
+  truncated: boolean;
+  stdout: string;
+  stderr: string;
 }
 
 export interface CheckResult {

@@ -40,7 +40,7 @@ function write(yml: string): void {
   // give it one that drives the check so only the schema rule under test can fire.
   fs.writeFileSync(
     path.join(tmpDir, 'SKILL.md'),
-    '---\nname: x\n---\n# x\n`checklist check p c1`\n`checklist verify p`\n',
+    '---\nname: x\n---\n# x\n' + (yml.includes('verify:') ? '`checklist verify p`\n' : '`checklist check p c1`\n'),
     'utf-8',
   );
 }

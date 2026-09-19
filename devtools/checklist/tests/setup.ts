@@ -27,3 +27,5 @@ delete process.env.CLAUDE_SKILL_DIR;
 // explicitly to exercise the keyed path.
 delete process.env.CHECKLIST_SESSION_ID;
 delete process.env.CLAUDE_CODE_SESSION_ID;
+delete process.env.CLAUDE_SESSION_ID;
+delete process.env.CHECKLIST_RUN_ID;

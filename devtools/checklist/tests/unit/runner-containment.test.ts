@@ -292,21 +292,20 @@ describe('runner containment + classification boundaries', () => {
       expect(result.result!.message).toBe('padded');
     });
 
-    it('a process killed by a SIGNAL (empty stderr) is reported as fail via message fallback', async () => {
-      // Deterministic stand-in for an abnormally-terminated child: self-SIGTERM.
-      // stderr is empty, err.message is non-empty → fail with non-empty detail.
-      const result = await runCheck(makeItem('shell:kill -TERM $$'), tmpDir, tmpDir);
-      expect(result.result!.status).toBe('fail');
+    it('a process killed by a SIGNAL is an execution error, not a negative finding', async () => {
+      // Deterministic abnormal termination, distinct from a normal nonzero exit.
+      // Checklist $$ escapes one dollar; $$$$ is bash's actual PID expansion.
+      const result = await runCheck(makeItem('shell:kill -TERM $$$$'), tmpDir, tmpDir);
+      expect(result.result!.status).toBe('error');
+      expect(result.result!.message).toContain('SIGTERM');
       expect(result.result!.message.length).toBeGreaterThan(0);
     });
 
     it('the REAL 10s timeout path: a command exceeding EXEC_TIMEOUT fails (ETIMEDOUT)', async () => {
-      // EXEC_TIMEOUT is hardcoded at 10_000ms and not injectable, so this is a
-      // genuinely slow test. `sleep 30` blows past it; execSync throws ETIMEDOUT
-      // with empty stderr → message fallback → fail. Pins that the timeout option
-      // is wired into runShell.
+      // Preserve the real default timeout regression. An interrupted sensor is
+      // an execution error, not evidence that the inspected project failed.
       const result = await runCheck(makeItem('shell:sleep 30'), tmpDir, tmpDir);
-      expect(result.result!.status).toBe('fail');
+      expect(result.result!.status).toBe('error');
       expect(result.result!.message.length).toBeGreaterThan(0);
     }, 20_000);
   });

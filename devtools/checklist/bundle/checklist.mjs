@@ -17,11 +17,7 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 var __commonJS = (cb, mod) => function __require2() {
-  try {
-    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
-  } catch (e) {
-    throw mod = 0, e;
-  }
+  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -566,13 +562,13 @@ var require_help = __commonJS({
         function callFormatItem(term, description) {
           return helper.formatItem(term, termWidth, description, helper);
         }
-        let output = [
+        let output2 = [
           `${helper.styleTitle("Usage:")} ${helper.styleUsage(helper.commandUsage(cmd))}`,
           ""
         ];
         const commandDescription = helper.commandDescription(cmd);
         if (commandDescription.length > 0) {
-          output = output.concat([
+          output2 = output2.concat([
             helper.boxWrap(
               helper.styleCommandDescription(commandDescription),
               helpWidth
@@ -586,7 +582,7 @@ var require_help = __commonJS({
             helper.styleArgumentDescription(helper.argumentDescription(argument))
           );
         });
-        output = output.concat(
+        output2 = output2.concat(
           this.formatItemList("Arguments:", argumentList, helper)
         );
         const optionGroups = this.groupItems(
@@ -601,7 +597,7 @@ var require_help = __commonJS({
               helper.styleOptionDescription(helper.optionDescription(option))
             );
           });
-          output = output.concat(this.formatItemList(group, optionList, helper));
+          output2 = output2.concat(this.formatItemList(group, optionList, helper));
         });
         if (helper.showGlobalOptions) {
           const globalOptionList = helper.visibleGlobalOptions(cmd).map((option) => {
@@ -610,7 +606,7 @@ var require_help = __commonJS({
               helper.styleOptionDescription(helper.optionDescription(option))
             );
           });
-          output = output.concat(
+          output2 = output2.concat(
             this.formatItemList("Global Options:", globalOptionList, helper)
           );
         }
@@ -626,9 +622,9 @@ var require_help = __commonJS({
               helper.styleSubcommandDescription(helper.subcommandDescription(sub))
             );
           });
-          output = output.concat(this.formatItemList(group, commandList, helper));
+          output2 = output2.concat(this.formatItemList(group, commandList, helper));
         });
-        return output.join("\n");
+        return output2.join("\n");
       }
       /**
        * Return display width of string, ignoring ANSI escape sequences. Used in padding and wrapping calculations.
@@ -1126,30 +1122,30 @@ var require_suggestSimilar = __commonJS({
       if (Math.abs(a.length - b.length) > maxDistance)
         return Math.max(a.length, b.length);
       const d = [];
-      for (let i2 = 0; i2 <= a.length; i2++) {
-        d[i2] = [i2];
+      for (let i = 0; i <= a.length; i++) {
+        d[i] = [i];
       }
       for (let j = 0; j <= b.length; j++) {
         d[0][j] = j;
       }
       for (let j = 1; j <= b.length; j++) {
-        for (let i2 = 1; i2 <= a.length; i2++) {
+        for (let i = 1; i <= a.length; i++) {
           let cost = 1;
-          if (a[i2 - 1] === b[j - 1]) {
+          if (a[i - 1] === b[j - 1]) {
             cost = 0;
           } else {
             cost = 1;
           }
-          d[i2][j] = Math.min(
-            d[i2 - 1][j] + 1,
+          d[i][j] = Math.min(
+            d[i - 1][j] + 1,
             // deletion
-            d[i2][j - 1] + 1,
+            d[i][j - 1] + 1,
             // insertion
-            d[i2 - 1][j - 1] + cost
+            d[i - 1][j - 1] + cost
             // substitution
           );
-          if (i2 > 1 && j > 1 && a[i2 - 1] === b[j - 2] && a[i2 - 2] === b[j - 1]) {
-            d[i2][j] = Math.min(d[i2][j], d[i2 - 2][j - 2] + 1);
+          if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+            d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
           }
         }
       }
@@ -1203,8 +1199,8 @@ var require_command = __commonJS({
   "node_modules/commander/lib/command.js"(exports2) {
     var EventEmitter = __require("node:events").EventEmitter;
     var childProcess = __require("node:child_process");
-    var path17 = __require("node:path");
-    var fs16 = __require("node:fs");
+    var path14 = __require("node:path");
+    var fs12 = __require("node:fs");
     var process2 = __require("node:process");
     var { Argument: Argument2, humanReadableArgName } = require_argument();
     var { CommanderError: CommanderError2 } = require_error();
@@ -1607,16 +1603,16 @@ var require_command = __commonJS({
        * @param {Function} listener
        * @return {Command} `this` command for chaining
        */
-      hook(event, listener) {
+      hook(event2, listener) {
         const allowedValues = ["preSubcommand", "preAction", "postAction"];
-        if (!allowedValues.includes(event)) {
-          throw new Error(`Unexpected value for event passed to hook : '${event}'.
+        if (!allowedValues.includes(event2)) {
+          throw new Error(`Unexpected value for event passed to hook : '${event2}'.
 Expecting one of '${allowedValues.join("', '")}'`);
         }
-        if (this._lifeCycleHooks[event]) {
-          this._lifeCycleHooks[event].push(listener);
+        if (this._lifeCycleHooks[event2]) {
+          this._lifeCycleHooks[event2].push(listener);
         } else {
-          this._lifeCycleHooks[event] = [listener];
+          this._lifeCycleHooks[event2] = [listener];
         }
         return this;
       }
@@ -2198,7 +2194,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @param {string} subcommandName
        */
       _checkForMissingExecutable(executableFile, executableDir, subcommandName) {
-        if (fs16.existsSync(executableFile)) return;
+        if (fs12.existsSync(executableFile)) return;
         const executableDirMessage = executableDir ? `searched for local subcommand relative to directory '${executableDir}'` : "no directory for search for local subcommand, use .executableDir() to supply a custom directory";
         const executableMissing = `'${executableFile}' does not exist
  - if '${subcommandName}' is not meant to be an executable command, remove description parameter from '.command()' and use '.description()' instead
@@ -2216,11 +2212,11 @@ Expecting one of '${allowedValues.join("', '")}'`);
         let launchWithNode = false;
         const sourceExt = [".js", ".ts", ".tsx", ".mjs", ".cjs"];
         function findFile(baseDir, baseName) {
-          const localBin = path17.resolve(baseDir, baseName);
-          if (fs16.existsSync(localBin)) return localBin;
-          if (sourceExt.includes(path17.extname(baseName))) return void 0;
+          const localBin = path14.resolve(baseDir, baseName);
+          if (fs12.existsSync(localBin)) return localBin;
+          if (sourceExt.includes(path14.extname(baseName))) return void 0;
           const foundExt = sourceExt.find(
-            (ext) => fs16.existsSync(`${localBin}${ext}`)
+            (ext) => fs12.existsSync(`${localBin}${ext}`)
           );
           if (foundExt) return `${localBin}${foundExt}`;
           return void 0;
@@ -2232,21 +2228,21 @@ Expecting one of '${allowedValues.join("', '")}'`);
         if (this._scriptPath) {
           let resolvedScriptPath;
           try {
-            resolvedScriptPath = fs16.realpathSync(this._scriptPath);
+            resolvedScriptPath = fs12.realpathSync(this._scriptPath);
           } catch {
             resolvedScriptPath = this._scriptPath;
           }
-          executableDir = path17.resolve(
-            path17.dirname(resolvedScriptPath),
+          executableDir = path14.resolve(
+            path14.dirname(resolvedScriptPath),
             executableDir
           );
         }
         if (executableDir) {
           let localFile = findFile(executableDir, executableFile);
           if (!localFile && !subcommand._executableFile && this._scriptPath) {
-            const legacyName = path17.basename(
+            const legacyName = path14.basename(
               this._scriptPath,
-              path17.extname(this._scriptPath)
+              path14.extname(this._scriptPath)
             );
             if (legacyName !== this._name) {
               localFile = findFile(
@@ -2257,7 +2253,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
           }
           executableFile = localFile || executableFile;
         }
-        launchWithNode = sourceExt.includes(path17.extname(executableFile));
+        launchWithNode = sourceExt.includes(path14.extname(executableFile));
         let proc;
         if (process2.platform !== "win32") {
           if (launchWithNode) {
@@ -2374,8 +2370,8 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @private
        */
       _checkNumberOfArguments() {
-        this.registeredArguments.forEach((arg, i2) => {
-          if (arg.required && this.args[i2] == null) {
+        this.registeredArguments.forEach((arg, i) => {
+          if (arg.required && this.args[i] == null) {
             this.missingArgument(arg.name());
           }
         });
@@ -2451,15 +2447,15 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @return {(Promise|undefined)}
        * @private
        */
-      _chainOrCallHooks(promise, event) {
+      _chainOrCallHooks(promise, event2) {
         let result = promise;
         const hooks = [];
-        this._getCommandAndAncestors().reverse().filter((cmd) => cmd._lifeCycleHooks[event] !== void 0).forEach((hookedCommand) => {
-          hookedCommand._lifeCycleHooks[event].forEach((callback) => {
+        this._getCommandAndAncestors().reverse().filter((cmd) => cmd._lifeCycleHooks[event2] !== void 0).forEach((hookedCommand) => {
+          hookedCommand._lifeCycleHooks[event2].forEach((callback) => {
             hooks.push({ hookedCommand, callback });
           });
         });
-        if (event === "postAction") {
+        if (event2 === "postAction") {
           hooks.reverse();
         }
         hooks.forEach((hookDetail) => {
@@ -2477,10 +2473,10 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @return {(Promise|undefined)}
        * @private
        */
-      _chainOrCallSubCommandHook(promise, subCommand, event) {
+      _chainOrCallSubCommandHook(promise, subCommand, event2) {
         let result = promise;
-        if (this._lifeCycleHooks[event] !== void 0) {
-          this._lifeCycleHooks[event].forEach((hook) => {
+        if (this._lifeCycleHooks[event2] !== void 0) {
+          this._lifeCycleHooks[event2].forEach((hook) => {
             result = this._chainOrCall(result, () => {
               return hook(this, subCommand);
             });
@@ -2673,13 +2669,13 @@ Expecting one of '${allowedValues.join("', '")}'`);
         };
         let activeVariadicOption = null;
         let activeGroup = null;
-        let i2 = 0;
-        while (i2 < args.length || activeGroup) {
-          const arg = activeGroup ?? args[i2++];
+        let i = 0;
+        while (i < args.length || activeGroup) {
+          const arg = activeGroup ?? args[i++];
           activeGroup = null;
           if (arg === "--") {
             if (dest === unknown) dest.push(arg);
-            dest.push(...args.slice(i2));
+            dest.push(...args.slice(i));
             break;
           }
           if (activeVariadicOption && (!maybeOption(arg) || negativeNumberArg(arg))) {
@@ -2691,13 +2687,13 @@ Expecting one of '${allowedValues.join("', '")}'`);
             const option = this._findOption(arg);
             if (option) {
               if (option.required) {
-                const value = args[i2++];
+                const value = args[i++];
                 if (value === void 0) this.optionMissingArgument(option);
                 this.emit(`option:${option.name()}`, value);
               } else if (option.optional) {
                 let value = null;
-                if (i2 < args.length && (!maybeOption(args[i2]) || negativeNumberArg(args[i2]))) {
-                  value = args[i2++];
+                if (i < args.length && (!maybeOption(args[i]) || negativeNumberArg(args[i]))) {
+                  value = args[i++];
                 }
                 this.emit(`option:${option.name()}`, value);
               } else {
@@ -2733,18 +2729,18 @@ Expecting one of '${allowedValues.join("', '")}'`);
           if ((this._enablePositionalOptions || this._passThroughOptions) && operands.length === 0 && unknown.length === 0) {
             if (this._findCommand(arg)) {
               operands.push(arg);
-              unknown.push(...args.slice(i2));
+              unknown.push(...args.slice(i));
               break;
             } else if (this._getHelpCommand() && arg === this._getHelpCommand().name()) {
-              operands.push(arg, ...args.slice(i2));
+              operands.push(arg, ...args.slice(i));
               break;
             } else if (this._defaultCommandName) {
-              unknown.push(arg, ...args.slice(i2));
+              unknown.push(arg, ...args.slice(i));
               break;
             }
           }
           if (this._passThroughOptions) {
-            dest.push(arg, ...args.slice(i2));
+            dest.push(arg, ...args.slice(i));
             break;
           }
           dest.push(arg);
@@ -2760,8 +2756,8 @@ Expecting one of '${allowedValues.join("', '")}'`);
         if (this._storeOptionsAsProperties) {
           const result = {};
           const len = this.options.length;
-          for (let i2 = 0; i2 < len; i2++) {
-            const key = this.options[i2].attributeName();
+          for (let i = 0; i < len; i++) {
+            const key = this.options[i].attributeName();
             result[key] = key === this._versionOptionName ? this._version : this[key];
           }
           return result;
@@ -3172,7 +3168,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @return {Command}
        */
       nameFromFilename(filename) {
-        this._name = path17.basename(filename, path17.extname(filename));
+        this._name = path14.basename(filename, path14.extname(filename));
         return this;
       }
       /**
@@ -3186,9 +3182,9 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @param {string} [path]
        * @return {(string|null|Command)}
        */
-      executableDir(path18) {
-        if (path18 === void 0) return this._executableDir;
-        this._executableDir = path18;
+      executableDir(path15) {
+        if (path15 === void 0) return this._executableDir;
+        this._executableDir = path15;
         return this;
       }
       /**
@@ -3607,8 +3603,8 @@ var require_extend_shallow = __commonJS({
         o = {};
       }
       var len = arguments.length;
-      for (var i2 = 1; i2 < len; i2++) {
-        var obj = arguments[i2];
+      for (var i = 1; i < len; i++) {
+        var obj = arguments[i];
         if (isObject2(obj)) {
           assign(o, obj);
         }
@@ -3663,12 +3659,12 @@ var require_section_matter = __commonJS({
           stack = [];
         }
       }
-      for (var i2 = 0; i2 < lines.length; i2++) {
-        var line = lines[i2];
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
         var len = stack.length;
         var ln = line.trim();
         if (isDelimiter(ln, delim)) {
-          if (ln.length === 3 && i2 !== 0) {
+          if (ln.length === 3 && i !== 0) {
             if (len === 0 || len === 2) {
               content.push(line);
               continue;
@@ -4939,11 +4935,11 @@ var require_loader = __commonJS({
     }
     var simpleEscapeCheck2 = new Array(256);
     var simpleEscapeMap2 = new Array(256);
-    for (i2 = 0; i2 < 256; i2++) {
-      simpleEscapeCheck2[i2] = simpleEscapeSequence2(i2) ? 1 : 0;
-      simpleEscapeMap2[i2] = simpleEscapeSequence2(i2);
+    for (i = 0; i < 256; i++) {
+      simpleEscapeCheck2[i] = simpleEscapeSequence2(i) ? 1 : 0;
+      simpleEscapeMap2[i] = simpleEscapeSequence2(i);
     }
-    var i2;
+    var i;
     function State2(input, options2) {
       this.input = input;
       this.filename = options2["filename"] || null;
@@ -6143,7 +6139,7 @@ var require_dumper = __commonJS({
     var STYLE_FOLDED2 = 4;
     var STYLE_DOUBLE2 = 5;
     function chooseScalarStyle2(string, singleLineOnly, indentPerLevel, lineWidth, testAmbiguousType) {
-      var i2;
+      var i;
       var char, prev_char;
       var hasLineBreak = false;
       var hasFoldableLine = false;
@@ -6151,31 +6147,31 @@ var require_dumper = __commonJS({
       var previousLineBreak = -1;
       var plain = isPlainSafeFirst2(string.charCodeAt(0)) && !isWhitespace2(string.charCodeAt(string.length - 1));
       if (singleLineOnly) {
-        for (i2 = 0; i2 < string.length; i2++) {
-          char = string.charCodeAt(i2);
+        for (i = 0; i < string.length; i++) {
+          char = string.charCodeAt(i);
           if (!isPrintable2(char)) {
             return STYLE_DOUBLE2;
           }
-          prev_char = i2 > 0 ? string.charCodeAt(i2 - 1) : null;
+          prev_char = i > 0 ? string.charCodeAt(i - 1) : null;
           plain = plain && isPlainSafe2(char, prev_char);
         }
       } else {
-        for (i2 = 0; i2 < string.length; i2++) {
-          char = string.charCodeAt(i2);
+        for (i = 0; i < string.length; i++) {
+          char = string.charCodeAt(i);
           if (char === CHAR_LINE_FEED2) {
             hasLineBreak = true;
             if (shouldTrackWidth) {
               hasFoldableLine = hasFoldableLine || // Foldable line = too long, and not more-indented.
-              i2 - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ";
-              previousLineBreak = i2;
+              i - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ";
+              previousLineBreak = i;
             }
           } else if (!isPrintable2(char)) {
             return STYLE_DOUBLE2;
           }
-          prev_char = i2 > 0 ? string.charCodeAt(i2 - 1) : null;
+          prev_char = i > 0 ? string.charCodeAt(i - 1) : null;
           plain = plain && isPlainSafe2(char, prev_char);
         }
-        hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i2 - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ");
+        hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ");
       }
       if (!hasLineBreak && !hasFoldableLine) {
         return plain && !testAmbiguousType(string) ? STYLE_PLAIN2 : STYLE_SINGLE2;
@@ -6271,18 +6267,18 @@ var require_dumper = __commonJS({
       var result = "";
       var char, nextChar;
       var escapeSeq;
-      for (var i2 = 0; i2 < string.length; i2++) {
-        char = string.charCodeAt(i2);
+      for (var i = 0; i < string.length; i++) {
+        char = string.charCodeAt(i);
         if (char >= 55296 && char <= 56319) {
-          nextChar = string.charCodeAt(i2 + 1);
+          nextChar = string.charCodeAt(i + 1);
           if (nextChar >= 56320 && nextChar <= 57343) {
             result += encodeHex2((char - 55296) * 1024 + nextChar - 56320 + 65536);
-            i2++;
+            i++;
             continue;
           }
         }
         escapeSeq = ESCAPE_SEQUENCES2[char];
-        result += !escapeSeq && isPrintable2(char) ? string[i2] : escapeSeq || encodeHex2(char);
+        result += !escapeSeq && isPrintable2(char) ? string[i] : escapeSeq || encodeHex2(char);
       }
       return result;
     }
@@ -6837,7 +6833,7 @@ var require_parse = __commonJS({
 var require_gray_matter = __commonJS({
   "node_modules/gray-matter/index.js"(exports2, module2) {
     "use strict";
-    var fs16 = __require("fs");
+    var fs12 = __require("fs");
     var sections = require_section_matter();
     var defaults = require_defaults();
     var stringify = require_stringify();
@@ -6921,7 +6917,7 @@ var require_gray_matter = __commonJS({
       return stringify(file, data, options2);
     };
     matter5.read = function(filepath, options2) {
-      const str3 = fs16.readFileSync(filepath, "utf8");
+      const str3 = fs12.readFileSync(filepath, "utf8");
       const file = matter5(str3, options2);
       file.path = filepath;
       return file;
@@ -6967,14 +6963,13 @@ var {
 } = import_index.default;
 
 // src/index.ts
-import { readFileSync as readFileSync13 } from "node:fs";
-import { join as join6 } from "node:path";
+import { readFileSync as readFileSync10, realpathSync as realpathSync3 } from "node:fs";
+import { join as join5, resolve as resolve11 } from "node:path";
 
-// src/commands/init.ts
-import * as fs12 from "node:fs";
-import * as path12 from "node:path";
+// src/commands/lint.ts
+import * as path3 from "node:path";
 
-// src/loader.ts
+// src/lint.ts
 import * as fs from "node:fs";
 import * as path from "node:path";
 
@@ -7096,33 +7091,33 @@ function makeSnippet(mark, options2) {
     }
   }
   if (foundLineNo < 0) foundLineNo = lineStarts.length - 1;
-  var result = "", i2, line;
+  var result = "", i, line;
   var lineNoLength = Math.min(mark.line + options2.linesAfter, lineEnds.length).toString().length;
   var maxLineLength = options2.maxLength - (options2.indent + lineNoLength + 3);
-  for (i2 = 1; i2 <= options2.linesBefore; i2++) {
-    if (foundLineNo - i2 < 0) break;
+  for (i = 1; i <= options2.linesBefore; i++) {
+    if (foundLineNo - i < 0) break;
     line = getLine(
       mark.buffer,
-      lineStarts[foundLineNo - i2],
-      lineEnds[foundLineNo - i2],
-      mark.position - (lineStarts[foundLineNo] - lineStarts[foundLineNo - i2]),
+      lineStarts[foundLineNo - i],
+      lineEnds[foundLineNo - i],
+      mark.position - (lineStarts[foundLineNo] - lineStarts[foundLineNo - i]),
       maxLineLength
     );
-    result = common.repeat(" ", options2.indent) + padStart((mark.line - i2 + 1).toString(), lineNoLength) + " | " + line.str + "\n" + result;
+    result = common.repeat(" ", options2.indent) + padStart((mark.line - i + 1).toString(), lineNoLength) + " | " + line.str + "\n" + result;
   }
   line = getLine(mark.buffer, lineStarts[foundLineNo], lineEnds[foundLineNo], mark.position, maxLineLength);
   result += common.repeat(" ", options2.indent) + padStart((mark.line + 1).toString(), lineNoLength) + " | " + line.str + "\n";
   result += common.repeat("-", options2.indent + lineNoLength + 3 + line.pos) + "^\n";
-  for (i2 = 1; i2 <= options2.linesAfter; i2++) {
-    if (foundLineNo + i2 >= lineEnds.length) break;
+  for (i = 1; i <= options2.linesAfter; i++) {
+    if (foundLineNo + i >= lineEnds.length) break;
     line = getLine(
       mark.buffer,
-      lineStarts[foundLineNo + i2],
-      lineEnds[foundLineNo + i2],
-      mark.position - (lineStarts[foundLineNo] - lineStarts[foundLineNo + i2]),
+      lineStarts[foundLineNo + i],
+      lineEnds[foundLineNo + i],
+      mark.position - (lineStarts[foundLineNo] - lineStarts[foundLineNo + i]),
       maxLineLength
     );
-    result += common.repeat(" ", options2.indent) + padStart((mark.line + i2 + 1).toString(), lineNoLength) + " | " + line.str + "\n";
+    result += common.repeat(" ", options2.indent) + padStart((mark.line + i + 1).toString(), lineNoLength) + " | " + line.str + "\n";
   }
   return result.replace(/\n$/, "");
 }
@@ -9127,7 +9122,7 @@ var STYLE_LITERAL = 3;
 var STYLE_FOLDED = 4;
 var STYLE_DOUBLE = 5;
 function chooseScalarStyle(string, singleLineOnly, indentPerLevel, lineWidth, testAmbiguousType, quotingType, forceQuotes, inblock) {
-  var i2;
+  var i;
   var char = 0;
   var prevChar = null;
   var hasLineBreak = false;
@@ -9136,8 +9131,8 @@ function chooseScalarStyle(string, singleLineOnly, indentPerLevel, lineWidth, te
   var previousLineBreak = -1;
   var plain = isPlainSafeFirst(codePointAt(string, 0)) && isPlainSafeLast(codePointAt(string, string.length - 1));
   if (singleLineOnly || forceQuotes) {
-    for (i2 = 0; i2 < string.length; char >= 65536 ? i2 += 2 : i2++) {
-      char = codePointAt(string, i2);
+    for (i = 0; i < string.length; char >= 65536 ? i += 2 : i++) {
+      char = codePointAt(string, i);
       if (!isPrintable(char)) {
         return STYLE_DOUBLE;
       }
@@ -9145,14 +9140,14 @@ function chooseScalarStyle(string, singleLineOnly, indentPerLevel, lineWidth, te
       prevChar = char;
     }
   } else {
-    for (i2 = 0; i2 < string.length; char >= 65536 ? i2 += 2 : i2++) {
-      char = codePointAt(string, i2);
+    for (i = 0; i < string.length; char >= 65536 ? i += 2 : i++) {
+      char = codePointAt(string, i);
       if (char === CHAR_LINE_FEED) {
         hasLineBreak = true;
         if (shouldTrackWidth) {
           hasFoldableLine = hasFoldableLine || // Foldable line = too long, and not more-indented.
-          i2 - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ";
-          previousLineBreak = i2;
+          i - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ";
+          previousLineBreak = i;
         }
       } else if (!isPrintable(char)) {
         return STYLE_DOUBLE;
@@ -9160,7 +9155,7 @@ function chooseScalarStyle(string, singleLineOnly, indentPerLevel, lineWidth, te
       plain = plain && isPlainSafe(char, prevChar, inblock);
       prevChar = char;
     }
-    hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i2 - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ");
+    hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ");
   }
   if (!hasLineBreak && !hasFoldableLine) {
     if (plain && !forceQuotes && !testAmbiguousType(string)) {
@@ -9273,12 +9268,12 @@ function escapeString(string) {
   var result = "";
   var char = 0;
   var escapeSeq;
-  for (var i2 = 0; i2 < string.length; char >= 65536 ? i2 += 2 : i2++) {
-    char = codePointAt(string, i2);
+  for (var i = 0; i < string.length; char >= 65536 ? i += 2 : i++) {
+    char = codePointAt(string, i);
     escapeSeq = ESCAPE_SEQUENCES[char];
     if (!escapeSeq && isPrintable(char)) {
-      result += string[i2];
-      if (char >= 65536) result += string[i2 + 1];
+      result += string[i];
+      if (char >= 65536) result += string[i + 1];
     } else {
       result += escapeSeq || encodeHex(char);
     }
@@ -9564,1270 +9559,21 @@ var safeLoad = renamed("safeLoad", "load");
 var safeLoadAll = renamed("safeLoadAll", "loadAll");
 var safeDump = renamed("safeDump", "dump");
 
-// src/loader.ts
-var CONFIG_FILE = ".checklist.yml";
-function loadChecklist(dir) {
-  const filePath = path.resolve(dir, CONFIG_FILE);
-  if (!fs.existsSync(filePath)) {
-    const skillHint = process.env.CLAUDE_SKILL_DIR ? `
-  this skill's dir is: ${process.env.CLAUDE_SKILL_DIR}
-  try: checklist init "${process.env.CLAUDE_SKILL_DIR}"` : `
-  a checklist lives in the skill directory (next to SKILL.md), not your project/working dir.
-  try: checklist init <skill-dir>`;
-    throw new Error(`${CONFIG_FILE} not found in ${dir}${skillHint}`);
-  }
-  const raw = fs.readFileSync(filePath, "utf-8");
-  const data = load(raw);
-  if (!data || typeof data !== "object") {
-    throw new Error(`${CONFIG_FILE} is empty or not a valid YAML object`);
-  }
-  if (!Array.isArray(data.phases)) {
-    throw new Error(`${CONFIG_FILE} missing "phases" array`);
-  }
-  const phases = data.phases.map((p, i2) => {
-    if (!p || typeof p !== "object" || Array.isArray(p)) {
-      throw new Error(`Phase ${i2}: entry must be a mapping with "name" and "checks"`);
-    }
-    const phase = p;
-    if (!phase.name || typeof phase.name !== "string") {
-      throw new Error(`Phase ${i2}: missing "name" field`);
-    }
-    if (!Array.isArray(phase.checks)) {
-      throw new Error(`Phase "${phase.name}": missing "checks" array`);
-    }
-    if (phase.checks.length === 0) {
-      throw new Error(`Phase "${phase.name}": "checks" array is empty`);
-    }
-    const checks = phase.checks.map((c, j) => {
-      if (!c || typeof c !== "object" || Array.isArray(c)) {
-        throw new Error(`Phase "${phase.name}", check ${j}: entry must be a mapping with "id" and "description"`);
-      }
-      const check = c;
-      if (!check.id || typeof check.id !== "string") {
-        throw new Error(`Phase "${phase.name}", check ${j}: missing "id"`);
-      }
-      if (!check.description || typeof check.description !== "string") {
-        throw new Error(`Phase "${phase.name}", check "${check.id}": missing "description"`);
-      }
-      const verify = check.verify;
-      if (verify !== void 0 && typeof verify !== "string") {
-        throw new Error(`Phase "${phase.name}", check "${check.id}": "verify" must be a string`);
-      }
-      const evidence = check.evidence;
-      let evidenceRequired = false;
-      if (evidence !== void 0) {
-        if (evidence !== "required") {
-          throw new Error(`Phase "${phase.name}", check "${check.id}": "evidence" may only be the string "required"`);
-        }
-        if (verify !== void 0) {
-          throw new Error(`Phase "${phase.name}", check "${check.id}": "evidence: required" is for manual checks; this check has a "verify" rule (it is mechanical, cleared by \`checklist verify\`)`);
-        }
-        evidenceRequired = true;
-      }
-      return {
-        id: check.id,
-        description: check.description,
-        verify,
-        evidenceRequired
-      };
-    });
-    const seenIds = /* @__PURE__ */ new Set();
-    for (const ch of checks) {
-      if (seenIds.has(ch.id)) {
-        throw new Error(`Phase "${phase.name}": duplicate check id "${ch.id}"`);
-      }
-      seenIds.add(ch.id);
-    }
-    return { name: phase.name, checks };
-  });
-  if (phases.length === 0) {
-    throw new Error(`${CONFIG_FILE}: "phases" array is empty`);
-  }
-  const seenPhaseNames = /* @__PURE__ */ new Set();
-  for (const ph of phases) {
-    const key = ph.name.toLowerCase();
-    if (seenPhaseNames.has(key)) {
-      throw new Error(`${CONFIG_FILE}: duplicate phase name "${ph.name}"`);
-    }
-    seenPhaseNames.add(key);
-  }
-  return { phases };
-}
-
-// src/state.ts
-import * as fs2 from "node:fs";
-import * as os from "node:os";
-import * as path2 from "node:path";
-import { createHash, randomUUID } from "node:crypto";
-var STATE_FILE = ".checklist.state.json";
-function stateHomeDir() {
-  if (process.env.CHECKLIST_STATE_HOME) {
-    return process.env.CHECKLIST_STATE_HOME;
-  }
-  if (process.env.XDG_STATE_HOME) {
-    return path2.join(process.env.XDG_STATE_HOME, "checklist");
-  }
-  return path2.join(os.homedir(), ".local", "state", "checklist");
-}
-function stateKey(skillDir, targetPath) {
-  const skill = path2.resolve(skillDir);
-  const target = path2.resolve(targetPath);
-  const hash = createHash("sha256").update(`${skill}\0${target}`).digest("hex").slice(0, 16);
-  const base = path2.basename(skill) || "skill";
-  const safeBase = base.replace(/[^A-Za-z0-9._-]/g, "_").slice(0, 40);
-  return `${safeBase}.${hash}.json`;
-}
-function stateFilePath(skillDir, targetPath) {
-  return path2.join(stateHomeDir(), stateKey(skillDir, targetPath));
-}
-function journalDir(skillDir) {
-  const skill = path2.resolve(skillDir);
-  const hash = createHash("sha256").update(skill).digest("hex").slice(0, 16);
-  const base = path2.basename(skill) || "skill";
-  const safeBase = base.replace(/[^A-Za-z0-9._-]/g, "_").slice(0, 40);
-  return path2.join(stateHomeDir(), `${safeBase}.${hash}.journal`);
-}
-function legacyStateFilePath(skillDir) {
-  return path2.resolve(skillDir, STATE_FILE);
-}
-function findLegacyStateFile(skillDir) {
-  const p = legacyStateFilePath(skillDir);
-  return fs2.existsSync(p) ? p : void 0;
-}
-function loadState(stateFile) {
-  if (!fs2.existsSync(stateFile)) {
-    return { checked: {} };
-  }
-  let parsed;
-  try {
-    parsed = JSON.parse(fs2.readFileSync(stateFile, "utf-8"));
-  } catch {
-    throw new Error(`state file is corrupt: ${stateFile}. run \`checklist init --force\` to reset it`);
-  }
-  if (!parsed || typeof parsed !== "object") {
-    throw new Error(`state file is malformed: ${stateFile}. run \`checklist init --force\` to reset it`);
-  }
-  const checked = parsed.checked;
-  if (typeof checked !== "object" || checked === null || Array.isArray(checked)) {
-    throw new Error(`state file is malformed: ${stateFile}. run \`checklist init --force\` to reset it`);
-  }
-  return parsed;
-}
-function saveState(stateFile, state) {
-  fs2.mkdirSync(path2.dirname(stateFile), { recursive: true });
-  const tmp = `${stateFile}.${process.pid}.${randomUUID()}.tmp`;
-  fs2.writeFileSync(tmp, JSON.stringify(state, null, 2), "utf-8");
-  try {
-    fs2.renameSync(tmp, stateFile);
-  } catch (e) {
-    try {
-      fs2.unlinkSync(tmp);
-    } catch {
-    }
-    throw e;
-  }
-}
-function mergeAndSaveState(stateFile, updates) {
-  let onDisk;
-  try {
-    onDisk = loadState(stateFile);
-  } catch {
-    onDisk = { checked: {} };
-  }
-  const merged = { ...onDisk, ...updates, vars: onDisk.vars, checked: {} };
-  for (const [phase, items] of Object.entries(onDisk.checked)) {
-    merged.checked[phase] = { ...items };
-  }
-  for (const [phase, items] of Object.entries(updates.checked)) {
-    merged.checked[phase] = { ...merged.checked[phase], ...items };
-  }
-  saveState(stateFile, merged);
-  return merged;
-}
-function clearState(stateFile) {
-  if (fs2.existsSync(stateFile)) {
-    fs2.unlinkSync(stateFile);
-  }
-}
-function phaseKeyOf(phase) {
-  return String(phase).toLowerCase();
-}
-function writeInitialState(stateFile, vars) {
-  saveState(stateFile, { checked: {}, vars });
-}
-function loadVars(state) {
-  const vars = state.vars;
-  if (typeof vars !== "object" || vars === null || Array.isArray(vars)) {
-    return {};
-  }
-  return vars;
-}
-function isItemChecked(state, phase, itemId) {
-  return state.checked[phaseKeyOf(phase)]?.[itemId]?.status === "pass";
-}
-function getItemResult(state, phase, itemId) {
-  return state.checked[phaseKeyOf(phase)]?.[itemId];
-}
-function setItemResult(state, phase, itemId, result) {
-  const key = phaseKeyOf(phase);
-  if (!state.checked[key]) {
-    state.checked[key] = {};
-  }
-  state.checked[key][itemId] = result;
-}
-function isPhaseComplete(state, phase, itemIds) {
-  return itemIds.every((id) => isItemChecked(state, phase, id));
-}
-function phaseProgress(state, phase, itemIds) {
-  const done = itemIds.filter((id) => isItemChecked(state, phase, id)).length;
-  return { done, total: itemIds.length };
-}
-
-// src/formatter.ts
-function padDots(left, right, width = 50) {
-  const dotsCount = width - left.length - right.length;
-  if (dotsCount < 3) return `${left} .. ${right}`;
-  return `${left} ${".".repeat(dotsCount)} ${right}`;
-}
-function formatInit(config, cleared) {
-  const total = config.phases.length;
-  const phaseList = config.phases.map((p, i2) => `  ${i2}: ${p.name} (${p.checks.length} checks)`).join("\n");
-  const header = cleared ? `checklist ready, ${total} phases (previous state cleared)` : `checklist ready, ${total} phases`;
-  return `${header}
-${phaseList}`;
-}
-function formatOverview(config, state) {
-  let currentPhase = -1;
-  const lines = config.phases.map((phase, i2) => {
-    const ids = phase.checks.map((c) => c.id);
-    const complete = isPhaseComplete(state, phase.name, ids);
-    const { done, total } = phaseProgress(state, phase.name, ids);
-    let status;
-    if (complete) {
-      status = "[x] passed";
-    } else if (done > 0) {
-      status = `[ ] ${done}/${total}`;
-      if (currentPhase === -1) currentPhase = i2;
-    } else {
-      status = "[ ] pending";
-      if (currentPhase === -1) currentPhase = i2;
-    }
-    return `PHASE ${i2}: ${phase.name.toUpperCase().padEnd(20)} ${status}`;
-  });
-  const allDone = config.phases.every(
-    (phase) => isPhaseComplete(state, phase.name, phase.checks.map((c) => c.id))
-  );
-  if (allDone) {
-    lines.push("", "all phases passed");
-  } else {
-    lines.push("", `current phase: PHASE ${currentPhase}`);
-  }
-  return lines.join("\n");
-}
-function formatPhaseShow(result, state, totalPhases) {
-  const header = `PHASE ${result.phaseIndex}: ${result.phaseName.toUpperCase()}`;
-  const items = result.checks.map((c, i2) => {
-    const checked = isItemChecked(state, result.phaseName, c.item.id);
-    const mark = checked ? "[x]" : "[ ]";
-    const num = `${i2 + 1}.`;
-    const line = `${num} ${mark} ${padDots(c.item.id, c.item.description)}`;
-    if (checked) {
-      return line;
-    }
-    if (c.kind === "manual") {
-      return `${line}
-       -> [manual confirmation required]`;
-    }
-    if (c.result) {
-      const reading = c.result.status === "error" ? `[ERROR] ${c.result.message}` : `[reading] ${c.result.message}`;
-      return `${line}
-       -> ${reading}`;
-    }
-    return line;
-  }).join("\n");
-  const ids = result.checks.map((c) => c.item.id);
-  const { done, total } = phaseProgress(state, result.phaseName, ids);
-  const lines = [header, "", items, ""];
-  if (done === total) {
-    const isLast = totalPhases !== void 0 && result.phaseIndex >= totalPhases - 1;
-    lines.push(isLast ? `PHASE ${result.phaseIndex} passed \u2014 all phases complete, run \`checklist done\`` : `PHASE ${result.phaseIndex} passed, proceed to PHASE ${result.phaseIndex + 1}`);
-  } else {
-    lines.push(`${done}/${total} completed`);
-  }
-  return lines.join("\n");
-}
-function formatVerifyResult(result, state, totalPhases) {
-  const header = `PHASE ${result.phaseIndex}: ${result.phaseName.toUpperCase()}`;
-  const items = result.checks.map((c, i2) => {
-    const num = `${i2 + 1}.`;
-    if (c.kind === "manual") {
-      const checked = isItemChecked(state, result.phaseName, c.item.id);
-      if (checked) {
-        return `${num} [x] ${padDots(c.item.id, "confirmed")}`;
-      }
-      return `${num} [ ] ${padDots(c.item.id, c.item.description)}
-       -> run: checklist check ${result.phaseIndex} ${c.item.id}`;
-    }
-    const passed = c.result?.status === "pass";
-    const mark = passed ? "[x]" : "[ ]";
-    const suffix = passed ? "PASS" : `FAIL: ${c.result?.message || "unknown"}`;
-    return `${num} ${mark} ${padDots(c.item.id, suffix)}`;
-  }).join("\n");
-  const lines = [header, "", items, ""];
-  if (result.mechanicalTotal > 0) {
-    lines.push(`mechanical: ${result.mechanicalPassed}/${result.mechanicalTotal} passed`);
-  }
-  if (result.manualCount > 0) {
-    const manualChecked = result.checks.filter((c) => c.kind === "manual" && isItemChecked(state, result.phaseName, c.item.id)).length;
-    const remaining = result.manualCount - manualChecked;
-    if (remaining > 0) {
-      lines.push(`manual: ${remaining} pending`);
-    }
-  }
-  const ids = result.checks.map((c) => c.item.id);
-  const { done, total } = phaseProgress(state, result.phaseName, ids);
-  const mechanicalOk = result.mechanicalPassed === result.mechanicalTotal;
-  if (mechanicalOk && done === total) {
-    const isLast = totalPhases !== void 0 && result.phaseIndex >= totalPhases - 1;
-    lines.push(isLast ? `PHASE ${result.phaseIndex} verified \u2014 all phases complete, run \`checklist done\`` : `PHASE ${result.phaseIndex} verified, proceed to PHASE ${result.phaseIndex + 1}`);
-  }
-  return lines.join("\n");
-}
-function formatCheckConfirm(phaseIndex, itemId, evidence) {
-  const base = `[x] ${itemId} .. confirmed`;
-  return evidence ? `${base}
-       evidence: ${evidence}` : base;
-}
-function formatGateFailure(failedPhase, failedIndex) {
-  return `gate blocked: PHASE ${failedIndex} (${failedPhase}) incomplete`;
-}
-function formatPhases(config) {
-  return config.phases.map((p, i2) => `${i2}: ${p.name} (${p.checks.length} checks)`).join("\n");
-}
-var STATUS_MARK = { pass: "[x]", fail: "[FAIL]", error: "[ERROR]" };
-function formatReport(events, config) {
-  const lines = ["# checklist gate-trail", ""];
-  if (config) {
-    lines.push(`Checklist: ${config.phases.length} phases`, "");
-  }
-  if (events.length === 0) {
-    lines.push("_No journal events recorded yet._", "");
-    lines.push("> The journal proves what was recorded and when; manual checks are still");
-    lines.push("> agent-entered, so a recorded pass is a claim with a cited basis, not a proof.");
-    return lines.join("\n");
-  }
-  lines.push("| time (UTC) | event | phase | check | status | evidence / detail |");
-  lines.push("| --- | --- | --- | --- | --- | --- |");
-  const cell = (s) => s.replace(/\|/g, "\\|").replace(/\n/g, " ");
-  for (const e of events) {
-    const mark = STATUS_MARK[e.status] ?? e.status;
-    const phase = e.kind === "reset" ? "\u2014" : `${e.phaseIndex} (${cell(e.phaseName)})`;
-    const check = e.kind === "reset" ? "\u2014" : cell(e.itemId);
-    const detail = cell(e.evidence ?? e.message ?? "");
-    lines.push(`| ${cell(e.ts)} | ${e.kind} | ${phase} | ${check} | ${mark} | ${detail} |`);
-  }
-  lines.push("");
-  lines.push("> The journal proves what was recorded and when; manual checks are still");
-  lines.push("> agent-entered, so a recorded pass is a claim with a cited basis, not a proof.");
-  return lines.join("\n");
-}
-function buildStateJson(config, state) {
-  let currentPhase = null;
-  const phases = config.phases.map((phase, i2) => {
-    const ids = phase.checks.map((c) => c.id);
-    const complete = isPhaseComplete(state, phase.name, ids);
-    const { done, total } = phaseProgress(state, phase.name, ids);
-    if (!complete && currentPhase === null) currentPhase = i2;
-    const checks = phase.checks.map((c) => {
-      const rec = getItemResult(state, phase.name, c.id);
-      return {
-        id: c.id,
-        description: c.description,
-        kind: c.verify ? "mechanical" : "manual",
-        evidenceRequired: c.evidenceRequired === true,
-        status: rec?.status ?? "unchecked",
-        ...rec?.message !== void 0 ? { message: rec.message } : {},
-        ...rec?.evidence !== void 0 ? { evidence: rec.evidence } : {}
-      };
-    });
-    return { index: i2, name: phase.name, complete, done, total, checks };
-  });
-  const allComplete = phases.every((p) => p.complete);
-  return { phases, allComplete, currentPhase: allComplete ? null : currentPhase };
-}
-function formatStateJson(config, state) {
-  return JSON.stringify(buildStateJson(config, state), null, 2);
-}
-function formatLintReport(result) {
-  const { skillDirs, diagnostics } = result;
-  const errorCount = diagnostics.filter((d) => d.severity === "error").length;
-  const warningCount = diagnostics.filter((d) => d.severity === "warning").length;
-  const lines = [];
-  if (skillDirs.length === 0) {
-    lines.push("no skill directories found (a skill dir contains a .checklist.yml)");
-    return { report: lines.join("\n"), errorCount, warningCount };
-  }
-  const byFile = /* @__PURE__ */ new Map();
-  for (const d of diagnostics) {
-    const arr = byFile.get(d.file);
-    if (arr) arr.push(d);
-    else byFile.set(d.file, [d]);
-  }
-  for (const [file, diags] of byFile) {
-    lines.push(file);
-    for (const d of diags) {
-      const tag = d.severity === "error" ? "ERROR" : "WARN ";
-      lines.push(`  ${tag} [${d.rule}] ${d.message}`);
-      if (d.fix) {
-        lines.push(`        fix: ${d.fix}`);
-      }
-    }
-    lines.push("");
-  }
-  const skillWord = skillDirs.length === 1 ? "skill" : "skills";
-  if (errorCount === 0 && warningCount === 0) {
-    lines.push(`lint: ${skillDirs.length} ${skillWord} OK \u2014 no problems found`);
-  } else {
-    const parts = [];
-    if (errorCount > 0) parts.push(`${errorCount} error${errorCount === 1 ? "" : "s"}`);
-    if (warningCount > 0) parts.push(`${warningCount} warning${warningCount === 1 ? "" : "s"}`);
-    lines.push(`lint: ${parts.join(", ")} across ${skillDirs.length} ${skillWord}`);
-  }
-  return { report: lines.join("\n"), errorCount, warningCount };
-}
-
-// src/resolver.ts
-import * as fs11 from "node:fs";
-import * as os2 from "node:os";
-import * as path11 from "node:path";
-
-// src/runner.ts
-import { execFileSync, execSync } from "node:child_process";
-import * as fs10 from "node:fs";
-import * as path10 from "node:path";
-
-// src/builtins/frontmatter.ts
-var import_gray_matter = __toESM(require_gray_matter());
-import * as fs3 from "node:fs";
-import * as path3 from "node:path";
-async function frontmatterCheck(targetPath) {
-  const filePath = path3.resolve(targetPath, "SKILL.md");
-  if (!fs3.existsSync(filePath)) {
-    return { status: "fail", message: "SKILL.md not found" };
-  }
-  try {
-    const raw = fs3.readFileSync(filePath, "utf-8");
-    if (!raw.trimStart().startsWith("---")) {
-      return { status: "fail", message: "missing --- frontmatter delimiter" };
-    }
-    const { data } = (0, import_gray_matter.default)(raw);
-    const fieldCount = Object.keys(data).length;
-    if (fieldCount === 0) {
-      return { status: "fail", message: "frontmatter is empty" };
-    }
-    return { status: "pass", message: `parsed, ${fieldCount} fields` };
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return { status: "fail", message: `parse error: ${msg}` };
-  }
-}
-
-// src/builtins/name-format.ts
-var import_gray_matter2 = __toESM(require_gray_matter());
-import * as fs4 from "node:fs";
-import * as path4 from "node:path";
-var NAME_RE = /^[a-z0-9-]+$/;
-var MAX_LENGTH = 64;
-async function nameFormatCheck(targetPath) {
-  const filePath = path4.resolve(targetPath, "SKILL.md");
-  if (!fs4.existsSync(filePath)) {
-    return { status: "fail", message: "SKILL.md not found" };
-  }
-  const { data } = (0, import_gray_matter2.default)(fs4.readFileSync(filePath, "utf-8"));
-  const name = data.name;
-  if (name === void 0 || name === null || name === "") {
-    return { status: "pass", message: "name field not set (will use directory name)" };
-  }
-  if (typeof name !== "string") {
-    return { status: "fail", message: "name must be a string" };
-  }
-  if (!NAME_RE.test(name)) {
-    return { status: "fail", message: `invalid characters: "${name}"` };
-  }
-  if (name.length > MAX_LENGTH) {
-    return { status: "fail", message: `${name.length}/${MAX_LENGTH} chars` };
-  }
-  return { status: "pass", message: `"${name}", ${name.length} chars` };
-}
-
-// src/builtins/description.ts
-var import_gray_matter3 = __toESM(require_gray_matter());
-import * as fs5 from "node:fs";
-import * as path5 from "node:path";
-var MAX_COMBINED = 1536;
-async function descriptionPresentCheck(targetPath) {
-  const filePath = path5.resolve(targetPath, "SKILL.md");
-  if (!fs5.existsSync(filePath)) {
-    return { status: "fail", message: "SKILL.md not found" };
-  }
-  const { data } = (0, import_gray_matter3.default)(fs5.readFileSync(filePath, "utf-8"));
-  const desc = data.description;
-  if (desc !== void 0 && typeof desc !== "string") {
-    return { status: "fail", message: "description must be a string" };
-  }
-  if (!desc || desc.trim().length === 0) {
-    return { status: "fail", message: "description is empty" };
-  }
-  return { status: "pass", message: `${desc.length} chars` };
-}
-async function descriptionLengthCheck(targetPath) {
-  const filePath = path5.resolve(targetPath, "SKILL.md");
-  if (!fs5.existsSync(filePath)) {
-    return { status: "fail", message: "SKILL.md not found" };
-  }
-  const { data } = (0, import_gray_matter3.default)(fs5.readFileSync(filePath, "utf-8"));
-  const desc = typeof data.description === "string" ? data.description : "";
-  const whenToUse = typeof data.when_to_use === "string" ? data.when_to_use : "";
-  const total = desc.length + whenToUse.length;
-  if (total > MAX_COMBINED) {
-    return { status: "fail", message: `${total}/${MAX_COMBINED} chars` };
-  }
-  return { status: "pass", message: `${total}/${MAX_COMBINED} chars` };
-}
-
-// src/builtins/no-secrets.ts
-import * as fs6 from "node:fs";
-import * as path6 from "node:path";
-var TOKEN_PATTERNS = [
-  { name: "AWS Access Key", re: /AKIA[0-9A-Z]{16}/ },
-  { name: "Private Key", re: /-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----/ },
-  { name: "GitHub Token", re: /gh[pousr]_[a-zA-Z0-9]{20,}/ },
-  { name: "GitHub Fine-grained Token", re: /github_pat_[a-zA-Z0-9_]{20,}/ },
-  { name: "npm Token", re: /npm_[a-zA-Z0-9]{20,}/ },
-  { name: "Slack Token", re: /xox[baprs]-[a-zA-Z0-9-]{10,}/ },
-  { name: "OpenAI Key", re: /sk-[a-zA-Z0-9]{20,}/ },
-  { name: "Google API Key", re: /AIza[0-9A-Za-z_\-]{35}/ }
-];
-var ASSIGNMENT_PATTERNS = [
-  { name: "API Key assignment", re: /(?:api[_-]?key|apikey)\s*[:=]\s*['"]?([^\s'"]{20,})/i },
-  { name: "Token/Secret assignment", re: /(?:token|secret|password|passwd|pwd)\s*[:=]\s*['"]?([^\s'"]{8,})/i }
-];
-var PLACEHOLDER_RE = /^(?:[<{].*[>}]|\.{3,}|x{3,}|your[_-]|my[_-]|changeme|placeholder|replace|example|todo|\$\{|env\.|process\.env)/i;
-function isPlaceholder(value) {
-  if (PLACEHOLDER_RE.test(value)) return true;
-  if (/^[A-Z][A-Z0-9_]*$/.test(value)) {
-    return value.includes("_") || !/[0-9]/.test(value);
-  }
-  return false;
-}
-async function noSecretsCheck(targetPath) {
-  const filePath = path6.resolve(targetPath, "SKILL.md");
-  if (!fs6.existsSync(filePath)) {
-    return { status: "fail", message: "SKILL.md not found" };
-  }
-  const lines = fs6.readFileSync(filePath, "utf-8").split("\n");
-  const findings = [];
-  for (let i2 = 0; i2 < lines.length; i2++) {
-    const line = lines[i2];
-    for (const pattern of TOKEN_PATTERNS) {
-      if (pattern.re.test(line)) {
-        findings.push(`L${i2 + 1}: ${pattern.name}`);
-      }
-    }
-    for (const pattern of ASSIGNMENT_PATTERNS) {
-      const m = pattern.re.exec(line);
-      if (m && !isPlaceholder(m[1])) {
-        findings.push(`L${i2 + 1}: ${pattern.name}`);
-      }
-    }
-  }
-  if (findings.length > 0) {
-    return { status: "fail", message: findings.join(", ") };
-  }
-  return { status: "pass", message: "no secret patterns detected" };
-}
-
-// src/builtins/file-refs.ts
-var import_gray_matter4 = __toESM(require_gray_matter());
-import * as fs7 from "node:fs";
-import * as path7 from "node:path";
-var LINK_RE = /\[.*?\]\(((?!https?:\/\/|#|mailto:).*?)\)/g;
-async function fileRefsCheck(targetPath) {
-  const filePath = path7.resolve(targetPath, "SKILL.md");
-  if (!fs7.existsSync(filePath)) {
-    return { status: "fail", message: "SKILL.md not found" };
-  }
-  const { content } = (0, import_gray_matter4.default)(fs7.readFileSync(filePath, "utf-8"));
-  const refs = [];
-  let match;
-  while ((match = LINK_RE.exec(content)) !== null) {
-    let ref = match[1].trim();
-    ref = ref.replace(/^<(.*)>$/, "$1");
-    ref = ref.replace(/\s+["'][^"']*["']\s*$/, "");
-    const hash = ref.indexOf("#");
-    if (hash !== -1) ref = ref.slice(0, hash);
-    ref = ref.trim();
-    if (ref) refs.push(ref);
-  }
-  if (refs.length === 0) {
-    return { status: "pass", message: "no file references" };
-  }
-  const missing = refs.filter((ref) => {
-    const resolved = path7.resolve(targetPath, ref);
-    return !fs7.existsSync(resolved);
-  });
-  if (missing.length > 0) {
-    return { status: "fail", message: `missing: ${missing.join(", ")}` };
-  }
-  return { status: "pass", message: `${refs.length} refs valid` };
-}
-
-// src/builtins/has-checklist.ts
-import * as fs8 from "node:fs";
-import * as path8 from "node:path";
-var CHECKLIST_RE = /^#+\s*CHECKLIST:/im;
-async function hasChecklistCheck(targetPath) {
-  const filePath = path8.resolve(targetPath, "SKILL.md");
-  if (!fs8.existsSync(filePath)) {
-    return { status: "fail", message: "SKILL.md not found" };
-  }
-  const content = fs8.readFileSync(filePath, "utf-8");
-  const matches = content.match(new RegExp(CHECKLIST_RE.source, "gim"));
-  const count = matches ? matches.length : 0;
-  if (count === 0) {
-    return { status: "fail", message: "no CHECKLIST section found" };
-  }
-  return { status: "pass", message: `${count} checklist sections` };
-}
-
-// src/builtins/line-count.ts
-import * as fs9 from "node:fs";
-import * as path9 from "node:path";
-var MAX_LINES = 500;
-async function lineCountCheck(targetPath) {
-  const filePath = path9.resolve(targetPath, "SKILL.md");
-  if (!fs9.existsSync(filePath)) {
-    return { status: "fail", message: "SKILL.md not found" };
-  }
-  const content = fs9.readFileSync(filePath, "utf-8");
-  const text = content.endsWith("\n") ? content.slice(0, -1) : content;
-  const count = text.split("\n").length;
-  if (count > MAX_LINES) {
-    return { status: "fail", message: `${count} lines, exceeds ${MAX_LINES} limit` };
-  }
-  return { status: "pass", message: `${count} lines` };
-}
-
-// src/builtins/index.ts
-var BUILTINS = {
-  "frontmatter": frontmatterCheck,
-  "name-format": nameFormatCheck,
-  "description-present": descriptionPresentCheck,
-  "description-length": descriptionLengthCheck,
-  "no-secrets": noSecretsCheck,
-  "file-refs": fileRefsCheck,
-  "has-checklist": hasChecklistCheck,
-  "line-count": lineCountCheck
-};
-function getBuiltin(name) {
-  return BUILTINS[name];
-}
-function listBuiltins() {
-  return Object.keys(BUILTINS);
-}
-
-// src/runner.ts
-var EXEC_TIMEOUT = 1e4;
-var BASH = "/bin/bash";
-var PREFIX_MAP = {
-  "builtin:": "builtin",
-  "shell:": "shell",
-  "script:": "script"
-};
-var UndefinedVarError = class extends Error {
-  constructor(varName) {
-    super(`undefined variable "\${${varName}}"`);
-    this.varName = varName;
-    this.name = "UndefinedVarError";
-  }
-  varName;
-};
-function interpolate(template, vars) {
-  let out = "";
-  let i2 = 0;
-  while (i2 < template.length) {
-    const ch = template[i2];
-    if (ch === "$" && template[i2 + 1] === "$") {
-      out += "$";
-      i2 += 2;
-      continue;
-    }
-    if (ch === "$" && template[i2 + 1] === "{") {
-      const close = template.indexOf("}", i2 + 2);
-      const name = close === -1 ? "" : template.slice(i2 + 2, close);
-      if (close !== -1 && /^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) {
-        const value = Object.prototype.hasOwnProperty.call(vars, name) ? vars[name] : Object.prototype.hasOwnProperty.call(process.env, name) ? process.env[name] : void 0;
-        if (value === void 0) {
-          throw new UndefinedVarError(name);
-        }
-        out += value;
-        i2 = close + 1;
-        continue;
-      }
-    }
-    out += ch;
-    i2 += 1;
-  }
-  return out;
-}
-function classifyVerify(verify) {
-  for (const [prefix, kind] of Object.entries(PREFIX_MAP)) {
-    if (verify.startsWith(prefix)) {
-      return { kind, value: verify.slice(prefix.length).trim(), explicit: true };
-    }
-  }
-  const firstToken = verify.split(/\s/)[0];
-  if (firstToken.includes("/") || /\.(sh|bash|ts|js|py)$/.test(firstToken)) {
-    return { kind: "script", value: verify, explicit: false };
-  }
-  return { kind: "shell", value: verify, explicit: false };
-}
-function failureFromExec(e) {
-  const err = e;
-  const detail = (err.stderr || err.message || "command failed").trim();
-  return { status: "fail", message: detail };
-}
-async function runShell(command, cwd) {
-  try {
-    const stdout = execSync(command, {
-      cwd,
-      timeout: EXEC_TIMEOUT,
-      encoding: "utf-8",
-      shell: BASH,
-      stdio: ["pipe", "pipe", "pipe"]
-    }).trim();
-    return { status: "pass", message: stdout || "OK" };
-  } catch (e) {
-    return failureFromExec(e);
-  }
-}
-async function runScriptFile(scriptPath, cwd) {
-  try {
-    const stdout = execFileSync(BASH, [scriptPath], {
-      cwd,
-      timeout: EXEC_TIMEOUT,
-      encoding: "utf-8",
-      stdio: ["pipe", "pipe", "pipe"]
-    }).trim();
-    return { status: "pass", message: stdout || "OK" };
-  } catch (e) {
-    return failureFromExec(e);
-  }
-}
-async function runBuiltin(name, targetPath) {
-  const handler = getBuiltin(name);
-  if (!handler) {
-    const available = listBuiltins().join(", ");
-    return { status: "error", message: `unknown builtin "${name}". available: ${available}` };
-  }
-  return handler(targetPath);
-}
-async function runScript(scriptPath, cwd, explicit) {
-  const base = path10.resolve(cwd);
-  const resolved = path10.resolve(base, scriptPath);
-  const rel = path10.relative(base, resolved);
-  if (rel === ".." || rel.startsWith(".." + path10.sep) || path10.isAbsolute(rel)) {
-    return {
-      status: "error",
-      message: `script path escapes the checklist dir: "${scriptPath}" (resolved to "${resolved}")`
-    };
-  }
-  if (!fs10.existsSync(resolved)) {
-    const hint = explicit ? `script not found: "${resolved}" (resolved from "${scriptPath}")` : `auto-classified as script (first token contains "/" or has script extension), but file not found: "${resolved}". use "shell:" prefix if this is a shell command`;
-    return { status: "error", message: hint };
-  }
-  const realBase = fs10.realpathSync(base);
-  const realResolved = fs10.realpathSync(resolved);
-  const realRel = path10.relative(realBase, realResolved);
-  if (realRel === ".." || realRel.startsWith(".." + path10.sep) || path10.isAbsolute(realRel)) {
-    return {
-      status: "error",
-      message: `script path escapes the checklist dir via symlink: "${scriptPath}" (resolves to "${realResolved}")`
-    };
-  }
-  return runScriptFile(realResolved, cwd);
-}
-async function runCheck(item, cwd, targetPath, vars = {}) {
-  if (!item.verify) {
-    return { item, kind: "manual" };
-  }
-  const { kind, value, explicit } = classifyVerify(item.verify);
-  let result;
-  try {
-    switch (kind) {
-      case "builtin":
-        result = await runBuiltin(value, targetPath);
-        break;
-      case "script": {
-        const scriptPath = interpolate(value, vars);
-        result = await runScript(scriptPath, cwd, explicit);
-        break;
-      }
-      case "shell":
-        result = await runShell(interpolate(value, vars), cwd);
-        break;
-    }
-  } catch (e) {
-    if (e instanceof UndefinedVarError) {
-      return {
-        item,
-        kind: "mechanical",
-        result: {
-          status: "error",
-          message: `${item.id}: ${e.message} in verify rule "${item.verify}" \u2014 pass it with \`checklist init <skill> --var ${e.varName}=...\` or export ${e.varName} in the environment`
-        }
-      };
-    }
-    const reason = e instanceof Error ? e.message : String(e);
-    result = { status: "error", message: `${item.id}: ${reason}` };
-  }
-  return { item, kind: "mechanical", result };
-}
-
-// src/resolver.ts
-var CONFIG_FILE2 = ".checklist.yml";
-function sessionTag() {
-  const raw = (process.env.CHECKLIST_SESSION_ID || process.env.CLAUDE_CODE_SESSION_ID || "").trim();
-  return raw.replace(/[^A-Za-z0-9._-]/g, "_").slice(0, 64);
-}
-function activePointerPath() {
-  const dir = process.env.CHECKLIST_HOME || (process.env.XDG_CONFIG_HOME ? path11.join(process.env.XDG_CONFIG_HOME, "checklist") : path11.join(os2.homedir(), ".config", "checklist"));
-  const tag = sessionTag();
-  return path11.join(dir, tag ? `active.${tag}` : "active");
-}
-function resolveDir(explicit) {
-  if (explicit) return explicit;
-  if (process.env.CHECKLIST_DIR) return process.env.CHECKLIST_DIR;
-  if (process.env.CLAUDE_SKILL_DIR) return process.env.CLAUDE_SKILL_DIR;
-  const pointerPath = activePointerPath();
-  let raw;
-  try {
-    raw = fs11.readFileSync(pointerPath, "utf-8");
-  } catch {
-    return process.cwd();
-  }
-  const target = raw.trim();
-  if (target) {
-    try {
-      fs11.statSync(path11.join(target, CONFIG_FILE2));
-      return target;
-    } catch (e) {
-      const code = e.code;
-      if (code !== "ENOENT" && code !== "ENOTDIR") {
-        return target;
-      }
-    }
-  }
-  try {
-    fs11.unlinkSync(pointerPath);
-  } catch {
-  }
-  return process.cwd();
-}
-function writeActivePointer(targetDir) {
-  const absDir = path11.resolve(targetDir);
-  const pointerPath = activePointerPath();
-  fs11.mkdirSync(path11.dirname(pointerPath), { recursive: true });
-  fs11.writeFileSync(pointerPath, absDir, "utf-8");
-}
-function clearActivePointer(targetDir) {
-  const pointerPath = activePointerPath();
-  let current;
-  try {
-    current = fs11.readFileSync(pointerPath, "utf-8").trim();
-  } catch {
-    return false;
-  }
-  if (targetDir && current !== path11.resolve(targetDir)) return false;
-  try {
-    fs11.unlinkSync(pointerPath);
-    return true;
-  } catch {
-    return false;
-  }
-}
-function findPhaseIndex(config, nameOrIndex) {
-  if (/^\d+$/.test(nameOrIndex)) {
-    const num = parseInt(nameOrIndex, 10);
-    if (num < config.phases.length) {
-      return num;
-    }
-  }
-  const idx = config.phases.findIndex((p) => p.name.toLowerCase() === nameOrIndex.toLowerCase());
-  if (idx === -1) {
-    throw new Error(`Phase not found: "${nameOrIndex}". Use \`checklist phases\` to list available phases.`);
-  }
-  return idx;
-}
-async function runPhase(phase, phaseIndex, cwd, targetPath, vars = {}) {
-  const checks = await Promise.all(
-    phase.checks.map((item) => runCheck(item, cwd, targetPath, vars))
-  );
-  let mechanicalPassed = 0;
-  let mechanicalTotal = 0;
-  let manualCount = 0;
-  for (const c of checks) {
-    if (c.kind === "manual") {
-      manualCount++;
-    } else {
-      mechanicalTotal++;
-      if (c.result?.status === "pass") mechanicalPassed++;
-    }
-  }
-  return {
-    phaseName: phase.name,
-    phaseIndex,
-    checks,
-    mechanicalPassed,
-    mechanicalTotal,
-    manualCount
-  };
-}
-function gatePriorPhases(config, targetPhaseIndex, state) {
-  for (let i2 = 0; i2 < targetPhaseIndex; i2++) {
-    const phase = config.phases[i2];
-    const ids = phase.checks.map((c) => c.id);
-    if (!isPhaseComplete(state, phase.name, ids)) {
-      return {
-        passed: false,
-        failedPhase: phase.name,
-        failedPhaseIndex: i2
-      };
-    }
-  }
-  return { passed: true };
-}
-
-// src/commands/init.ts
-var VAR_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/;
-function parseVars(raw) {
-  const vars = {};
-  for (const entry of raw) {
-    const eq = entry.indexOf("=");
-    if (eq === -1) {
-      throw new Error(`invalid --var "${entry}": expected name=value`);
-    }
-    const name = entry.slice(0, eq);
-    const value = entry.slice(eq + 1);
-    if (!VAR_NAME.test(name)) {
-      throw new Error(`invalid --var name "${name}": must match [A-Za-z_][A-Za-z0-9_]* (from "${entry}")`);
-    }
-    if (Object.prototype.hasOwnProperty.call(vars, name)) {
-      throw new Error(`duplicate --var name "${name}"`);
-    }
-    vars[name] = value;
-  }
-  return vars;
-}
-function initCommand(dir, options2) {
-  if (dir && options2?.dir && path12.resolve(dir) !== path12.resolve(options2.dir)) {
-    console.error(`conflicting target dir: positional "${dir}" vs --dir "${options2.dir}"`);
-    process.exit(1);
-  }
-  const targetDir = dir || resolveDir(options2?.dir);
-  const target = options2?.path || process.cwd();
-  const stateFile = stateFilePath(targetDir, target);
-  try {
-    const vars = parseVars(options2?.var ?? []);
-    const config = loadChecklist(targetDir);
-    const stateExists = fs12.existsSync(stateFile);
-    if (stateExists && !options2?.force) {
-      console.error(`state file exists in ${targetDir}. use --force to clear and reinitialize`);
-      process.exit(1);
-    }
-    if (Object.keys(vars).length > 0) {
-      writeInitialState(stateFile, vars);
-    } else {
-      clearState(stateFile);
-    }
-    writeActivePointer(targetDir);
-    const legacy = findLegacyStateFile(targetDir);
-    if (legacy) {
-      console.error(`note: legacy state file ${legacy} is ignored (state now lives outside the skill dir); it is safe to delete`);
-    }
-    console.log(formatInit(config, stateExists));
-  } catch (e) {
-    console.error(e instanceof Error ? e.message : String(e));
-    process.exit(1);
-  }
-}
-
-// src/commands/show.ts
-async function showCommand(phaseArg, options2) {
-  const cwd = resolveDir(options2?.dir);
-  const targetPath = options2?.path || process.cwd();
-  const stateFile = stateFilePath(cwd, targetPath);
-  try {
-    const config = loadChecklist(cwd);
-    const state = loadState(stateFile);
-    if (options2?.json) {
-      console.log(formatStateJson(config, state));
-      return;
-    }
-    if (!phaseArg) {
-      console.log(formatOverview(config, state));
-      return;
-    }
-    const phaseIndex = findPhaseIndex(config, phaseArg);
-    const gate = gatePriorPhases(config, phaseIndex, state);
-    if (!gate.passed) {
-      console.error(formatGateFailure(gate.failedPhase, gate.failedPhaseIndex));
-      process.exit(1);
-    }
-    const result = await runPhase(config.phases[phaseIndex], phaseIndex, cwd, targetPath, loadVars(state));
-    console.log(formatPhaseShow(result, state, config.phases.length));
-  } catch (e) {
-    console.error(e instanceof Error ? e.message : String(e));
-    process.exit(1);
-  }
-}
-
-// src/journal.ts
-import * as fs13 from "node:fs";
-import * as path13 from "node:path";
-var RUNS_DIR = "runs";
-function runsDir(stateDir) {
-  return path13.resolve(stateDir, RUNS_DIR);
-}
-function runStamp(now = /* @__PURE__ */ new Date()) {
-  return now.toISOString().replace(/[:.]/g, "-");
-}
-function appendEvents(runFile, events) {
-  if (events.length === 0) return;
-  fs13.mkdirSync(path13.dirname(runFile), { recursive: true });
-  const payload = events.map((e) => JSON.stringify(e)).join("\n") + "\n";
-  fs13.appendFileSync(runFile, payload, "utf-8");
-}
-function journalPathFor(stateDir, stamp) {
-  return path13.join(runsDir(stateDir), `${stamp}.jsonl`);
-}
-function readJournal(stateDir) {
-  const dir = runsDir(stateDir);
-  let files;
-  try {
-    files = fs13.readdirSync(dir).filter((f) => f.endsWith(".jsonl"));
-  } catch {
-    return [];
-  }
-  files.sort();
-  const events = [];
-  for (const f of files) {
-    let raw;
-    try {
-      raw = fs13.readFileSync(path13.join(dir, f), "utf-8");
-    } catch {
-      continue;
-    }
-    for (const line of raw.split("\n")) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
-      try {
-        const parsed = JSON.parse(trimmed);
-        if (parsed && typeof parsed === "object" && typeof parsed.ts === "string") {
-          events.push(parsed);
-        }
-      } catch {
-      }
-    }
-  }
-  return events;
-}
-
-// src/commands/verify.ts
-async function verifyCommand(phaseArg, options2) {
-  const cwd = resolveDir(options2.dir);
-  const targetPath = options2.path || process.cwd();
-  const stateFile = stateFilePath(cwd, targetPath);
-  try {
-    const config = loadChecklist(cwd);
-    const state = loadState(stateFile);
-    const phaseIndex = findPhaseIndex(config, phaseArg);
-    const gate = gatePriorPhases(config, phaseIndex, state);
-    if (!gate.passed) {
-      console.error(formatGateFailure(gate.failedPhase, gate.failedPhaseIndex));
-      process.exit(1);
-    }
-    const result = await runPhase(config.phases[phaseIndex], phaseIndex, cwd, targetPath, loadVars(state));
-    const updates = { checked: {} };
-    const events = [];
-    const phaseName = config.phases[phaseIndex].name;
-    const ts = (/* @__PURE__ */ new Date()).toISOString();
-    for (const c of result.checks) {
-      if (c.kind === "mechanical" && c.result) {
-        setItemResult(updates, result.phaseName, c.item.id, c.result);
-        events.push({
-          ts,
-          kind: "verify",
-          phaseIndex,
-          phaseName,
-          itemId: c.item.id,
-          status: c.result.status,
-          message: c.result.message
-        });
-      }
-    }
-    const merged = mergeAndSaveState(stateFile, updates);
-    try {
-      appendEvents(journalPathFor(journalDir(cwd), runStamp()), events);
-    } catch {
-    }
-    console.log(formatVerifyResult(result, merged, config.phases.length));
-    if (result.mechanicalPassed < result.mechanicalTotal) {
-      process.exit(1);
-    }
-  } catch (e) {
-    console.error(e instanceof Error ? e.message : String(e));
-    process.exit(1);
-  }
-}
-
-// src/commands/check.ts
-function checkCommand(phaseArg, itemId, options2) {
-  const cwd = resolveDir(options2.dir);
-  const target = options2.path || process.cwd();
-  const stateFile = stateFilePath(cwd, target);
-  try {
-    const config = loadChecklist(cwd);
-    const state = loadState(stateFile);
-    const phaseIndex = findPhaseIndex(config, phaseArg);
-    const gate = gatePriorPhases(config, phaseIndex, state);
-    if (!gate.passed) {
-      console.error(formatGateFailure(gate.failedPhase, gate.failedPhaseIndex));
-      process.exit(1);
-    }
-    const phase = config.phases[phaseIndex];
-    const item = phase.checks.find((c) => c.id === itemId);
-    if (!item) {
-      const available = phase.checks.map((c) => c.id).join(", ");
-      console.error(`item "${itemId}" not found in phase "${phase.name}". available: ${available}`);
-      process.exit(1);
-    }
-    if (item.verify) {
-      console.error(`"${itemId}" has a verify rule \u2014 it is mechanical, not manual. run: checklist verify ${phaseArg}`);
-      process.exit(1);
-    }
-    const evidence = options2.evidence?.trim() || void 0;
-    if (item.evidenceRequired && !evidence) {
-      console.error(`check "${phase.name}/${itemId}" requires evidence \u2014 re-run with --evidence "<file:line | command output | artifact path>"`);
-      process.exit(1);
-      return;
-    }
-    const updates = { checked: {} };
-    setItemResult(updates, phase.name, itemId, { status: "pass", message: "confirmed", evidence });
-    mergeAndSaveState(stateFile, updates);
-    const event = {
-      ts: (/* @__PURE__ */ new Date()).toISOString(),
-      kind: "check",
-      phaseIndex,
-      phaseName: phase.name,
-      itemId,
-      status: "pass",
-      message: "confirmed",
-      ...evidence ? { evidence } : {}
-    };
-    try {
-      appendEvents(journalPathFor(journalDir(cwd), runStamp()), [event]);
-    } catch {
-    }
-    console.log(formatCheckConfirm(phaseIndex, itemId, evidence));
-  } catch (e) {
-    console.error(e instanceof Error ? e.message : String(e));
-    process.exit(1);
-  }
-}
-
-// src/commands/phases.ts
-function phasesCommand(options2) {
-  const targetDir = resolveDir(options2?.dir);
-  try {
-    const config = loadChecklist(targetDir);
-    console.log(formatPhases(config));
-  } catch (e) {
-    console.error(e instanceof Error ? e.message : String(e));
-    process.exit(1);
-  }
-}
-
-// src/commands/reset.ts
-import * as fs14 from "node:fs";
-import * as path14 from "node:path";
-var CONFIG_FILE3 = ".checklist.yml";
-function resetCommand(options2) {
-  const targetDir = resolveDir(options2?.dir);
-  if (!fs14.existsSync(path14.join(targetDir, CONFIG_FILE3))) {
-    console.error(`no active checklist to reset in ${targetDir}. pass --dir <skill-dir>`);
-    process.exit(1);
-    return;
-  }
-  const target = options2?.path || process.cwd();
-  const stateFile = stateFilePath(targetDir, target);
-  const resetEvent = {
-    ts: (/* @__PURE__ */ new Date()).toISOString(),
-    kind: "reset",
-    phaseIndex: -1,
-    phaseName: "",
-    itemId: "",
-    status: "pass",
-    message: "run reset \u2014 state cleared, journal retained"
-  };
-  try {
-    appendEvents(journalPathFor(journalDir(targetDir), runStamp()), [resetEvent]);
-  } catch {
-  }
-  clearState(stateFile);
-  const pointerCleared = clearActivePointer(targetDir);
-  const pointerNote = pointerCleared ? " and active pointer" : "";
-  console.log(`checklist reset: cleared state${pointerNote} for ${targetDir} (run journal retained)`);
-}
-
-// src/commands/report.ts
-function reportCommand(options2) {
-  const cwd = resolveDir(options2?.dir);
-  try {
-    let config;
-    try {
-      config = loadChecklist(cwd);
-    } catch {
-      config = void 0;
-    }
-    const events = readJournal(journalDir(cwd));
-    console.log(formatReport(events, config));
-  } catch (e) {
-    console.error(e instanceof Error ? e.message : String(e));
-    process.exit(1);
-  }
-}
-
-// src/commands/lint.ts
-import * as path16 from "node:path";
-
 // src/lint.ts
-import * as fs15 from "node:fs";
-import * as path15 from "node:path";
-var CONFIG_FILE4 = ".checklist.yml";
+var CONFIG_FILE = ".checklist.yml";
 var SKILL_FILE = "SKILL.md";
 var VERIFY_PREFIXES = ["builtin:", "shell:", "script:"];
 function lintChecklistSchema(ymlPath, diags) {
   const empty = { phases: [] };
   let raw;
   try {
-    raw = fs15.readFileSync(ymlPath, "utf-8");
+    raw = fs.readFileSync(ymlPath, "utf-8");
   } catch (e) {
     diags.push({
       file: ymlPath,
       severity: "error",
       rule: "schema/unreadable",
-      message: `could not read ${CONFIG_FILE4}: ${e instanceof Error ? e.message : String(e)}`
+      message: `could not read ${CONFIG_FILE}: ${e instanceof Error ? e.message : String(e)}`
     });
     return empty;
   }
@@ -10849,12 +9595,23 @@ function lintChecklistSchema(ymlPath, diags) {
       file: ymlPath,
       severity: "error",
       rule: "schema/not-a-mapping",
-      message: `${CONFIG_FILE4} must be a YAML mapping with a top-level "phases" list`,
+      message: `${CONFIG_FILE} must be a YAML mapping with a top-level "phases" list`,
       fix: "wrap the file in a top-level `phases:` key"
     });
     return empty;
   }
   const obj = data;
+  if (obj.checks !== void 0 && obj.phases !== void 0) {
+    diags.push({ file: ymlPath, severity: "error", rule: "schema/ambiguous-shape", message: "cannot specify both checks and phases" });
+    return { phases: [] };
+  }
+  if (obj.checks !== void 0) {
+    if (!Array.isArray(obj.checks)) {
+      diags.push({ file: ymlPath, severity: "error", rule: "schema/checks-not-an-array", message: "checks must be an array" });
+      return { phases: [] };
+    }
+    obj.phases = [{ name: "main", checks: obj.checks }];
+  }
   if (!Array.isArray(obj.phases)) {
     diags.push({
       file: ymlPath,
@@ -10877,13 +9634,13 @@ function lintChecklistSchema(ymlPath, diags) {
   }
   const phases = [];
   const seenPhaseNames = /* @__PURE__ */ new Map();
-  obj.phases.forEach((p, i2) => {
+  obj.phases.forEach((p, i) => {
     if (!p || typeof p !== "object" || Array.isArray(p)) {
       diags.push({
         file: ymlPath,
         severity: "error",
         rule: "schema/phase-not-a-mapping",
-        message: `phase ${i2}: entry is not a mapping (a bare "- " or "- null" list item?)`,
+        message: `phase ${i}: entry is not a mapping (a bare "- " or "- null" list item?)`,
         fix: "give the entry a `name:` and a `checks:` list"
       });
       return;
@@ -10895,7 +9652,7 @@ function lintChecklistSchema(ymlPath, diags) {
         file: ymlPath,
         severity: "error",
         rule: "schema/phase-missing-name",
-        message: `phase ${i2}: missing a non-empty string "name"`,
+        message: `phase ${i}: missing a non-empty string "name"`,
         fix: "add a `name:` to this phase"
       });
     } else {
@@ -10907,14 +9664,14 @@ function lintChecklistSchema(ymlPath, diags) {
           file: ymlPath,
           severity: "error",
           rule: "schema/duplicate-phase-name",
-          message: `phase ${i2}: duplicate phase name "${name}" (collides with "${prior}", names are compared case-insensitively)`,
+          message: `phase ${i}: duplicate phase name "${name}" (collides with "${prior}", names are compared case-insensitively)`,
           fix: "rename one of the phases \u2014 phases are addressed by name, so a duplicate makes one unreachable"
         });
       } else {
         seenPhaseNames.set(key, name);
       }
     }
-    const phaseLabel = hasName ? `"${phase.name}"` : `${i2}`;
+    const phaseLabel = hasName ? `"${phase.name}"` : `${i}`;
     if (!Array.isArray(phase.checks)) {
       diags.push({
         file: ymlPath,
@@ -10980,7 +9737,7 @@ function lintChecklistSchema(ymlPath, diags) {
           });
         } else {
           const v = check.verify.trim();
-          if (v.length === 0) {
+          if (v.length === 0 || /^(shell|script|builtin):\s*$/.test(v)) {
             diags.push({
               file: ymlPath,
               severity: "error",
@@ -11018,6 +9775,36 @@ function lintChecklistSchema(ymlPath, diags) {
           });
         }
       }
+      if (check.timeout !== void 0) {
+        if (check.verify === void 0) {
+          diags.push({
+            file: ymlPath,
+            severity: "error",
+            rule: "schema/timeout-without-verify",
+            message: `phase ${phaseLabel}, check ${checkLabel}: "timeout" applies only to a mechanical check, but this check has no "verify" rule`,
+            fix: "add a `verify:` rule (a real sensor), or remove the `timeout` key"
+          });
+        } else if (typeof check.timeout !== "number" || !Number.isFinite(check.timeout) || check.timeout <= 0) {
+          diags.push({
+            file: ymlPath,
+            severity: "error",
+            rule: "schema/timeout-not-positive",
+            message: `phase ${phaseLabel}, check ${checkLabel}: "timeout" must be a positive number of seconds, got ${describeType(check.timeout)}`,
+            fix: "set `timeout:` to a positive number, e.g. `timeout: 600`"
+          });
+        } else if (check.timeout > 1800) {
+          diags.push({
+            file: ymlPath,
+            severity: "error",
+            rule: "schema/timeout-too-large",
+            message: `phase ${phaseLabel}, check ${checkLabel}: "timeout" of ${check.timeout}s exceeds the 1800s ceiling (a gate sensor must not run unbounded)`,
+            fix: "lower `timeout:` to 1800 seconds or less"
+          });
+        }
+      }
+      if (check["allow-na"] !== void 0 && typeof check["allow-na"] !== "boolean") {
+        diags.push({ file: ymlPath, severity: "error", rule: "schema/allow-na-not-boolean", message: `phase ${phaseLabel}, check ${checkLabel}: allow-na must be boolean` });
+      }
       if (hasId) {
         const id = check.id;
         if (seenIds.has(id)) {
@@ -11030,7 +9817,7 @@ function lintChecklistSchema(ymlPath, diags) {
           });
         } else {
           seenIds.add(id);
-          checks.push({ id, hasVerify: check.verify !== void 0 });
+          checks.push({ id, hasVerify: check.verify !== void 0, allowNa: check["allow-na"] === true });
         }
       }
     });
@@ -11038,7 +9825,7 @@ function lintChecklistSchema(ymlPath, diags) {
       phases.push({ name: phase.name, checks });
     }
   });
-  return { phases };
+  return { phases, flat: obj.checks !== void 0 };
 }
 function describeType(v) {
   if (v === null) return "null";
@@ -11049,7 +9836,8 @@ function truncate(s, n) {
   return s.length <= n ? s : s.slice(0, n - 1) + "\u2026";
 }
 var CHECK_RE = /\bchecklist\s+check\s+([^\s`]+)\s+([^\s`]+)/g;
-var VERIFY_RE = /\bchecklist\s+verify\s+([^\s`]+)/g;
+var VERIFY_RE = /\bchecklist\s+(verify|advance)\s+([^\s`]+)/g;
+var NA_RE = /\bchecklist\s+na\s+([^\s`]+)\s+([^\s`]+)/g;
 function trimToken(token) {
   return token.replace(/[.,;:!?)\]}>]+$/, "");
 }
@@ -11063,9 +9851,13 @@ function extractSkillCommands(text) {
     while ((m = CHECK_RE.exec(line)) !== null) {
       commands.push({ kind: "check", phase: trimToken(m[1]), itemId: trimToken(m[2]), line: lineNo });
     }
+    NA_RE.lastIndex = 0;
+    while ((m = NA_RE.exec(line)) !== null) {
+      commands.push({ kind: "na", phase: trimToken(m[1]), itemId: trimToken(m[2]), line: lineNo });
+    }
     VERIFY_RE.lastIndex = 0;
     while ((m = VERIFY_RE.exec(line)) !== null) {
-      commands.push({ kind: "verify", phase: trimToken(m[1]), line: lineNo });
+      commands.push({ kind: m[1], phase: trimToken(m[2]), line: lineNo });
     }
   });
   return commands;
@@ -11090,12 +9882,12 @@ function lintParity(skillPath, ymlPath, text, parse2, diags) {
         file: skillPath,
         severity: "error",
         rule: "parity/unknown-phase",
-        message: `line ${cmd.line}: \`checklist ${cmd.kind} ${cmd.phase}${cmd.itemId ? " " + cmd.itemId : ""}\` names phase "${cmd.phase}", which does not exist in ${path15.basename(ymlPath)}`,
-        fix: `use one of the phases defined in ${path15.basename(ymlPath)}: ${parse2.phases.map((p) => p.name).join(", ") || "(none)"}`
+        message: `line ${cmd.line}: \`checklist ${cmd.kind} ${cmd.phase}${cmd.itemId ? " " + cmd.itemId : ""}\` names phase "${cmd.phase}", which does not exist in ${path.basename(ymlPath)}`,
+        fix: `use one of the phases defined in ${path.basename(ymlPath)}: ${parse2.phases.map((p) => p.name).join(", ") || "(none)"}`
       });
       continue;
     }
-    if (cmd.kind === "check" && cmd.itemId !== void 0) {
+    if ((cmd.kind === "check" || cmd.kind === "na") && cmd.itemId !== void 0) {
       const found = phase.checks.find((c) => c.id === cmd.itemId);
       if (!found) {
         diags.push({
@@ -11106,7 +9898,16 @@ function lintParity(skillPath, ymlPath, text, parse2, diags) {
           fix: `use one of phase "${phase.name}"'s check ids: ${phase.checks.map((c) => c.id).join(", ") || "(none)"}`
         });
       } else {
+        if (cmd.kind === "check" && found.hasVerify) diags.push({ file: skillPath, severity: "error", rule: "parity/manual-mechanical", message: `line ${cmd.line}: mechanical check ${found.id} requires verify` });
+        if (cmd.kind === "na" && !found.allowNa) diags.push({ file: skillPath, severity: "error", rule: "parity/na-not-allowed", message: `line ${cmd.line}: ${found.id} does not allow N/A` });
         referenced.add(key(phase.name, found.id));
+      }
+    }
+  }
+  if (!parse2.flat && /^  kind: sop\s*$/m.test(text)) {
+    for (const phase of parse2.phases) {
+      if (!commands.some((cmd) => cmd.kind === "advance" && resolvePhase(cmd.phase) === phase)) {
+        diags.push({ file: skillPath, severity: "error", rule: "parity/missing-advance", message: `phase ${phase.name} has no explicit advance command` });
       }
     }
   }
@@ -11118,8 +9919,8 @@ function lintParity(skillPath, ymlPath, text, parse2, diags) {
           file: skillPath,
           severity: "warning",
           rule: "parity/orphan-check",
-          message: `check "${check.id}" in phase "${phase.name}" is never driven by a \`checklist check ${phase.name} ${check.id}\` command in ${path15.basename(skillPath)}`,
-          fix: `add \`checklist check ${phase.name} ${check.id}\` to the ${phase.name} stage in ${path15.basename(skillPath)}, or remove the check from ${path15.basename(ymlPath)}`
+          message: `check "${check.id}" in phase "${phase.name}" is never driven by a \`checklist check ${phase.name} ${check.id}\` command in ${path.basename(skillPath)}`,
+          fix: `add \`checklist check ${phase.name} ${check.id}\` to the ${phase.name} stage in ${path.basename(skillPath)}, or remove the check from ${path.basename(ymlPath)}`
         });
       }
     }
@@ -11127,9 +9928,9 @@ function lintParity(skillPath, ymlPath, text, parse2, diags) {
 }
 function lintFiles(skillDir, hasSkill, diags) {
   for (const required of ["LICENSE", "NOTICE"]) {
-    if (!fs15.existsSync(path15.join(skillDir, required))) {
+    if (!fs.existsSync(path.join(skillDir, required))) {
       diags.push({
-        file: path15.join(skillDir, required),
+        file: path.join(skillDir, required),
         severity: "warning",
         rule: "files/missing-license",
         message: `${required} is missing from the skill directory`,
@@ -11137,24 +9938,24 @@ function lintFiles(skillDir, hasSkill, diags) {
       });
     }
   }
-  const refsDir = path15.join(skillDir, "references");
-  if (hasSkill && fs15.existsSync(refsDir) && fs15.statSync(refsDir).isDirectory()) {
+  const refsDir = path.join(skillDir, "references");
+  if (hasSkill && fs.existsSync(refsDir) && fs.statSync(refsDir).isDirectory()) {
     let skillText = "";
     try {
-      skillText = fs15.readFileSync(path15.join(skillDir, SKILL_FILE), "utf-8");
+      skillText = fs.readFileSync(path.join(skillDir, SKILL_FILE), "utf-8");
     } catch {
       skillText = "";
     }
     let entries = [];
     try {
-      entries = fs15.readdirSync(refsDir).filter((f) => f.endsWith(".md"));
+      entries = fs.readdirSync(refsDir).filter((f) => f.endsWith(".md"));
     } catch {
       entries = [];
     }
     for (const ref of entries) {
       if (!skillText.includes(ref)) {
         diags.push({
-          file: path15.join(refsDir, ref),
+          file: path.join(refsDir, ref),
           severity: "warning",
           rule: "files/orphan-reference",
           message: `references/${ref} is never mentioned in ${SKILL_FILE} (possible orphan)`,
@@ -11166,29 +9967,29 @@ function lintFiles(skillDir, hasSkill, diags) {
 }
 function isSkillDir(dir) {
   try {
-    return fs15.statSync(path15.join(dir, CONFIG_FILE4)).isFile();
+    return fs.statSync(path.join(dir, CONFIG_FILE)).isFile();
   } catch {
     return false;
   }
 }
 function lintSkill(skillDir) {
   const diags = [];
-  const ymlPath = path15.join(skillDir, CONFIG_FILE4);
-  const skillPath = path15.join(skillDir, SKILL_FILE);
+  const ymlPath = path.join(skillDir, CONFIG_FILE);
+  const skillPath = path.join(skillDir, SKILL_FILE);
   const parse2 = lintChecklistSchema(ymlPath, diags);
-  const hasSkill = fs15.existsSync(skillPath);
+  const hasSkill = fs.existsSync(skillPath);
   if (!hasSkill) {
     diags.push({
       file: skillPath,
       severity: "error",
       rule: "parity/missing-skill-md",
       message: `${SKILL_FILE} is missing \u2014 cannot cross-validate the checklist against it`,
-      fix: `add a ${SKILL_FILE} next to ${CONFIG_FILE4}`
+      fix: `add a ${SKILL_FILE} next to ${CONFIG_FILE}`
     });
   } else {
     let text = "";
     try {
-      text = fs15.readFileSync(skillPath, "utf-8");
+      text = fs.readFileSync(skillPath, "utf-8");
     } catch (e) {
       diags.push({
         file: skillPath,
@@ -11221,26 +10022,78 @@ function lintTree(root) {
 function walk(dir, found) {
   let entries;
   try {
-    entries = fs15.readdirSync(dir, { withFileTypes: true });
+    entries = fs.readdirSync(dir, { withFileTypes: true });
   } catch {
     return;
   }
-  if (entries.some((e) => e.isFile() && e.name === CONFIG_FILE4)) {
+  if (entries.some((e) => e.isFile() && e.name === CONFIG_FILE)) {
     found.push(dir);
     return;
   }
   for (const e of entries) {
     if (!e.isDirectory()) continue;
     if (e.name === "node_modules" || e.name.startsWith(".")) continue;
-    walk(path15.join(dir, e.name), found);
+    walk(path.join(dir, e.name), found);
   }
+}
+
+// src/state.ts
+import * as os from "node:os";
+import * as path2 from "node:path";
+function stateHomeDir() {
+  if (process.env.CHECKLIST_STATE_HOME) {
+    return process.env.CHECKLIST_STATE_HOME;
+  }
+  if (process.env.XDG_STATE_HOME) {
+    return path2.join(process.env.XDG_STATE_HOME, "checklist");
+  }
+  return path2.join(os.homedir(), ".local", "state", "checklist");
+}
+
+// src/formatter.ts
+function formatLintReport(result) {
+  const { skillDirs, diagnostics } = result;
+  const errorCount = diagnostics.filter((d) => d.severity === "error").length;
+  const warningCount = diagnostics.filter((d) => d.severity === "warning").length;
+  const lines = [];
+  if (skillDirs.length === 0) {
+    lines.push("no skill directories found (a skill dir contains a .checklist.yml)");
+    return { report: lines.join("\n"), errorCount, warningCount };
+  }
+  const byFile = /* @__PURE__ */ new Map();
+  for (const d of diagnostics) {
+    const arr = byFile.get(d.file);
+    if (arr) arr.push(d);
+    else byFile.set(d.file, [d]);
+  }
+  for (const [file, diags] of byFile) {
+    lines.push(file);
+    for (const d of diags) {
+      const tag = d.severity === "error" ? "ERROR" : "WARN ";
+      lines.push(`  ${tag} [${d.rule}] ${d.message}`);
+      if (d.fix) {
+        lines.push(`        fix: ${d.fix}`);
+      }
+    }
+    lines.push("");
+  }
+  const skillWord = skillDirs.length === 1 ? "skill" : "skills";
+  if (errorCount === 0 && warningCount === 0) {
+    lines.push(`lint: ${skillDirs.length} ${skillWord} OK \u2014 no problems found`);
+  } else {
+    const parts = [];
+    if (errorCount > 0) parts.push(`${errorCount} error${errorCount === 1 ? "" : "s"}`);
+    if (warningCount > 0) parts.push(`${warningCount} warning${warningCount === 1 ? "" : "s"}`);
+    lines.push(`lint: ${parts.join(", ")} across ${skillDirs.length} ${skillWord}`);
+  }
+  return { report: lines.join("\n"), errorCount, warningCount };
 }
 
 // src/commands/lint.ts
 function lintCommand(pathArg, options2) {
-  const target = pathArg || options2?.dir || resolveDir(options2?.dir);
+  const target = pathArg || options2?.dir || process.cwd();
   try {
-    const result = lintTree(path16.resolve(target));
+    const result = lintTree(path3.resolve(target));
     if (options2?.json) {
       console.log(JSON.stringify(result, null, 2));
     }
@@ -11258,24 +10111,1045 @@ function lintCommand(pathArg, options2) {
   }
 }
 
+// src/variables.ts
+var VAR_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/;
+function parseVars(raw) {
+  const vars = {};
+  for (const entry of raw) {
+    const eq = entry.indexOf("=");
+    if (eq === -1) {
+      throw new Error(`invalid --var "${entry}": expected name=value`);
+    }
+    const name = entry.slice(0, eq);
+    const value = entry.slice(eq + 1);
+    if (!VAR_NAME.test(name)) {
+      throw new Error(`invalid --var name "${name}": must match [A-Za-z_][A-Za-z0-9_]* (from "${entry}")`);
+    }
+    if (Object.prototype.hasOwnProperty.call(vars, name)) {
+      throw new Error(`duplicate --var name "${name}"`);
+    }
+    Object.defineProperty(vars, name, { value, enumerable: true, writable: true, configurable: true });
+  }
+  return vars;
+}
+function requiredVars(template) {
+  return [...template.replace(/\$\$/g, "").matchAll(/\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g)].map((m) => m[1]);
+}
+function captureVars(config, explicit) {
+  const vars = { ...explicit };
+  for (const phase of config.phases) for (const item of phase.checks) {
+    for (const name of requiredVars(item.verify || "")) {
+      if (!Object.hasOwn(vars, name) && Object.hasOwn(process.env, name)) Object.defineProperty(vars, name, { value: process.env[name], enumerable: true, writable: true, configurable: true });
+    }
+  }
+  return vars;
+}
+
+// src/runs.ts
+import * as fs2 from "node:fs";
+import * as path4 from "node:path";
+import { createHash, randomUUID } from "node:crypto";
+
+// src/loader.ts
+var CONFIG_FILE2 = ".checklist.yml";
+var MAX_TIMEOUT_SECONDS = 1800;
+function parseChecklist(raw) {
+  const data = load(raw);
+  if (!data || typeof data !== "object") {
+    throw new Error(`${CONFIG_FILE2} is empty or not a valid YAML object`);
+  }
+  if (data.checks !== void 0 && data.phases !== void 0) {
+    throw new Error(`${CONFIG_FILE2}: cannot specify both checks and phases`);
+  }
+  if (data.checks !== void 0) {
+    if (!Array.isArray(data.checks)) throw new Error(`${CONFIG_FILE2}: checks must be an array`);
+    data.phases = [{ name: "main", checks: data.checks }];
+  }
+  if (!Array.isArray(data.phases)) {
+    throw new Error(`${CONFIG_FILE2} missing "phases" array`);
+  }
+  const phases = data.phases.map((p, i) => {
+    if (!p || typeof p !== "object" || Array.isArray(p)) {
+      throw new Error(`Phase ${i}: entry must be a mapping with "name" and "checks"`);
+    }
+    const phase = p;
+    if (!phase.name || typeof phase.name !== "string") {
+      throw new Error(`Phase ${i}: missing "name" field`);
+    }
+    if (!Array.isArray(phase.checks)) {
+      throw new Error(`Phase "${phase.name}": missing "checks" array`);
+    }
+    if (phase.checks.length === 0) {
+      throw new Error(`Phase "${phase.name}": "checks" array is empty`);
+    }
+    const checks = phase.checks.map((c, j) => {
+      if (!c || typeof c !== "object" || Array.isArray(c)) {
+        throw new Error(`Phase "${phase.name}", check ${j}: entry must be a mapping with "id" and "description"`);
+      }
+      const check = c;
+      if (!check.id || typeof check.id !== "string") {
+        throw new Error(`Phase "${phase.name}", check ${j}: missing "id"`);
+      }
+      if (!check.description || typeof check.description !== "string") {
+        throw new Error(`Phase "${phase.name}", check "${check.id}": missing "description"`);
+      }
+      const verify2 = check.verify;
+      if (verify2 !== void 0 && typeof verify2 !== "string") {
+        throw new Error(`Phase "${phase.name}", check "${check.id}": "verify" must be a string`);
+      }
+      if (typeof verify2 === "string" && (!verify2.trim() || /^(shell|script|builtin):\s*$/.test(verify2.trim()))) {
+        throw new Error(`Phase "${phase.name}", check "${check.id}": verify must have a non-empty rule and command`);
+      }
+      if (check["allow-na"] !== void 0 && typeof check["allow-na"] !== "boolean") {
+        throw new Error(`Phase "${phase.name}", check "${check.id}": allow-na must be a boolean`);
+      }
+      const evidence = check.evidence;
+      let evidenceRequired = false;
+      if (evidence !== void 0) {
+        if (evidence !== "required") {
+          throw new Error(`Phase "${phase.name}", check "${check.id}": "evidence" may only be the string "required"`);
+        }
+        if (verify2 !== void 0) {
+          throw new Error(`Phase "${phase.name}", check "${check.id}": "evidence: required" is for manual checks; this check has a "verify" rule (it is mechanical, cleared by \`checklist verify\`)`);
+        }
+        evidenceRequired = true;
+      }
+      const timeout = check.timeout;
+      let timeoutMs;
+      if (timeout !== void 0) {
+        if (verify2 === void 0) {
+          throw new Error(`Phase "${phase.name}", check "${check.id}": "timeout" applies only to a mechanical check; this check has no "verify" rule`);
+        }
+        if (typeof timeout !== "number" || !Number.isFinite(timeout) || timeout <= 0) {
+          throw new Error(`Phase "${phase.name}", check "${check.id}": "timeout" must be a positive number of seconds`);
+        }
+        if (timeout > MAX_TIMEOUT_SECONDS) {
+          throw new Error(`Phase "${phase.name}", check "${check.id}": "timeout" of ${timeout}s exceeds the ${MAX_TIMEOUT_SECONDS}s ceiling (a gate sensor must not run unbounded)`);
+        }
+        timeoutMs = Math.round(timeout * 1e3);
+      }
+      return {
+        id: check.id,
+        description: check.description,
+        verify: verify2,
+        evidenceRequired,
+        timeoutMs,
+        ...check["allow-na"] === true ? { allowNa: true } : {}
+      };
+    });
+    const seenIds = /* @__PURE__ */ new Set();
+    for (const ch of checks) {
+      if (seenIds.has(ch.id)) {
+        throw new Error(`Phase "${phase.name}": duplicate check id "${ch.id}"`);
+      }
+      seenIds.add(ch.id);
+    }
+    return { name: phase.name, checks };
+  });
+  if (phases.length === 0) {
+    throw new Error(`${CONFIG_FILE2}: "phases" array is empty`);
+  }
+  const seenPhaseNames = /* @__PURE__ */ new Set();
+  for (const ph of phases) {
+    const key = ph.name.toLowerCase();
+    if (seenPhaseNames.has(key)) {
+      throw new Error(`${CONFIG_FILE2}: duplicate phase name "${ph.name}"`);
+    }
+    seenPhaseNames.add(key);
+  }
+  return { phases, ...data.checks !== void 0 ? { flat: true } : {} };
+}
+
+// src/runs.ts
+function hash(text) {
+  return createHash("sha256").update(text).digest("hex");
+}
+function loadDefinition(skill) {
+  const raw = fs2.readFileSync(path4.join(skill, ".checklist.yml"), "utf8");
+  return { config: parseChecklist(raw), hash: hash(raw) };
+}
+function definitionHash(skill) {
+  return hash(fs2.readFileSync(path4.join(skill, ".checklist.yml"), "utf8"));
+}
+function sessionId(explicit) {
+  return explicit || process.env.CHECKLIST_SESSION_ID || process.env.CLAUDE_SESSION_ID || process.env.CLAUDE_CODE_SESSION_ID || void 0;
+}
+function runsDir() {
+  return path4.join(stateHomeDir(), "v2", "runs");
+}
+function runDir(id) {
+  if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(id)) throw new Error("invalid run ID");
+  return path4.join(runsDir(), id);
+}
+function readRun(id) {
+  const data = JSON.parse(fs2.readFileSync(path4.join(runDir(id), "run.json"), "utf8"));
+  if (data.schema !== 2 || data.id !== id || !Array.isArray(data.events) || !data.checked || !data.config?.phases || !["active", "completed", "abandoned"].includes(data.status)) {
+    throw new Error(`malformed run ${id}; preserve the file for recovery, do not reset it blindly`);
+  }
+  return data;
+}
+function saveRun(run) {
+  const dir = runDir(run.id);
+  fs2.mkdirSync(dir, { recursive: true, mode: 448 });
+  const tmp = path4.join(dir, `.run-${randomUUID()}.tmp`);
+  try {
+    fs2.writeFileSync(tmp, JSON.stringify(run, null, 2) + "\n", { mode: 384 });
+    fs2.renameSync(tmp, path4.join(dir, "run.json"));
+  } finally {
+    if (fs2.existsSync(tmp)) fs2.unlinkSync(tmp);
+  }
+}
+function event(run, action, detail, phase, item) {
+  const at = (/* @__PURE__ */ new Date()).toISOString();
+  run.events.push({ at, action, detail, ...phase ? { phase } : {}, ...item ? { item } : {} });
+  run.updatedAt = at;
+  run.revision++;
+}
+function listRuns() {
+  if (!fs2.existsSync(runsDir())) return [];
+  return fs2.readdirSync(runsDir()).filter((id) => /^[a-f0-9-]{36}$/.test(id)).map(readRun);
+}
+function selectRun(id, session) {
+  const explicit = id || process.env.CHECKLIST_RUN_ID;
+  if (explicit) {
+    readRun(explicit);
+    return explicit;
+  }
+  const sid = sessionId(session);
+  if (!sid) throw new Error("select a run explicitly with --run <id> (or CHECKLIST_RUN_ID); use checklist runs to list runs");
+  const candidates = listRuns().filter((r) => r.status === "active" && r.session === sid);
+  if (candidates.length !== 1) throw new Error(`${candidates.length} active runs in this session; select --run <id>, never the most recent by guess`);
+  return candidates[0].id;
+}
+async function withRun(id, fn) {
+  const lock = path4.join(runDir(id), "lock");
+  const token = randomUUID();
+  try {
+    fs2.mkdirSync(lock, { mode: 448 });
+  } catch (e) {
+    if (e.code === "EEXIST") throw new Error(`run ${id} is busy; retry after the running command, or use unlock after its process has exited`);
+    throw e;
+  }
+  try {
+    fs2.writeFileSync(path4.join(lock, "owner.json"), JSON.stringify({ pid: process.pid, token }), { mode: 384 });
+    return await fn(readRun(id));
+  } finally {
+    const owner = JSON.parse(fs2.readFileSync(path4.join(lock, "owner.json"), "utf8"));
+    if (owner.token === token) {
+      fs2.unlinkSync(path4.join(lock, "owner.json"));
+      fs2.rmdirSync(lock);
+    }
+  }
+}
+function unlockRun(id) {
+  readRun(id);
+  const lock = path4.join(runDir(id), "lock");
+  const recovery = path4.join(runDir(id), "recovery");
+  fs2.mkdirSync(recovery, { mode: 448 });
+  try {
+    const owner = JSON.parse(fs2.readFileSync(path4.join(lock, "owner.json"), "utf8"));
+    if (!Number.isSafeInteger(owner.pid) || owner.pid <= 0 || typeof owner.token !== "string") throw new Error("malformed lock owner; manual recovery required");
+    try {
+      process.kill(owner.pid, 0);
+    } catch (e) {
+      if (e.code !== "ESRCH") throw new Error("cannot establish whether the lock owner exited; refusing unlock");
+      fs2.unlinkSync(path4.join(lock, "owner.json"));
+      fs2.rmdirSync(lock);
+      return;
+    }
+    throw new Error(`lock owner ${owner.pid} is still alive; refusing unlock`);
+  } finally {
+    fs2.rmdirSync(recovery);
+  }
+}
+function createRun(skillDir, targetPath, vars, session) {
+  const skill = fs2.realpathSync(skillDir);
+  const target = fs2.realpathSync(targetPath);
+  if (!fs2.statSync(target).isDirectory()) throw new Error("target must be a project directory");
+  const definition = loadDefinition(skill);
+  const at = (/* @__PURE__ */ new Date()).toISOString();
+  const run = {
+    schema: 2,
+    id: randomUUID(),
+    skill,
+    target,
+    session: sessionId(session),
+    status: "active",
+    createdAt: at,
+    updatedAt: at,
+    revision: 0,
+    definitionHash: definition.hash,
+    config: definition.config,
+    vars: captureVars(definition.config, vars),
+    checked: {},
+    closed: [],
+    events: []
+  };
+  event(run, "start", `target: ${target}`);
+  saveRun(run);
+  return run;
+}
+function invalidate(run, reason) {
+  for (const items of Object.values(run.checked)) {
+    for (const reading of Object.values(items)) reading.status = "stale";
+  }
+  run.closed = [];
+  event(run, "invalidate", reason);
+  saveRun(run);
+}
+function assertActive(run) {
+  if (run.status !== "active") throw new Error(`run is ${run.status}; start a new run instead of rewriting its history`);
+}
+function assertDefinition(run) {
+  if (definitionHash(run.skill) !== run.definitionHash) {
+    invalidate(run, "checklist definition changed; resume --refresh to accept it and recheck");
+    throw new Error("checklist definition changed; results are stale. Use resume <id> --refresh");
+  }
+}
+
+// src/workflow.ts
+import * as fs11 from "node:fs";
+import * as path13 from "node:path";
+import { randomUUID as randomUUID2 } from "node:crypto";
+
+// src/runner.ts
+import { spawn } from "node:child_process";
+import * as fs10 from "node:fs";
+import * as path12 from "node:path";
+
+// src/builtins/frontmatter.ts
+var import_gray_matter = __toESM(require_gray_matter());
+import * as fs3 from "node:fs";
+import * as path5 from "node:path";
+async function frontmatterCheck(targetPath) {
+  const filePath = path5.resolve(targetPath, "SKILL.md");
+  if (!fs3.existsSync(filePath)) {
+    return { status: "fail", message: "SKILL.md not found" };
+  }
+  try {
+    const raw = fs3.readFileSync(filePath, "utf-8");
+    if (!raw.trimStart().startsWith("---")) {
+      return { status: "fail", message: "missing --- frontmatter delimiter" };
+    }
+    const { data } = (0, import_gray_matter.default)(raw);
+    const fieldCount = Object.keys(data).length;
+    if (fieldCount === 0) {
+      return { status: "fail", message: "frontmatter is empty" };
+    }
+    return { status: "pass", message: `parsed, ${fieldCount} fields` };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return { status: "fail", message: `parse error: ${msg}` };
+  }
+}
+
+// src/builtins/name-format.ts
+var import_gray_matter2 = __toESM(require_gray_matter());
+import * as fs4 from "node:fs";
+import * as path6 from "node:path";
+var NAME_RE = /^[a-z0-9-]+$/;
+var MAX_LENGTH = 64;
+async function nameFormatCheck(targetPath) {
+  const filePath = path6.resolve(targetPath, "SKILL.md");
+  if (!fs4.existsSync(filePath)) {
+    return { status: "fail", message: "SKILL.md not found" };
+  }
+  const { data } = (0, import_gray_matter2.default)(fs4.readFileSync(filePath, "utf-8"));
+  const name = data.name;
+  if (name === void 0 || name === null || name === "") {
+    return { status: "pass", message: "name field not set (will use directory name)" };
+  }
+  if (typeof name !== "string") {
+    return { status: "fail", message: "name must be a string" };
+  }
+  if (!NAME_RE.test(name)) {
+    return { status: "fail", message: `invalid characters: "${name}"` };
+  }
+  if (name.length > MAX_LENGTH) {
+    return { status: "fail", message: `${name.length}/${MAX_LENGTH} chars` };
+  }
+  return { status: "pass", message: `"${name}", ${name.length} chars` };
+}
+
+// src/builtins/description.ts
+var import_gray_matter3 = __toESM(require_gray_matter());
+import * as fs5 from "node:fs";
+import * as path7 from "node:path";
+var MAX_COMBINED = 1536;
+async function descriptionPresentCheck(targetPath) {
+  const filePath = path7.resolve(targetPath, "SKILL.md");
+  if (!fs5.existsSync(filePath)) {
+    return { status: "fail", message: "SKILL.md not found" };
+  }
+  const { data } = (0, import_gray_matter3.default)(fs5.readFileSync(filePath, "utf-8"));
+  const desc = data.description;
+  if (desc !== void 0 && typeof desc !== "string") {
+    return { status: "fail", message: "description must be a string" };
+  }
+  if (!desc || desc.trim().length === 0) {
+    return { status: "fail", message: "description is empty" };
+  }
+  return { status: "pass", message: `${desc.length} chars` };
+}
+async function descriptionLengthCheck(targetPath) {
+  const filePath = path7.resolve(targetPath, "SKILL.md");
+  if (!fs5.existsSync(filePath)) {
+    return { status: "fail", message: "SKILL.md not found" };
+  }
+  const { data } = (0, import_gray_matter3.default)(fs5.readFileSync(filePath, "utf-8"));
+  const desc = typeof data.description === "string" ? data.description : "";
+  const whenToUse = typeof data.when_to_use === "string" ? data.when_to_use : "";
+  const total = desc.length + whenToUse.length;
+  if (total > MAX_COMBINED) {
+    return { status: "fail", message: `${total}/${MAX_COMBINED} chars` };
+  }
+  return { status: "pass", message: `${total}/${MAX_COMBINED} chars` };
+}
+
+// src/builtins/no-secrets.ts
+import * as fs6 from "node:fs";
+import * as path8 from "node:path";
+var TOKEN_PATTERNS = [
+  { name: "AWS Access Key", re: /AKIA[0-9A-Z]{16}/ },
+  { name: "Private Key", re: /-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----/ },
+  { name: "GitHub Token", re: /gh[pousr]_[a-zA-Z0-9]{20,}/ },
+  { name: "GitHub Fine-grained Token", re: /github_pat_[a-zA-Z0-9_]{20,}/ },
+  { name: "npm Token", re: /npm_[a-zA-Z0-9]{20,}/ },
+  { name: "Slack Token", re: /xox[baprs]-[a-zA-Z0-9-]{10,}/ },
+  { name: "OpenAI Key", re: /sk-[a-zA-Z0-9]{20,}/ },
+  { name: "Google API Key", re: /AIza[0-9A-Za-z_\-]{35}/ }
+];
+var ASSIGNMENT_PATTERNS = [
+  { name: "API Key assignment", re: /(?:api[_-]?key|apikey)\s*[:=]\s*['"]?([^\s'"]{20,})/i },
+  { name: "Token/Secret assignment", re: /(?:token|secret|password|passwd|pwd)\s*[:=]\s*['"]?([^\s'"]{8,})/i }
+];
+var PLACEHOLDER_RE = /^(?:[<{].*[>}]|\.{3,}|x{3,}|your[_-]|my[_-]|changeme|placeholder|replace|example|todo|\$\{|env\.|process\.env)/i;
+function isPlaceholder(value) {
+  if (PLACEHOLDER_RE.test(value)) return true;
+  if (/^[A-Z][A-Z0-9_]*$/.test(value)) {
+    return value.includes("_") || !/[0-9]/.test(value);
+  }
+  return false;
+}
+async function noSecretsCheck(targetPath) {
+  const filePath = path8.resolve(targetPath, "SKILL.md");
+  if (!fs6.existsSync(filePath)) {
+    return { status: "fail", message: "SKILL.md not found" };
+  }
+  const lines = fs6.readFileSync(filePath, "utf-8").split("\n");
+  const findings = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    for (const pattern of TOKEN_PATTERNS) {
+      if (pattern.re.test(line)) {
+        findings.push(`L${i + 1}: ${pattern.name}`);
+      }
+    }
+    for (const pattern of ASSIGNMENT_PATTERNS) {
+      const m = pattern.re.exec(line);
+      if (m && !isPlaceholder(m[1])) {
+        findings.push(`L${i + 1}: ${pattern.name}`);
+      }
+    }
+  }
+  if (findings.length > 0) {
+    return { status: "fail", message: findings.join(", ") };
+  }
+  return { status: "pass", message: "no secret patterns detected" };
+}
+
+// src/builtins/file-refs.ts
+var import_gray_matter4 = __toESM(require_gray_matter());
+import * as fs7 from "node:fs";
+import * as path9 from "node:path";
+var LINK_RE = /\[.*?\]\(((?!https?:\/\/|#|mailto:).*?)\)/g;
+async function fileRefsCheck(targetPath) {
+  const filePath = path9.resolve(targetPath, "SKILL.md");
+  if (!fs7.existsSync(filePath)) {
+    return { status: "fail", message: "SKILL.md not found" };
+  }
+  const { content } = (0, import_gray_matter4.default)(fs7.readFileSync(filePath, "utf-8"));
+  const refs = [];
+  let match;
+  while ((match = LINK_RE.exec(content)) !== null) {
+    let ref = match[1].trim();
+    ref = ref.replace(/^<(.*)>$/, "$1");
+    ref = ref.replace(/\s+["'][^"']*["']\s*$/, "");
+    const hash2 = ref.indexOf("#");
+    if (hash2 !== -1) ref = ref.slice(0, hash2);
+    ref = ref.trim();
+    if (ref) refs.push(ref);
+  }
+  if (refs.length === 0) {
+    return { status: "pass", message: "no file references" };
+  }
+  const missing2 = refs.filter((ref) => {
+    const resolved = path9.resolve(targetPath, ref);
+    return !fs7.existsSync(resolved);
+  });
+  if (missing2.length > 0) {
+    return { status: "fail", message: `missing: ${missing2.join(", ")}` };
+  }
+  return { status: "pass", message: `${refs.length} refs valid` };
+}
+
+// src/builtins/has-checklist.ts
+import * as fs8 from "node:fs";
+import * as path10 from "node:path";
+var CHECKLIST_RE = /^#+\s*CHECKLIST:/im;
+async function hasChecklistCheck(targetPath) {
+  const filePath = path10.resolve(targetPath, "SKILL.md");
+  if (!fs8.existsSync(filePath)) {
+    return { status: "fail", message: "SKILL.md not found" };
+  }
+  const content = fs8.readFileSync(filePath, "utf-8");
+  const matches = content.match(new RegExp(CHECKLIST_RE.source, "gim"));
+  const count = matches ? matches.length : 0;
+  if (count === 0) {
+    return { status: "fail", message: "no CHECKLIST section found" };
+  }
+  return { status: "pass", message: `${count} checklist sections` };
+}
+
+// src/builtins/line-count.ts
+import * as fs9 from "node:fs";
+import * as path11 from "node:path";
+var MAX_LINES = 500;
+async function lineCountCheck(targetPath) {
+  const filePath = path11.resolve(targetPath, "SKILL.md");
+  if (!fs9.existsSync(filePath)) {
+    return { status: "fail", message: "SKILL.md not found" };
+  }
+  const content = fs9.readFileSync(filePath, "utf-8");
+  const text = content.endsWith("\n") ? content.slice(0, -1) : content;
+  const count = text.split("\n").length;
+  if (count > MAX_LINES) {
+    return { status: "fail", message: `${count} lines, exceeds ${MAX_LINES} limit` };
+  }
+  return { status: "pass", message: `${count} lines` };
+}
+
+// src/builtins/index.ts
+var BUILTINS = {
+  "frontmatter": frontmatterCheck,
+  "name-format": nameFormatCheck,
+  "description-present": descriptionPresentCheck,
+  "description-length": descriptionLengthCheck,
+  "no-secrets": noSecretsCheck,
+  "file-refs": fileRefsCheck,
+  "has-checklist": hasChecklistCheck,
+  "line-count": lineCountCheck
+};
+function getBuiltin(name) {
+  return BUILTINS[name];
+}
+function listBuiltins() {
+  return Object.keys(BUILTINS);
+}
+
+// src/runner.ts
+var DEFAULT_EXEC_TIMEOUT = 1e4;
+var BASH = "/bin/bash";
+var PREFIX_MAP = {
+  "builtin:": "builtin",
+  "shell:": "shell",
+  "script:": "script"
+};
+var UndefinedVarError = class extends Error {
+  constructor(varName) {
+    super(`undefined variable "\${${varName}}"`);
+    this.varName = varName;
+    this.name = "UndefinedVarError";
+  }
+  varName;
+};
+function interpolate(template, vars) {
+  let out = "";
+  let i = 0;
+  while (i < template.length) {
+    const ch = template[i];
+    if (ch === "$" && template[i + 1] === "$") {
+      out += "$";
+      i += 2;
+      continue;
+    }
+    if (ch === "$" && template[i + 1] === "{") {
+      const close = template.indexOf("}", i + 2);
+      const name = close === -1 ? "" : template.slice(i + 2, close);
+      if (close !== -1 && /^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) {
+        const value = Object.prototype.hasOwnProperty.call(vars, name) ? vars[name] : Object.prototype.hasOwnProperty.call(process.env, name) ? process.env[name] : void 0;
+        if (value === void 0) {
+          throw new UndefinedVarError(name);
+        }
+        out += value;
+        i = close + 1;
+        continue;
+      }
+    }
+    out += ch;
+    i += 1;
+  }
+  return out;
+}
+function classifyVerify(verify2) {
+  for (const [prefix, kind] of Object.entries(PREFIX_MAP)) {
+    if (verify2.startsWith(prefix)) {
+      return { kind, value: verify2.slice(prefix.length).trim(), explicit: true };
+    }
+  }
+  const firstToken = verify2.split(/\s/)[0];
+  if (firstToken.includes("/") || /\.(sh|bash|ts|js|py)$/.test(firstToken)) {
+    return { kind: "script", value: verify2, explicit: false };
+  }
+  return { kind: "shell", value: verify2, explicit: false };
+}
+async function execute(args, command, cwd, timeoutMs, sink) {
+  const startedAt = (/* @__PURE__ */ new Date()).toISOString();
+  const start = performance.now();
+  return new Promise((resolve12, reject) => {
+    const child = spawn(BASH, args, { cwd, detached: process.platform !== "win32", stdio: ["ignore", "pipe", "pipe"] });
+    let truncated = false, timedOut = false, spawnError = "";
+    const stdoutChunks = [], stderrChunks = [];
+    let stdoutBytes = 0, stderrBytes = 0;
+    const limit = 1024 * 1024;
+    const kill = () => {
+      if (child.pid) {
+        try {
+          process.kill(process.platform === "win32" ? child.pid : -child.pid, "SIGKILL");
+        } catch {
+        }
+      }
+    };
+    const timer = setTimeout(() => {
+      timedOut = true;
+      kill();
+    }, timeoutMs);
+    const append = (chunks, bytes, chunk) => {
+      if (bytes + chunk.length > limit) {
+        truncated = true;
+        kill();
+      }
+      chunks.push(chunk.subarray(0, Math.max(0, limit - bytes)));
+      return Math.min(limit, bytes + chunk.length);
+    };
+    child.stdout.on("data", (chunk) => {
+      stdoutBytes = append(stdoutChunks, stdoutBytes, chunk);
+    });
+    child.stderr.on("data", (chunk) => {
+      stderrBytes = append(stderrChunks, stderrBytes, chunk);
+    });
+    const interrupt = (signal) => {
+      kill();
+      process.exit(signal === "SIGINT" ? 130 : 143);
+    };
+    process.once("SIGINT", interrupt);
+    process.once("SIGTERM", interrupt);
+    child.on("error", (error) => {
+      spawnError = error.message;
+    });
+    child.on("close", (exitCode, signal) => {
+      clearTimeout(timer);
+      process.removeListener("SIGINT", interrupt);
+      process.removeListener("SIGTERM", interrupt);
+      const stdout = Buffer.concat(stdoutChunks).toString("utf8");
+      const stderr = Buffer.concat(stderrChunks).toString("utf8");
+      const summary = (text) => text.trim().slice(0, 4096);
+      const trace = { command, cwd, startedAt, durationMs: Math.round(performance.now() - start), exitCode, signal, timedOut, truncated, stdout, stderr };
+      try {
+        sink?.(trace);
+      } catch (e) {
+        reject(e);
+        return;
+      }
+      if (spawnError || timedOut || truncated || signal) {
+        resolve12({ status: "error", message: spawnError || (timedOut ? `sensor timed out after ${timeoutMs}ms (SIGKILL)` : truncated ? "sensor output exceeded 1 MiB limit per stream" : `sensor terminated by ${signal}`) });
+      } else if (exitCode === 0) resolve12({ status: "pass", message: summary(stdout) || "OK" });
+      else resolve12({ status: "fail", message: summary(stderr) || `command failed: exit ${exitCode}` });
+    });
+  });
+}
+async function runShell(command, cwd, timeoutMs, sink) {
+  if (!command.trim()) return { status: "error", message: "empty shell command" };
+  return execute(["-c", command], command, cwd, timeoutMs, sink);
+}
+async function runScriptFile(scriptPath, cwd, timeoutMs, sink) {
+  return execute([scriptPath], `${BASH} ${JSON.stringify(scriptPath)}`, cwd, timeoutMs, sink);
+}
+async function runBuiltin(name, targetPath) {
+  const handler = getBuiltin(name);
+  if (!handler) {
+    const available = listBuiltins().join(", ");
+    return { status: "error", message: `unknown builtin "${name}". available: ${available}` };
+  }
+  return handler(targetPath);
+}
+async function runScript(scriptPath, containmentBase, execCwd, explicit, timeoutMs, sink) {
+  const base = path12.resolve(containmentBase);
+  const resolved = path12.resolve(base, scriptPath);
+  const rel = path12.relative(base, resolved);
+  if (rel === ".." || rel.startsWith(".." + path12.sep) || path12.isAbsolute(rel)) {
+    return {
+      status: "error",
+      message: `script path escapes the checklist dir: "${scriptPath}" (resolved to "${resolved}")`
+    };
+  }
+  if (!fs10.existsSync(resolved)) {
+    const hint = explicit ? `script not found: "${resolved}" (resolved from "${scriptPath}")` : `auto-classified as script (first token contains "/" or has script extension), but file not found: "${resolved}". use "shell:" prefix if this is a shell command`;
+    return { status: "error", message: hint };
+  }
+  const realBase = fs10.realpathSync(base);
+  const realResolved = fs10.realpathSync(resolved);
+  const realRel = path12.relative(realBase, realResolved);
+  if (realRel === ".." || realRel.startsWith(".." + path12.sep) || path12.isAbsolute(realRel)) {
+    return {
+      status: "error",
+      message: `script path escapes the checklist dir via symlink: "${scriptPath}" (resolves to "${realResolved}")`
+    };
+  }
+  return runScriptFile(realResolved, execCwd, timeoutMs, sink);
+}
+async function runCheck(item, cwd, targetPath, vars = {}, sink) {
+  if (item.verify === void 0) {
+    return { item, kind: "manual" };
+  }
+  const { kind, value, explicit } = classifyVerify(item.verify);
+  const timeoutMs = item.timeoutMs ?? DEFAULT_EXEC_TIMEOUT;
+  let result;
+  try {
+    switch (kind) {
+      case "builtin":
+        result = await runBuiltin(value, targetPath);
+        break;
+      case "script": {
+        const scriptPath = interpolate(value, vars);
+        result = await runScript(scriptPath, cwd, targetPath, explicit, timeoutMs, sink);
+        break;
+      }
+      case "shell":
+        result = await runShell(interpolate(value, vars), targetPath, timeoutMs, sink);
+        break;
+    }
+  } catch (e) {
+    if (e instanceof UndefinedVarError) {
+      return {
+        item,
+        kind: "mechanical",
+        result: {
+          status: "error",
+          message: `${item.id}: ${e.message} in verify rule "${item.verify}" \u2014 pass it with \`checklist init <skill> --var ${e.varName}=...\` or export ${e.varName} in the environment`
+        }
+      };
+    }
+    const reason = e instanceof Error ? e.message : String(e);
+    result = { status: "error", message: `${item.id}: ${reason}` };
+  }
+  return { item, kind: "mechanical", result };
+}
+
+// src/resolver.ts
+function findPhaseIndex(config, nameOrIndex) {
+  if (/^\d+$/.test(nameOrIndex)) {
+    const num = parseInt(nameOrIndex, 10);
+    if (num < config.phases.length) {
+      return num;
+    }
+  }
+  const idx = config.phases.findIndex((p) => p.name.toLowerCase() === nameOrIndex.toLowerCase());
+  if (idx === -1) {
+    throw new Error(`Phase not found: "${nameOrIndex}". Use \`checklist phases\` to list available phases.`);
+  }
+  return idx;
+}
+
+// src/workflow.ts
+function ruleFor(run, item) {
+  if (item.verify === void 0) return item;
+  for (const name of requiredVars(item.verify)) {
+    if (!Object.hasOwn(run.vars, name)) throw new Error(`unbound variable ${name}; use resume ${run.id} --var '${name}=...' (invalidates old readings)`);
+  }
+  const expanded = interpolate(item.verify, run.vars);
+  return { ...item, verify: expanded.replace(/\$/g, "$$$$") };
+}
+function phaseIndex(run, name) {
+  return findPhaseIndex(run.config, name);
+}
+function phaseKey(run, index) {
+  return run.config.phases[index].name.toLowerCase();
+}
+function requirePrior(run, index) {
+  for (let i = 0; i < index; i++) {
+    if (!run.closed.includes(phaseKey(run, i)) || missing(run, i).length) throw new Error(`gate blocked: ${run.config.phases[i].name} is not closed; use advance after fulfilling its checks`);
+  }
+}
+function fulfilled(item, reading) {
+  return reading?.status === "pass" || item.allowNa === true && reading?.status === "na" && !!reading.message.trim();
+}
+function missing(run, index) {
+  const p = run.config.phases[index];
+  return p.checks.filter((item) => !fulfilled(item, run.checked[p.name.toLowerCase()]?.[item.id])).map((item) => item.id);
+}
+function reopen(run, index) {
+  const affected = new Set(run.config.phases.slice(index).map((p) => p.name.toLowerCase()));
+  run.closed = run.closed.filter((key) => !affected.has(key));
+  for (const phase of run.config.phases.slice(index + 1)) {
+    for (const reading of Object.values(run.checked[phase.name.toLowerCase()] || {})) reading.status = "stale";
+  }
+}
+function record(run, index, id, reading) {
+  const key = phaseKey(run, index);
+  if (!Object.hasOwn(run.checked, key)) Object.defineProperty(run.checked, key, { value: {}, enumerable: true, writable: true, configurable: true });
+  Object.defineProperty(run.checked[key], id, { value: reading, enumerable: true, writable: true, configurable: true });
+}
+async function confirm(id, phase, itemId, evidence, naReason) {
+  return withRun(id, (run) => {
+    assertActive(run);
+    assertDefinition(run);
+    const index = phaseIndex(run, phase);
+    requirePrior(run, index);
+    const item = run.config.phases[index].checks.find((c) => c.id === itemId);
+    if (!item) throw new Error(`item not found: ${itemId}`);
+    const isNa = naReason !== void 0;
+    if (isNa && (!item.allowNa || !naReason.trim())) throw new Error("N/A requires allow-na: true and a nonblank reason");
+    if (!isNa && item.verify !== void 0) throw new Error("mechanical checks require verify, not manual confirmation");
+    if (!isNa && item.evidenceRequired && !evidence?.trim()) throw new Error("this confirmation requires --evidence");
+    reopen(run, index);
+    record(run, index, itemId, { status: isNa ? "na" : "pass", source: isNa ? "na" : "confirmation", message: isNa ? naReason.trim() : "confirmed (not independently verified)", recordedAt: (/* @__PURE__ */ new Date()).toISOString(), ...evidence?.trim() ? { evidence: evidence.trim() } : {} });
+    event(run, isNa ? "na" : "check", isNa ? naReason.trim() : evidence?.trim() || "confirmation without independent verification", phase, itemId);
+    saveRun(run);
+    return run;
+  });
+}
+async function verify(id, phase) {
+  return withRun(id, async (run) => {
+    assertActive(run);
+    assertDefinition(run);
+    const index = phaseIndex(run, phase);
+    requirePrior(run, index);
+    const items = run.config.phases[index].checks.filter((c) => c.verify !== void 0 && run.checked[phaseKey(run, index)]?.[c.id]?.status !== "na");
+    if (!items.length) return { run, failed: false };
+    reopen(run, index);
+    for (const item of items) record(run, index, item.id, { status: "stale", source: "sensor", message: "verification started; no completed reading yet", recordedAt: (/* @__PURE__ */ new Date()).toISOString() });
+    event(run, "verify-start", `${items.length} sensor(s)`, phase);
+    saveRun(run);
+    let failed = false;
+    for (const item of items) {
+      const startedAt = (/* @__PURE__ */ new Date()).toISOString();
+      const start = performance.now();
+      let trace;
+      let result;
+      try {
+        result = (await runCheck(ruleFor(run, item), run.skill, run.target, {}, (t) => {
+          trace = t;
+        })).result;
+      } catch (e) {
+        result = { status: "error", message: String(e.message || e) };
+      }
+      assertDefinition(run);
+      const artifact = `outputs/${randomUUID2()}.json`;
+      fs11.mkdirSync(path13.join(runDir(id), "outputs"), { recursive: true, mode: 448 });
+      fs11.writeFileSync(path13.join(runDir(id), artifact), JSON.stringify({ runId: id, target: run.target, phase, item: item.id, definitionHash: run.definitionHash, rule: item.verify, result, trace: trace || { cwd: run.target, startedAt, durationMs: Math.round(performance.now() - start), executed: false } }, null, 2) + "\n", { mode: 384 });
+      record(run, index, item.id, { ...result, source: "sensor", recordedAt: (/* @__PURE__ */ new Date()).toISOString(), artifact });
+      event(run, "verify", `${result.status}: ${result.message}`, phase, item.id);
+      saveRun(run);
+      if (result.status !== "pass") failed = true;
+    }
+    return { run, failed };
+  });
+}
+async function advance(id, phase) {
+  return withRun(id, (run) => {
+    assertActive(run);
+    assertDefinition(run);
+    const index = phase ? phaseIndex(run, phase) : run.config.phases.findIndex((_, i) => !run.closed.includes(phaseKey(run, i)));
+    if (index < 0) throw new Error("all phases are closed; use done to complete the run");
+    requirePrior(run, index);
+    const pending = missing(run, index);
+    if (pending.length) throw new Error(`phase incomplete: ${pending.join(", ")}`);
+    const key = phaseKey(run, index);
+    if (!run.closed.includes(key)) {
+      run.closed.push(key);
+      event(run, "advance", "phase closed", run.config.phases[index].name);
+      saveRun(run);
+    }
+    return run;
+  });
+}
+async function finish(id, abandon = false, reason) {
+  return withRun(id, (run) => {
+    assertActive(run);
+    if (abandon && !reason?.trim()) throw new Error("abandonment requires a nonblank reason");
+    if (!abandon) {
+      assertDefinition(run);
+      for (let i = 0; i < run.config.phases.length; i++) {
+        if (missing(run, i).length || !run.config.flat && !run.closed.includes(phaseKey(run, i))) throw new Error(`cannot complete: ${run.config.phases[i].name} is not fulfilled and closed`);
+      }
+    }
+    run.status = abandon ? "abandoned" : "completed";
+    event(run, abandon ? "reset" : "done", reason?.trim() || run.status);
+    saveRun(run);
+    return run;
+  });
+}
+async function resume(id, refresh, vars) {
+  return withRun(id, (run) => {
+    assertActive(run);
+    if (refresh) {
+      const definition = loadDefinition(run.skill);
+      invalidate(run, "explicit definition refresh");
+      run.config = definition.config;
+      run.definitionHash = definition.hash;
+    } else assertDefinition(run);
+    if (Object.keys(vars).length) {
+      const next = { ...run.vars, ...vars };
+      if (JSON.stringify(next) !== JSON.stringify(run.vars)) {
+        invalidate(run, "run variables changed");
+        run.vars = next;
+      }
+    }
+    event(run, "resume", refresh ? "definition refreshed; recheck required" : "existing run retained");
+    saveRun(run);
+    return run;
+  });
+}
+function inspect(id) {
+  const run = readRun(id);
+  let definitionChanged = false, definitionError;
+  if (run.status === "active") {
+    try {
+      definitionChanged = definitionHash(run.skill) !== run.definitionHash;
+    } catch (e) {
+      definitionChanged = true;
+      definitionError = e.message;
+    }
+  }
+  const phases = run.config.phases.map((p, i) => ({
+    name: p.name,
+    closed: !definitionChanged && run.closed.includes(p.name.toLowerCase()),
+    missing: definitionChanged ? p.checks.map((c) => c.id) : missing(run, i),
+    checks: p.checks.map((item) => {
+      const recorded = run.checked[p.name.toLowerCase()]?.[item.id];
+      const reading = recorded && definitionChanged ? { ...recorded, recordedStatus: recorded.status, status: "stale" } : recorded || null;
+      return { id: item.id, description: item.description, kind: item.verify === void 0 ? "manual" : "mechanical", allowNa: !!item.allowNa, reading };
+    })
+  }));
+  const current = phases.find((p) => !p.closed);
+  return { id: run.id, skill: run.skill, target: run.target, status: run.status, revision: run.revision, definitionChanged, definitionError, phases, next: run.status !== "active" ? null : definitionChanged ? `resume ${id} --refresh` : current ? current.missing.length ? `fulfill ${current.name}: ${current.missing.join(", ")}` : run.config.flat ? "done" : `advance ${current.name}` : "done", events: run.events };
+}
+
 // src/index.ts
-var bundledVersion = true ? "0.4.2" : "";
-var version = bundledVersion || JSON.parse(readFileSync13(join6(__dirname, "..", "package.json"), "utf8")).version;
-var program2 = new Command().name("checklist").description("Flight checklist CLI for Claude Code skills").version(version);
-var DIR_OPT = ["-d, --dir <dir>", "Directory containing .checklist.yml"];
-var PATH_OPT = ["-p, --path <path>", "Target skill directory for builtins (defaults to --dir)"];
-var collect = (value, previous) => previous.concat([value]);
-program2.command("init [dir]").description("Load .checklist.yml, clear state, show ready summary").option(...DIR_OPT).option(...PATH_OPT).option("--force", "Clear existing state without prompting").option(
-  "--var <name=value>",
-  "Capture a run variable for ${name} interpolation in shell:/script: verify rules (repeatable)",
-  collect,
-  []
-).action(initCommand);
-program2.command("show [phase]").description("Show checklist overview, or a specific phase with readings").option(...DIR_OPT).option(...PATH_OPT).option("--json", "Emit machine-readable current state (for hooks/statusline)").action(showCommand);
-program2.command("verify <phase>").description("Batch verify mechanical checks for a phase").option(...DIR_OPT).option(...PATH_OPT).action(verifyCommand);
-program2.command("check <phase> <item-id>").description("Manually confirm a human-judgment check item").option(...DIR_OPT).option(...PATH_OPT).option("--evidence <text>", "Cite the basis for this confirmation (file:line, command output, artifact path); required when the check sets evidence: required").action(checkCommand);
-program2.command("phases").description("List all phases").option(...DIR_OPT).option(...PATH_OPT).action(phasesCommand);
-program2.command("reset").alias("done").description("End-of-run cleanup: clear this skill's state and active pointer (run journal retained)").option(...DIR_OPT).option(...PATH_OPT).action(resetCommand);
-program2.command("report").description("Render a markdown gate-trail from the append-only run journal").option(...DIR_OPT).option(...PATH_OPT).action(reportCommand);
-program2.command("lint [path]").description("Validate skill checklists: yml schema + SKILL.md parity (CI / authoring gate)").option(...DIR_OPT).option(...PATH_OPT).option("--strict", "Treat warnings as errors (non-zero exit)").option("--json", "Emit machine-readable lint results").action(lintCommand);
-program2.parse();
+var bundledVersion = true ? "0.5.0" : "";
+var version = bundledVersion || JSON.parse(readFileSync10(join5(__dirname, "..", "package.json"), "utf8")).version;
+var program2 = new Command().name("checklist").description("SOP runs: confirmations, sensor readings, explicit stage closure").version(version);
+var collect = (value, values) => [...values, value];
+function output(id, json2 = false) {
+  const view = inspect(id);
+  if (json2) {
+    console.log(JSON.stringify(view, null, 2));
+    return;
+  }
+  console.log(`run ${id} \xB7 ${view.status}
+skill: ${view.skill}
+target: ${view.target}`);
+  if (view.definitionChanged) console.log("STALE: definition changed or unavailable; resume --refresh before continuing");
+  for (const phase of view.phases) {
+    console.log(`${phase.closed ? "[closed]" : "[open]"} ${phase.name}`);
+    for (const item of phase.checks) console.log(`  ${item.id}: ${view.definitionChanged ? "stale" : item.reading?.status || "pending"} (${item.kind})${item.reading ? ` \u2014 ${item.reading.message}` : ""}`);
+  }
+  console.log(`next: ${view.next || "none"}`);
+}
+function select(options2) {
+  const id = selectRun(options2.run, options2.session);
+  const run = readRun(id);
+  if (options2.dir && realpathSync3(options2.dir) !== run.skill) throw new Error("--dir conflicts with the selected run");
+  if (options2.path && realpathSync3(options2.path) !== run.target) throw new Error("--path conflicts with the fixed run target; start a new run");
+  return id;
+}
+function selected(name, description) {
+  return program2.command(name).description(description).option("--run <id>", "Explicit run ID (or CHECKLIST_RUN_ID)").option("--session <id>", "Select only when this session has exactly one active run").option("-d, --dir <dir>", "Assert the selected run uses this skill directory").option("-p, --path <path>", "Assert the selected run uses this fixed project directory").option("--json", "Machine-readable recorded state");
+}
+program2.command("init [dir]").alias("start").description("Explicitly create a new run, or resume a named run; never erase work on skill load").option("-d, --dir <dir>", "Directory containing .checklist.yml").option("-p, --path <path>", "Project directory, frozen at creation (default: cwd)").option("--new", "Create a distinct run even for the same skill/project").option("--resume <id>", "Resume an existing run instead of creating one").option("--force", "Removed: use --new or --resume explicitly").option("--session <id>", "Record an optional session association").option("--var <name=value>", "Trusted command binding, stored locally; do not store secrets", collect, []).option("--json", "Machine-readable recorded state").action(async (dir, opts) => {
+  if (opts.force) throw new Error("init --force was removed; use --new or --resume <id>. Old state is not deleted or imported.");
+  if (!!opts.new === !!opts.resume) throw new Error("choose exactly one: init --new or init --resume <id>");
+  if (dir && opts.dir && resolve11(dir) !== resolve11(opts.dir)) throw new Error("conflicting target dir");
+  if (opts.resume) {
+    const id = select({ ...opts, dir: dir || opts.dir, run: opts.resume });
+    await resume(id, false, parseVars(opts.var || []));
+    output(id, opts.json);
+    return;
+  }
+  const skill = dir || opts.dir || process.env.CLAUDE_SKILL_DIR || process.env.CHECKLIST_DIR || process.cwd();
+  const vars = parseVars(opts.var || []);
+  const run = createRun(skill, opts.path || process.cwd(), vars, opts.session);
+  output(run.id, opts.json);
+});
+program2.command("resume <id>").description("Resume without clearing work; explicit refresh/binding changes invalidate old results").option("--refresh", "Accept changed checklist definition and invalidate old readings").option("--var <name=value>", "Change a binding and invalidate old readings", collect, []).option("--json", "Machine-readable recorded state").action(async (id, opts) => {
+  await resume(id, !!opts.refresh, parseVars(opts.var || []));
+  output(id, opts.json);
+});
+program2.command("runs").description("List recorded runs, including completed and abandoned runs").option("--json").action((opts) => {
+  const rows = listRuns().map(({ id, status, skill, target, session }) => ({ id, status, skill, target, session }));
+  console.log(opts.json ? JSON.stringify(rows, null, 2) : rows.map((r) => `${r.id} ${r.status} ${r.skill} \u2192 ${r.target}`).join("\n"));
+});
+selected("show [phase]", "Read recorded state only; never execute sensors").action((phase, opts) => {
+  const id = select(opts);
+  if (phase && !readRun(id).config.phases.some((p) => p.name.toLowerCase() === phase.toLowerCase())) throw new Error(`phase not found: ${phase}`);
+  output(id, opts.json);
+});
+selected("phases", "List phases of the selected run").action((opts) => {
+  output(select(opts), opts.json);
+});
+selected("check <phase> <item>", "Record a manual confirmation, not an independent verification").option("--evidence <text>", "Basis or artifact reference; not proof of user authorization").action(async (phase, item, opts) => {
+  const id = select(opts);
+  await confirm(id, phase, item, opts.evidence);
+  output(id, opts.json);
+});
+selected("na <phase> <item>", "Record not-applicable only where the definition explicitly permits it").requiredOption("--reason <text>", "Nonblank reason the check does not apply").action(async (phase, item, opts) => {
+  const id = select(opts);
+  await confirm(id, phase, item, void 0, opts.reason);
+  output(id, opts.json);
+});
+selected("verify <phase>", "Execute sensors and record readings; does NOT close the phase").action(async (phase, opts) => {
+  const id = select(opts);
+  const result = await verify(id, phase);
+  output(id, opts.json);
+  if (result.failed) process.exitCode = 1;
+});
+selected("advance [phase]", "Close a fulfilled phase; no sensors are run implicitly").action(async (phase, opts) => {
+  const id = select(opts);
+  await advance(id, phase);
+  output(id, opts.json);
+});
+selected("done", "Complete a fulfilled run and retain its evidence and history").action(async (opts) => {
+  const id = select(opts);
+  await finish(id);
+  output(id, opts.json);
+});
+selected("reset", "Abandon this run without deleting its history; not an alias of done").requiredOption("--reason <text>", "Reason for abandonment").action(async (opts) => {
+  if (!opts.reason?.trim()) throw new Error("reset requires a nonblank reason");
+  const id = select(opts);
+  await finish(id, true, opts.reason);
+  output(id, opts.json);
+});
+selected("report", "Read this run\u2019s history, including archived runs; never execute sensors").action((opts) => {
+  const id = select(opts);
+  if (opts.json) {
+    output(id, true);
+    return;
+  }
+  const run = readRun(id);
+  console.log(`# Run ${id}
+Status: ${run.status}
+Target: ${run.target}
+`);
+  for (const e of run.events) console.log(`${e.at} ${e.action} ${e.phase || ""}/${e.item || ""} ${JSON.stringify(e.detail)}`);
+});
+selected("unlock", "Recover a lock only after its owning process has exited").action((opts) => {
+  const id = select(opts);
+  unlockRun(id);
+  console.log(`unlocked ${id}; inspect and rerun interrupted sensors`);
+});
+program2.command("lint [path]").description("Validate checklist schemas and skill references").option("-d, --dir <dir>").option("--strict").option("--json").action(lintCommand);
+program2.parseAsync().catch((error) => {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exitCode = 1;
+});

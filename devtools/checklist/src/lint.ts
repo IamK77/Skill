@@ -56,6 +56,7 @@ export interface LintResult {
 interface ParsedCheck {
   id: string;
   hasVerify: boolean;
+  allowNa: boolean;
 }
 
 interface ParsedPhase {
@@ -67,6 +68,7 @@ interface SchemaParse {
   /** The structurally-sound phases/checks, for the parity pass. Best-effort:
    *  malformed entries are skipped here but reported as diagnostics. */
   phases: ParsedPhase[];
+  flat?: boolean;
 }
 
 /**
@@ -116,6 +118,17 @@ function lintChecklistSchema(ymlPath: string, diags: LintDiagnostic[]): SchemaPa
   }
 
   const obj = data as Record<string, unknown>;
+  if (obj.checks !== undefined && obj.phases !== undefined) {
+    diags.push({ file: ymlPath, severity: 'error', rule: 'schema/ambiguous-shape', message: 'cannot specify both checks and phases' });
+    return { phases: [] };
+  }
+  if (obj.checks !== undefined) {
+    if (!Array.isArray(obj.checks)) {
+      diags.push({ file: ymlPath, severity: 'error', rule: 'schema/checks-not-an-array', message: 'checks must be an array' });
+      return { phases: [] };
+    }
+    obj.phases = [{ name: 'main', checks: obj.checks }];
+  }
   if (!Array.isArray(obj.phases)) {
     diags.push({
       file: ymlPath,
@@ -257,7 +270,7 @@ function lintChecklistSchema(ymlPath: string, diags: LintDiagnostic[]): SchemaPa
           });
         } else {
           const v = check.verify.trim();
-          if (v.length === 0) {
+          if (v.length === 0 || /^(shell|script|builtin):\s*$/.test(v)) {
             diags.push({
               file: ymlPath,
               severity: 'error',
@@ -336,6 +349,9 @@ function lintChecklistSchema(ymlPath: string, diags: LintDiagnostic[]): SchemaPa
         }
       }
 
+      if (check['allow-na'] !== undefined && typeof check['allow-na'] !== 'boolean') {
+        diags.push({ file: ymlPath, severity: 'error', rule: 'schema/allow-na-not-boolean', message: `phase ${phaseLabel}, check ${checkLabel}: allow-na must be boolean` });
+      }
       if (hasId) {
         const id = check.id as string;
         if (seenIds.has(id)) {
@@ -348,7 +364,7 @@ function lintChecklistSchema(ymlPath: string, diags: LintDiagnostic[]): SchemaPa
           });
         } else {
           seenIds.add(id);
-          checks.push({ id, hasVerify: check.verify !== undefined });
+          checks.push({ id, hasVerify: check.verify !== undefined, allowNa: check['allow-na'] === true });
         }
       }
     });
@@ -358,7 +374,7 @@ function lintChecklistSchema(ymlPath: string, diags: LintDiagnostic[]): SchemaPa
     }
   });
 
-  return { phases };
+  return { phases, flat: obj.checks !== undefined };
 }
 
 function describeType(v: unknown): string {
@@ -374,7 +390,7 @@ function truncate(s: string, n: number): string {
 // ── SKILL.md <-> .checklist.yml parity ───────────────────────────────────────
 
 interface SkillCommand {
-  kind: 'check' | 'verify';
+  kind: 'check' | 'verify' | 'advance' | 'na';
   phase: string;
   itemId?: string;
   line: number;
@@ -386,7 +402,8 @@ interface SkillCommand {
 // The leading `checklist` may be preceded by a backtick / list marker / `!`
 // (the init opener is `!`checklist init ...``); we only care about check/verify.
 const CHECK_RE = /\bchecklist\s+check\s+([^\s`]+)\s+([^\s`]+)/g;
-const VERIFY_RE = /\bchecklist\s+verify\s+([^\s`]+)/g;
+const VERIFY_RE = /\bchecklist\s+(verify|advance)\s+([^\s`]+)/g;
+const NA_RE = /\bchecklist\s+na\s+([^\s`]+)\s+([^\s`]+)/g;
 
 // A captured phase/item token may carry trailing sentence or markdown punctuation
 // when a command is written in prose ("...check charter motivation." or wrapped in
@@ -412,9 +429,14 @@ function extractSkillCommands(text: string): SkillCommand[] {
       commands.push({ kind: 'check', phase: trimToken(m[1]), itemId: trimToken(m[2]), line: lineNo });
     }
 
+    NA_RE.lastIndex = 0;
+    while ((m = NA_RE.exec(line)) !== null) {
+      commands.push({ kind: 'na', phase: trimToken(m[1]), itemId: trimToken(m[2]), line: lineNo });
+    }
+
     VERIFY_RE.lastIndex = 0;
     while ((m = VERIFY_RE.exec(line)) !== null) {
-      commands.push({ kind: 'verify', phase: trimToken(m[1]), line: lineNo });
+      commands.push({ kind: m[1] as 'verify' | 'advance', phase: trimToken(m[2]), line: lineNo });
     }
   });
   return commands;
@@ -470,7 +492,7 @@ function lintParity(
       continue;
     }
 
-    if (cmd.kind === 'check' && cmd.itemId !== undefined) {
+    if ((cmd.kind === 'check' || cmd.kind === 'na') && cmd.itemId !== undefined) {
       const found = phase.checks.find(c => c.id === cmd.itemId);
       if (!found) {
         diags.push({
@@ -481,7 +503,19 @@ function lintParity(
           fix: `use one of phase "${phase.name}"'s check ids: ${phase.checks.map(c => c.id).join(', ') || '(none)'}`,
         });
       } else {
+        if (cmd.kind === 'check' && found.hasVerify) diags.push({ file: skillPath, severity: 'error', rule: 'parity/manual-mechanical', message: `line ${cmd.line}: mechanical check ${found.id} requires verify` });
+        if (cmd.kind === 'na' && !found.allowNa) diags.push({ file: skillPath, severity: 'error', rule: 'parity/na-not-allowed', message: `line ${cmd.line}: ${found.id} does not allow N/A` });
         referenced.add(key(phase.name, found.id));
+      }
+    }
+  }
+
+  // New SOP entrypoints declare their type. Historical third-party definitions
+  // still get schema/parity diagnostics without assuming their lifecycle version.
+  if (!parse.flat && /^  kind: sop\s*$/m.test(text)) {
+    for (const phase of parse.phases) {
+      if (!commands.some(cmd => cmd.kind === 'advance' && resolvePhase(cmd.phase) === phase)) {
+        diags.push({ file: skillPath, severity: 'error', rule: 'parity/missing-advance', message: `phase ${phase.name} has no explicit advance command` });
       }
     }
   }

@@ -2,13 +2,9 @@
 // deps (commander, gray-matter, js-yaml) — into a single, node-runnable file
 // committed into the repo at bundle/checklist.mjs.
 //
-// Why this exists (spec output/90-repo-audit.md §八-4): a skill's opener runs
-// `checklist init ...`, which today needs a global npm install on PATH. That
-// install-or-fail-open problem (§七) dissolves if the gate ships *with* the
-// plugin. Because the runtime deps are tiny and pure, the whole gate fits in
-// one file; installing the plugin then means the gate is already present, and
-// its version is pinned to the marketplace rather than to whatever happens to
-// be on PATH.
+// A standalone local CLI without a global installation or node_modules.
+// It records SOP runs; loading a skill does not execute or reset a run.
+// --check builds in memory and fails if the committed artifact is stale.
 //
 // Reproducibility: no timestamps or absolute paths leak into the artifact.
 // esbuild output is deterministic for a fixed input + version, so re-running
@@ -28,7 +24,9 @@ const { version } = JSON.parse(readFileSync(join(pkgRoot, 'package.json'), 'utf8
 
 const outfile = join(pkgRoot, 'bundle', 'checklist.mjs');
 
-await build({
+const check = process.argv.includes('--check');
+const result = await build({
+  write: !check,
   entryPoints: [join(pkgRoot, 'src', 'index.ts')],
   outfile,
   bundle: true,
@@ -55,5 +53,13 @@ await build({
   },
 });
 
-const bytes = readFileSync(outfile).length;
-console.log(`bundled checklist v${version} -> ${outfile} (${bytes} bytes)`);
+if (check) {
+  const expected = result.outputFiles[0].contents;
+  const current = readFileSync(outfile);
+  if (!current.equals(Buffer.from(expected))) {
+    console.error('STALE bundle: run npm run bundle, then review and commit the generated artifact.');
+    process.exitCode = 1;
+  } else console.log('bundle matches source byte-for-byte');
+} else {
+  console.log(`bundled checklist v${version} -> ${outfile} (${readFileSync(outfile).length} bytes)`);
+}
