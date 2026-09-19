@@ -14,3 +14,7 @@ devtools/arxiv-cli/
 # Generated skill outputs (temporary; e.g. if the github skill runs from here)
 output/
 github-discovery-*
+
+# Retired A/B platform: historical tracked files are in Git; do not accidentally
+# publish pre-existing local experiment results/scripts that were never committed.
+/touchstone/

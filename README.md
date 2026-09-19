@@ -70,7 +70,7 @@ The CLI constrains **its own state transitions**. It cannot stop an agent from r
 
 ## Maintained scope
 
-Active work here is the skills, checklist CLI, authoring checks, and design probes. The root [`touchstone/`](touchstone/) A/B experiment platform is retained but is not a development focus. It is **not** the supported [`quarry:touchstone`](skills/quarry/touchstone/SKILL.md) repository-assessment skill.
+Active work here is the skills, checklist CLI, authoring checks, and design probes. The root A/B experiment platform has been removed from the tracked tree; its source and artifacts remain in [Git history](docs/retired-ab.md). The supported [`quarry:touchstone`](skills/quarry/touchstone/SKILL.md) repository-assessment skill remains available.
 
 Historical reference essays remain available for techniques and context. They do not add mandatory gates to current entrypoints. See [AUTHORING.md](AUTHORING.md) for the current contract.
 
