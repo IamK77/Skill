@@ -1,6 +1,8 @@
 # distributed
 
-A creative lens for causality, coordination, partial knowledge, and alternative distributed designs.
+A doorway from shared-system questions into stranger possibilities, with a warm, unhurried, playful conversational stance. Distributed concepts are a starting place, not a required menu of solutions.
+
+`holdfast` is the pilot for the revised heuristic approach: emotional ease supports the exploration itself, and an association may develop beyond its first technical translation. It is not a distributed-correctness audit or a promise that every detour will produce a useful architecture.
 
 1 heuristic.
 
@@ -12,7 +14,7 @@ A creative lens for causality, coordination, partial knowledge, and alternative 
 
 | Skill | Kind | Purpose |
 | --- | --- | --- |
-| [holdfast](holdfast/SKILL.md) | heuristic | Imagine alternative coordination and replication designs through causality, partial knowledge, and failure stories. |
+| [holdfast](holdfast/SKILL.md) | heuristic | Follow an intriguing question or image beyond the usual protocol choices, without making the thought defend itself immediately. |
 
 ## Use
 

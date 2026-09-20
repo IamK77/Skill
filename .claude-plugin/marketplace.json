@@ -30,7 +30,7 @@
     },
     {
       "name": "distributed",
-      "description": "Holdfast is a creative lens for causality, partial knowledge, coordination, and alternative distributed-system designs. Thought experiments and institutional analogies open possibilities; no mandatory stages or checklist runtime.",
+      "description": "Holdfast is the pilot for warm, unhurried, playful exploration of shared worlds and distributed questions. Follow an intriguing association beyond its first technical translation; unfinished ideas need not defend an implementation immediately. No mandatory stages, option quotas, correctness verdict, or checklist runtime.",
       "source": "./",
       "strict": false,
       "skills": [

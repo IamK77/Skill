@@ -1,17 +1,15 @@
-# Different useful promises around an operation
+# The promise that changes its keeper
 
-## An opening
+Imagine a promise that can choose who carries it next.
 
-Borrow reservations, escrow, receipts, or compensation from everyday institutions. “Confirmed immediately,” “reserved until a deadline,” and “accepted pending settlement” are different promises, not implementations of one identical transaction. Explore the promise before selecting its coordination machinery.
+Not a debt quietly assigned to an unwilling stranger. More like an unfinished melody that catches someone at the right moment. A person finds a promise in a coat pocket and says, “I can't do what was intended, but I could do this other thing.” The promise has to decide whether that still counts as continuing.
 
-## Elaborate a candidate
+Let's not make a contract format yet. Perhaps the original maker is delighted by the change. Perhaps they feel that the promise has been taken away from them. Perhaps nobody can tell whether the new act fulfils the old intention or gives it a different ending.
 
-Clarify what is atomic or isolated, which participants and resources are included, and how failures are recovered. A local transaction does not automatically cover an external side effect. Reservations, compensation, idempotent named requests, and distributed coordination express different semantics and costs rather than interchangeable implementations of one word.
+A small institution grows around these uncertainties. It employs listeners rather than judges. Their job is to tell both versions of a promise so well that a third possibility becomes imaginable. Some promises find new keepers. Others are released, with nobody required to turn the release into a success story.
 
-## A small comparison
+Here, coordination has wandered into inheritance, interpretation, generosity, obligation, and the right to decline. The point is not that an actual transaction should acquire magical agency. It is that “finish the operation” may be too small a description of some things we want a group to carry together.
 
-Compare an immediate confirmed booking with a time-bounded reservation and a request accepted pending settlement. The product experience may make one model more useful. Once a promise is chosen, retain failure examples around its actual boundary instead of claiming universal exactly-once behaviour from one component.
+If the person wants to return to a concrete system, the distinction between a story and an enforceable promise will matter. Until then, we can spend a little longer with the coat pocket—or with the person who decides not to take the promise home.
 
-## Keep the choice open
-
-Use this note when its question is useful, not as a required inspection. A sketch, a contrast, or an unresolved question can be the result. The [parent lens](../SKILL.md) offers other ways into the subject; execution begins only when a direction and task are chosen.
+[Back to holdfast](../SKILL.md)

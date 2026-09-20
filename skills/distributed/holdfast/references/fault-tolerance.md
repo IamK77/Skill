@@ -1,17 +1,15 @@
-# Recovery without assuming a total failure
+# An unfinished intention after a loss
 
-## An opening
+Someone built a small house. It is gone. There are perfectly competent questions about rebuilding the walls, recovering the tools, and preventing the next explosion.
 
-Tell a failure story from the participant that disappears, the one that keeps working, and the one returning with old information. Invent a useful experience for each perspective. Resilience might mean preserving intent, reducing a promise, or changing coordination—not simply adding retries everywhere.
+For a moment, let those wait. What was the house going to make possible? A place to return to? A room for somebody else? The pleasure of having made something with a window in a particular spot?
 
-## Elaborate a candidate
+Suppose the world keeps not the destroyed house but a letter from its unfinished future: “There was going to be a table here.” A passer-by finds it. They do not rebuild the house. They put a table under a tree, and something of the old intention continues in a form its first maker never planned.
 
-A process, request, network path, or dependency can fail while other participants continue. Retries can duplicate effects or increase load, so relate them to request identity, deadlines, resource limits, and the selected operation semantics. Replicas can share a failure domain even when they run on different machines.
+We don't need to turn that into an inspirational lesson. Loss need not be useful, and nobody owes us a quick recovery. There can be a little time spent planting potatoes, or looking at the place where the window was.
 
-## A small comparison
+The interesting turn might come later: a system whose remnants are invitations rather than repair instructions. Or a community that can inherit an abandoned effort without being required to finish it. Or a world in which some things are allowed to be mourned rather than restored.
 
-Tell a partial-write story and a delayed-response story with the same visible timeout. They may need different recovery actions. Preserve the distinction between what was observed and what is merely suspected, then explore the promise that remains useful under uncertainty.
+If the person wants to stay with the sad or quiet part, stay there without trying to cheer it into a design proposal. If they begin to wonder about the stranger rebuilding the table, follow that curiosity. The emotional room is part of the exploration, not a resource to convert into productivity.
 
-## Keep the choice open
-
-Use this note when its question is useful, not as a required inspection. A sketch, a contrast, or an unresolved question can be the result. The [parent lens](../SKILL.md) offers other ways into the subject; execution begins only when a direction and task are chosen.
+[Back to holdfast](../SKILL.md)

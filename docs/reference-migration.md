@@ -51,7 +51,7 @@ The original filenames are generally retained for link stability, including some
 
 Design probe implementations and fixtures remain unchanged. The canon reference now identifies the detector's flags as declared surface indicators, not evidence of authorship or aesthetic merit. A zero count is not a creativity certificate.
 
-`devtools/skill-lint.py` now traverses both entrypoints and references. It checks local resource links, heading anchors, descriptive reference headings, and a limited set of obsolete initialization, stage, and unsupported-claim patterns. Negative fixtures demonstrate that a clean entrypoint does not conceal a broken reference. These are structural/editorial regression guards, not automatic validation of all technical truth or creative quality.
+At this migration checkpoint, `devtools/skill-lint.py` was extended to traverse entrypoints and references, including local links, heading anchors, descriptive reference headings, obsolete execution patterns, and a few claim-related keywords. The subsequent [holdfast pilot](holdfast-pilot.md) removes the keyword judgements and fixed heuristic outline: quoted, hypothetical, and emotional language cannot be judged reliably that way. Structural guards remain; contextual truth and creative quality require reading and use rather than a passing lint result.
 
 The existing CLI schema/parity tests and probe tests remain independent. No A/B evaluation platform is required for maintaining these skills; see [the platform retirement record](retired-ab.md).
 
