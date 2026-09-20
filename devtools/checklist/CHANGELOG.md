@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.5.0](https://github.com/IamK77/Skill/compare/v0.4.3...v0.5.0) (2026-09-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* **checklist:** init requires --new or --resume; commands select a run; verify no longer implies phase closure; done completes and reset abandons without erasing history.
+
+### Features
+
+* **checklist:** isolate SOP runs and make completion explicit ([21de407](https://github.com/IamK77/Skill/commit/21de4073fd85ba21397045db9f4807cd1bfe33c7))
+
+
+### Bug Fixes
+
+* **checklist:** arm interruption handling before spawning sensors ([08fa490](https://github.com/IamK77/Skill/commit/08fa490926f9dc4ecb2b0ad67870f311fc0cc9b9))
+* **checklist:** reproduce bundles with the locked builder and cwd ([62d165c](https://github.com/IamK77/Skill/commit/62d165ccc56c86ea420adcbc27d42cfa0c2c4da8))
+* **deps:** upgrade vulnerable YAML and development dependency chains ([8521918](https://github.com/IamK77/Skill/commit/852191878df8b3d8a2abde81a67bbfe5fb11534c))
+
 ## [0.4.3](https://github.com/IamK77/Skill/compare/v0.4.2...v0.4.3) (2026-06-25)
 
 
