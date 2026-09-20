@@ -113,17 +113,29 @@ async function execute(args: string[], command: string, cwd: string, timeoutMs: 
   const startedAt = new Date().toISOString();
   const start = performance.now();
   return new Promise((resolve, reject) => {
-    const child = spawn(BASH, args, { cwd, detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] });
+    let sensorPid: number | undefined;
+    const kill = () => {
+      if (sensorPid) {
+        try { process.kill(process.platform === 'win32' ? sensorPid : -sensorPid, 'SIGKILL'); }
+        catch { /* process already exited */ }
+      }
+    };
+    const interrupt = (signal: NodeJS.Signals) => { kill(); process.exit(signal === 'SIGINT' ? 130 : 143); };
+    const disarm = () => {
+      process.removeListener('SIGINT', interrupt); process.removeListener('SIGTERM', interrupt);
+    };
+    // A fast child may expose readiness before spawn returns. Arm the parent
+    // first so an immediate external signal cannot take the default exit path.
+    process.once('SIGINT', interrupt); process.once('SIGTERM', interrupt);
+    let child;
+    try {
+      child = spawn(BASH, args, { cwd, detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] });
+      sensorPid = child.pid;
+    } catch (error) { disarm(); reject(error); return; }
     let truncated = false, timedOut = false, spawnError = '';
     const stdoutChunks: Buffer[] = [], stderrChunks: Buffer[] = [];
     let stdoutBytes = 0, stderrBytes = 0;
     const limit = 1024 * 1024;
-    const kill = () => {
-      if (child.pid) {
-        try { process.kill(process.platform === 'win32' ? child.pid : -child.pid, 'SIGKILL'); }
-        catch { /* process already exited */ }
-      }
-    };
     const timer = setTimeout(() => { timedOut = true; kill(); }, timeoutMs);
     const append = (chunks: Buffer[], bytes: number, chunk: Buffer) => {
       if (bytes + chunk.length > limit) { truncated = true; kill(); }
@@ -132,14 +144,10 @@ async function execute(args: string[], command: string, cwd: string, timeoutMs: 
     };
     child.stdout.on('data', chunk => { stdoutBytes = append(stdoutChunks, stdoutBytes, chunk); });
     child.stderr.on('data', chunk => { stderrBytes = append(stderrChunks, stderrBytes, chunk); });
-    // On a normal terminal interruption, stop the sensor group too. SIGKILL of
-    // this CLI cannot be caught; its persisted pending reading still stays stale.
-    const interrupt = (signal: NodeJS.Signals) => { kill(); process.exit(signal === 'SIGINT' ? 130 : 143); };
-    process.once('SIGINT', interrupt); process.once('SIGTERM', interrupt);
     child.on('error', error => { spawnError = error.message; });
     child.on('close', (exitCode, signal) => {
       clearTimeout(timer);
-      process.removeListener('SIGINT', interrupt); process.removeListener('SIGTERM', interrupt);
+      disarm();
       const stdout = Buffer.concat(stdoutChunks).toString('utf8');
       const stderr = Buffer.concat(stderrChunks).toString('utf8');
       const summary = (text: string) => text.trim().slice(0, 4096);

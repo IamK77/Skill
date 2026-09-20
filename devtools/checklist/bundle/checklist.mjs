@@ -10711,19 +10711,38 @@ async function execute(args, command, cwd, timeoutMs, sink) {
   const startedAt = (/* @__PURE__ */ new Date()).toISOString();
   const start = performance.now();
   return new Promise((resolve12, reject) => {
-    const child = spawn(BASH, args, { cwd, detached: process.platform !== "win32", stdio: ["ignore", "pipe", "pipe"] });
-    let truncated = false, timedOut = false, spawnError = "";
-    const stdoutChunks = [], stderrChunks = [];
-    let stdoutBytes = 0, stderrBytes = 0;
-    const limit = 1024 * 1024;
+    let sensorPid;
     const kill = () => {
-      if (child.pid) {
+      if (sensorPid) {
         try {
-          process.kill(process.platform === "win32" ? child.pid : -child.pid, "SIGKILL");
+          process.kill(process.platform === "win32" ? sensorPid : -sensorPid, "SIGKILL");
         } catch {
         }
       }
     };
+    const interrupt = (signal) => {
+      kill();
+      process.exit(signal === "SIGINT" ? 130 : 143);
+    };
+    const disarm = () => {
+      process.removeListener("SIGINT", interrupt);
+      process.removeListener("SIGTERM", interrupt);
+    };
+    process.once("SIGINT", interrupt);
+    process.once("SIGTERM", interrupt);
+    let child;
+    try {
+      child = spawn(BASH, args, { cwd, detached: process.platform !== "win32", stdio: ["ignore", "pipe", "pipe"] });
+      sensorPid = child.pid;
+    } catch (error) {
+      disarm();
+      reject(error);
+      return;
+    }
+    let truncated = false, timedOut = false, spawnError = "";
+    const stdoutChunks = [], stderrChunks = [];
+    let stdoutBytes = 0, stderrBytes = 0;
+    const limit = 1024 * 1024;
     const timer = setTimeout(() => {
       timedOut = true;
       kill();
@@ -10742,19 +10761,12 @@ async function execute(args, command, cwd, timeoutMs, sink) {
     child.stderr.on("data", (chunk) => {
       stderrBytes = append(stderrChunks, stderrBytes, chunk);
     });
-    const interrupt = (signal) => {
-      kill();
-      process.exit(signal === "SIGINT" ? 130 : 143);
-    };
-    process.once("SIGINT", interrupt);
-    process.once("SIGTERM", interrupt);
     child.on("error", (error) => {
       spawnError = error.message;
     });
     child.on("close", (exitCode, signal) => {
       clearTimeout(timer);
-      process.removeListener("SIGINT", interrupt);
-      process.removeListener("SIGTERM", interrupt);
+      disarm();
       const stdout = Buffer.concat(stdoutChunks).toString("utf8");
       const stderr = Buffer.concat(stderrChunks).toString("utf8");
       const summary = (text) => text.trim().slice(0, 4096);
