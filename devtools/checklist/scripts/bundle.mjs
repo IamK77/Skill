@@ -12,7 +12,7 @@
 // version is injected via --define so the single file needs no package.json
 // beside it at runtime (see the BUNDLED_VERSION note in src/index.ts).
 
-import { build } from 'esbuild';
+import { build, version as esbuildVersion } from 'esbuild';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -21,11 +21,18 @@ const here = dirname(fileURLToPath(import.meta.url));
 const pkgRoot = join(here, '..');
 
 const { version } = JSON.parse(readFileSync(join(pkgRoot, 'package.json'), 'utf8'));
+const lock = JSON.parse(readFileSync(join(pkgRoot, 'package-lock.json'), 'utf8'));
+const lockedBuilder = lock.packages?.['node_modules/esbuild']?.version;
+if (esbuildVersion !== lockedBuilder) {
+  throw new Error(`esbuild ${esbuildVersion} does not match package-lock.json (${lockedBuilder}); run npm ci before building or checking the bundle`);
+}
 
 const outfile = join(pkgRoot, 'bundle', 'checklist.mjs');
 
 const check = process.argv.includes('--check');
 const result = await build({
+  // Source labels and module names must not depend on the caller's cwd.
+  absWorkingDir: pkgRoot,
   write: !check,
   entryPoints: [join(pkgRoot, 'src', 'index.ts')],
   outfile,

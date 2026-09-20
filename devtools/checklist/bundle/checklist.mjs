@@ -17,7 +17,11 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 var __commonJS = (cb, mod) => function __require2() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  try {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  } catch (e) {
+    throw mod = 0, e;
+  }
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -1122,30 +1126,30 @@ var require_suggestSimilar = __commonJS({
       if (Math.abs(a.length - b.length) > maxDistance)
         return Math.max(a.length, b.length);
       const d = [];
-      for (let i = 0; i <= a.length; i++) {
-        d[i] = [i];
+      for (let i2 = 0; i2 <= a.length; i2++) {
+        d[i2] = [i2];
       }
       for (let j = 0; j <= b.length; j++) {
         d[0][j] = j;
       }
       for (let j = 1; j <= b.length; j++) {
-        for (let i = 1; i <= a.length; i++) {
+        for (let i2 = 1; i2 <= a.length; i2++) {
           let cost = 1;
-          if (a[i - 1] === b[j - 1]) {
+          if (a[i2 - 1] === b[j - 1]) {
             cost = 0;
           } else {
             cost = 1;
           }
-          d[i][j] = Math.min(
-            d[i - 1][j] + 1,
+          d[i2][j] = Math.min(
+            d[i2 - 1][j] + 1,
             // deletion
-            d[i][j - 1] + 1,
+            d[i2][j - 1] + 1,
             // insertion
-            d[i - 1][j - 1] + cost
+            d[i2 - 1][j - 1] + cost
             // substitution
           );
-          if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
-            d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+          if (i2 > 1 && j > 1 && a[i2 - 1] === b[j - 2] && a[i2 - 2] === b[j - 1]) {
+            d[i2][j] = Math.min(d[i2][j], d[i2 - 2][j - 2] + 1);
           }
         }
       }
@@ -2370,8 +2374,8 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @private
        */
       _checkNumberOfArguments() {
-        this.registeredArguments.forEach((arg, i) => {
-          if (arg.required && this.args[i] == null) {
+        this.registeredArguments.forEach((arg, i2) => {
+          if (arg.required && this.args[i2] == null) {
             this.missingArgument(arg.name());
           }
         });
@@ -2669,13 +2673,13 @@ Expecting one of '${allowedValues.join("', '")}'`);
         };
         let activeVariadicOption = null;
         let activeGroup = null;
-        let i = 0;
-        while (i < args.length || activeGroup) {
-          const arg = activeGroup ?? args[i++];
+        let i2 = 0;
+        while (i2 < args.length || activeGroup) {
+          const arg = activeGroup ?? args[i2++];
           activeGroup = null;
           if (arg === "--") {
             if (dest === unknown) dest.push(arg);
-            dest.push(...args.slice(i));
+            dest.push(...args.slice(i2));
             break;
           }
           if (activeVariadicOption && (!maybeOption(arg) || negativeNumberArg(arg))) {
@@ -2687,13 +2691,13 @@ Expecting one of '${allowedValues.join("', '")}'`);
             const option = this._findOption(arg);
             if (option) {
               if (option.required) {
-                const value = args[i++];
+                const value = args[i2++];
                 if (value === void 0) this.optionMissingArgument(option);
                 this.emit(`option:${option.name()}`, value);
               } else if (option.optional) {
                 let value = null;
-                if (i < args.length && (!maybeOption(args[i]) || negativeNumberArg(args[i]))) {
-                  value = args[i++];
+                if (i2 < args.length && (!maybeOption(args[i2]) || negativeNumberArg(args[i2]))) {
+                  value = args[i2++];
                 }
                 this.emit(`option:${option.name()}`, value);
               } else {
@@ -2729,18 +2733,18 @@ Expecting one of '${allowedValues.join("', '")}'`);
           if ((this._enablePositionalOptions || this._passThroughOptions) && operands.length === 0 && unknown.length === 0) {
             if (this._findCommand(arg)) {
               operands.push(arg);
-              unknown.push(...args.slice(i));
+              unknown.push(...args.slice(i2));
               break;
             } else if (this._getHelpCommand() && arg === this._getHelpCommand().name()) {
-              operands.push(arg, ...args.slice(i));
+              operands.push(arg, ...args.slice(i2));
               break;
             } else if (this._defaultCommandName) {
-              unknown.push(arg, ...args.slice(i));
+              unknown.push(arg, ...args.slice(i2));
               break;
             }
           }
           if (this._passThroughOptions) {
-            dest.push(arg, ...args.slice(i));
+            dest.push(arg, ...args.slice(i2));
             break;
           }
           dest.push(arg);
@@ -2756,8 +2760,8 @@ Expecting one of '${allowedValues.join("', '")}'`);
         if (this._storeOptionsAsProperties) {
           const result = {};
           const len = this.options.length;
-          for (let i = 0; i < len; i++) {
-            const key = this.options[i].attributeName();
+          for (let i2 = 0; i2 < len; i2++) {
+            const key = this.options[i2].attributeName();
             result[key] = key === this._versionOptionName ? this._version : this[key];
           }
           return result;
@@ -3603,8 +3607,8 @@ var require_extend_shallow = __commonJS({
         o = {};
       }
       var len = arguments.length;
-      for (var i = 1; i < len; i++) {
-        var obj = arguments[i];
+      for (var i2 = 1; i2 < len; i2++) {
+        var obj = arguments[i2];
         if (isObject2(obj)) {
           assign(o, obj);
         }
@@ -3659,12 +3663,12 @@ var require_section_matter = __commonJS({
           stack = [];
         }
       }
-      for (var i = 0; i < lines.length; i++) {
-        var line = lines[i];
+      for (var i2 = 0; i2 < lines.length; i2++) {
+        var line = lines[i2];
         var len = stack.length;
         var ln = line.trim();
         if (isDelimiter(ln, delim)) {
-          if (ln.length === 3 && i !== 0) {
+          if (ln.length === 3 && i2 !== 0) {
             if (len === 0 || len === 2) {
               content.push(line);
               continue;
@@ -4935,11 +4939,11 @@ var require_loader = __commonJS({
     }
     var simpleEscapeCheck2 = new Array(256);
     var simpleEscapeMap2 = new Array(256);
-    for (i = 0; i < 256; i++) {
-      simpleEscapeCheck2[i] = simpleEscapeSequence2(i) ? 1 : 0;
-      simpleEscapeMap2[i] = simpleEscapeSequence2(i);
+    for (i2 = 0; i2 < 256; i2++) {
+      simpleEscapeCheck2[i2] = simpleEscapeSequence2(i2) ? 1 : 0;
+      simpleEscapeMap2[i2] = simpleEscapeSequence2(i2);
     }
-    var i;
+    var i2;
     function State2(input, options2) {
       this.input = input;
       this.filename = options2["filename"] || null;
@@ -6139,7 +6143,7 @@ var require_dumper = __commonJS({
     var STYLE_FOLDED2 = 4;
     var STYLE_DOUBLE2 = 5;
     function chooseScalarStyle2(string, singleLineOnly, indentPerLevel, lineWidth, testAmbiguousType) {
-      var i;
+      var i2;
       var char, prev_char;
       var hasLineBreak = false;
       var hasFoldableLine = false;
@@ -6147,31 +6151,31 @@ var require_dumper = __commonJS({
       var previousLineBreak = -1;
       var plain = isPlainSafeFirst2(string.charCodeAt(0)) && !isWhitespace2(string.charCodeAt(string.length - 1));
       if (singleLineOnly) {
-        for (i = 0; i < string.length; i++) {
-          char = string.charCodeAt(i);
+        for (i2 = 0; i2 < string.length; i2++) {
+          char = string.charCodeAt(i2);
           if (!isPrintable2(char)) {
             return STYLE_DOUBLE2;
           }
-          prev_char = i > 0 ? string.charCodeAt(i - 1) : null;
+          prev_char = i2 > 0 ? string.charCodeAt(i2 - 1) : null;
           plain = plain && isPlainSafe2(char, prev_char);
         }
       } else {
-        for (i = 0; i < string.length; i++) {
-          char = string.charCodeAt(i);
+        for (i2 = 0; i2 < string.length; i2++) {
+          char = string.charCodeAt(i2);
           if (char === CHAR_LINE_FEED2) {
             hasLineBreak = true;
             if (shouldTrackWidth) {
               hasFoldableLine = hasFoldableLine || // Foldable line = too long, and not more-indented.
-              i - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ";
-              previousLineBreak = i;
+              i2 - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ";
+              previousLineBreak = i2;
             }
           } else if (!isPrintable2(char)) {
             return STYLE_DOUBLE2;
           }
-          prev_char = i > 0 ? string.charCodeAt(i - 1) : null;
+          prev_char = i2 > 0 ? string.charCodeAt(i2 - 1) : null;
           plain = plain && isPlainSafe2(char, prev_char);
         }
-        hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ");
+        hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i2 - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ");
       }
       if (!hasLineBreak && !hasFoldableLine) {
         return plain && !testAmbiguousType(string) ? STYLE_PLAIN2 : STYLE_SINGLE2;
@@ -6267,18 +6271,18 @@ var require_dumper = __commonJS({
       var result = "";
       var char, nextChar;
       var escapeSeq;
-      for (var i = 0; i < string.length; i++) {
-        char = string.charCodeAt(i);
+      for (var i2 = 0; i2 < string.length; i2++) {
+        char = string.charCodeAt(i2);
         if (char >= 55296 && char <= 56319) {
-          nextChar = string.charCodeAt(i + 1);
+          nextChar = string.charCodeAt(i2 + 1);
           if (nextChar >= 56320 && nextChar <= 57343) {
             result += encodeHex2((char - 55296) * 1024 + nextChar - 56320 + 65536);
-            i++;
+            i2++;
             continue;
           }
         }
         escapeSeq = ESCAPE_SEQUENCES2[char];
-        result += !escapeSeq && isPrintable2(char) ? string[i] : escapeSeq || encodeHex2(char);
+        result += !escapeSeq && isPrintable2(char) ? string[i2] : escapeSeq || encodeHex2(char);
       }
       return result;
     }
@@ -7091,33 +7095,33 @@ function makeSnippet(mark, options2) {
     }
   }
   if (foundLineNo < 0) foundLineNo = lineStarts.length - 1;
-  var result = "", i, line;
+  var result = "", i2, line;
   var lineNoLength = Math.min(mark.line + options2.linesAfter, lineEnds.length).toString().length;
   var maxLineLength = options2.maxLength - (options2.indent + lineNoLength + 3);
-  for (i = 1; i <= options2.linesBefore; i++) {
-    if (foundLineNo - i < 0) break;
+  for (i2 = 1; i2 <= options2.linesBefore; i2++) {
+    if (foundLineNo - i2 < 0) break;
     line = getLine(
       mark.buffer,
-      lineStarts[foundLineNo - i],
-      lineEnds[foundLineNo - i],
-      mark.position - (lineStarts[foundLineNo] - lineStarts[foundLineNo - i]),
+      lineStarts[foundLineNo - i2],
+      lineEnds[foundLineNo - i2],
+      mark.position - (lineStarts[foundLineNo] - lineStarts[foundLineNo - i2]),
       maxLineLength
     );
-    result = common.repeat(" ", options2.indent) + padStart((mark.line - i + 1).toString(), lineNoLength) + " | " + line.str + "\n" + result;
+    result = common.repeat(" ", options2.indent) + padStart((mark.line - i2 + 1).toString(), lineNoLength) + " | " + line.str + "\n" + result;
   }
   line = getLine(mark.buffer, lineStarts[foundLineNo], lineEnds[foundLineNo], mark.position, maxLineLength);
   result += common.repeat(" ", options2.indent) + padStart((mark.line + 1).toString(), lineNoLength) + " | " + line.str + "\n";
   result += common.repeat("-", options2.indent + lineNoLength + 3 + line.pos) + "^\n";
-  for (i = 1; i <= options2.linesAfter; i++) {
-    if (foundLineNo + i >= lineEnds.length) break;
+  for (i2 = 1; i2 <= options2.linesAfter; i2++) {
+    if (foundLineNo + i2 >= lineEnds.length) break;
     line = getLine(
       mark.buffer,
-      lineStarts[foundLineNo + i],
-      lineEnds[foundLineNo + i],
-      mark.position - (lineStarts[foundLineNo] - lineStarts[foundLineNo + i]),
+      lineStarts[foundLineNo + i2],
+      lineEnds[foundLineNo + i2],
+      mark.position - (lineStarts[foundLineNo] - lineStarts[foundLineNo + i2]),
       maxLineLength
     );
-    result += common.repeat(" ", options2.indent) + padStart((mark.line + i + 1).toString(), lineNoLength) + " | " + line.str + "\n";
+    result += common.repeat(" ", options2.indent) + padStart((mark.line + i2 + 1).toString(), lineNoLength) + " | " + line.str + "\n";
   }
   return result.replace(/\n$/, "");
 }
@@ -9122,7 +9126,7 @@ var STYLE_LITERAL = 3;
 var STYLE_FOLDED = 4;
 var STYLE_DOUBLE = 5;
 function chooseScalarStyle(string, singleLineOnly, indentPerLevel, lineWidth, testAmbiguousType, quotingType, forceQuotes, inblock) {
-  var i;
+  var i2;
   var char = 0;
   var prevChar = null;
   var hasLineBreak = false;
@@ -9131,8 +9135,8 @@ function chooseScalarStyle(string, singleLineOnly, indentPerLevel, lineWidth, te
   var previousLineBreak = -1;
   var plain = isPlainSafeFirst(codePointAt(string, 0)) && isPlainSafeLast(codePointAt(string, string.length - 1));
   if (singleLineOnly || forceQuotes) {
-    for (i = 0; i < string.length; char >= 65536 ? i += 2 : i++) {
-      char = codePointAt(string, i);
+    for (i2 = 0; i2 < string.length; char >= 65536 ? i2 += 2 : i2++) {
+      char = codePointAt(string, i2);
       if (!isPrintable(char)) {
         return STYLE_DOUBLE;
       }
@@ -9140,14 +9144,14 @@ function chooseScalarStyle(string, singleLineOnly, indentPerLevel, lineWidth, te
       prevChar = char;
     }
   } else {
-    for (i = 0; i < string.length; char >= 65536 ? i += 2 : i++) {
-      char = codePointAt(string, i);
+    for (i2 = 0; i2 < string.length; char >= 65536 ? i2 += 2 : i2++) {
+      char = codePointAt(string, i2);
       if (char === CHAR_LINE_FEED) {
         hasLineBreak = true;
         if (shouldTrackWidth) {
           hasFoldableLine = hasFoldableLine || // Foldable line = too long, and not more-indented.
-          i - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ";
-          previousLineBreak = i;
+          i2 - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ";
+          previousLineBreak = i2;
         }
       } else if (!isPrintable(char)) {
         return STYLE_DOUBLE;
@@ -9155,7 +9159,7 @@ function chooseScalarStyle(string, singleLineOnly, indentPerLevel, lineWidth, te
       plain = plain && isPlainSafe(char, prevChar, inblock);
       prevChar = char;
     }
-    hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ");
+    hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i2 - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ");
   }
   if (!hasLineBreak && !hasFoldableLine) {
     if (plain && !forceQuotes && !testAmbiguousType(string)) {
@@ -9268,12 +9272,12 @@ function escapeString(string) {
   var result = "";
   var char = 0;
   var escapeSeq;
-  for (var i = 0; i < string.length; char >= 65536 ? i += 2 : i++) {
-    char = codePointAt(string, i);
+  for (var i2 = 0; i2 < string.length; char >= 65536 ? i2 += 2 : i2++) {
+    char = codePointAt(string, i2);
     escapeSeq = ESCAPE_SEQUENCES[char];
     if (!escapeSeq && isPrintable(char)) {
-      result += string[i];
-      if (char >= 65536) result += string[i + 1];
+      result += string[i2];
+      if (char >= 65536) result += string[i2 + 1];
     } else {
       result += escapeSeq || encodeHex(char);
     }
@@ -9634,13 +9638,13 @@ function lintChecklistSchema(ymlPath, diags) {
   }
   const phases = [];
   const seenPhaseNames = /* @__PURE__ */ new Map();
-  obj.phases.forEach((p, i) => {
+  obj.phases.forEach((p, i2) => {
     if (!p || typeof p !== "object" || Array.isArray(p)) {
       diags.push({
         file: ymlPath,
         severity: "error",
         rule: "schema/phase-not-a-mapping",
-        message: `phase ${i}: entry is not a mapping (a bare "- " or "- null" list item?)`,
+        message: `phase ${i2}: entry is not a mapping (a bare "- " or "- null" list item?)`,
         fix: "give the entry a `name:` and a `checks:` list"
       });
       return;
@@ -9652,7 +9656,7 @@ function lintChecklistSchema(ymlPath, diags) {
         file: ymlPath,
         severity: "error",
         rule: "schema/phase-missing-name",
-        message: `phase ${i}: missing a non-empty string "name"`,
+        message: `phase ${i2}: missing a non-empty string "name"`,
         fix: "add a `name:` to this phase"
       });
     } else {
@@ -9664,14 +9668,14 @@ function lintChecklistSchema(ymlPath, diags) {
           file: ymlPath,
           severity: "error",
           rule: "schema/duplicate-phase-name",
-          message: `phase ${i}: duplicate phase name "${name}" (collides with "${prior}", names are compared case-insensitively)`,
+          message: `phase ${i2}: duplicate phase name "${name}" (collides with "${prior}", names are compared case-insensitively)`,
           fix: "rename one of the phases \u2014 phases are addressed by name, so a duplicate makes one unreachable"
         });
       } else {
         seenPhaseNames.set(key, name);
       }
     }
-    const phaseLabel = hasName ? `"${phase.name}"` : `${i}`;
+    const phaseLabel = hasName ? `"${phase.name}"` : `${i2}`;
     if (!Array.isArray(phase.checks)) {
       diags.push({
         file: ymlPath,
@@ -10168,13 +10172,13 @@ function parseChecklist(raw) {
   if (!Array.isArray(data.phases)) {
     throw new Error(`${CONFIG_FILE2} missing "phases" array`);
   }
-  const phases = data.phases.map((p, i) => {
+  const phases = data.phases.map((p, i2) => {
     if (!p || typeof p !== "object" || Array.isArray(p)) {
-      throw new Error(`Phase ${i}: entry must be a mapping with "name" and "checks"`);
+      throw new Error(`Phase ${i2}: entry must be a mapping with "name" and "checks"`);
     }
     const phase = p;
     if (!phase.name || typeof phase.name !== "string") {
-      throw new Error(`Phase ${i}: missing "name" field`);
+      throw new Error(`Phase ${i2}: missing "name" field`);
     }
     if (!Array.isArray(phase.checks)) {
       throw new Error(`Phase "${phase.name}": missing "checks" array`);
@@ -10538,17 +10542,17 @@ async function noSecretsCheck(targetPath) {
   }
   const lines = fs6.readFileSync(filePath, "utf-8").split("\n");
   const findings = [];
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+  for (let i2 = 0; i2 < lines.length; i2++) {
+    const line = lines[i2];
     for (const pattern of TOKEN_PATTERNS) {
       if (pattern.re.test(line)) {
-        findings.push(`L${i + 1}: ${pattern.name}`);
+        findings.push(`L${i2 + 1}: ${pattern.name}`);
       }
     }
     for (const pattern of ASSIGNMENT_PATTERNS) {
       const m = pattern.re.exec(line);
       if (m && !isPlaceholder(m[1])) {
-        findings.push(`L${i + 1}: ${pattern.name}`);
+        findings.push(`L${i2 + 1}: ${pattern.name}`);
       }
     }
   }
@@ -10665,29 +10669,29 @@ var UndefinedVarError = class extends Error {
 };
 function interpolate(template, vars) {
   let out = "";
-  let i = 0;
-  while (i < template.length) {
-    const ch = template[i];
-    if (ch === "$" && template[i + 1] === "$") {
+  let i2 = 0;
+  while (i2 < template.length) {
+    const ch = template[i2];
+    if (ch === "$" && template[i2 + 1] === "$") {
       out += "$";
-      i += 2;
+      i2 += 2;
       continue;
     }
-    if (ch === "$" && template[i + 1] === "{") {
-      const close = template.indexOf("}", i + 2);
-      const name = close === -1 ? "" : template.slice(i + 2, close);
+    if (ch === "$" && template[i2 + 1] === "{") {
+      const close = template.indexOf("}", i2 + 2);
+      const name = close === -1 ? "" : template.slice(i2 + 2, close);
       if (close !== -1 && /^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) {
         const value = Object.prototype.hasOwnProperty.call(vars, name) ? vars[name] : Object.prototype.hasOwnProperty.call(process.env, name) ? process.env[name] : void 0;
         if (value === void 0) {
           throw new UndefinedVarError(name);
         }
         out += value;
-        i = close + 1;
+        i2 = close + 1;
         continue;
       }
     }
     out += ch;
-    i += 1;
+    i2 += 1;
   }
   return out;
 }
@@ -10877,8 +10881,8 @@ function phaseKey(run, index) {
   return run.config.phases[index].name.toLowerCase();
 }
 function requirePrior(run, index) {
-  for (let i = 0; i < index; i++) {
-    if (!run.closed.includes(phaseKey(run, i)) || missing(run, i).length) throw new Error(`gate blocked: ${run.config.phases[i].name} is not closed; use advance after fulfilling its checks`);
+  for (let i2 = 0; i2 < index; i2++) {
+    if (!run.closed.includes(phaseKey(run, i2)) || missing(run, i2).length) throw new Error(`gate blocked: ${run.config.phases[i2].name} is not closed; use advance after fulfilling its checks`);
   }
 }
 function fulfilled(item, reading) {
@@ -10960,7 +10964,7 @@ async function advance(id, phase) {
   return withRun(id, (run) => {
     assertActive(run);
     assertDefinition(run);
-    const index = phase ? phaseIndex(run, phase) : run.config.phases.findIndex((_, i) => !run.closed.includes(phaseKey(run, i)));
+    const index = phase ? phaseIndex(run, phase) : run.config.phases.findIndex((_, i2) => !run.closed.includes(phaseKey(run, i2)));
     if (index < 0) throw new Error("all phases are closed; use done to complete the run");
     requirePrior(run, index);
     const pending = missing(run, index);
@@ -10980,8 +10984,8 @@ async function finish(id, abandon = false, reason) {
     if (abandon && !reason?.trim()) throw new Error("abandonment requires a nonblank reason");
     if (!abandon) {
       assertDefinition(run);
-      for (let i = 0; i < run.config.phases.length; i++) {
-        if (missing(run, i).length || !run.config.flat && !run.closed.includes(phaseKey(run, i))) throw new Error(`cannot complete: ${run.config.phases[i].name} is not fulfilled and closed`);
+      for (let i2 = 0; i2 < run.config.phases.length; i2++) {
+        if (missing(run, i2).length || !run.config.flat && !run.closed.includes(phaseKey(run, i2))) throw new Error(`cannot complete: ${run.config.phases[i2].name} is not fulfilled and closed`);
       }
     }
     run.status = abandon ? "abandoned" : "completed";
@@ -11022,10 +11026,10 @@ function inspect(id) {
       definitionError = e.message;
     }
   }
-  const phases = run.config.phases.map((p, i) => ({
+  const phases = run.config.phases.map((p, i2) => ({
     name: p.name,
     closed: !definitionChanged && run.closed.includes(p.name.toLowerCase()),
-    missing: definitionChanged ? p.checks.map((c) => c.id) : missing(run, i),
+    missing: definitionChanged ? p.checks.map((c) => c.id) : missing(run, i2),
     checks: p.checks.map((item) => {
       const recorded = run.checked[p.name.toLowerCase()]?.[item.id];
       const reading = recorded && definitionChanged ? { ...recorded, recordedStatus: recorded.status, status: "stale" } : recorded || null;

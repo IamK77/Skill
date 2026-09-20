@@ -146,4 +146,6 @@ npm run bundle:check      # compare in memory; no rewriting
 node dist/index.js lint ../../skills --strict
 ```
 
+Use `npm ci` before regenerating or validating a release artifact. Both bundle commands reject an installed esbuild version that differs from `package-lock.json`; a locally self-consistent artifact from a different builder is not a reproducible artifact. The build uses the package directory as its fixed working directory, so calling the script from the repository root or another directory does not change the output.
+
 The run-contract integration suite exercises compiled source and a relocated committed bundle with identical cases. It intentionally does not repair a stale bundle before testing. CI checks freshness before merge rather than pushing a generated update afterward. Pure and legacy helper regression tests remain separately named; the shipping run contract is tested through the real CLI entrypoints.
