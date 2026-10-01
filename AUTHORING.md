@@ -75,7 +75,7 @@ Do not require a CLI for heuristics or navigation, insist that every visual task
 
 ```sh
 python3 devtools/skill-lint.py
-python3 -m unittest discover -s devtools -p 'test_skill_lint.py'
+python3 -m unittest discover -s devtools -p 'test_*.py'
 node devtools/checklist/bundle/checklist.mjs lint skills --strict
 ```
 
