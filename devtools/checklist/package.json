@@ -28,7 +28,8 @@
   "files": [
     "dist",
     "bin",
-    "NOTICE"
+    "NOTICE",
+    "MIGRATION.md"
   ],
   "scripts": {
     "build": "tsc",

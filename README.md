@@ -38,7 +38,7 @@ In Claude Code, add the repository marketplace and install only the suites you w
 /plugin install atelier@skill
 ```
 
-Invoke a plugin skill by its namespace, such as `/engineering:assay` or `/atelier:color`. Alternatively, copy `skills/<suite>/<name>/` into your host's skills directory, preserving references, LICENSE, and NOTICE. Heuristics and routers need no checklist runtime.
+Invoke a plugin skill by its namespace, such as `/engineering:assay` or `/atelier:color`. Alternatively, copy `skills/<suite>/<name>/` into your host's skills directory, preserving references, LICENSE, and NOTICE. A `pilot` router also needs the sibling skills it links to: install its suite, or preserve that suite's sibling layout when copying it manually. Copying `pilot/` alone does not install its destinations. Heuristics and routers need no checklist runtime.
 
 **The rewritten SOPs require checklist 0.5 or newer.** The source and committed bundle in this working tree implement that interface; this does not imply an npm release has been published. With Node 20 or newer, the repository's self-contained bundle needs no dependency install:
 
@@ -83,7 +83,7 @@ npm run bundle:check   # fails on a stale committed artifact; never rewrites it
 npm test              # builds source; same run contract tests compiled and relocated bundle
 cd ../..
 python3 devtools/skill-lint.py
-python3 -m unittest discover -s devtools -p 'test_skill_lint.py'
+python3 -m unittest discover -s devtools -p 'test_*.py'
 node devtools/checklist/dist/index.js lint skills --strict
 ```
 

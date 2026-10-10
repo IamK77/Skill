@@ -1,14 +1,14 @@
 name: probe
 
-# Run each atelier lens probe's ground-truth regression suite (test.mjs) whenever a
-# probe changes, so a probe — the instrument the GATE leans on — can't silently regress.
+# Run each optional atelier probe's ground-truth regression suite (test.mjs)
+# when its implementation or this workflow changes.
 
 on:
   push:
     branches: [main]
-    paths: ['skills/atelier/**/probes/**']
+    paths: ['skills/atelier/**/probes/**', '.github/workflows/probe.yml']
   pull_request:
-    paths: ['skills/atelier/**/probes/**']
+    paths: ['skills/atelier/**/probes/**', '.github/workflows/probe.yml']
 
 permissions:
   contents: read

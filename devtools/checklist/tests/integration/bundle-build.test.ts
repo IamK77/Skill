@@ -35,3 +35,36 @@ it('checks the same committed artifact from the package, repository, or unrelate
   }
   expect(fs.readFileSync(artifact).equals(before)).toBe(true);
 });
+
+it('rejects a version-only change until the standalone artifact is regenerated', () => {
+  fs.mkdirSync(path.join(tmp, 'scripts'));
+  fs.mkdirSync(path.join(tmp, 'src'));
+  for (const name of ['scripts/bundle.mjs', 'package.json', 'package-lock.json']) {
+    fs.copyFileSync(path.join(pkg, name), path.join(tmp, name));
+  }
+  fs.symlinkSync(path.join(pkg, 'node_modules'), path.join(tmp, 'node_modules'), 'dir');
+  // Exercise the real builder's version injection without copying CLI dependencies.
+  fs.writeFileSync(path.join(tmp, 'src/index.ts'), 'console.log(__CHECKLIST_BUNDLED_VERSION__);\n');
+  const build = (...args: string[]) => spawnSync(process.execPath, [path.join(tmp, 'scripts/bundle.mjs'), ...args], { cwd: tmp, encoding: 'utf8' });
+  expect(build().status).toBe(0);
+  expect(build('--check').status).toBe(0);
+  const artifact = path.join(tmp, 'bundle/checklist.mjs');
+  const before = fs.readFileSync(artifact);
+  const manifestPath = path.join(tmp, 'package.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  manifest.version = '0.0.0-version-regression';
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+  const lockPath = path.join(tmp, 'package-lock.json');
+  const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+  lock.version = lock.packages[''].version = manifest.version;
+  fs.writeFileSync(lockPath, JSON.stringify(lock));
+  const stale = build('--check');
+  expect(stale.status).toBe(1);
+  expect(stale.stderr).toContain('STALE bundle');
+  expect(fs.readFileSync(artifact).equals(before)).toBe(true);
+  expect(build().status).toBe(0);
+  expect(build('--check').status).toBe(0);
+  const run = spawnSync(process.execPath, [artifact], { cwd: tmp, encoding: 'utf8' });
+  expect(run.status, run.stderr).toBe(0);
+  expect(run.stdout.trim()).toBe(manifest.version);
+});

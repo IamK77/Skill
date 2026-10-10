@@ -477,7 +477,7 @@ function lintParity(
   // Track which (phaseName, id) pairs a `check` command referenced, to find
   // orphaned checks afterward.
   const referenced = new Set<string>();
-  const key = (phaseName: string, id: string) => `${phaseName.toLowerCase()} ${id}`;
+  const key = (phaseName: string, id: string) => `${phaseName.toLowerCase()}\0${id}`;
 
   for (const cmd of commands) {
     const phase = resolvePhase(cmd.phase);
