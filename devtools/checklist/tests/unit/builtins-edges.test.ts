@@ -179,7 +179,7 @@ describe('nameFormatCheck — type and length boundaries', () => {
   afterEach(() => { fs.rmSync(tmpDir, { recursive: true, force: true }); });
 
   it('fails when name is a non-string (YAML number)', async () => {
-    // gray-matter parses `name: 123` as the number 123 -> typeof !== 'string'.
+    // YAML parses `name: 123` as the number 123 -> typeof !== 'string'.
     writeSkill(tmpDir, '---\nname: 123\n---\n# Skill');
     const result = await nameFormatCheck(tmpDir);
     expect(result.status).toBe('fail');

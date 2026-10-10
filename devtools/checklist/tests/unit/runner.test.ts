@@ -296,16 +296,13 @@ describe('runCheck', () => {
 
   // ── Crash containment: a throwing handler becomes an attributed error ──
   //
-  // Several builtins call gray-matter/js-yaml without their own guard. A
+  // Several builtins call the YAML frontmatter parser without their own guard. A
   // SKILL.md with malformed frontmatter made them THROW a raw YAMLException,
   // aborting the whole verify batch with no hint of which check died. runCheck
   // now catches handler crashes and returns {status:'error'} attributed to the
   // check id.
   describe('crash containment (malformed SKILL.md frontmatter)', () => {
     // Unterminated double-quoted scalar -> js-yaml throws YAMLException.
-    // The content must be UNIQUE per test: gray-matter caches parses by content
-    // string, and a throw poisons the cache so identical content silently
-    // returns empty data on the next call instead of throwing again.
     function writeMalformedSkill(marker: string): void {
       const malformed = ['---', `name: "unterminated-${marker}`, '---', '', '# Body'].join('\n');
       fs.writeFileSync(path.join(tmpDir, 'SKILL.md'), malformed, 'utf-8');

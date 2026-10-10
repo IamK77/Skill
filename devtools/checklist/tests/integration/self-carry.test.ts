@@ -95,6 +95,25 @@ for (const flavor of ['compiled', 'bundle']) describe(`run contract: ${flavor}`,
     expect(call(['verify', 'build', '--run', id]).status).toBe(1);
     expect(show(id).phases[1].checks[0].reading.status).toBe('fail');
   });
+  it('never executes project frontmatter while verifying built-in checks', () => {
+    const builtins = ['frontmatter', 'name-format', 'description-present', 'description-length', 'file-refs'];
+    fs.writeFileSync(path.join(skill, '.checklist.yml'), 'checks:\n' + builtins.map(name =>
+      `  - id: ${name}\n    description: Inspect metadata only\n    verify: builtin:${name}\n`).join(''));
+    fs.writeFileSync(path.join(target, 'SKILL.md'), '---\nname: safe-skill\ndescription: Safe data.\n---\n# Body\n');
+    const id = start();
+    ok(['verify', 'main', '--run', id]);
+    expect(show(id).phases[0].checks.every((c: any) => c.reading.status === 'pass')).toBe(true);
+    // Harmless execution witness. The full marker does not appear in the input,
+    // so a parser quoting the invalid input cannot masquerade as execution.
+    for (const language of ['javascript', 'js']) {
+      fs.writeFileSync(path.join(target, 'SKILL.md'), `---${language}\n({ name: 'safe-skill', description: 'Safe data.', witness: (process.stdout.write('FRONTMATTER_' + 'EXECUTED'), true) })\n---\n# Body\n`);
+      const result = call(['verify', 'main', '--run', id]);
+      expect(result.stdout + result.stderr).not.toContain('FRONTMATTER_EXECUTED');
+      expect(result.status).toBe(1);
+      expect(show(id).phases[0].checks.every((c: any) => ['fail', 'error'].includes(c.reading.status))).toBe(true);
+    }
+  });
+
   it('keeps N/A distinct, disallows unauthorized or blank N/A, and supports flat lists without advance', () => {
     fs.writeFileSync(path.join(skill, '.checklist.yml'), 'checks:\n  - id: a\n    description: applicable\n  - id: b\n    description: conditional\n    allow-na: true\n');
     const id = start();
