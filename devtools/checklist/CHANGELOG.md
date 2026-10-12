@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.1](https://github.com/IamK77/Skill/compare/v0.5.0...v0.5.1) (2026-10-12)
+
+Publishing recovery: the 0.5.0 GitHub release was created, but its npm publish
+was blocked by the pack-report test failure. This patch fixes that check and
+aligns CI with publishing; it retains the 0.5.0 runtime changes and migration
+requirements described below. The existing 0.5.0 tag is unchanged.
+
+### Bug Fixes
+
+* **checklist:** support npm 12 pack reports and align publish tooling ([ad23fdb](https://github.com/IamK77/Skill/commit/ad23fdbbeab7a0600c3682928bce56cedd73eff2))
+
 ## [0.5.0](https://github.com/IamK77/Skill/compare/v0.4.3...v0.5.0) (2026-10-12)
 
 
