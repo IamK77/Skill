@@ -58,8 +58,8 @@ jobs:
         with:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
-      - name: Upgrade npm to a version with trusted-publishing (OIDC) support
-        run: npm install -g npm@latest
+      - name: Install the same pinned npm used by CI (OIDC support)
+        run: npm install -g npm@12.2.0
       - run: npm ci
       - run: npm test
       - name: Publish to npm (OIDC trusted publishing, with provenance)
