@@ -8073,7 +8073,7 @@ function inspect(id) {
 }
 
 // src/index.ts
-var bundledVersion = true ? "0.5.0" : "";
+var bundledVersion = true ? "0.5.1" : "";
 var version = bundledVersion || JSON.parse(readFileSync10(join5(__dirname, "..", "package.json"), "utf8")).version;
 var program2 = new Command().name("checklist").description("SOP runs: confirmations, sensor readings, explicit stage closure").version(version);
 var collect = (value, values) => [...values, value];
