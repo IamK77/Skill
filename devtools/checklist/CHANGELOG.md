@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.1](https://github.com/IamK77/Skill/compare/v0.5.0...v0.5.1) (2026-10-12)
+
+
+### Bug Fixes
+
+* **checklist:** support npm 12 pack reports and align publish tooling ([570d06d](https://github.com/IamK77/Skill/commit/570d06d50b416d15921a2f6249911f029cbdd962))
+* **checklist:** support npm 12 pack reports and align publish tooling ([ad23fdb](https://github.com/IamK77/Skill/commit/ad23fdbbeab7a0600c3682928bce56cedd73eff2))
+
 ## [0.5.0](https://github.com/IamK77/Skill/compare/v0.4.3...v0.5.0) (2026-10-12)
 
 
