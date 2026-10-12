@@ -1,17 +1,15 @@
-# Agreement has a scope and a model
+# The disagreement worth keeping
 
-## An opening
+Take a shared sheet of paper. One person sees a harbour in the drawing; another sees the inside of a lung. They have not misunderstood the same picture. Their two readings are making a third picture possible.
 
-Move the boundary of agreement from the whole system to a document, an account, or settlement time. Each boundary makes some local action easier and some global promise weaker. Imagine what the person using the product would observe during disagreement; the semantics can change the architecture.
+We could ask them to choose the correct interpretation. Or, just for a little while, we could let each add something that makes the other's reading harder to lose.
 
-## Elaborate a candidate
+A pier becomes a bronchial branch. A tide makes breathing visible. Somebody draws a boat where an inhalation should be, and the whole group goes quiet because the boat seems to be carrying something out rather than bringing something in.
 
-Describe which operations or observations must agree, under which timing and failure assumptions, and what availability tradeoff the product accepts. Replication and consensus address related but different questions. Avoid reducing all consistency choices to a slogan or treating one model as universally superior.
+There is no score for that silence. Perhaps the image is awkward or sentimental. We can say so. But it may also be the moment when agreement stops meaning “we all have the same picture” and starts meaning “we can keep making a picture none of us had alone.”
 
-## A small comparison
+Suppose the drawing acquires a strange rule: an addition disappears whenever everyone can explain it in the same words. The group begins leaving little pockets of unresolved meaning. One person becomes protective of a mark nobody else notices. Another asks whether the sheet is becoming hospitable to newcomers or merely private to its makers.
 
-Compare agreement per document with agreement across an account's resources. Explore what a participant can do during a partition and what reconciliation would mean afterward. If a model is chosen, its precise guarantees and failure cases can become acceptance examples rather than remain an architectural label.
+That question might be more interesting than the original exercise. We can follow it without completing the drawing. Or we can stay with the boat, which still seems to be carrying something away.
 
-## Keep the choice open
-
-Use this note when its question is useful, not as a required inspection. A sketch, a contrast, or an unresolved question can be the result. The [parent lens](../SKILL.md) offers other ways into the subject; execution begins only when a direction and task are chosen.
+[Back to holdfast](../SKILL.md)

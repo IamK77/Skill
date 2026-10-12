@@ -34,20 +34,31 @@ Use `init --new` once for a new task, retain its returned run ID, and use `resum
 
 [Engineering assay](skills/engineering/assay/SKILL.md) is a sensor-backed example. [Quarry forage](skills/quarry/forage/SKILL.md) is a flat SOP. [CLI schema and lifecycle](devtools/checklist/README.md) is the command reference.
 
-## Heuristic template
+## Writing a heuristic: an invitation, not an essay template
 
-A heuristic opens a possibility space rather than validating a selected design. A useful shape is:
+A heuristic opens possibilities, including possibilities that change the original question. Offering several familiar solutions is useful, but is not by itself the associative exploration sought here. A domain supplies material and a starting place; it need not contain every subsequent thought.
 
-- **Starting point:** a philosophical perspective or productive tension that changes what can be noticed.
-- **Thought experiments:** invitations to associate, borrow a relation from another field, invert an assumption, change scale or time, or compose incompatible ideas. Choose useful threads; no prescribed order.
-- **A possible turn:** a concrete example showing how a different perspective generates a genuinely different idea.
-- **Leave the space open:** possible expressions of the thought—a sketch, several alternatives, a new question. A handoff to an SOP is optional and follows human direction selection.
+### The emotional climate is part of the skill
 
-Do not add a `.checklist.yml`, mandatory certificate, scoring rubric, full-dimension diagnostic sweep, or compulsory action plan. Rewriting “check these seven dimensions” as “explore these seven dimensions” is not enough: the content must actually generate new frames and associations.
+Write for a companionable, unhurried exchange in which a half-formed thought does not have to justify its usefulness immediately. Invite curiosity, play, and patience with uncertainty. This is more than adding emotions as subjects for metaphors: the response itself should feel less like assessment or a deliverable review.
 
-A metaphor suggests possibilities; it is not empirical evidence. Preserve that distinction without strangling exploration. References can provide depth, and a design probe can measure a candidate later; neither decides taste.
+Let that climate appear in attention to a particular detail, a willing detour, an honest point of view, and space for the human to change the thought. Avoid a repeated welcome speech, automatic praise, manufactured intimacy, or obligatory excitement. Warmth can include disagreement. A quiet or disappointing stretch need not become a failure diagnosis or an instruction to cheer up.
 
-[Distributed holdfast](skills/distributed/holdfast/SKILL.md) and [atelier canon](skills/atelier/canon/SKILL.md) illustrate different generative lenses.
+Emotional language, narrative voices, and imaginative hypotheses are legitimate writing tools. Keep factual claims attributable, but do not treat those tools as unsupported factual claims merely because they use words such as delight, longing, or fear. Neither the skill nor its user needs to settle a theory of subjective experience before exploring in that register.
+
+### Follow a connection beyond its first translation
+
+An image, contradiction, memory, game, philosophical stance, or odd rule can lead somewhere the original vocabulary would not. Develop the particular relation or consequence that becomes interesting. Do not immediately turn a forest back into nodes and queues, or dismiss a connection as a named pattern before seeing what else it makes imaginable.
+
+Strangeness alone is not the goal. Give the thought enough specificity that another person can inhabit, question, or alter it. A scene is one possibility, not a compulsory storytelling genre. A drawing, a surprising question, a changed assumption, or an unusual construction may serve better. Technical knowledge can deepen an idea when wanted; it need not close every excursion.
+
+### Let the form follow the conversation
+
+There are no required heuristic headings, number of alternatives, cross-domain quota, novelty score, or emotional-performance rubric. Authors may include examples, but examples should demonstrate a living turn rather than become outputs to imitate for every task. References can be browseable provocations or useful technical material, not an eight-part course to complete.
+
+Do not add a `.checklist.yml`, mandatory certificate, full-dimension diagnostic sweep, or compulsory action plan. A human-selected direction can move into an SOP; an unfinished question can also be the outcome. Imagination does not establish empirical truth or authorise a real-world action. Put that boundary where it matters instead of interrupting every unusual idea with a disclaimer.
+
+[Distributed holdfast](skills/distributed/holdfast/SKILL.md) is the pilot for this revised approach. The other heuristic entrypoints have not yet been rewritten to the same emotional/associative standard; their existing outlines are allowed, not a template enforced on future work.
 
 ## Routers and handoffs
 
@@ -64,10 +75,10 @@ Do not require a CLI for heuristics or navigation, insist that every visual task
 
 ```sh
 python3 devtools/skill-lint.py
-python3 -m unittest discover -s devtools -p 'test_skill_lint.py'
+python3 -m unittest discover -s devtools -p 'test_*.py'
 node devtools/checklist/bundle/checklist.mjs lint skills --strict
 ```
 
-Structural lint checks entrypoints and every reference: declared form, resource links and heading anchors, lifecycle markers, and known obsolete gates or unsupported model-psychology claims. CLI lint validates actual YAML and command parity. The guards are deliberately limited; they do not judge whether an analogy is interesting, a procedure is wise, or every technical statement is true. That still requires editorial review and use on a real task.
+Structural lint checks entrypoints and every reference: declared form, resource links and heading anchors, SOP lifecycle markers, and known obsolete execution-gate patterns. It does not require a heuristic essay outline or police emotional and narrative vocabulary. CLI lint validates actual YAML and command parity. The guards cannot judge warmth, associative range, factual truth, or creative value; those require contextual reading and actual conversations, not keyword counts. Tests should protect the structural boundaries without pretending to certify the desired experience.
 
 CLI logic changes need regression tests; demonstrate that the test detects the target fault. Source and committed bundle must pass the same run-contract cases. Probe changes retain their own behavioural tests. The root A/B experiment platform is not the required development path for skills.

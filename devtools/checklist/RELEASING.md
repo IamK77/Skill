@@ -9,12 +9,17 @@ npm with [OIDC trusted publishing][tp] from GitHub Actions.
 1. **Write Conventional Commits** that touch `devtools/checklist/`. The commit
    type decides the next version:
 
-   | Commit | Example | Bump |
+   | Commit | Example | Bump below 1.0 |
    |---|---|---|
    | `fix:` | `fix(checklist): reset no longer deletes an unrelated state file` | patch (0.2.0 → 0.2.1) |
-   | `feat:` | `feat(checklist): add a --json output flag` | minor (0.2.0 → 0.3.0) |
-   | `feat!:` or a `BREAKING CHANGE:` footer | `feat(checklist)!: rename the active-pointer env var` | major (0.2.0 → 1.0.0) |
+   | `feat:` | `feat(checklist): add a --json output flag` | patch (0.2.0 → 0.2.1) |
+   | `feat!:` or a `BREAKING CHANGE:` footer | `feat(checklist)!: rename the active-pointer env var` | minor (0.2.0 → 0.3.0) |
    | `docs:` / `chore:` / `refactor:` / `test:` | — | no release on their own |
+
+   These pre-1.0 rules come from `bump-minor-pre-major: true` and
+   `bump-patch-for-minor-pre-major: true` in the root
+   [release configuration](../../release-please-config.json). At 1.0 and later,
+   features bump minor and breaking changes bump major.
 
    Only commits that change files under `devtools/checklist/` count toward this
    package's version. A commit that only edits `skills/` or the root README will
@@ -23,15 +28,37 @@ npm with [OIDC trusted publishing][tp] from GitHub Actions.
 2. **Merge to `main`.** On every push to main, the `release-please` workflow
    opens (or updates) a PR titled like `chore(main): release checklist 0.3.0`.
    That PR bumps `package.json` and writes `CHANGELOG.md` — review it like any PR.
+   On that release branch, regenerate the committed standalone artifact after
+   the version bump:
 
-3. **Merge the release PR.** That is the release trigger. release-please tags
+   ```sh
+   cd devtools/checklist
+   npm ci
+   npm run bundle
+   npm run bundle:check
+   npm test
+   ```
+
+   Review and commit `bundle/checklist.mjs` on the release branch. Repeat if
+   release-please changes the version or source again. It does not run the
+   bundle generator for you.
+
+3. **Merge the release PR only after its current head passes CI and bundle
+   checks.** If a workflow awaits maintainer approval, approve it and inspect
+   its completed result first; missing or pending checks are not a green suite.
+   Requiring these checks for merge is a separate repository setting.
+   Merging is the release trigger. release-please tags
    the commit (`v0.3.0`) and cuts a GitHub Release, then the `publish` job builds,
    tests, and publishes to npm via OIDC. Watch it under the repo's **Actions** tab.
 
 4. **Verify:** `npm view @iamk77/skill-checklist version`.
 
-The version string in the CLI (`checklist --version`) is read from
-`package.json` at runtime, so the bump in step 2 is the only place it lives.
+The compiled npm CLI reads its version from `package.json` at runtime. The
+standalone bundle embeds that version at build time, so even a version-only
+change requires regeneration. `npm test` includes the bundle freshness check;
+the publish job fails rather than publishing with a stale committed bundle.
+That job runs after the GitHub tag/release is created, so catch staleness in the
+release PR, not after merging it.
 
 ## One-time setup (required before the first automated publish)
 

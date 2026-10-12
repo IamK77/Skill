@@ -1,17 +1,15 @@
-# Partial failure, delay, and incomplete knowledge
+# Three inconvenient guests
 
-## An opening
+Delay arrives after dinner has ended. Disagreement brings a different invitation. Absence sends an empty chair.
 
-Change one property of the world: communication pauses, participants disagree about time, or only part of an operation survives. Instead of immediately restoring the original illusion, invent a promise that remains useful in that world. The resulting product semantics may eliminate a coordination problem.
+The host has spent years trying to prevent these guests from attending. Tonight, for some reason, she decides to set the table for them.
 
-## Elaborate a candidate
+What might each guest make possible? Delay could bring news that would have been unbearable yesterday. Disagreement might notice a person the others have stopped seeing. The empty chair might let somebody speak who would otherwise have been interrupted.
 
-Use a small participant story to distinguish absence of a response from proof of failure, physical time from causal relation, and a local observation from global agreement. These distinctions can guide a design without requiring an exhaustive tour of every distributed-systems mechanism.
+We needn't conclude that faults are gifts. Sometimes dinner is simply cold. What is interesting is the host's change of attention: she is no longer imagining only the evening that would have happened without them.
 
-## A small comparison
+Now suppose the guests begin arguing about which invitation is real. The host discovers that there was no invitation until their different versions arrived. Dinner was assembled out of the discrepancies. She wonders whether next week's gathering needs an invitation at all, or whether it needs something else—a rumour, a question, an unfinished recipe.
 
-A worker finishes a task but its acknowledgment is delayed. Imagine the coordinator assigning another worker, waiting, or requesting a durable receipt. Each option changes latency, duplication risk, and the product promise. Let the inconvenient story generate alternatives rather than merely condemn one implementation.
+This is a scene to inhabit, not a three-part exercise to complete. You might be drawn to the empty chair and forget the other guests entirely. The person you're talking with might dislike the host. Either can move the thought somewhere the original vocabulary of faults would not have taken it.
 
-## Keep the choice open
-
-Use this note when its question is useful, not as a required inspection. A sketch, a contrast, or an unresolved question can be the result. The [parent lens](../SKILL.md) offers other ways into the subject; execution begins only when a direction and task are chosen.
+[Back to holdfast](../SKILL.md)

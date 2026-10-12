@@ -1,3 +1,7 @@
+# Local collaboration workspace and macOS Finder metadata.
+/schedule/
+.DS_Store
+
 .claude/
 .checklist.state.json
 .checklist.active

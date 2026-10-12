@@ -1,6 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import matter from 'gray-matter';
+import { parseFrontmatter } from '../frontmatter.js';
 import type { CheckResult } from '../types.js';
 
 const LINK_RE = /\[.*?\]\(((?!https?:\/\/|#|mailto:).*?)\)/g;
@@ -12,7 +12,7 @@ export async function fileRefsCheck(targetPath: string): Promise<CheckResult> {
     return { status: 'fail', message: 'SKILL.md not found' };
   }
 
-  const { content } = matter(fs.readFileSync(filePath, 'utf-8'));
+  const { content } = parseFrontmatter(fs.readFileSync(filePath, 'utf-8'));
   const refs: string[] = [];
   let match: RegExpExecArray | null;
 

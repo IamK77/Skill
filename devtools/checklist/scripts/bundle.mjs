@@ -1,5 +1,5 @@
-// Self-carry build: bundle the whole CLI — including its only three runtime
-// deps (commander, gray-matter, js-yaml) — into a single, node-runnable file
+// Self-carry build: bundle the whole CLI — including its runtime dependencies
+// (commander and js-yaml) — into a single, node-runnable file
 // committed into the repo at bundle/checklist.mjs.
 //
 // A standalone local CLI without a global installation or node_modules.
@@ -40,7 +40,7 @@ const result = await build({
   platform: 'node',
   format: 'esm',
   target: 'node20',
-  // Inline all three runtime deps; nothing stays external. The bundle must run
+  // Inline all runtime deps; nothing stays external. The bundle must run
   // with no node_modules present.
   packages: 'bundle',
   // The version read in src/index.ts falls back to a package.json read when this

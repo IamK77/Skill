@@ -105,7 +105,7 @@ describe('frontmatterCheck', () => {
   });
 
   it('covers the String(e) branch by triggering a parse error', async () => {
-    // gray-matter always throws Error objects, so the String(e) branch in
+    // This YAML parse error is an Error object, so the String(e) branch in
     // frontmatterCheck is a defensive catch. We verify the error path works
     // with a real parse error (which is an Error instance, covering arm=0).
     // The arm=1 (non-Error) branch is a defensive guard against unknown throws.

@@ -1,17 +1,17 @@
-# Copies, authority, and reconciliation
+# A story with no first copy
 
-## An opening
+Hum a tune, then imagine hearing it through a wall. Part of it disappears. A neighbour supplies the missing part, but what they supply belongs to a different song. Somebody outside hears that version and remembers it as something their grandmother used to sing.
 
-Compare replicas to witnesses, notebooks, and work queues. Witnesses may remember different events; notebooks may preserve local edits; a queue suggests custody of unfinished work. Transfer one relation from the metaphor and ask what reconciliation should mean, rather than assuming every copy must behave identically at every instant.
+Which moment made a copy? Which made something else?
 
-## Elaborate a candidate
+We needn't settle that before listening a little longer. The wall is not merely a bad channel now; it has become an unwitting collaborator. The grandmother's remembered song may never have sounded this way. Yet something recognisable has travelled through the mistakes.
 
-Identify what a replica contains, who may write, how changes are propagated, and what happens when histories disagree. A cache, a durable copy, and a multi-writer replica need not make the same promise. Conflict resolution chooses a meaning for concurrent or uncertain work; it is not only a background implementation detail.
+Try holding that image beside a very different one: a perfect recording preserved forever in a room nobody enters. The recording may matter enormously. Still, preservation and continuing to participate in a life have stopped looking like exactly the same activity.
 
-## A small comparison
+What if an archive were interested in future versions instead? Its catalogue might contain “the version sung after the quarrel is over,” with an empty space for the recording. A musician objects that the label is telling the future what to feel. Someone turns the label over and leaves the space unnamed.
 
-Compare preserving both edits for review, merging a structured operation, and selecting one acknowledged owner for a record. Each can be coherent in a different product. Use a small concurrent-edit story to reveal the difference before committing to a replication mechanism.
+We have wandered into memory, anticipation, authorship, and the pleasure of leaving room. The useful detail might be the wall, the objection, or the empty space. It does not have to be the archive as a whole.
 
-## Keep the choice open
+If the image begins to feel overworked, let it rest. A little listening can be more generative than forcing one more clever consequence out of it.
 
-Use this note when its question is useful, not as a required inspection. A sketch, a contrast, or an unresolved question can be the result. The [parent lens](../SKILL.md) offers other ways into the subject; execution begins only when a direction and task are chosen.
+[Back to holdfast](../SKILL.md)

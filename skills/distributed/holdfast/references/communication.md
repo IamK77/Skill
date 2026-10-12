@@ -1,17 +1,15 @@
-# Messages as promises about information
+# Letters that change who can receive them
 
-## An opening
+Imagine a letter addressed to “the person who will misunderstand this in an interesting way.” Nobody is qualified to receive it yet. Its address becomes meaningful only after somebody reads it.
 
-Tell the same exchange as a conversation, a posted letter, and a public notice. A conversation suggests immediate shared context; a letter suggests delayed delivery and acknowledgements; a notice suggests observers joining at different times. Explore what the product could promise under each model before choosing a messaging mechanism.
+We needn't repair that contradiction immediately. Perhaps a child draws on the envelope, and the drawing makes a stranger realise that the letter is meant for them. Perhaps the original sender becomes its recipient years later, having become a different person.
 
-## Elaborate a candidate
+There is a little room to play here. What travels: the sentence, an invitation, a misunderstanding, or a change in the reader? Stay with whichever part seems alive rather than covering all four questions.
 
-Distinguish sending, receipt, processing, and durable effect. Delivery, ordering, duplication, and retry assumptions change what participants can know. An acknowledgment may refer to one of those boundaries rather than all of them. Use explicit identities or reconciliation where a selected promise needs them; no transport label alone supplies end-to-end semantics.
+A person says, “That sounds like a terrible postal service.” We can agree without throwing the image away: “Yes, if the job is delivering the original message. I wonder what happens if its job is helping a message find a meaning it didn't leave home with.”
 
-## A small comparison
+Now imagine the town hires someone to preserve the mistakes on envelopes. One mistaken address reunites two people. Another becomes the name of a street. Correcting the archive would erase part of the place.
 
-Imagine a sender losing contact immediately after a receiver performs an operation. Compare retrying a named request, checking a receipt, and negotiating a reservation. The different stories can generate different useful product contracts before a protocol is selected.
+A technical account may eventually have something useful to say about this, but the letter need not become a routing algorithm on its first outing. For a while, it can simply leave us with the odd possibility that a conversation creates its participants, rather than merely connecting participants who already exist.
 
-## Keep the choice open
-
-Use this note when its question is useful, not as a required inspection. A sketch, a contrast, or an unresolved question can be the result. The [parent lens](../SKILL.md) offers other ways into the subject; execution begins only when a direction and task are chosen.
+[Back to holdfast](../SKILL.md)

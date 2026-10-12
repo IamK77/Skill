@@ -1,17 +1,15 @@
-# Partitions that follow a relationship
+# A city arranged around its questions
 
-## An opening
+Suppose a city's districts are not drawn around land, work, or ownership. They gather around questions people cannot put down.
 
-Imagine boundaries drawn around geography, ownership, time, or a social group. Which operations become local, and which relationships now cross a border? A different partition can suggest a different product workflow as well as a different routing function.
+Someone asking “where did the birds go?” temporarily becomes a neighbour of a child asking “why is the sky quieter?” Their homes haven't moved, but there is suddenly a short path between their doors. When their questions change, the path may grow over.
 
-## Elaborate a candidate
+Let's walk a little before deciding what a partition key would be. A house could belong to two districts at dawn and none at night. An empty square might preserve a question nobody is currently asking. A person might keep returning there because they remember when the question mattered to someone else.
 
-Choose a candidate partition key and examine the operations it makes local, the relationships it splits, and the workload skew it might create. Rebalancing, routing, and cross-partition operations follow from that choice. Even distribution of identifiers does not necessarily mean even distribution of work.
+There could also be a cartographer who is embarrassed by maps that stay correct for too long. Instead of borders, she draws promising misunderstandings between neighbourhoods. The city begins visiting places because of those misunderstandings, and the map becomes wrong in a new and useful way.
 
-## A small comparison
+This doesn't have to mean that every boundary should be fluid. Perhaps somebody longs for a street that will stay put. Their wish belongs in the scene too; it might produce a very different city from the one we began imagining.
 
-Compare partitioning a collaboration product by document, organisation, and time. A large shared document or one active organisation can expose a different hot spot in each design. The exercise may suggest a different workflow or ownership boundary, not just another hash function.
+We have moved from dividing a collection to wondering how proximity comes into being. That change of question may be the interesting result. Or we may leave with only the cartographer and want to write her a better job description.
 
-## Keep the choice open
-
-Use this note when its question is useful, not as a required inspection. A sketch, a contrast, or an unresolved question can be the result. The [parent lens](../SKILL.md) offers other ways into the subject; execution begins only when a direction and task are chosen.
+[Back to holdfast](../SKILL.md)

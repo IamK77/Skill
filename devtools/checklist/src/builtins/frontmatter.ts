@@ -1,6 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import matter from 'gray-matter';
+import { parseFrontmatter } from '../frontmatter.js';
 import type { CheckResult } from '../types.js';
 
 export async function frontmatterCheck(targetPath: string): Promise<CheckResult> {
@@ -12,10 +12,10 @@ export async function frontmatterCheck(targetPath: string): Promise<CheckResult>
 
   try {
     const raw = fs.readFileSync(filePath, 'utf-8');
-    if (!raw.trimStart().startsWith('---')) {
+    const { data, hasFrontmatter } = parseFrontmatter(raw);
+    if (!hasFrontmatter) {
       return { status: 'fail', message: 'missing --- frontmatter delimiter' };
     }
-    const { data } = matter(raw);
     const fieldCount = Object.keys(data).length;
     if (fieldCount === 0) {
       return { status: 'fail', message: 'frontmatter is empty' };

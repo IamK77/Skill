@@ -37,6 +37,10 @@ Definition refreshes, changed bindings, and upstream re-verification invalidate 
 
 The repository's 38 entrypoints and reference library have been migrated. Of 198 references, 194 were rewritten as scoped method cards or creative/technique notes; four already-current routing notes remain. Probe implementations are retained as optional instruments. References do not impose additional stages. Three intentionally user-started workflows (`gungnir`, `stationkeeping`, and `envoy`) declare `disable-model-invocation: true`; host permission prompts remain separate.
 
+## Data-only frontmatter
+
+Frontmatter-reading builtins no longer use language engines. Use a YAML mapping between plain, whole-line `---` delimiters. Language-labelled headers (including `---javascript`, `---js`, `---yaml`, and `---json`), executable YAML tags, non-mapping roots, and missing closing delimiters are rejected. Replace a data-only labelled header with plain YAML framing; do not migrate executable metadata by evaluating it. JSON mapping syntax inside plain YAML framing is supported.
+
 ## Recovery and limits
 
 A busy run is not permission to delete its lock. Inspect the owner and let an active operation finish. `unlock` requires the recorded process to have exited. Ownerless/corrupt locks, interrupted recovery directories, or shared cross-host state require manual inspection. Retain the run record before recovery.

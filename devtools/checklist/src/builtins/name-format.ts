@@ -1,6 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import matter from 'gray-matter';
+import { parseFrontmatter } from '../frontmatter.js';
 import type { CheckResult } from '../types.js';
 
 const NAME_RE = /^[a-z0-9-]+$/;
@@ -13,7 +13,7 @@ export async function nameFormatCheck(targetPath: string): Promise<CheckResult> 
     return { status: 'fail', message: 'SKILL.md not found' };
   }
 
-  const { data } = matter(fs.readFileSync(filePath, 'utf-8'));
+  const { data } = parseFrontmatter(fs.readFileSync(filePath, 'utf-8'));
   const name = data.name;
 
   if (name === undefined || name === null || name === '') {

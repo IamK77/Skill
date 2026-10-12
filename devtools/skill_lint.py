@@ -66,6 +66,8 @@ def link_errors(path, text):
 
 
 def lint_reference(path):
+    # Structural checks only: narrative voice, truth, and creative quality need
+    # contextual editorial review, not keyword bans or a required essay outline.
     text = path.read_text(encoding='utf-8')
     body = prose(text)
     errors = link_errors(path, text)
@@ -76,10 +78,6 @@ def lint_reference(path):
         errors.append('reference must not impose a hidden stage or gate')
     if re.search(r'checklist\s+init[^\n]*--force', text):
         errors.append('reference contains destructive initialization')
-    if re.search(r'\b(?:agent|model)s?\b[^\n.!?]{0,80}\b(?:feels? no wrongness|cannot feel|has no taste|have no taste|always skips?|always lies?)\b', body, re.I):
-        errors.append('unsupported model-psychology generalisation')
-    if re.search(r'\bWCAG\b[^\n.]{0,80}(?:is|as|—|-)\s+(?:the |a )?legal (?:floor|baseline)', body, re.I):
-        errors.append('universal legal claim requires contextual requirements instead')
     return errors
 
 
@@ -125,10 +123,6 @@ def lint_skill(path):
             errors.append(kind + ' must not carry a checklist')
         if re.search(r'checklist\s+(init|check|verify|advance)|^#{1,3} (?:STAGE|GATE)', text, re.M):
             errors.append(kind + ' must not impose execution gates')
-    if kind == 'heuristic':
-        for heading in ['## Starting point', '## Thought experiments', '## A possible turn']:
-            if heading not in text:
-                errors.append('heuristic missing ' + heading)
     errors.extend(link_errors(path, text))
     for reference in sorted((path.parent / 'references').rglob('*.md')):
         errors.extend(f'{reference.relative_to(path.parent)}: {error}' for error in lint_reference(reference))

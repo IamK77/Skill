@@ -1,15 +1,14 @@
 name: ci
 
-# Build + test the checklist CLI on every push/PR that touches it, so the
-# release PR (and any feature PR) is gated by a green suite before it can be
-# merged and auto-published.
+# Build/test the CLI and its workflow trigger contracts, including probe.yml.
+# Requiring a green run before merge is a separate repository setting.
 
 on:
   push:
     branches: [main]
-    paths: ['devtools/checklist/**']
+    paths: ['devtools/checklist/**', '.github/workflows/ci.yml', '.github/workflows/probe.yml']
   pull_request:
-    paths: ['devtools/checklist/**']
+    paths: ['devtools/checklist/**', '.github/workflows/ci.yml', '.github/workflows/probe.yml']
 
 permissions:
   contents: read

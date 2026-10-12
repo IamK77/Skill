@@ -226,10 +226,8 @@ describe('runPhase', () => {
 
   it('a crashing builtin does not abort the batch: sibling checks still run and the crash is an attributed error', async () => {
     // Malformed frontmatter makes the unguarded builtins throw inside
-    // gray-matter/js-yaml. The batch (Promise.all over runCheck) must survive,
+    // the YAML parser. The batch (Promise.all over runCheck) must survive,
     // count the crash as ONE errored mechanical check, and run the sibling.
-    // (Content is unique to this test: gray-matter caches parses by content
-    // string and a throw poisons the cache for identical content.)
     fs.writeFileSync(
       path.join(tmpDir, 'SKILL.md'),
       ['---', 'name: "unterminated-batch-survival', '---', '', '# Body'].join('\n'),

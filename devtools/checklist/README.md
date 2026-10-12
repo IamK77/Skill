@@ -126,6 +126,8 @@ Flat checks use phase name `main` for commands. `done` may complete a fulfilled 
 - `shell:command`: `/bin/bash -c`, with the fixed project as cwd.
 - `script:path`: a bash script contained in the skill directory, checked lexically and through symlinks; executes with the project as cwd. This is path containment, **not a sandbox**: a trusted script or shell command can access anything the process can access.
 
+Frontmatter-reading builtins accept YAML mappings between plain, whole-line `---` delimiters at the start of `SKILL.md` (an initial BOM and LF/CRLF are supported). Metadata is data only: language-labelled headers such as `---javascript`, `---js`, `---yaml`, or `---json`, executable YAML tags, non-mapping roots, and unterminated headers are rejected. JSON mapping syntax inside plain YAML delimiters remains valid.
+
 Use explicit prefixes; the loader retains historical bare-rule classification, while authoring lint requires explicit kinds. Timeout defaults to 10 seconds; `timeout` is a positive number of seconds, at most 1800. Normal exit 0 means pass; normal nonzero exit means fail; spawn errors, signals, timeout, and output overflow are execution errors. stdout and stderr are retained separately, bounded to 1 MiB of input bytes per stream; overflow stops the process group and is flagged. A cut UTF-8 sequence may decode to a replacement character. Summary messages are shortened; consult the artifact for captured output.
 
 Subprocess traces record effective command, cwd, start time, duration, exit code, signal, timeout and truncation flags. Builtin or pre-execution errors have timing/location metadata but no subprocess exit trace.

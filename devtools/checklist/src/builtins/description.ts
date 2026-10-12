@@ -1,6 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import matter from 'gray-matter';
+import { parseFrontmatter } from '../frontmatter.js';
 import type { CheckResult } from '../types.js';
 
 const MAX_COMBINED = 1536;
@@ -12,7 +12,7 @@ export async function descriptionPresentCheck(targetPath: string): Promise<Check
     return { status: 'fail', message: 'SKILL.md not found' };
   }
 
-  const { data } = matter(fs.readFileSync(filePath, 'utf-8'));
+  const { data } = parseFrontmatter(fs.readFileSync(filePath, 'utf-8'));
   const desc = data.description;
 
   if (desc !== undefined && typeof desc !== 'string') {
@@ -33,7 +33,7 @@ export async function descriptionLengthCheck(targetPath: string): Promise<CheckR
     return { status: 'fail', message: 'SKILL.md not found' };
   }
 
-  const { data } = matter(fs.readFileSync(filePath, 'utf-8'));
+  const { data } = parseFrontmatter(fs.readFileSync(filePath, 'utf-8'));
   const desc = typeof data.description === 'string' ? data.description : '';
   const whenToUse = typeof data.when_to_use === 'string' ? data.when_to_use : '';
   const total = desc.length + whenToUse.length;

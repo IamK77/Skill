@@ -75,8 +75,6 @@ class SkillContract(unittest.TestCase):
             ('It clears exactly one gate — threat-model-built.\n', 'hidden stage'),
             ('This stage backs two checks.\n', 'hidden stage'),
             ('Run `checklist init . --force` every time.\n', 'destructive initialization'),
-            ('The agent feels no wrongness.\n', 'model-psychology'),
-            ('WCAG is the legal floor.\n', 'universal legal'),
             ('[missing](missing.md)\n', 'missing linked resource'),
             ('[bad anchor](#does-not-exist)\n', 'missing linked anchor'),
         ]
@@ -99,13 +97,23 @@ class SkillContract(unittest.TestCase):
             (refs / 'note.md').write_text('# Technique\n\nA literal `[example](missing.md)` is source text.\n\n```markdown\n```not-a-closing-fence\n[also literal](also-missing.md)\n```\n')
             self.assertEqual(lint_skill(p), [])
 
-    def test_missing_sop_definition_and_creative_example_are_caught(self):
+    def test_heuristic_can_use_its_own_structure_and_emotional_voice(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = self.make(Path(d))
+            text = p.read_text().split('## Starting point')[0]
+            p.write_text(text + '# A question we can play with\n\nThere is no presentation to win here. Let an odd image stay unfinished.\n\n## The library that misses its books\n\nSuppose a catalogue remembers the books it never acquired.\n')
+            self.assertEqual(lint_skill(p), [])
+
+    def test_reference_quotes_and_emotional_metaphors_are_editorial_not_keyword_errors(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = self.make(Path(d)); refs = p.parent / 'references'; refs.mkdir()
+            (refs / 'story.md').write_text('# An unreliable narrator\n\nIn this fictional scene a character says, “the model cannot feel homesick.” Another character disagrees. Neither voice settles the question.\n\nThe characters also argue over the slogan “WCAG is the legal floor”; a real product needs its actual requirements, not that slogan.\n')
+            self.assertEqual(lint_skill(p), [])
+
+    def test_sop_still_requires_its_definition(self):
         with tempfile.TemporaryDirectory() as d:
             p = self.make(Path(d), 'sop'); (p.parent / '.checklist.yml').unlink()
             self.assertIn('SOP requires a checklist definition', lint_skill(p))
-        with tempfile.TemporaryDirectory() as d:
-            p = self.make(Path(d)); p.write_text(p.read_text().replace('## A possible turn', '## Verdict'))
-            self.assertTrue(any('possible turn' in e for e in lint_skill(p)))
 
 
 if __name__ == '__main__':
